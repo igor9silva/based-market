@@ -9,4 +9,10 @@ export default defineConfig({
 			}),
 		],
 	},
+	tsr: {
+		autoCodeSplitting: true,
+	},
+	server: {
+		preset: 'vercel',
+	},
 });

@@ -1,7 +1,6 @@
 {
 	"include": ["**/*.ts", "**/*.tsx"],
 	"compilerOptions": {
-		"strict": true,
 		"esModuleInterop": true,
 		"jsx": "react-jsx",
 		"module": "ESNext",
@@ -9,14 +8,23 @@
 		"lib": ["DOM", "DOM.Iterable", "ES2022"],
 		"isolatedModules": true,
 		"resolveJsonModule": true,
-		"skipLibCheck": true,
 		"target": "ES2022",
-		"allowJs": true,
-		"forceConsistentCasingInFileNames": true,
+		"allowJs": false,
 		"baseUrl": ".",
 		"paths": {
 			"~/*": ["./app/*"]
 		},
-		"noEmit": true
+		"noEmit": true,
+
+		// Best practices
+		"strict": true,
+		"skipLibCheck": true,
+		"strictNullChecks": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"allowUnreachableCode": true
 	}
 }

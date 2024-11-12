@@ -1,3 +1,4 @@
+import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { Link, createFileRoute } from '@tanstack/react-router';
 import {
 	Card,
@@ -5,7 +6,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '../components/ui/card';
-import { ExternalLinkIcon } from '@radix-ui/react-icons';
 
 export const Route = createFileRoute('/')({
 	component: LandingPage,

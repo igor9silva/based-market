@@ -7,8 +7,8 @@ import {
 } from '@tanstack/react-router';
 import { Body, Head, Html, Meta, Scripts } from '@tanstack/start';
 import * as React from 'react';
-import appCss from '../styles/app.css?url';
 import { cn } from '~/lib/utils';
+import appCss from '~/styles/app.css?url';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 	{
@@ -18,10 +18,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 			},
 			{
 				name: 'viewport',
-				content: 'width=device-width, initial-scale=1',
+				content:
+					'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
 			},
 			{
-				title: 'TanStack Start Starter',
+				title: 'Meseeks',
 			},
 		],
 		links: () => [{ rel: 'stylesheet', href: appCss }],
@@ -71,9 +72,7 @@ export default function RootLayout({
 			<header className="bg-slate-900 border-b border-slate-800">
 				<div className="container mx-auto py-4 flex flex-col xl:flex-row gap-4 xl:items-center xl:justify-between">
 					<Link to="/">
-						<h1 className="text-2xl font-bold">
-							Convex with TanStack Start
-						</h1>
+						<h1 className="text-2xl font-bold">Meseeks</h1>
 					</Link>
 					<nav>
 						<ul className="flex gap-4 xl:flex-row flex-col xl:gap-1">

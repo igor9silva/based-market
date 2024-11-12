@@ -1,11 +1,11 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
-import CodeSample from '~/components/CodeSample';
-import Chat from '~/components/Chat';
-import { Button } from '~/components/ui/button';
 import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
-import { api } from 'convex/_generated/api';
-import { useSuspenseQuery } from '@tanstack/react-query';
 import { ReloadIcon } from '@radix-ui/react-icons';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { api } from 'convex/_generated/api';
+import Chat from '~/components/Chat';
+import CodeSample from '~/components/CodeSample';
+import { Button } from '~/components/ui/button';
 
 export const Route = createFileRoute('/react-query')({
 	component: ReactQuery,
