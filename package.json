@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx convex run messages:seed --push && concurrently -r npm:dev:web npm:dev:db",
+    "dev": "bunx convex run messages:seed --push && concurrently -r bun:dev:web bun:dev:db",
     "dev:web": "vinxi dev",
     "dev:db": "npx convex dev",
     "build": "vinxi build",
