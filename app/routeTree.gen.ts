@@ -15,6 +15,7 @@ import { Route as SsrImport } from './routes/ssr'
 import { Route as ReactQueryImport } from './routes/react-query'
 import { Route as LoadersImport } from './routes/loaders'
 import { Route as GcTimeImport } from './routes/gcTime'
+import { Route as IgorRouteImport } from './routes/igor/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as LoadersPrefetchImport } from './routes/loaders/prefetch'
 import { Route as LoadersNoLoaderImport } from './routes/loaders/no-loader'
@@ -43,6 +44,12 @@ const LoadersRoute = LoadersImport.update({
 const GcTimeRoute = GcTimeImport.update({
   id: '/gcTime',
   path: '/gcTime',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const IgorRouteRoute = IgorRouteImport.update({
+  id: '/igor',
+  path: '/igor',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -79,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/igor': {
+      id: '/igor'
+      path: '/igor'
+      fullPath: '/igor'
+      preLoaderRoute: typeof IgorRouteImport
       parentRoute: typeof rootRoute
     }
     '/gcTime': {
@@ -152,6 +166,7 @@ const LoadersRouteWithChildren =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/igor': typeof IgorRouteRoute
   '/gcTime': typeof GcTimeRoute
   '/loaders': typeof LoadersRouteWithChildren
   '/react-query': typeof ReactQueryRoute
@@ -163,6 +178,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/igor': typeof IgorRouteRoute
   '/gcTime': typeof GcTimeRoute
   '/loaders': typeof LoadersRouteWithChildren
   '/react-query': typeof ReactQueryRoute
@@ -175,6 +191,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/igor': typeof IgorRouteRoute
   '/gcTime': typeof GcTimeRoute
   '/loaders': typeof LoadersRouteWithChildren
   '/react-query': typeof ReactQueryRoute
@@ -188,6 +205,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/igor'
     | '/gcTime'
     | '/loaders'
     | '/react-query'
@@ -198,6 +216,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/igor'
     | '/gcTime'
     | '/loaders'
     | '/react-query'
@@ -208,6 +227,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/igor'
     | '/gcTime'
     | '/loaders'
     | '/react-query'
@@ -220,6 +240,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  IgorRouteRoute: typeof IgorRouteRoute
   GcTimeRoute: typeof GcTimeRoute
   LoadersRoute: typeof LoadersRouteWithChildren
   ReactQueryRoute: typeof ReactQueryRoute
@@ -228,6 +249,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  IgorRouteRoute: IgorRouteRoute,
   GcTimeRoute: GcTimeRoute,
   LoadersRoute: LoadersRouteWithChildren,
   ReactQueryRoute: ReactQueryRoute,
@@ -247,6 +269,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/igor",
         "/gcTime",
         "/loaders",
         "/react-query",
@@ -255,6 +278,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/igor": {
+      "filePath": "igor/route.tsx"
     },
     "/gcTime": {
       "filePath": "gcTime.tsx"

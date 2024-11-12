@@ -1,6 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
 import {
-	Link,
 	Outlet,
 	ScrollRestoration,
 	createRootRouteWithContext,
@@ -67,46 +66,47 @@ export default function RootLayout({
 		className: cn(baseClasses, 'hover:bg-slate-800'),
 	} as const;
 	const linkProps = { inactiveProps, activeProps } as const;
+	return children;
 	return (
-		<div className="min-h-screen flex flex-col">
-			<header className="bg-slate-900 border-b border-slate-800">
-				<div className="container mx-auto py-4 flex flex-col xl:flex-row gap-4 xl:items-center xl:justify-between">
-					<Link to="/">
-						<h1 className="text-2xl font-bold">Meseeks</h1>
-					</Link>
-					<nav>
-						<ul className="flex gap-4 xl:flex-row flex-col xl:gap-1">
-							<li>
-								<Link to="/react-query" {...linkProps}>
-									React Query hooks
-								</Link>
-							</li>
-							<li>
-								<Link to="/ssr" {...linkProps}>
-									SSR and Live Queries
-								</Link>
-							</li>
-							<li>
-								<Link to="/gcTime" {...linkProps}>
-									Staying subscribed
-								</Link>
-							</li>
-							<li>
-								<Link
-									to="/loaders"
-									search={{ cacheBust: 'initial' }}
-									{...linkProps}
-								>
-									Loaders
-								</Link>
-							</li>
-						</ul>
-					</nav>
-				</div>
-			</header>
-			<main className="container mx-auto py-12 prose-xl prose-slate prose-headings:font-bold prose-ol:pl-0 prose-li:pl-0 prose-a:underline prose-a:underline-offset-3 prose-p:leading-snug transition-colors hover:prose-a:text-white">
-				{children}
-			</main>
-		</div>
+		// <div className="min-h-screen flex flex-col">
+		// 	<header className="bg-slate-900 border-b border-slate-800">
+		// 		<div className="container mx-auto py-4 flex flex-col xl:flex-row gap-4 xl:items-center xl:justify-between">
+		// 			<Link to="/">
+		// 				<h1 className="text-2xl font-bold">Meseeks</h1>
+		// 			</Link>
+		// 			<nav>
+		// 				<ul className="flex gap-4 xl:flex-row flex-col xl:gap-1">
+		// 					<li>
+		// 						<Link to="/react-query" {...linkProps}>
+		// 							React Query hooks
+		// 						</Link>
+		// 					</li>
+		// 					<li>
+		// 						<Link to="/ssr" {...linkProps}>
+		// 							SSR and Live Queries
+		// 						</Link>
+		// 					</li>
+		// 					<li>
+		// 						<Link to="/gcTime" {...linkProps}>
+		// 							Staying subscribed
+		// 						</Link>
+		// 					</li>
+		// 					<li>
+		// 						<Link
+		// 							to="/loaders"
+		// 							search={{ cacheBust: 'initial' }}
+		// 							{...linkProps}
+		// 						>
+		// 							Loaders
+		// 						</Link>
+		// 					</li>
+		// 				</ul>
+		// 			</nav>
+		// 		</div>
+		// 	</header>
+		// 	<main className="container mx-auto py-12 prose-xl prose-slate prose-headings:font-bold prose-ol:pl-0 prose-li:pl-0 prose-a:underline prose-a:underline-offset-3 prose-p:leading-snug transition-colors hover:prose-a:text-white">
+		{ children }
+		// 	</main>
+		// </div>
 	);
 }
