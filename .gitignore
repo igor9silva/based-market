@@ -4,3 +4,6 @@ app.config.timestamp_*.js
 node_modules
 
 .env.local
+
+.DS_Store
+**/.DS_Store
