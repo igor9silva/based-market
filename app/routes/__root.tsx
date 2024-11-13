@@ -2,7 +2,8 @@ import { QueryClient } from '@tanstack/react-query';
 import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router';
 import { Body, Head, Html, Meta, Scripts } from '@tanstack/start';
 import * as React from 'react';
-import { cn } from '~/lib/utils';
+import { MainSidebar } from '~/components/MainSidebar';
+import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import appCss from '~/styles/app.css?url';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -49,55 +50,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-	const baseClasses = 'pb-1 font-medium px-3 py-2 transition-colors rounded-md';
-	const activeProps = {
-		className: cn(baseClasses, 'bg-slate-700'),
-	} as const;
-	const inactiveProps = {
-		className: cn(baseClasses, 'hover:bg-slate-800'),
-	} as const;
-	const linkProps = { inactiveProps, activeProps } as const;
-	return children;
 	return (
-		// <div className="min-h-screen flex flex-col">
-		// 	<header className="bg-slate-900 border-b border-slate-800">
-		// 		<div className="container mx-auto py-4 flex flex-col xl:flex-row gap-4 xl:items-center xl:justify-between">
-		// 			<Link to="/">
-		// 				<h1 className="text-2xl font-bold">Meseeks</h1>
-		// 			</Link>
-		// 			<nav>
-		// 				<ul className="flex gap-4 xl:flex-row flex-col xl:gap-1">
-		// 					<li>
-		// 						<Link to="/react-query" {...linkProps}>
-		// 							React Query hooks
-		// 						</Link>
-		// 					</li>
-		// 					<li>
-		// 						<Link to="/ssr" {...linkProps}>
-		// 							SSR and Live Queries
-		// 						</Link>
-		// 					</li>
-		// 					<li>
-		// 						<Link to="/gcTime" {...linkProps}>
-		// 							Staying subscribed
-		// 						</Link>
-		// 					</li>
-		// 					<li>
-		// 						<Link
-		// 							to="/loaders"
-		// 							search={{ cacheBust: 'initial' }}
-		// 							{...linkProps}
-		// 						>
-		// 							Loaders
-		// 						</Link>
-		// 					</li>
-		// 				</ul>
-		// 			</nav>
-		// 		</div>
-		// 	</header>
-		// 	<main className="container mx-auto py-12 prose-xl prose-slate prose-headings:font-bold prose-ol:pl-0 prose-li:pl-0 prose-a:underline prose-a:underline-offset-3 prose-p:leading-snug transition-colors hover:prose-a:text-white">
-		{ children }
-		// 	</main>
-		// </div>
+		<SidebarProvider open={false}>
+			<MainSidebar />
+			<SidebarInset>{children}</SidebarInset>
+		</SidebarProvider>
 	);
 }
