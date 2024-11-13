@@ -1,7 +1,6 @@
-import { MutationCtx, QueryCtx, action, internalMutation, mutation } from './_generated/server';
-import { query } from './_generated/server';
-import { api, internal } from './_generated/api.js';
 import { v } from 'convex/values';
+import { api, internal } from './_generated/api.js';
+import { MutationCtx, QueryCtx, action, internalMutation, mutation, query } from './_generated/server';
 
 export const list = query(async (ctx, { cacheBust }) => {
 	const _unused = cacheBust;
@@ -137,7 +136,7 @@ export const sendMessage = mutation(
 		const cleanBody = madlib`${greetings} ${names}${punc} ${text}`;
 		const existingUser = await ctx.db
 			.query('users')
-			.withIndex('by_name')
+			// .withIndex('by_name')
 			.filter((q) => q.eq(q.field('name'), user))
 			.unique();
 		let userId = existingUser?._id || (await ctx.db.insert('users', { name: user }));
