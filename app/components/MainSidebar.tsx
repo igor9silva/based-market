@@ -44,7 +44,7 @@ function MenuItem(item: (typeof menuItems)[number]) {
 
 	return (
 		<SidebarMenuItem>
-			<Link to={item.url} params={{ inbox: item.title }}>
+			<Link tabIndex={-1} to={item.url} params={{ inbox: item.title }}>
 				{({ isActive }) => {
 					return (
 						<SidebarMenuButton
