@@ -1,5 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
+// TODO: vision
+// - persist config to server, load during SSR toghether with user data
+// - mode = dark, light or system (auto, tied with OS)
+// - theme = customizable everything (from corner radius to spacing)
+
 type ThemeMode = 'dark' | 'light' | 'system';
 
 const ThemeProviderContext = createContext({
@@ -38,8 +43,13 @@ export function ThemeProvider({ children, mode = 'system', ...props }: ThemeProv
 		}
 	}, [theme]);
 
+	const customSetTheme = (theme: ThemeMode) => {
+		setTheme(theme);
+		// TODO: persist config to server
+	};
+
 	return (
-		<ThemeProviderContext.Provider {...props} value={{ theme, setTheme }}>
+		<ThemeProviderContext.Provider {...props} value={{ theme, setTheme: customSetTheme }}>
 			{children}
 		</ThemeProviderContext.Provider>
 	);

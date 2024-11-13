@@ -11,11 +11,7 @@ import {
 	BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
 import { Separator } from '~/components/ui/separator';
-import {
-	SidebarInset,
-	SidebarProvider,
-	SidebarTrigger,
-} from '~/components/ui/sidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar';
 
 export const Route = createFileRoute('/igor')({
 	component: Component,
@@ -23,13 +19,7 @@ export const Route = createFileRoute('/igor')({
 
 function Component() {
 	return (
-		<SidebarProvider
-			style={
-				{
-					'--sidebar-width': '350px',
-				} as React.CSSProperties
-			}
-		>
+		<SidebarProvider style={{ '--sidebar-width': '350px' } as React.CSSProperties}>
 			<AppSidebar />
 			<SidebarInset>
 				<header className="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4">
@@ -38,9 +28,7 @@ function Component() {
 					<Breadcrumb>
 						<BreadcrumbList>
 							<BreadcrumbItem className="hidden md:block">
-								<BreadcrumbLink href="#">
-									All Inboxes
-								</BreadcrumbLink>
+								<BreadcrumbLink href="#">All Inboxes</BreadcrumbLink>
 							</BreadcrumbItem>
 							<BreadcrumbSeparator className="hidden md:block" />
 							<BreadcrumbItem>
@@ -51,10 +39,7 @@ function Component() {
 				</header>
 				<div className="flex flex-1 flex-col gap-4 p-4">
 					{Array.from({ length: 24 }).map((_, index) => (
-						<div
-							key={index}
-							className="aspect-video h-12 w-full rounded-lg bg-muted/50"
-						/>
+						<div key={index} className="h-12 w-full rounded-lg bg-muted/50" />
 					))}
 				</div>
 			</SidebarInset>
