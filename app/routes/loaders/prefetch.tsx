@@ -8,8 +8,7 @@ export const Route = createFileRoute('/loaders/prefetch')({
 	component: Messages,
 	validateSearch: (search: Record<string, unknown>) => {
 		return {
-			cacheBust:
-				typeof search.cacheBust === 'string' ? search.cacheBust : '',
+			cacheBust: typeof search.cacheBust === 'string' ? search.cacheBust : '',
 		};
 	},
 	loaderDeps: ({ search: { cacheBust } }) => ({ cacheBust }),
@@ -28,12 +27,7 @@ function Messages() {
 	const { cacheBust } = Route.useSearch();
 	return (
 		<div>
-			<Chat
-				channel="seattle"
-				cacheBust={cacheBust}
-				gcTime={10000}
-				useSuspense={false}
-			/>
+			<Chat channel="seattle" cacheBust={cacheBust} gcTime={10000} useSuspense={false} />
 			<div className="mt-4">
 				<CodeSample
 					code={`export const Route = createFileRoute('/loaders/prefetch')({

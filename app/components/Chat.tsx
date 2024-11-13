@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from '../components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { PaperPlaneIcon } from '@radix-ui/react-icons';
@@ -29,15 +24,7 @@ function clientTimeFormat(ms: number): string {
 	});
 	return formatter.format(new Date(ms));
 }
-const Message = ({
-	user,
-	body,
-	_creationTime,
-}: {
-	user: string;
-	body: string;
-	_creationTime: number;
-}) => {
+const Message = ({ user, body, _creationTime }: { user: string; body: string; _creationTime: number }) => {
 	const [timestamp, setTimestamp] = useState<string | undefined>();
 	useEffect(() => {
 		setTimestamp(clientTimeFormat(_creationTime));
@@ -45,9 +32,7 @@ const Message = ({
 	return (
 		<div className="flex items-start space-x-2 group">
 			<div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-				{user.toLowerCase().startsWith('user ')
-					? user[5]
-					: user[0].toUpperCase()}
+				{user.toLowerCase().startsWith('user ') ? user[5] : user[0].toUpperCase()}
 			</div>
 			<div className="flex-1">
 				<div className="flex items-baseline">
@@ -90,9 +75,7 @@ export default function Component({
 	gcTime?: number;
 	cacheBust?: any;
 }) {
-	const useWhicheverQuery: typeof useQuery = useSuspense
-		? (useSuspenseQuery as typeof useQuery)
-		: useQuery;
+	const useWhicheverQuery: typeof useQuery = useSuspense ? (useSuspenseQuery as typeof useQuery) : useQuery;
 
 	const { data, isPending, error } = useWhicheverQuery({
 		...convexQuery(api.messages.listMessages, {
@@ -131,8 +114,7 @@ export default function Component({
 			</div>
 			{newMessage !== '' && (
 				<span className="text-xs text-slate-400">
-					As this is a public demo, your message will be replaced with
-					system-generated text.
+					As this is a public demo, your message will be replaced with system-generated text.
 				</span>
 			)}
 		</div>
@@ -150,12 +132,7 @@ export default function Component({
 						</>
 					) : (
 						data.map((msg) => (
-							<Message
-								key={msg._id}
-								user={msg.user}
-								body={msg.body}
-								_creationTime={msg._creationTime}
-							/>
+							<Message key={msg._id} user={msg.user} body={msg.body} _creationTime={msg._creationTime} />
 						))
 					)}
 				</CardHeader>

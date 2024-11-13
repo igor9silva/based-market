@@ -139,37 +139,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { setOpen } = useSidebar();
 
 	return (
-		<Sidebar
-			collapsible="icon"
-			className="overflow-hidden [&>[data-sidebar=sidebar]]:flex-row"
-			{...props}
-		>
+		<Sidebar collapsible="icon" className="overflow-hidden [&>[data-sidebar=sidebar]]:flex-row" {...props}>
 			{/* This is the first sidebar */}
 			{/* We disable collapsible and adjust width to icon. */}
 			{/* This will make the sidebar appear as icons. */}
-			<Sidebar
-				collapsible="none"
-				className="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
-			>
+			<Sidebar collapsible="none" className="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r">
 				<SidebarHeader>
 					<SidebarMenu>
 						<SidebarMenuItem>
-							<SidebarMenuButton
-								size="lg"
-								asChild
-								className="md:h-8 md:p-0"
-							>
+							<SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
 								<a href="#">
 									<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
 										<Command className="size-4" />
 									</div>
 									<div className="grid flex-1 text-left text-sm leading-tight">
-										<span className="truncate font-semibold">
-											Acme Inc
-										</span>
-										<span className="truncate text-xs">
-											Enterprise
-										</span>
+										<span className="truncate font-semibold">Acme Inc</span>
+										<span className="truncate text-xs">Enterprise</span>
 									</div>
 								</a>
 							</SidebarMenuButton>
@@ -189,26 +174,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 											}}
 											onClick={() => {
 												setActiveItem(item);
-												const mail = data.mails.sort(
-													() => Math.random() - 0.5,
-												);
+												const mail = data.mails.sort(() => Math.random() - 0.5);
 												setMails(
-													mail.slice(
-														0,
-														Math.max(
-															5,
-															Math.floor(
-																Math.random() *
-																	10,
-															) + 1,
-														),
-													),
+													mail.slice(0, Math.max(5, Math.floor(Math.random() * 10) + 1)),
 												);
 												setOpen(true);
 											}}
-											isActive={
-												activeItem.title === item.title
-											}
+											isActive={activeItem.title === item.title}
 											className="px-2.5 md:px-2"
 										>
 											<item.icon />
@@ -230,9 +202,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			<Sidebar collapsible="none" className="hidden flex-1 md:flex">
 				<SidebarHeader className="gap-3.5 border-b p-4">
 					<div className="flex w-full items-center justify-between">
-						<div className="text-base font-medium text-foreground">
-							{activeItem.title}
-						</div>
+						<div className="text-base font-medium text-foreground">{activeItem.title}</div>
 						<Label className="flex items-center gap-2 text-sm">
 							<span>Unreads</span>
 							<Switch className="shadow-none" />
@@ -250,14 +220,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 									className="flex flex-col items-start gap-2 whitespace-nowrap border-b p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
 								>
 									<div className="flex w-full items-center gap-2">
-										<span>{mail.name}</span>{' '}
-										<span className="ml-auto text-xs">
-											{mail.date}
-										</span>
+										<span>{mail.name}</span> <span className="ml-auto text-xs">{mail.date}</span>
 									</div>
-									<span className="font-medium">
-										{mail.subject}
-									</span>
+									<span className="font-medium">{mail.subject}</span>
 									<span className="line-clamp-2 w-[260px] whitespace-break-spaces text-xs">
 										{mail.teaser}
 									</span>

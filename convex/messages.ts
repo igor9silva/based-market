@@ -1,10 +1,4 @@
-import {
-	MutationCtx,
-	QueryCtx,
-	action,
-	internalMutation,
-	mutation,
-} from './_generated/server';
+import { MutationCtx, QueryCtx, action, internalMutation, mutation } from './_generated/server';
 import { query } from './_generated/server';
 import { api, internal } from './_generated/api.js';
 import { v } from 'convex/values';
@@ -35,11 +29,7 @@ async function channelByName(ctx: QueryCtx, channelName: string) {
 	return channel;
 }
 
-async function latestMessagesFromChannel(
-	ctx: QueryCtx,
-	channelName: string,
-	max = 20,
-) {
+async function latestMessagesFromChannel(ctx: QueryCtx, channelName: string, max = 20) {
 	const channel = await channelByName(ctx, channelName);
 
 	const messages = await ctx.db
@@ -57,16 +47,11 @@ async function latestMessagesFromChannel(
 	return messagesWithAuthor;
 }
 
-export const count = query(
-	async (
-		ctx,
-		{ cacheBust, channel }: { cacheBust: unknown; channel: string },
-	) => {
-		const _unused = cacheBust;
-		const channelName = channel || 'chatty';
-		return (await latestMessagesFromChannel(ctx, channelName, 1000)).length;
-	},
-);
+export const count = query(async (ctx, { cacheBust, channel }: { cacheBust: unknown; channel: string }) => {
+	const _unused = cacheBust;
+	const channelName = channel || 'chatty';
+	return (await latestMessagesFromChannel(ctx, channelName, 1000)).length;
+});
 
 export const listUsers = query(async (ctx, { cacheBust }) => {
 	const _unused = cacheBust;
@@ -121,18 +106,10 @@ export const sendGeneratedMessages = action({
 
 export const clear = mutation(async (ctx) => {
 	await Promise.all([
-		...(await ctx.db.query('messages').collect()).map((message) =>
-			ctx.db.delete(message._id),
-		),
-		...(await ctx.db.query('users').collect()).map((user) =>
-			ctx.db.delete(user._id),
-		),
-		...(await ctx.db.query('channels').collect()).map((channel) =>
-			ctx.db.delete(channel._id),
-		),
-		...(await ctx.db.query('channelMembers').collect()).map((membership) =>
-			ctx.db.delete(membership._id),
-		),
+		...(await ctx.db.query('messages').collect()).map((message) => ctx.db.delete(message._id)),
+		...(await ctx.db.query('users').collect()).map((user) => ctx.db.delete(user._id)),
+		...(await ctx.db.query('channels').collect()).map((channel) => ctx.db.delete(channel._id)),
+		...(await ctx.db.query('channelMembers').collect()).map((membership) => ctx.db.delete(membership._id)),
 	]);
 });
 
@@ -154,14 +131,7 @@ export const seed = internalMutation(async (ctx) => {
 });
 
 export const sendMessage = mutation(
-	async (
-		ctx,
-		{
-			user,
-			body,
-			channel = 'chatty',
-		}: { user: string; body: string; channel: string },
-	) => {
+	async (ctx, { user, body, channel = 'chatty' }: { user: string; body: string; channel: string }) => {
 		// userId ought to match User /d+
 		// until every user gets their own channel, use simulated messages
 		const cleanBody = madlib`${greetings} ${names}${punc} ${text}`;
@@ -170,8 +140,7 @@ export const sendMessage = mutation(
 			.withIndex('by_name')
 			.filter((q) => q.eq(q.field('name'), user))
 			.unique();
-		let userId =
-			existingUser?._id || (await ctx.db.insert('users', { name: user }));
+		let userId = existingUser?._id || (await ctx.db.insert('users', { name: user }));
 		const channelId = (await channelByName(ctx, channel))._id;
 		await ctx.db.insert('messages', {
 			user: userId,

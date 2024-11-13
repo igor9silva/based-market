@@ -29,37 +29,24 @@ export default function ReactQuery() {
 			<div className="gap-6 grid grid-cols-1 md:grid-cols-2  ">
 				<div>
 					<p className="mt-0">
-						TanStack Start apps can use React Query (TanStack Query
-						for React) hooks to take advantage of React Query's
-						excellent Start integration. Convex queries are exposed
-						through{' '}
-						<a href="https://tkdodo.eu/blog/the-query-options-api">
-							query options factories
-						</a>{' '}
-						like{' '}
+						TanStack Start apps can use React Query (TanStack Query for React) hooks to take advantage of
+						React Query's excellent Start integration. Convex queries are exposed through{' '}
+						<a href="https://tkdodo.eu/blog/the-query-options-api">query options factories</a> like{' '}
 						<a href="https://docs.convex.dev/client/tanstack-query#queries">
 							<code>convexQuery()</code>
 						</a>
 						.
 					</p>
 					<p>
-						Instead of React Query's standard interval and
-						activity-based polling and manual invalidation, updates
-						are streamed down WebSocket to update the Query Cache
-						directly for live, always-up-to-date results.
+						Instead of React Query's standard interval and activity-based polling and manual invalidation,
+						updates are streamed down WebSocket to update the Query Cache directly for live,
+						always-up-to-date results.
 					</p>
 					<p>
-						Open this page in another tab or on your phone and send
-						a message or{' '}
-						<Button
-							variant="link"
-							className="text-md px-0 underline"
-							onClick={() => sendTraffic()}
-						>
+						Open this page in another tab or on your phone and send a message or{' '}
+						<Button variant="link" className="text-md px-0 underline" onClick={() => sendTraffic()}>
 							simulate chat traffic{' '}
-							{simulationRunning ? (
-								<ReloadIcon className="h-4 w-4 animate-spin inline" />
-							) : null}
+							{simulationRunning ? <ReloadIcon className="h-4 w-4 animate-spin inline" /> : null}
 						</Button>{' '}
 						to see these updates pushed live.{' '}
 					</p>
@@ -94,29 +81,21 @@ const { data } = useQuery({
 
 			<h2>Already used Convex React hooks?</h2>
 			<p>
-				If you've used Convex React hooks React Query hooks are going to
-				familiar. Instead of returning the data directly, this{' '}
-				<code>useQuery()</code> returns an object with a{' '}
-				<code>.data</code> property along with other metadata. The hook
-				accepts a single object, which you'll mostly populate with the
-				return value of the <code>convexQuery()</code>
+				If you've used Convex React hooks React Query hooks are going to familiar. Instead of returning the data
+				directly, this <code>useQuery()</code> returns an object with a <code>.data</code> property along with
+				other metadata. The hook accepts a single object, which you'll mostly populate with the return value of
+				the <code>convexQuery()</code>
 				hook.
 			</p>
 			<p>
-				The same React Query hooks can be used for fetch endpoints and
-				Convex actions for standard interval or activity-based polling
-				while Convex queries benefit from the live update behavior.
+				The same React Query hooks can be used for fetch endpoints and Convex actions for standard interval or
+				activity-based polling while Convex queries benefit from the live update behavior.
 			</p>
 			<p>
-				What does this give you? It's not just the often-asked-for{' '}
-				<code>isLoading</code> and <code>error</code> properties or
-				simple interop with other server endpoints or introspection from
-				the TanStack Query devtools. It's React Query's Router
-				integration with the TanStack Start providing things like{' '}
-				<Link to="/ssr">
-					server-side rendering and live updating queries
-				</Link>{' '}
-				in a single hook.
+				What does this give you? It's not just the often-asked-for <code>isLoading</code> and <code>error</code>{' '}
+				properties or simple interop with other server endpoints or introspection from the TanStack Query
+				devtools. It's React Query's Router integration with the TanStack Start providing things like{' '}
+				<Link to="/ssr">server-side rendering and live updating queries</Link> in a single hook.
 			</p>
 
 			<h2>Learn More</h2>
@@ -132,11 +111,8 @@ const { data } = useQuery({
 				</a>
 			</p>
 			<p>
-				The{' '}
-				<a href="https://github.com/get-convex/convex-react-query">
-					@convex-dev/react-query
-				</a>{' '}
-				library links the TanStack Query Client with the Convex client
+				The <a href="https://github.com/get-convex/convex-react-query">@convex-dev/react-query</a> library links
+				the TanStack Query Client with the Convex client
 			</p>
 		</>
 	);

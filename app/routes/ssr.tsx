@@ -22,14 +22,11 @@ export default function LiveQueriesSSR() {
 		<>
 			<h2>Server-Side Rendering and Live Queries</h2>
 			<p>
-				TanStack Start routes render on the server for the first
-				pageload of a browsing session. Neither the React Query nor
-				standard Convex <code>useQuery()</code> hooks kick off requests
-				for this data during this initial SSR pass, but the React Query
-				hook <code>useSuspenseQuery()</code> does. The React Query
-				client is then serialized with whatever data was loaded to make
-				it available in the browser at hydration time. This reduces
-				rendering on the server and updating on the client from{' '}
+				TanStack Start routes render on the server for the first pageload of a browsing session. Neither the
+				React Query nor standard Convex <code>useQuery()</code> hooks kick off requests for this data during
+				this initial SSR pass, but the React Query hook <code>useSuspenseQuery()</code> does. The React Query
+				client is then serialized with whatever data was loaded to make it available in the browser at hydration
+				time. This reduces rendering on the server and updating on the client from{' '}
 				<a href="https://docs.convex.dev/client/react/nextjs/server-rendering#preloading-data-for-client-components">
 					two steps
 				</a>{' '}
@@ -46,8 +43,7 @@ export default function LiveQueriesSSR() {
 				>
 					reloading
 				</a>{' '}
-				this page to see the difference between{' '}
-				<code>useSuspenseQuery()</code> and <code>useQuery()</code>.
+				this page to see the difference between <code>useSuspenseQuery()</code> and <code>useQuery()</code>.
 			</p>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -70,23 +66,15 @@ export default function LiveQueriesSSR() {
 			</div>
 
 			<p>
-				On the browser these queries resume their subscriptions which
-				you can see by{' '}
-				<Button
-					variant="link"
-					className="text-md px-0 underline"
-					onClick={() => sendTraffic()}
-				>
+				On the browser these queries resume their subscriptions which you can see by{' '}
+				<Button variant="link" className="text-md px-0 underline" onClick={() => sendTraffic()}>
 					simulating chat traffic{' '}
-					{simulationRunning ? (
-						<ReloadIcon className="h-4 w-4 animate-spin inline" />
-					) : null}
+					{simulationRunning ? <ReloadIcon className="h-4 w-4 animate-spin inline" /> : null}
 				</Button>
 				.
 			</p>
 			<p>
-				Another way to opt into server-side data loading is to load the
-				query in a{' '}
+				Another way to opt into server-side data loading is to load the query in a{' '}
 				<Link to="/loaders" search={{ cacheBust: 'initial' }}>
 					loader
 				</Link>
@@ -95,9 +83,7 @@ export default function LiveQueriesSSR() {
 			<h2>Learn More</h2>
 
 			<p>
-				<a href="https://tanstack.com/router/latest/docs/framework/react/start/ssr">
-					TanStack Start SSR Guide
-				</a>
+				<a href="https://tanstack.com/router/latest/docs/framework/react/start/ssr">TanStack Start SSR Guide</a>
 			</p>
 		</>
 	);
