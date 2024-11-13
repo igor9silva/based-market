@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import React from 'react';
 
 import { AppSidebar } from '~/components/app-sidebar';
 import {
@@ -19,10 +18,11 @@ export const Route = createFileRoute('/igor')({
 
 function Component() {
 	return (
-		<SidebarProvider style={{ '--sidebar-width': '350px' } as React.CSSProperties}>
+		// force open=false because we want Icon-only on desktop
+		<SidebarProvider open={false}>
 			<AppSidebar />
 			<SidebarInset>
-				<header className="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4">
+				<header className="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 rounded-tl-lg rounded-tr-lg">
 					<SidebarTrigger className="-ml-1" />
 					<Separator orientation="vertical" className="mr-2 h-4" />
 					<Breadcrumb>
