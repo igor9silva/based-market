@@ -4,6 +4,7 @@ import { createRouter as createTanStackRouter } from '@tanstack/react-router';
 import { routerWithQueryClient } from '@tanstack/react-router-with-query';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 
+import { ThemeProvider } from '~/components/ThemeProvider';
 import { DefaultCatchBoundary } from './components/DefaultCatchBoundary';
 import { NotFound } from './components/NotFound';
 import { routeTree } from './routeTree.gen';
@@ -40,7 +41,7 @@ export function createRouter() {
 			Wrap: ({ children }) => {
 				return (
 					<ConvexProvider client={convexQueryClient.convexClient}>
-						{children}
+						<ThemeProvider>{children}</ThemeProvider>
 					</ConvexProvider>
 				);
 			},

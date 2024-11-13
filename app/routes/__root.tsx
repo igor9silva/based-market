@@ -1,33 +1,29 @@
 import { QueryClient } from '@tanstack/react-query';
-import {
-	Outlet,
-	ScrollRestoration,
-	createRootRouteWithContext,
-} from '@tanstack/react-router';
+import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router';
 import { Body, Head, Html, Meta, Scripts } from '@tanstack/start';
 import * as React from 'react';
 import { cn } from '~/lib/utils';
 import appCss from '~/styles/app.css?url';
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
-	{
-		meta: () => [
-			{
-				charSet: 'utf-8',
-			},
-			{
-				name: 'viewport',
-				content:
-					'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
-			},
-			{
-				title: 'Meseeks',
-			},
-		],
-		links: () => [{ rel: 'stylesheet', href: appCss }],
-		component: RootComponent,
-	},
-);
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+	meta: () => [
+		{ title: 'Meseeks' },
+		{ charSet: 'utf-8' },
+		{
+			name: 'viewport',
+			content: [
+				'width=device-width',
+				'initial-scale=1',
+				'minimum-scale=1',
+				'maximum-scale=1',
+				'user-scalable=no',
+				'viewport-fit=cover',
+			].join(', '),
+		},
+	],
+	links: () => [{ rel: 'stylesheet', href: appCss }],
+	component: RootComponent,
+});
 
 function RootComponent() {
 	return (
@@ -52,13 +48,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	);
 }
 
-export default function RootLayout({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
-	const baseClasses =
-		'pb-1 font-medium px-3 py-2 transition-colors rounded-md';
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+	const baseClasses = 'pb-1 font-medium px-3 py-2 transition-colors rounded-md';
 	const activeProps = {
 		className: cn(baseClasses, 'bg-slate-700'),
 	} as const;
