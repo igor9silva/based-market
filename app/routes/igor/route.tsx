@@ -48,11 +48,11 @@ function Component() {
 				</Breadcrumb>
 			</header>
 			{user ? (
-				<Button className="max-w-96" onClick={() => signOut()}>
+				<Button className="p-2 m-2" onClick={() => signOut()}>
 					Welcome back, {user.name}! Sign out
 				</Button>
 			) : (
-				<Button className="max-w-96" onClick={() => signIn('google', { redirectTo: location.href })}>
+				<Button className="p-2 m-2" onClick={() => signIn('google', { redirectTo: location.href })}>
 					Sign in
 				</Button>
 			)}
