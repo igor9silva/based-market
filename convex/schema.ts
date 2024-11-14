@@ -19,4 +19,9 @@ export default defineSchema({
 		userId: v.id('users'),
 		channelId: v.id('channels'),
 	}),
+	tasks: defineTable({
+		title: v.string(),
+		body: v.optional(v.string()),
+		owner: v.id('users'),
+	}),
 });

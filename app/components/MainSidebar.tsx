@@ -18,12 +18,12 @@ import {
 const menuItems = [
 	{
 		title: 'Inbox',
-		url: '/igor',
+		url: '/inbox',
 		icon: Inbox,
 	},
 	{
 		title: 'Drafts',
-		url: '/drafts',
+		url: '/igor',
 		icon: File,
 	},
 	{

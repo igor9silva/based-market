@@ -4,6 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 
+import { PageHeader } from '~/components/PageHeader';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -13,8 +14,6 @@ import {
 	BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
 import { Button } from '~/components/ui/button';
-import { Separator } from '~/components/ui/separator';
-import { SidebarTrigger } from '~/components/ui/sidebar';
 
 const query = convexQuery(api.users.currentUser, {});
 
@@ -32,9 +31,7 @@ function Component() {
 
 	return (
 		<>
-			<header className="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 rounded-tl-lg rounded-tr-lg">
-				<SidebarTrigger className="-ml-1 md:hidden" />
-				<Separator orientation="vertical" className="mr-2 h-4 md:hidden" />
+			<PageHeader>
 				<Breadcrumb>
 					<BreadcrumbList>
 						<BreadcrumbItem className="hidden md:block">
@@ -46,7 +43,7 @@ function Component() {
 						</BreadcrumbItem>
 					</BreadcrumbList>
 				</Breadcrumb>
-			</header>
+			</PageHeader>
 			{user ? (
 				<Button className="p-2 m-2" onClick={() => signOut()}>
 					Welcome back, {user.name}! Sign out
