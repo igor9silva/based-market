@@ -54,11 +54,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-	const { signIn } = useAuthActions();
-	const doSignIn = () => signIn('google');
-
-	const isSpecial = typeof location !== 'undefined' && location.pathname !== '/saifora';
-
 	return (
 		<SidebarProvider open={false}>
 			<AuthLoading>Loading...</AuthLoading>
@@ -67,15 +62,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<SidebarInset>{children}</SidebarInset>
 			</Authenticated>
 			<Unauthenticated>
-				{isSpecial ? (
-					<div className="h-screen w-full flex flex-col items-center justify-center gap-4">
-						<p>Who the f are you?!</p>
-						<img src={thinkingEmojiUrl} alt="Access denied" className="object-contain" />
-					</div>
-				) : (
-					<Button onClick={doSignIn}>Sign in</Button>
-				)}
+				<AccessDenied />
 			</Unauthenticated>
 		</SidebarProvider>
+	);
+}
+
+function AccessDenied() {
+	const { signIn } = useAuthActions();
+	const doSignIn = () => signIn('google');
+
+	const isSpecial = typeof location !== 'undefined' && location.pathname !== '/saifora';
+
+	return (
+		<div className="h-screen w-full flex flex-col items-center justify-center gap-4">
+			{isSpecial ? (
+				<>
+					<p>Who the f are you?!</p>
+					<img src={thinkingEmojiUrl} alt="Access denied" className="object-contain" />
+				</>
+			) : (
+				<Button onClick={doSignIn}>Sign in</Button>
+			)}
+		</div>
 	);
 }
