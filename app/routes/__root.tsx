@@ -1,9 +1,13 @@
+import { useAuthActions } from '@convex-dev/auth/react';
 import { QueryClient } from '@tanstack/react-query';
 import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router';
 import { Body, Head, Html, Meta, Scripts } from '@tanstack/start';
+import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
 import { MainSidebar } from '~/components/MainSidebar';
+import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
+import thinkingEmojiUrl from '~/static/thinking-emoji.gif';
 import appCss from '~/styles/app.css?url';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -50,10 +54,28 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+	const { signIn } = useAuthActions();
+	const doSignIn = () => signIn('google');
+
+	const isSpecial = typeof location !== 'undefined' && location.pathname !== '/saifora';
+
 	return (
 		<SidebarProvider open={false}>
-			<MainSidebar />
-			<SidebarInset>{children}</SidebarInset>
+			<AuthLoading>Loading...</AuthLoading>
+			<Authenticated>
+				<MainSidebar />
+				<SidebarInset>{children}</SidebarInset>
+			</Authenticated>
+			<Unauthenticated>
+				{isSpecial ? (
+					<div className="h-screen w-full flex flex-col items-center justify-center gap-4">
+						<p>Who the f are you?!</p>
+						<img src={thinkingEmojiUrl} alt="Access denied" className="object-contain" />
+					</div>
+				) : (
+					<Button onClick={doSignIn}>Sign in</Button>
+				)}
+			</Unauthenticated>
 		</SidebarProvider>
 	);
 }

@@ -19,7 +19,7 @@ import { SidebarTrigger } from '~/components/ui/sidebar';
 const query = convexQuery(api.users.currentUser, {});
 
 export const Route = createFileRoute('/igor')({
-	loader: async ({ context }) => {
+	loader: ({ context }) => {
 		context.queryClient.prefetchQuery(query);
 		// await context.queryClient.ensureQueryData(query);
 	},
