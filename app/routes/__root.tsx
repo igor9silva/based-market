@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<Authenticated>
 				<MainSidebar />
 				<SidebarInset>
-					<div className="flex flex-col gap-4 m-4">{children}</div>
+					<div className="flex flex-col gap-2 m-4">{children}</div>
 				</SidebarInset>
 			</Authenticated>
 			<Unauthenticated>

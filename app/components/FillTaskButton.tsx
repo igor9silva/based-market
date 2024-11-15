@@ -6,24 +6,32 @@ import { Button } from '~/components/ui/button';
 export function FillTaskButton({ task }: { task: Doc<'tasks'> }) {
 	//
 	// TODO: write a prettier abstraction for optmistc updates
-	const startFilling = useMutation(api.tasks.startFilling).withOptimisticUpdate((store, args) => {
-		const existing = store.getQuery(api.tasks.findOne, { taskId: args.taskId });
-		if (!existing) return;
-		store.setQuery(
-			api.tasks.findOne,
-			{ taskId: args.taskId },
-			{
-				...existing,
-				effects: [...(existing.effects || []), 'filling'],
-			},
-		);
-	});
+	const startFilling = useMutation(api.taskActions.enqueue);
+	// .withOptimisticUpdate((store, args) => {
+	// 	//
+	// 	const existing = store.getQuery(api.tasks.findOne, { taskId: args.taskId });
+	// 	if (!existing) return;
 
-	const isFilling = task.effects?.includes('filling') || false;
+	// 	store.setQuery(
+	// 		api.tasks.findOne,
+	// 		{ taskId: args.taskId },
+	// 		{
+	// 			...existing,
+	// 			effects: [...(existing.effects || []), 'filling'],
+	// 		},
+	// 	);
+	// });
 
 	return (
-		<Button onClick={() => startFilling({ taskId: task._id })} disabled={isFilling}>
-			{isFilling ? 'Filling...' : 'Fill'}
+		<Button
+			onClick={() =>
+				startFilling({
+					taskId: task._id,
+					kind: 'fill',
+				})
+			}
+		>
+			Fill
 		</Button>
 	);
 }

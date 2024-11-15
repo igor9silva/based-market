@@ -15,7 +15,6 @@ type UpdateArgs = {
 	taskId: Id<'tasks'>;
 	title: string;
 	body: string;
-	effects: string[];
 };
 
 // TODO: from user (authorization)
@@ -27,7 +26,7 @@ export const list = query(async (ctx) => {
 export const add = mutation((ctx, { title, body, owner }: AddArgs) => {
 	return ctx.db.insert('tasks', { title, body, owner });
 
-	// TODO: auto-schedule side effects
+	// TODO: auto-schedule actions
 	// - fill
 	// - learn
 	// = suggest
@@ -42,6 +41,6 @@ export const findOne = query(async (ctx, { taskId }: FindOneArgs) => {
 	return task;
 });
 
-export const update = mutation((ctx, { taskId, title, body, effects }: UpdateArgs) => {
-	return ctx.db.patch(taskId, { title, body, effects });
+export const update = mutation((ctx, { taskId, title, body }: UpdateArgs) => {
+	return ctx.db.patch(taskId, { title, body });
 });

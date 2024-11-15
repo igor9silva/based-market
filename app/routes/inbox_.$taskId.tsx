@@ -6,6 +6,7 @@ import { Id } from 'convex/_generated/dataModel';
 import { formatDistanceToNow } from 'date-fns';
 import { FillTaskButton } from '~/components/FillTaskButton';
 import { PageHeader } from '~/components/PageHeader';
+import { TaskActionList } from '~/components/TaskActionList';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -13,7 +14,7 @@ import {
 	BreadcrumbList,
 	BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
-import { Card, CardContent, CardFooter } from '~/components/ui/card';
+import { Card, CardContent } from '~/components/ui/card';
 
 export const Route = createFileRoute('/inbox_/$taskId')({
 	component: Task,
@@ -45,8 +46,17 @@ export default function Task() {
 						</BreadcrumbItem>
 					</BreadcrumbList>
 				</Breadcrumb>
+				<div className="ml-auto px-3">
+					<FillTaskButton task={task} />
+				</div>
 			</PageHeader>
-			<Card className="m-4">
+			<Card className="whitespace-pre-wrap">
+				<CardContent className="pt-6">
+					<h3 className="text-lg font-semibold">Action Queue</h3>
+					<TaskActionList task={task} />
+				</CardContent>
+			</Card>
+			<Card className="whitespace-pre-wrap">
 				<CardContent className="pt-6">
 					<div className="space-y-1">
 						<div className="flex items-start justify-between">
@@ -58,9 +68,6 @@ export default function Task() {
 						{task.body && <p className="text-sm text-muted-foreground">{task.body}</p>}
 					</div>
 				</CardContent>
-				<CardFooter>
-					<FillTaskButton task={task} />
-				</CardFooter>
 			</Card>
 		</>
 	);
