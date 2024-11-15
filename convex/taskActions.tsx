@@ -26,6 +26,7 @@ export const enqueue = mutation({
 		taskId: v.id('tasks'),
 		kind: v.union(
 			v.literal('fill'), //
+			v.literal('reduce'),
 			// v.literal('learn'),
 			// v.literal('suggest'),
 		),
@@ -104,6 +105,58 @@ export const fill = internalAction({
 				`You'll receive a user-created task, and your job is to fix and improve it.`,
 				`Users will usually only fill-in the 'title', and with very few details.`,
 				`You should fill everything possible based on info already in the task, plus everything else you know, is able to infer or is able to find on the web.`,
+				``,
+				`Here's the task:`,
+				`ID: ${task._id}`,
+				`Title: ${task.title}`,
+				`Body: ${task.body}`,
+				`Created at: ${task._creationTime}`,
+			].join('\n'),
+		});
+
+		await ctx.runMutation(api.tasks.update, {
+			taskId,
+			title: object.title,
+			body: object.body,
+		});
+
+		await ctx.runMutation(internal.taskActions.setStatus, {
+			actionId,
+			status: 'succeeded',
+		});
+
+		// TODO: error handling
+		// TODO: log/persist events
+	},
+});
+
+export const reduce = internalAction({
+	args: {
+		taskId: v.id('tasks'),
+		actionId: v.id('taskActions'),
+	},
+	handler: async (ctx, { taskId, actionId }) => {
+		//
+		const task = await ctx.runQuery(api.tasks.findOne, { taskId });
+		if (!task) throw new Error('Task not found');
+
+		await ctx.runMutation(internal.taskActions.setStatus, {
+			actionId,
+			status: 'running',
+		});
+
+		const { object } = await generateObject({
+			model: openai('gpt-4o'),
+			// TODO: think about how to use the same schema
+			schema: z.object({
+				title: z.string(),
+				body: z.string(),
+			}),
+			prompt: [
+				`You'll receive a user-created task, and your job is to make it shorter.`,
+				`Users will usually only fill-in the 'title', and with very few details.`,
+				`You should remove everything possible that's not necessary, and that's not useful.`,
+				`Make sure to not lose any important information.`,
 				``,
 				`Here's the task:`,
 				`ID: ${task._id}`,

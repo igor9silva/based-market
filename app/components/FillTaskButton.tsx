@@ -6,7 +6,7 @@ import { Button } from '~/components/ui/button';
 export function FillTaskButton({ task }: { task: Doc<'tasks'> }) {
 	//
 	// TODO: write a prettier abstraction for optmistc updates
-	const startFilling = useMutation(api.taskActions.enqueue);
+	const enqueueAction = useMutation(api.taskActions.enqueue);
 	// .withOptimisticUpdate((store, args) => {
 	// 	//
 	// 	const existing = store.getQuery(api.tasks.findOne, { taskId: args.taskId });
@@ -25,7 +25,7 @@ export function FillTaskButton({ task }: { task: Doc<'tasks'> }) {
 	return (
 		<Button
 			onClick={() =>
-				startFilling({
+				enqueueAction({
 					taskId: task._id,
 					kind: 'fill',
 				})

@@ -6,6 +6,7 @@ import { Id } from 'convex/_generated/dataModel';
 import { formatDistanceToNow } from 'date-fns';
 import { FillTaskButton } from '~/components/FillTaskButton';
 import { PageHeader } from '~/components/PageHeader';
+import { ReduceTaskButton } from '~/components/ReduceTaskButton';
 import { TaskActionList } from '~/components/TaskActionList';
 import {
 	Breadcrumb,
@@ -46,8 +47,9 @@ export default function Task() {
 						</BreadcrumbItem>
 					</BreadcrumbList>
 				</Breadcrumb>
-				<div className="ml-auto px-3">
+				<div className="ml-auto flex gap-1">
 					<FillTaskButton task={task} />
+					<ReduceTaskButton task={task} />
 				</div>
 			</PageHeader>
 			<Card className="whitespace-pre-wrap">
