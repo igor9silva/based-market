@@ -13,15 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as InboxImport } from './routes/inbox'
 import { Route as IgorRouteImport } from './routes/igor/route'
-import { Route as DemoIndexImport } from './routes/demo/index'
 import { Route as InboxTaskIdImport } from './routes/inbox_.$taskId'
-import { Route as DemoSsrImport } from './routes/demo/ssr'
-import { Route as DemoReactQueryImport } from './routes/demo/react-query'
-import { Route as DemoLoadersImport } from './routes/demo/loaders'
-import { Route as DemoGcTimeImport } from './routes/demo/gcTime'
-import { Route as DemoLoadersPrefetchImport } from './routes/demo/loaders/prefetch'
-import { Route as DemoLoadersNoLoaderImport } from './routes/demo/loaders/no-loader'
-import { Route as DemoLoadersEnsureImport } from './routes/demo/loaders/ensure'
 
 // Create/Update Routes
 
@@ -37,58 +29,10 @@ const IgorRouteRoute = IgorRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const DemoIndexRoute = DemoIndexImport.update({
-  id: '/demo/',
-  path: '/demo/',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const InboxTaskIdRoute = InboxTaskIdImport.update({
   id: '/inbox_/$taskId',
   path: '/inbox/$taskId',
   getParentRoute: () => rootRoute,
-} as any)
-
-const DemoSsrRoute = DemoSsrImport.update({
-  id: '/demo/ssr',
-  path: '/demo/ssr',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DemoReactQueryRoute = DemoReactQueryImport.update({
-  id: '/demo/react-query',
-  path: '/demo/react-query',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DemoLoadersRoute = DemoLoadersImport.update({
-  id: '/demo/loaders',
-  path: '/demo/loaders',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DemoGcTimeRoute = DemoGcTimeImport.update({
-  id: '/demo/gcTime',
-  path: '/demo/gcTime',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const DemoLoadersPrefetchRoute = DemoLoadersPrefetchImport.update({
-  id: '/prefetch',
-  path: '/prefetch',
-  getParentRoute: () => DemoLoadersRoute,
-} as any)
-
-const DemoLoadersNoLoaderRoute = DemoLoadersNoLoaderImport.update({
-  id: '/no-loader',
-  path: '/no-loader',
-  getParentRoute: () => DemoLoadersRoute,
-} as any)
-
-const DemoLoadersEnsureRoute = DemoLoadersEnsureImport.update({
-  id: '/ensure',
-  path: '/ensure',
-  getParentRoute: () => DemoLoadersRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -109,34 +53,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InboxImport
       parentRoute: typeof rootRoute
     }
-    '/demo/gcTime': {
-      id: '/demo/gcTime'
-      path: '/demo/gcTime'
-      fullPath: '/demo/gcTime'
-      preLoaderRoute: typeof DemoGcTimeImport
-      parentRoute: typeof rootRoute
-    }
-    '/demo/loaders': {
-      id: '/demo/loaders'
-      path: '/demo/loaders'
-      fullPath: '/demo/loaders'
-      preLoaderRoute: typeof DemoLoadersImport
-      parentRoute: typeof rootRoute
-    }
-    '/demo/react-query': {
-      id: '/demo/react-query'
-      path: '/demo/react-query'
-      fullPath: '/demo/react-query'
-      preLoaderRoute: typeof DemoReactQueryImport
-      parentRoute: typeof rootRoute
-    }
-    '/demo/ssr': {
-      id: '/demo/ssr'
-      path: '/demo/ssr'
-      fullPath: '/demo/ssr'
-      preLoaderRoute: typeof DemoSsrImport
-      parentRoute: typeof rootRoute
-    }
     '/inbox_/$taskId': {
       id: '/inbox_/$taskId'
       path: '/inbox/$taskId'
@@ -144,161 +60,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InboxTaskIdImport
       parentRoute: typeof rootRoute
     }
-    '/demo/': {
-      id: '/demo/'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof DemoIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/demo/loaders/ensure': {
-      id: '/demo/loaders/ensure'
-      path: '/ensure'
-      fullPath: '/demo/loaders/ensure'
-      preLoaderRoute: typeof DemoLoadersEnsureImport
-      parentRoute: typeof DemoLoadersImport
-    }
-    '/demo/loaders/no-loader': {
-      id: '/demo/loaders/no-loader'
-      path: '/no-loader'
-      fullPath: '/demo/loaders/no-loader'
-      preLoaderRoute: typeof DemoLoadersNoLoaderImport
-      parentRoute: typeof DemoLoadersImport
-    }
-    '/demo/loaders/prefetch': {
-      id: '/demo/loaders/prefetch'
-      path: '/prefetch'
-      fullPath: '/demo/loaders/prefetch'
-      preLoaderRoute: typeof DemoLoadersPrefetchImport
-      parentRoute: typeof DemoLoadersImport
-    }
   }
 }
 
 // Create and export the route tree
 
-interface DemoLoadersRouteChildren {
-  DemoLoadersEnsureRoute: typeof DemoLoadersEnsureRoute
-  DemoLoadersNoLoaderRoute: typeof DemoLoadersNoLoaderRoute
-  DemoLoadersPrefetchRoute: typeof DemoLoadersPrefetchRoute
-}
-
-const DemoLoadersRouteChildren: DemoLoadersRouteChildren = {
-  DemoLoadersEnsureRoute: DemoLoadersEnsureRoute,
-  DemoLoadersNoLoaderRoute: DemoLoadersNoLoaderRoute,
-  DemoLoadersPrefetchRoute: DemoLoadersPrefetchRoute,
-}
-
-const DemoLoadersRouteWithChildren = DemoLoadersRoute._addFileChildren(
-  DemoLoadersRouteChildren,
-)
-
 export interface FileRoutesByFullPath {
   '/igor': typeof IgorRouteRoute
   '/inbox': typeof InboxRoute
-  '/demo/gcTime': typeof DemoGcTimeRoute
-  '/demo/loaders': typeof DemoLoadersRouteWithChildren
-  '/demo/react-query': typeof DemoReactQueryRoute
-  '/demo/ssr': typeof DemoSsrRoute
   '/inbox/$taskId': typeof InboxTaskIdRoute
-  '/demo': typeof DemoIndexRoute
-  '/demo/loaders/ensure': typeof DemoLoadersEnsureRoute
-  '/demo/loaders/no-loader': typeof DemoLoadersNoLoaderRoute
-  '/demo/loaders/prefetch': typeof DemoLoadersPrefetchRoute
 }
 
 export interface FileRoutesByTo {
   '/igor': typeof IgorRouteRoute
   '/inbox': typeof InboxRoute
-  '/demo/gcTime': typeof DemoGcTimeRoute
-  '/demo/loaders': typeof DemoLoadersRouteWithChildren
-  '/demo/react-query': typeof DemoReactQueryRoute
-  '/demo/ssr': typeof DemoSsrRoute
   '/inbox/$taskId': typeof InboxTaskIdRoute
-  '/demo': typeof DemoIndexRoute
-  '/demo/loaders/ensure': typeof DemoLoadersEnsureRoute
-  '/demo/loaders/no-loader': typeof DemoLoadersNoLoaderRoute
-  '/demo/loaders/prefetch': typeof DemoLoadersPrefetchRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/igor': typeof IgorRouteRoute
   '/inbox': typeof InboxRoute
-  '/demo/gcTime': typeof DemoGcTimeRoute
-  '/demo/loaders': typeof DemoLoadersRouteWithChildren
-  '/demo/react-query': typeof DemoReactQueryRoute
-  '/demo/ssr': typeof DemoSsrRoute
   '/inbox_/$taskId': typeof InboxTaskIdRoute
-  '/demo/': typeof DemoIndexRoute
-  '/demo/loaders/ensure': typeof DemoLoadersEnsureRoute
-  '/demo/loaders/no-loader': typeof DemoLoadersNoLoaderRoute
-  '/demo/loaders/prefetch': typeof DemoLoadersPrefetchRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/igor'
-    | '/inbox'
-    | '/demo/gcTime'
-    | '/demo/loaders'
-    | '/demo/react-query'
-    | '/demo/ssr'
-    | '/inbox/$taskId'
-    | '/demo'
-    | '/demo/loaders/ensure'
-    | '/demo/loaders/no-loader'
-    | '/demo/loaders/prefetch'
+  fullPaths: '/igor' | '/inbox' | '/inbox/$taskId'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/igor'
-    | '/inbox'
-    | '/demo/gcTime'
-    | '/demo/loaders'
-    | '/demo/react-query'
-    | '/demo/ssr'
-    | '/inbox/$taskId'
-    | '/demo'
-    | '/demo/loaders/ensure'
-    | '/demo/loaders/no-loader'
-    | '/demo/loaders/prefetch'
-  id:
-    | '__root__'
-    | '/igor'
-    | '/inbox'
-    | '/demo/gcTime'
-    | '/demo/loaders'
-    | '/demo/react-query'
-    | '/demo/ssr'
-    | '/inbox_/$taskId'
-    | '/demo/'
-    | '/demo/loaders/ensure'
-    | '/demo/loaders/no-loader'
-    | '/demo/loaders/prefetch'
+  to: '/igor' | '/inbox' | '/inbox/$taskId'
+  id: '__root__' | '/igor' | '/inbox' | '/inbox_/$taskId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IgorRouteRoute: typeof IgorRouteRoute
   InboxRoute: typeof InboxRoute
-  DemoGcTimeRoute: typeof DemoGcTimeRoute
-  DemoLoadersRoute: typeof DemoLoadersRouteWithChildren
-  DemoReactQueryRoute: typeof DemoReactQueryRoute
-  DemoSsrRoute: typeof DemoSsrRoute
   InboxTaskIdRoute: typeof InboxTaskIdRoute
-  DemoIndexRoute: typeof DemoIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IgorRouteRoute: IgorRouteRoute,
   InboxRoute: InboxRoute,
-  DemoGcTimeRoute: DemoGcTimeRoute,
-  DemoLoadersRoute: DemoLoadersRouteWithChildren,
-  DemoReactQueryRoute: DemoReactQueryRoute,
-  DemoSsrRoute: DemoSsrRoute,
   InboxTaskIdRoute: InboxTaskIdRoute,
-  DemoIndexRoute: DemoIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -315,12 +119,7 @@ export const routeTree = rootRoute
       "children": [
         "/igor",
         "/inbox",
-        "/demo/gcTime",
-        "/demo/loaders",
-        "/demo/react-query",
-        "/demo/ssr",
-        "/inbox_/$taskId",
-        "/demo/"
+        "/inbox_/$taskId"
       ]
     },
     "/igor": {
@@ -329,40 +128,8 @@ export const routeTree = rootRoute
     "/inbox": {
       "filePath": "inbox.tsx"
     },
-    "/demo/gcTime": {
-      "filePath": "demo/gcTime.tsx"
-    },
-    "/demo/loaders": {
-      "filePath": "demo/loaders.tsx",
-      "children": [
-        "/demo/loaders/ensure",
-        "/demo/loaders/no-loader",
-        "/demo/loaders/prefetch"
-      ]
-    },
-    "/demo/react-query": {
-      "filePath": "demo/react-query.tsx"
-    },
-    "/demo/ssr": {
-      "filePath": "demo/ssr.tsx"
-    },
     "/inbox_/$taskId": {
       "filePath": "inbox_.$taskId.tsx"
-    },
-    "/demo/": {
-      "filePath": "demo/index.tsx"
-    },
-    "/demo/loaders/ensure": {
-      "filePath": "demo/loaders/ensure.tsx",
-      "parent": "/demo/loaders"
-    },
-    "/demo/loaders/no-loader": {
-      "filePath": "demo/loaders/no-loader.tsx",
-      "parent": "/demo/loaders"
-    },
-    "/demo/loaders/prefetch": {
-      "filePath": "demo/loaders/prefetch.tsx",
-      "parent": "/demo/loaders"
     }
   }
 }
