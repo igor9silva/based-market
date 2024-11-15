@@ -8,9 +8,9 @@ import { Input } from '~/components/ui/input';
 export function TaskComposer() {
 	const query = convexQuery(api.users.currentUser, {});
 	const { data: user } = useSuspenseQuery(query);
-	if (!user) return null;
-
 	const addTask = useMutation(api.tasks.add);
+
+	if (!user) return null;
 
 	// TODO: create a `handleSubmit` hook abstraction that receives just a function
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
