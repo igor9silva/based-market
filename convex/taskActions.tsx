@@ -4,7 +4,7 @@ import { v } from 'convex/values';
 import { z } from 'zod';
 import { api, internal } from './_generated/api';
 import { Doc } from './_generated/dataModel.js';
-import { internalAction, internalMutation, mutation, query } from './_generated/server.js';
+import { internalAction, internalMutation, internalQuery, mutation, query } from './_generated/server.js';
 
 // TODO: from user (authorization)
 
@@ -21,6 +21,33 @@ export const list = query({
 	},
 });
 
+export const findNextAction = internalQuery({
+	args: {
+		taskId: v.id('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		return await ctx.db
+			.query('taskActions')
+			.withIndex('by_task', (q) => q.eq('taskId', taskId))
+			.filter((q) => q.eq(q.field('status'), 'pending'))
+			.order('asc')
+			.first();
+	},
+});
+
+export const findRunningActions = internalQuery({
+	args: {
+		taskId: v.id('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		return await ctx.db
+			.query('taskActions')
+			.withIndex('by_task', (q) => q.eq('taskId', taskId))
+			.filter((q) => q.eq(q.field('status'), 'running'))
+			.collect();
+	},
+});
+
 export const enqueue = mutation({
 	args: {
 		taskId: v.id('tasks'),
@@ -32,24 +59,34 @@ export const enqueue = mutation({
 		),
 	},
 	handler: async (ctx, { taskId, kind }) => {
+		console.debug('ENQUEUE, taskId', taskId, 'kind', kind);
 		// I'm seeing a very odd behavior where reading from `currentUser` while breaks its type,
 		// that's why I'm expliciting `Doc<'users'>` here.
 		const currentUser: Doc<'users'> = await ctx.runQuery(api.users.currentUser);
 		if (!currentUser) throw new Error('Not authenticated');
 
+		const runningActions: Doc<'taskActions'>[] = await ctx.runQuery(
+			internal.taskActions.findRunningActions, //
+			{ taskId },
+		);
+
 		const actionId = await ctx.db.insert('taskActions', {
 			owner: currentUser._id,
 			taskId,
 			kind,
-			status: 'pending',
+			status: runningActions.length > 0 ? 'pending' : 'running', // important to avoid race condition
 			isDone: false,
 		});
 
-		await ctx.scheduler.runAfter(
-			0, //
-			internal.taskActions[kind],
-			{ taskId, actionId },
-		);
+		// if no running actions, run immediately
+		if (runningActions.length === 0) {
+			await ctx.scheduler.runAfter(
+				0, //
+				internal.taskActions[kind],
+				{ taskId, actionId },
+			);
+		}
+		console.debug('[END]  ENQUEUE, taskId', taskId, 'kind', kind);
 
 		return actionId;
 	},
@@ -70,14 +107,43 @@ export const enqueue = mutation({
 export const setStatus = internalMutation({
 	args: {
 		actionId: v.id('taskActions'),
-		status: v.union(v.literal('running'), v.literal('succeeded'), v.literal('failed')),
+		// TODO: use same union as in schema
+		status: v.union(
+			v.literal('running'), //
+			v.literal('succeeded'),
+			v.literal('failed'),
+			v.literal('cancelled'),
+		),
 	},
 	handler: async (ctx, { actionId, status }) => {
-		await ctx.db.patch(actionId, { status, isDone: status === 'succeeded' || status === 'failed' });
+		await ctx.db.patch(actionId, {
+			status,
+			isDone: status === 'succeeded' || status === 'failed' || status === 'cancelled',
+		});
 	},
 });
 
 // ------------------------------------
+
+export const nextAction = internalAction({
+	args: {
+		taskId: v.id('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		//
+		const nextAction = await ctx.runQuery(internal.taskActions.findNextAction, { taskId });
+		if (!nextAction) return console.info('No pending action found for task', taskId);
+
+		const runningActions = await ctx.runQuery(internal.taskActions.findRunningActions, { taskId });
+		if (runningActions.length > 0) return console.info('Already running actions found for task', taskId);
+
+		await ctx.scheduler.runAfter(
+			0, //
+			internal.taskActions[nextAction.kind],
+			{ taskId, actionId: nextAction._id },
+		);
+	},
+});
 
 export const fill = internalAction({
 	args: {
@@ -124,6 +190,12 @@ export const fill = internalAction({
 			actionId,
 			status: 'succeeded',
 		});
+
+		await ctx.scheduler.runAfter(
+			0, //
+			internal.taskActions.nextAction,
+			{ taskId },
+		);
 
 		// TODO: error handling
 		// TODO: log/persist events
@@ -176,6 +248,12 @@ export const reduce = internalAction({
 			actionId,
 			status: 'succeeded',
 		});
+
+		await ctx.scheduler.runAfter(
+			0, //
+			internal.taskActions.nextAction,
+			{ taskId },
+		);
 
 		// TODO: error handling
 		// TODO: log/persist events

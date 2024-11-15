@@ -15,15 +15,16 @@ export default defineSchema({
 		kind: v.union(
 			v.literal('fill'), //
 			v.literal('reduce'),
-			v.literal('learn'),
-			v.literal('suggest'),
+			// v.literal('learn'),
+			// v.literal('suggest'),
 		),
 		status: v.union(
 			v.literal('pending'), //
 			v.literal('running'),
 			v.literal('succeeded'),
 			v.literal('failed'),
+			v.literal('cancelled'),
 		),
 		isDone: v.boolean(),
-	}),
+	}).index('by_task', ['taskId']),
 });
