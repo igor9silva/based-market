@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
+import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
 import { PaperPlaneIcon } from '@radix-ui/react-icons';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import { convexQuery, useConvexMutation } from '@convex-dev/react-query';
 import { api } from 'convex/_generated/api';
-import { Skeleton } from './ui/skeleton';
-import CodeSample from '~/components/CodeSample';
+import { useEffect, useState } from 'react';
+import CodeSample from '~/components/demo/CodeSample';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from '../ui/card';
+import { Input } from '../ui/input';
+import { Skeleton } from '../ui/skeleton';
 
 function serverTimeFormat(ms: number): string {
 	return new Intl.DateTimeFormat('en-US', {

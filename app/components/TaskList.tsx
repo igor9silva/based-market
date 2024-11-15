@@ -4,6 +4,7 @@ import { api } from 'convex/_generated/api';
 import { Task } from '~/components/Task';
 
 export function TaskList() {
+	//
 	const query = convexQuery(api.tasks.list, {});
 	const { data: tasks } = useSuspenseQuery(query);
 

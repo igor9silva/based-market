@@ -2,6 +2,7 @@
 
 import { BadgeCheck, Bell, LogOut, Sparkles } from 'lucide-react';
 
+import { CaretSortIcon, ComponentPlaceholderIcon } from '@radix-ui/react-icons';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import {
 	DropdownMenu,
@@ -13,9 +14,8 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '~/components/ui/sidebar';
-import { CaretSortIcon, ComponentPlaceholderIcon } from '@radix-ui/react-icons';
 
-export function NavUser({
+export function UserMenuItem({
 	user,
 }: {
 	user: {

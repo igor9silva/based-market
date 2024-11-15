@@ -1,3 +1,3 @@
 export function NotFound({ children }: { children?: any }) {
-	return children || <p>The page you are looking for does not exist.</p>;
+	return children || <p>What you are looking for doesn't seem to exist.</p>;
 }

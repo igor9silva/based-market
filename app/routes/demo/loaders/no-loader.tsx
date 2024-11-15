@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import Chat from '~/components/Chat';
-import CodeSample from '../../components/CodeSample';
+import Chat from '~/components/demo/Chat';
+import CodeSample from '~/components/demo/CodeSample';
 
 export const Route = createFileRoute('/demo/loaders/no-loader')({
 	component: Messages,

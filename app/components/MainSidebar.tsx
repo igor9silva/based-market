@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { File, Inbox, Send } from 'lucide-react';
 import * as React from 'react';
-import { NavUser } from '~/components/nav-user';
+import { UserMenuItem } from '~/components/UserMenuItem';
 
 import {
 	Sidebar,
@@ -93,7 +93,7 @@ export function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
 				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={user} />
+				<UserMenuItem user={user} />
 			</SidebarFooter>
 		</Sidebar>
 	);

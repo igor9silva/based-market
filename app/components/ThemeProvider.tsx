@@ -18,6 +18,7 @@ type ThemeProviderProps = {
 };
 
 export function ThemeProvider({ children, mode = 'system', ...props }: ThemeProviderProps) {
+	//
 	const [theme, setTheme] = useState<ThemeMode>(mode);
 
 	useEffect(() => {
@@ -56,8 +57,8 @@ export function ThemeProvider({ children, mode = 'system', ...props }: ThemeProv
 }
 
 export const useTheme = () => {
+	//
 	const context = useContext(ThemeProviderContext);
-
 	if (context === undefined) throw new Error('useTheme must be used within a ThemeProvider');
 
 	return context;

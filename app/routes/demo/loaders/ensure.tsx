@@ -1,8 +1,8 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import Chat from '~/components/Chat';
-import CodeSample from '../../components/CodeSample';
+import Chat from '~/components/demo/Chat';
+import CodeSample from '~/components/demo/CodeSample';
 
 export const Route = createFileRoute('/demo/loaders/ensure')({
 	component: Messages,
