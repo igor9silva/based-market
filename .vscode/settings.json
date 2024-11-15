@@ -1,6 +1,6 @@
 {
 	// set prettier as default formatter for json, ts, tsx, js, jsx, html, css
-	"[json][jsonc][typescript][typescriptreact][javascript][javascriptreact][html][css]": {
+	"[json][jsonc][typescript][typescriptreact][javascript][javascriptreact][html][css][postcss][tailwindcss]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
 

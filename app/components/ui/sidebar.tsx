@@ -8,7 +8,7 @@ import { Separator } from '~/components/ui/separator';
 import { Sheet, SheetContent, SheetTitle } from '~/components/ui/sheet';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
-import { useIsMobile } from '~/hooks/use-mobile';
+import { useIsMobile } from '~/hooks/isMobile';
 import { cn } from '~/lib/utils';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
@@ -47,6 +47,7 @@ const SidebarProvider = React.forwardRef<
 		onOpenChange?: (open: boolean) => void;
 	}
 >(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
+	//
 	const isMobile = useIsMobile();
 	const [openMobile, setOpenMobile] = React.useState(false);
 

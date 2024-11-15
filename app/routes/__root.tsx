@@ -56,7 +56,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<SidebarProvider open={false}>
-			<AuthLoading>Loading...</AuthLoading>
+			<AuthLoading>
+				<div className="flex flex-col items-center justify-center h-screen w-full gap-4">Loading...</div>
+			</AuthLoading>
 			<Authenticated>
 				<MainSidebar />
 				<SidebarInset>

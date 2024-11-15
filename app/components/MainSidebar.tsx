@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router';
-import { File, Inbox, Send } from 'lucide-react';
 import * as React from 'react';
-import { UserMenuItem } from '~/components/UserMenuItem';
 
+import { File, Inbox, Send } from 'lucide-react';
+import { UserMenuItem } from '~/components/UserMenuItem';
 import {
 	Sidebar,
 	SidebarContent,
@@ -33,13 +33,8 @@ const menuItems = [
 	},
 ];
 
-const user = {
-	name: 'shadcn',
-	email: 'm@example.com',
-	avatar: '/avatars/shadcn.jpg',
-};
-
 function MenuItem(item: (typeof menuItems)[number]) {
+	//
 	const { setOpenMobile } = useSidebar();
 
 	return (
@@ -93,7 +88,7 @@ export function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
 				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>
-				<UserMenuItem user={user} />
+				<UserMenuItem />
 			</SidebarFooter>
 		</Sidebar>
 	);
