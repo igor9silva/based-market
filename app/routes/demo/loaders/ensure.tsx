@@ -4,7 +4,7 @@ import { api } from 'convex/_generated/api';
 import Chat from '~/components/Chat';
 import CodeSample from '../../components/CodeSample';
 
-export const Route = createFileRoute('/loaders/prefetch')({
+export const Route = createFileRoute('/demo/loaders/ensure')({
 	component: Messages,
 	validateSearch: (search: Record<string, unknown>) => {
 		return {
@@ -13,9 +13,9 @@ export const Route = createFileRoute('/loaders/prefetch')({
 	},
 	loaderDeps: ({ search: { cacheBust } }) => ({ cacheBust }),
 	loader: async ({ deps: { cacheBust }, context }) => {
-		context.queryClient.prefetchQuery({
+		await context.queryClient.ensureQueryData({
 			...convexQuery(api.messages.listMessages, {
-				channel: 'seattle',
+				channel: 'sf',
 				cacheBust,
 			}),
 			gcTime: 10000,
@@ -27,12 +27,12 @@ function Messages() {
 	const { cacheBust } = Route.useSearch();
 	return (
 		<div>
-			<Chat channel="seattle" cacheBust={cacheBust} gcTime={10000} useSuspense={false} />
+			<Chat channel="sf" cacheBust={cacheBust} gcTime={2000} useSuspense={false} />
 			<div className="mt-4">
 				<CodeSample
-					code={`export const Route = createFileRoute('/loaders/prefetch')({
+					code={`export const Route = createFileRoute('/demo/loaders/ensure')({
   loader: async (opts) => {
-    await opts.context.queryClient.prefetchQuery(
+    await opts.context.queryClient.ensureQueryData(
       convexQuery(api.messages.list, {}),
     );
   },

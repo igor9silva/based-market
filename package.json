@@ -54,6 +54,7 @@
 	},
 	"devDependencies": {
 		"@tailwindcss/typography": "^0.5.15",
+		"@tanstack/router-cli": "^1.81.9",
 		"@types/react": "^18.2.65",
 		"@types/react-dom": "^18.2.21",
 		"@typescript-eslint/parser": "^6.7.4",
