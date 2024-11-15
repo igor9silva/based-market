@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskComposer } from '~/components/TaskComposer';
 import { TaskList } from '~/components/TaskList';
@@ -12,12 +12,14 @@ export const Route = createFileRoute('/inbox')({
 
 export default function Inbox() {
 	return (
-		<div className="flex flex-col gap-4 m-4">
+		<>
 			<PageHeader>
 				<Breadcrumb>
 					<BreadcrumbList>
 						<BreadcrumbItem>
-							<BreadcrumbLink href="#">Inbox</BreadcrumbLink>
+							<BreadcrumbLink asChild>
+								<Link to="/inbox">Inbox</Link>
+							</BreadcrumbLink>
 						</BreadcrumbItem>
 					</BreadcrumbList>
 				</Breadcrumb>
@@ -25,6 +27,6 @@ export default function Inbox() {
 			<TaskList />
 			<Separator />
 			<TaskComposer />
-		</div>
+		</>
 	);
 }

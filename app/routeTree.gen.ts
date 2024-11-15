@@ -14,13 +14,14 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as SsrImport } from './routes/ssr'
 import { Route as ReactQueryImport } from './routes/react-query'
 import { Route as LoadersImport } from './routes/loaders'
+import { Route as InboxImport } from './routes/inbox'
 import { Route as GcTimeImport } from './routes/gcTime'
-import { Route as InboxRouteImport } from './routes/inbox/route'
 import { Route as IgorRouteImport } from './routes/igor/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as LoadersPrefetchImport } from './routes/loaders/prefetch'
 import { Route as LoadersNoLoaderImport } from './routes/loaders/no-loader'
 import { Route as LoadersEnsureImport } from './routes/loaders/ensure'
+import { Route as InboxTaskIdImport } from './routes/inbox_.$taskId'
 
 // Create/Update Routes
 
@@ -42,15 +43,15 @@ const LoadersRoute = LoadersImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const GcTimeRoute = GcTimeImport.update({
-  id: '/gcTime',
-  path: '/gcTime',
+const InboxRoute = InboxImport.update({
+  id: '/inbox',
+  path: '/inbox',
   getParentRoute: () => rootRoute,
 } as any)
 
-const InboxRouteRoute = InboxRouteImport.update({
-  id: '/inbox',
-  path: '/inbox',
+const GcTimeRoute = GcTimeImport.update({
+  id: '/gcTime',
+  path: '/gcTime',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -84,6 +85,12 @@ const LoadersEnsureRoute = LoadersEnsureImport.update({
   getParentRoute: () => LoadersRoute,
 } as any)
 
+const InboxTaskIdRoute = InboxTaskIdImport.update({
+  id: '/inbox_/$taskId',
+  path: '/inbox/$taskId',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -102,18 +109,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IgorRouteImport
       parentRoute: typeof rootRoute
     }
-    '/inbox': {
-      id: '/inbox'
-      path: '/inbox'
-      fullPath: '/inbox'
-      preLoaderRoute: typeof InboxRouteImport
-      parentRoute: typeof rootRoute
-    }
     '/gcTime': {
       id: '/gcTime'
       path: '/gcTime'
       fullPath: '/gcTime'
       preLoaderRoute: typeof GcTimeImport
+      parentRoute: typeof rootRoute
+    }
+    '/inbox': {
+      id: '/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof InboxImport
       parentRoute: typeof rootRoute
     }
     '/loaders': {
@@ -135,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/ssr'
       fullPath: '/ssr'
       preLoaderRoute: typeof SsrImport
+      parentRoute: typeof rootRoute
+    }
+    '/inbox_/$taskId': {
+      id: '/inbox_/$taskId'
+      path: '/inbox/$taskId'
+      fullPath: '/inbox/$taskId'
+      preLoaderRoute: typeof InboxTaskIdImport
       parentRoute: typeof rootRoute
     }
     '/loaders/ensure': {
@@ -181,11 +195,12 @@ const LoadersRouteWithChildren =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/igor': typeof IgorRouteRoute
-  '/inbox': typeof InboxRouteRoute
   '/gcTime': typeof GcTimeRoute
+  '/inbox': typeof InboxRoute
   '/loaders': typeof LoadersRouteWithChildren
   '/react-query': typeof ReactQueryRoute
   '/ssr': typeof SsrRoute
+  '/inbox/$taskId': typeof InboxTaskIdRoute
   '/loaders/ensure': typeof LoadersEnsureRoute
   '/loaders/no-loader': typeof LoadersNoLoaderRoute
   '/loaders/prefetch': typeof LoadersPrefetchRoute
@@ -194,11 +209,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/igor': typeof IgorRouteRoute
-  '/inbox': typeof InboxRouteRoute
   '/gcTime': typeof GcTimeRoute
+  '/inbox': typeof InboxRoute
   '/loaders': typeof LoadersRouteWithChildren
   '/react-query': typeof ReactQueryRoute
   '/ssr': typeof SsrRoute
+  '/inbox/$taskId': typeof InboxTaskIdRoute
   '/loaders/ensure': typeof LoadersEnsureRoute
   '/loaders/no-loader': typeof LoadersNoLoaderRoute
   '/loaders/prefetch': typeof LoadersPrefetchRoute
@@ -208,11 +224,12 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/igor': typeof IgorRouteRoute
-  '/inbox': typeof InboxRouteRoute
   '/gcTime': typeof GcTimeRoute
+  '/inbox': typeof InboxRoute
   '/loaders': typeof LoadersRouteWithChildren
   '/react-query': typeof ReactQueryRoute
   '/ssr': typeof SsrRoute
+  '/inbox_/$taskId': typeof InboxTaskIdRoute
   '/loaders/ensure': typeof LoadersEnsureRoute
   '/loaders/no-loader': typeof LoadersNoLoaderRoute
   '/loaders/prefetch': typeof LoadersPrefetchRoute
@@ -223,11 +240,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/igor'
-    | '/inbox'
     | '/gcTime'
+    | '/inbox'
     | '/loaders'
     | '/react-query'
     | '/ssr'
+    | '/inbox/$taskId'
     | '/loaders/ensure'
     | '/loaders/no-loader'
     | '/loaders/prefetch'
@@ -235,11 +253,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/igor'
-    | '/inbox'
     | '/gcTime'
+    | '/inbox'
     | '/loaders'
     | '/react-query'
     | '/ssr'
+    | '/inbox/$taskId'
     | '/loaders/ensure'
     | '/loaders/no-loader'
     | '/loaders/prefetch'
@@ -247,11 +266,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/igor'
-    | '/inbox'
     | '/gcTime'
+    | '/inbox'
     | '/loaders'
     | '/react-query'
     | '/ssr'
+    | '/inbox_/$taskId'
     | '/loaders/ensure'
     | '/loaders/no-loader'
     | '/loaders/prefetch'
@@ -261,21 +281,23 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   IgorRouteRoute: typeof IgorRouteRoute
-  InboxRouteRoute: typeof InboxRouteRoute
   GcTimeRoute: typeof GcTimeRoute
+  InboxRoute: typeof InboxRoute
   LoadersRoute: typeof LoadersRouteWithChildren
   ReactQueryRoute: typeof ReactQueryRoute
   SsrRoute: typeof SsrRoute
+  InboxTaskIdRoute: typeof InboxTaskIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   IgorRouteRoute: IgorRouteRoute,
-  InboxRouteRoute: InboxRouteRoute,
   GcTimeRoute: GcTimeRoute,
+  InboxRoute: InboxRoute,
   LoadersRoute: LoadersRouteWithChildren,
   ReactQueryRoute: ReactQueryRoute,
   SsrRoute: SsrRoute,
+  InboxTaskIdRoute: InboxTaskIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -292,11 +314,12 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/igor",
-        "/inbox",
         "/gcTime",
+        "/inbox",
         "/loaders",
         "/react-query",
-        "/ssr"
+        "/ssr",
+        "/inbox_/$taskId"
       ]
     },
     "/": {
@@ -305,11 +328,11 @@ export const routeTree = rootRoute
     "/igor": {
       "filePath": "igor/route.tsx"
     },
-    "/inbox": {
-      "filePath": "inbox/route.tsx"
-    },
     "/gcTime": {
       "filePath": "gcTime.tsx"
+    },
+    "/inbox": {
+      "filePath": "inbox.tsx"
     },
     "/loaders": {
       "filePath": "loaders.tsx",
@@ -324,6 +347,9 @@ export const routeTree = rootRoute
     },
     "/ssr": {
       "filePath": "ssr.tsx"
+    },
+    "/inbox_/$taskId": {
+      "filePath": "inbox_.$taskId.tsx"
     },
     "/loaders/ensure": {
       "filePath": "loaders/ensure.tsx",

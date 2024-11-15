@@ -16,6 +16,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@ai-sdk/openai": "^0.0.72",
 		"@auth/core": "0.36.0",
 		"@convex-dev/auth": "^0.0.74",
 		"@convex-dev/react-query": "^0.0.0-alpha.7",
@@ -36,6 +37,7 @@
 		"@tanstack/router-devtools": "^1.76.3",
 		"@tanstack/start": "^1.76.3",
 		"@vitejs/plugin-react": "^4.3.3",
+		"ai": "^3.4.33",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "1.2.1",
 		"convex": "^1.17.0",
