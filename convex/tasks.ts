@@ -1,9 +1,9 @@
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { api } from './_generated/api';
+import { api, internal } from './_generated/api';
 import { Id } from './_generated/dataModel';
-import { action, mutation, query } from './_generated/server.js';
+import { internalAction, mutation, query } from './_generated/server.js';
 
 export const list = query(async (ctx) => {
 	// TODO: from user
@@ -18,14 +18,11 @@ type AddArgs = {
 export const add = mutation(async (ctx, { title, body, owner }: AddArgs) => {
 	const taskId = await ctx.db.insert('tasks', { title, body, owner });
 
-	// TODO: schedule 1 side effect to each one defined
-	// - fulfill
+	// TODO: auto-schedule side effects
+	// - fill
 	// - learn
 	// = suggest
 	// - ...
-	await ctx.scheduler.runAfter(0, api.tasks.fulfill, {
-		taskId,
-	});
 });
 
 export const findOne = query(async (ctx, { taskId }: { taskId: Id<'tasks'> }) => {
@@ -36,12 +33,20 @@ export const findOne = query(async (ctx, { taskId }: { taskId: Id<'tasks'> }) =>
 });
 
 export const update = mutation(
-	async (ctx, { taskId, title, body }: { taskId: Id<'tasks'>; title: string; body: string }) => {
-		return await ctx.db.patch(taskId, { title, body });
+	async (
+		ctx,
+		{ taskId, title, body, effects }: { taskId: Id<'tasks'>; title: string; body: string; effects: string[] },
+	) => {
+		return await ctx.db.patch(taskId, { title, body, effects });
 	},
 );
 
-export const fulfill = action(async (ctx, { taskId }: { taskId: Id<'tasks'> }) => {
+export const startFilling = mutation(async (ctx, { taskId }: { taskId: Id<'tasks'> }) => {
+	await ctx.db.patch(taskId, { effects: ['filling'] });
+	await ctx.scheduler.runAfter(0, internal.tasks.fill, { taskId });
+});
+
+export const fill = internalAction(async (ctx, { taskId }: { taskId: Id<'tasks'> }) => {
 	//
 	const task = await ctx.runQuery(api.tasks.findOne, { taskId });
 	if (!task) throw new Error('Task not found');
@@ -66,10 +71,14 @@ export const fulfill = action(async (ctx, { taskId }: { taskId: Id<'tasks'> }) =
 		].join('\n'),
 	});
 
+	// remove 'filling' effect
+	const effects = task.effects?.filter((effect) => effect !== 'filling') ?? [];
+
 	await ctx.runMutation(api.tasks.update, {
 		taskId,
 		title: object.title,
 		body: object.body,
+		effects: effects,
 	});
 
 	// TODO: log/persist events

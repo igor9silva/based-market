@@ -4,6 +4,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { formatDistanceToNow } from 'date-fns';
+import { FillTaskButton } from '~/components/FillTaskButton';
 import { PageHeader } from '~/components/PageHeader';
 import {
 	Breadcrumb,
@@ -12,14 +13,18 @@ import {
 	BreadcrumbList,
 	BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
-import { Card, CardContent } from '~/components/ui/card';
+import { Card, CardContent, CardFooter } from '~/components/ui/card';
+
 export const Route = createFileRoute('/inbox_/$taskId')({
 	component: Task,
 });
 
 export default function Task() {
-	const { taskId } = Route.useParams();
-	const query = convexQuery(api.tasks.findOne, { taskId: taskId as Id<'tasks'> });
+	//
+	const params = Route.useParams();
+	const taskId = params.taskId as Id<'tasks'>;
+
+	const query = convexQuery(api.tasks.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(query);
 
 	return (
@@ -53,6 +58,9 @@ export default function Task() {
 						{task.body && <p className="text-sm text-muted-foreground">{task.body}</p>}
 					</div>
 				</CardContent>
+				<CardFooter>
+					<FillTaskButton task={task} />
+				</CardFooter>
 			</Card>
 		</>
 	);

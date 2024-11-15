@@ -23,5 +23,6 @@ export default defineSchema({
 		title: v.string(),
 		body: v.optional(v.string()),
 		owner: v.id('users'),
+		effects: v.optional(v.array(v.string())),
 	}),
 });
