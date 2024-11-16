@@ -16,8 +16,7 @@ export const list = query({
 	handler: async (ctx, { taskId }) => {
 		return await ctx.db
 			.query('taskActions')
-			.filter((q) => q.eq(q.field('taskId'), taskId))
-			// TODO: index
+			.withIndex('by_task', (q) => q.eq('taskId', taskId))
 			.collect();
 	},
 });
@@ -50,7 +49,6 @@ export const findRunningActions = internalQuery({
 });
 
 export const enqueue = mutation({
-	//TODO: duplication
 	args: {
 		taskId: v.id('tasks'),
 		kind: taskActionKinds,
