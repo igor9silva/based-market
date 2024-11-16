@@ -3,7 +3,7 @@ import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { Button } from '~/components/ui/button';
 
-export function ReduceTaskButton({ task }: { task: Doc<'tasks'> }) {
+export function MinifyTaskButton({ task }: { task: Doc<'tasks'> }) {
 	//
 	const enqueueAction = useMutation(api.taskActions.enqueue);
 
@@ -12,11 +12,11 @@ export function ReduceTaskButton({ task }: { task: Doc<'tasks'> }) {
 			onClick={() =>
 				enqueueAction({
 					taskId: task._id,
-					kind: 'reduce',
+					kind: 'minify',
 				})
 			}
 		>
-			Reduce
+			Minify
 		</Button>
 	);
 }

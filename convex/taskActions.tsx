@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { api, internal } from './_generated/api';
 import { Doc } from './_generated/dataModel.js';
 import { internalAction, internalMutation, internalQuery, mutation, query } from './_generated/server.js';
-import { taskActionStatuses } from './schema';
+import { taskActionKinds, taskActionStatuses } from './schema';
 
 // TODO: from user (authorization)
 
@@ -50,14 +50,10 @@ export const findRunningActions = internalQuery({
 });
 
 export const enqueue = mutation({
+	//TODO: duplication
 	args: {
 		taskId: v.id('tasks'),
-		kind: v.union(
-			v.literal('fill'), //
-			v.literal('reduce'),
-			// v.literal('learn'),
-			// v.literal('suggest'),
-		),
+		kind: taskActionKinds,
 	},
 	handler: async (ctx, { taskId, kind }) => {
 		console.debug('ENQUEUE, taskId', taskId, 'kind', kind);
@@ -197,7 +193,7 @@ export const fill = internalAction({
 	},
 });
 
-export const reduce = internalAction({
+export const minify = internalAction({
 	args: {
 		taskId: v.id('tasks'),
 		actionId: v.id('taskActions'),

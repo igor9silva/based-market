@@ -10,6 +10,13 @@ export const taskActionStatuses = v.union(
 	v.literal('cancelled'),
 );
 
+export const taskActionKinds = v.union(
+	v.literal('fill'),
+	v.literal('minify'),
+	// v.literal('learn'),
+	// v.literal('suggest'),
+);
+
 export default defineSchema({
 	...authTables,
 	tasks: defineTable({
@@ -20,12 +27,7 @@ export default defineSchema({
 	taskActions: defineTable({
 		owner: v.id('users'),
 		taskId: v.id('tasks'),
-		kind: v.union(
-			v.literal('fill'), //
-			v.literal('reduce'),
-			// v.literal('learn'),
-			// v.literal('suggest'),
-		),
+		kind: taskActionKinds,
 		status: taskActionStatuses,
 		isDone: v.boolean(),
 	}).index('by_task', ['taskId']),
