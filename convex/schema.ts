@@ -23,9 +23,8 @@ export default defineSchema({
 		owner: v.id('users'),
 		title: v.string(),
 		body: v.optional(v.string()),
-	}),
+	}).index('by_owner', ['owner']),
 	taskActions: defineTable({
-		owner: v.id('users'),
 		taskId: v.id('tasks'),
 		kind: taskActionKinds,
 		status: taskActionStatuses,

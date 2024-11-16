@@ -15,7 +15,7 @@ import {
 } from '~/components/ui/breadcrumb';
 import { Button } from '~/components/ui/button';
 
-const query = convexQuery(api.users.currentUser, {});
+const query = convexQuery(api.users.current, {});
 
 export const Route = createFileRoute('/igor')({
 	loader: ({ context }) => {

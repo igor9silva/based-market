@@ -5,7 +5,7 @@ import { Task } from '~/components/Task';
 
 export function TaskList() {
 	//
-	const query = convexQuery(api.tasks.list, {});
+	const query = convexQuery(api.tasks.findAll, {});
 	const { data: tasks } = useSuspenseQuery(query);
 
 	return (

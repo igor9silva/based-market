@@ -7,7 +7,7 @@ import { Input } from '~/components/ui/input';
 
 export function TaskComposer() {
 	//
-	const query = convexQuery(api.users.currentUser, {});
+	const query = convexQuery(api.users.current, {});
 	const { data: user } = useSuspenseQuery(query);
 
 	const addTask = useMutation(api.tasks.add);

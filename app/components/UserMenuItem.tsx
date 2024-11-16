@@ -18,7 +18,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '~/c
 
 export function UserMenuItem() {
 	//
-	const query = convexQuery(api.users.currentUser, {});
+	const query = convexQuery(api.users.current, {});
 	const { data: user } = useSuspenseQuery(query);
 
 	const { isMobile } = useSidebar();

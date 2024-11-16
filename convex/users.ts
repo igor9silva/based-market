@@ -1,7 +1,7 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { query } from './_generated/server';
 
-export const currentUser = query({
+export const current = query({
 	args: {},
 	handler: async (ctx) => {
 		//

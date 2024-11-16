@@ -1,19 +1,26 @@
-import { openai } from '@ai-sdk/openai';
-import { generateObject } from 'ai';
-import { v } from 'convex/values';
-import { z } from 'zod';
-import { api, internal } from './_generated/api';
-import { Doc } from './_generated/dataModel.js';
-import { internalAction, internalMutation, internalQuery, mutation, query } from './_generated/server.js';
+import { Infer, v } from 'convex/values';
+import { internal } from './_generated/api';
+import { Id } from './_generated/dataModel.js';
+import {
+	ActionCtx,
+	internalMutation,
+	internalQuery,
+	mutation,
+	MutationCtx,
+	query,
+	QueryCtx,
+} from './_generated/server.js';
 import { taskActionKinds, taskActionStatuses } from './schema';
+import { ensureTaskOwner } from './tasks';
 
-// TODO: from user (authorization)
+// Exposed -------------------------------------
 
-export const list = query({
+export const findAll = query({
 	args: {
 		taskId: v.id('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
+		await ensureTaskOwner(ctx, { taskId });
 		return await ctx.db
 			.query('taskActions')
 			.withIndex('by_task', (q) => q.eq('taskId', taskId))
@@ -21,30 +28,18 @@ export const list = query({
 	},
 });
 
-export const findNextAction = internalQuery({
+export const findOne = query({
 	args: {
-		taskId: v.id('tasks'),
+		actionId: v.id('taskActions'),
 	},
-	handler: async (ctx, { taskId }) => {
-		return await ctx.db
-			.query('taskActions')
-			.withIndex('by_task', (q) => q.eq('taskId', taskId))
-			.filter((q) => q.eq(q.field('status'), 'pending'))
-			.order('asc')
-			.first();
-	},
-});
+	handler: async (ctx, { actionId }) => {
+		//
+		const action = await ctx.db.get(actionId);
+		if (!action) throw new Error('Action not found');
 
-export const findRunningActions = internalQuery({
-	args: {
-		taskId: v.id('tasks'),
-	},
-	handler: async (ctx, { taskId }) => {
-		return await ctx.db
-			.query('taskActions')
-			.withIndex('by_task', (q) => q.eq('taskId', taskId))
-			.filter((q) => q.eq(q.field('status'), 'running'))
-			.collect();
+		await ensureTaskOwner(ctx, { taskId: action.taskId });
+
+		return action;
 	},
 });
 
@@ -54,50 +49,65 @@ export const enqueue = mutation({
 		kind: taskActionKinds,
 	},
 	handler: async (ctx, { taskId, kind }) => {
-		console.debug('ENQUEUE, taskId', taskId, 'kind', kind);
-		// I'm seeing a very odd behavior where reading from `currentUser` while breaks its type,
-		// that's why I'm expliciting `Doc<'users'>` here.
-		const currentUser: Doc<'users'> = await ctx.runQuery(api.users.currentUser);
-		if (!currentUser) throw new Error('Not authenticated');
+		//
+		console.debug(`[START] enqueue action for taskId '${taskId}' of kind '${kind}'`);
 
-		const runningActions: Doc<'taskActions'>[] = await ctx.runQuery(
-			internal.taskActions.findRunningActions, //
-			{ taskId },
-		);
+		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 
+		// find all running actions
+		const runningActions = await findAllRunning(ctx, { taskId });
+
+		// insert the new action as 'running' or 'pending'
 		const actionId = await ctx.db.insert('taskActions', {
-			owner: currentUser._id,
 			taskId,
 			kind,
 			status: runningActions.length > 0 ? 'pending' : 'running', // important to avoid race condition
 			isDone: false,
 		});
 
-		// if no running actions, run immediately
+		// if no running actions, run next pending action immediately
 		if (runningActions.length === 0) {
-			await ctx.scheduler.runAfter(
-				0, //
-				internal.taskActions[kind],
-				{ taskId, actionId },
-			);
+			await scheduleAction(ctx, { taskId, actionId, userId: currentUser._id });
 		}
-		console.debug('[END]  ENQUEUE, taskId', taskId, 'kind', kind);
+
+		console.debug(`[END] enqueue action for taskId '${taskId}' of kind '${kind}'`);
 
 		return actionId;
 	},
 });
 
-// export const findOne = query(async (ctx, { taskId }: FindOneArgs) => {
-// 	//
-// 	const task = await ctx.db.get(taskId);
-// 	if (!task) throw new Error('Task not found');
+// Internal (no authorization)------------------------------------
 
-// 	return task;
-// });
+export const _findOne = internalQuery({
+	args: {
+		actionId: v.id('taskActions'),
+	},
+	handler: async (ctx, { actionId }) => {
+		//
+		const action = await ctx.db.get(actionId);
+		if (!action) throw new Error('Action not found');
 
-// export const update = mutation((ctx, { taskId, title, body }: UpdateArgs) => {
-// 	return ctx.db.patch(taskId, { title, body });
-// });
+		return action;
+	},
+});
+
+export const findAllRunning = internalQuery({
+	args: {
+		taskId: v.id('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		return await findByStatus(ctx, { taskId, status: 'running' }).collect();
+	},
+});
+
+export const findNext = internalQuery({
+	args: {
+		taskId: v.id('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		return await findByStatus(ctx, { taskId, status: 'pending' }).first();
+	},
+});
 
 export const setStatus = internalMutation({
 	args: {
@@ -112,139 +122,79 @@ export const setStatus = internalMutation({
 	},
 });
 
-// ------------------------------------
+// Helper functions ------------------------------------
 
-export const nextAction = internalAction({
+/**
+ * Helper function to find task actions for a given task and status.
+ * This is purely for ergonomics to avoid repeating the query logic.
+ *
+ * @param ctx The query context
+ * @param args.taskId The ID of the task to find actions for
+ * @param args.status The status to filter the actions by
+ * @returns A query builder for task actions filtered by task and status
+ */
+function findByStatus(
+	ctx: QueryCtx,
+	{
+		taskId,
+		status,
+	}: {
+		taskId: Id<'tasks'>;
+		status: Infer<typeof taskActionStatuses>;
+	},
+) {
+	return ctx.db
+		.query('taskActions')
+		.withIndex('by_task', (q) => q.eq('taskId', taskId))
+		.filter((q) => q.eq(q.field('status'), status))
+		.order('asc');
+}
+
+export async function setActionStatus(
+	ctx: ActionCtx,
 	args: {
-		taskId: v.id('tasks'),
+		actionId: Id<'taskActions'>;
+		status: Infer<typeof taskActionStatuses>;
 	},
-	handler: async (ctx, { taskId }) => {
-		//
-		const nextAction = await ctx.runQuery(internal.taskActions.findNextAction, { taskId });
-		if (!nextAction) return console.info('No pending action found for task', taskId);
+) {
+	return await ctx.runMutation(internal.taskActions.setStatus, args);
+}
 
-		const runningActions = await ctx.runQuery(internal.taskActions.findRunningActions, { taskId });
-		if (runningActions.length > 0) return console.info('Already running actions found for task', taskId);
-
-		await ctx.scheduler.runAfter(
-			0, //
-			internal.taskActions[nextAction.kind],
-			{ taskId, actionId: nextAction._id },
-		);
-	},
-});
-
-export const fill = internalAction({
+async function scheduleAction(
+	ctx: ActionCtx | MutationCtx,
 	args: {
-		taskId: v.id('tasks'),
-		actionId: v.id('taskActions'),
+		userId: Id<'users'>;
+		taskId: Id<'tasks'>;
+		actionId: Id<'taskActions'>;
 	},
-	handler: async (ctx, { taskId, actionId }) => {
-		//
-		const task = await ctx.runQuery(api.tasks.findOne, { taskId });
-		if (!task) throw new Error('Task not found');
+) {
+	return ctx.scheduler.runAfter(0, internal.magic.run, args);
+}
 
-		await ctx.runMutation(internal.taskActions.setStatus, {
-			actionId,
-			status: 'running',
-		});
-
-		const { object } = await generateObject({
-			model: openai('gpt-4o'),
-			// TODO: think about how to use the same schema
-			schema: z.object({
-				title: z.string(),
-				body: z.string(),
-			}),
-			prompt: [
-				`You'll receive a user-created task, and your job is to fix and improve it.`,
-				`Users will usually only fill-in the 'title', and with very few details.`,
-				`You should fill everything possible based on info already in the task, plus everything else you know, is able to infer or is able to find on the web.`,
-				``,
-				`Here's the task:`,
-				`ID: ${task._id}`,
-				`Title: ${task.title}`,
-				`Body: ${task.body}`,
-				`Created at: ${task._creationTime}`,
-			].join('\n'),
-		});
-
-		await ctx.runMutation(api.tasks.update, {
-			taskId,
-			title: object.title,
-			body: object.body,
-		});
-
-		await ctx.runMutation(internal.taskActions.setStatus, {
-			actionId,
-			status: 'succeeded',
-		});
-
-		await ctx.scheduler.runAfter(
-			0, //
-			internal.taskActions.nextAction,
-			{ taskId },
-		);
-
-		// TODO: error handling
-		// TODO: log/persist events
+export async function scheduleNextActionIfNeeded(
+	ctx: ActionCtx,
+	{
+		taskId,
+		userId,
+	}: {
+		taskId: Id<'tasks'>;
+		userId: Id<'users'>;
 	},
-});
+) {
+	const busyMessage = (amount: number, taskId: Id<'tasks'>) =>
+		`Skipping scheduling next action for task ${taskId} because there are ${amount} running actions.`;
 
-export const minify = internalAction({
-	args: {
-		taskId: v.id('tasks'),
-		actionId: v.id('taskActions'),
-	},
-	handler: async (ctx, { taskId, actionId }) => {
-		//
-		const task = await ctx.runQuery(api.tasks.findOne, { taskId });
-		if (!task) throw new Error('Task not found');
+	const noPendingActionMessage = (taskId: Id<'tasks'>) =>
+		`Skipping scheduling next action for task ${taskId} because there are no more pending actions.`;
 
-		await ctx.runMutation(internal.taskActions.setStatus, {
-			actionId,
-			status: 'running',
-		});
+	// skip if there are running actions
+	const runningActions = await ctx.runQuery(internal.taskActions.findAllRunning, { taskId });
+	if (runningActions.length > 0) return console.info(busyMessage(runningActions.length, taskId));
 
-		const { object } = await generateObject({
-			model: openai('gpt-4o'),
-			// TODO: think about how to use the same schema
-			schema: z.object({
-				title: z.string(),
-				body: z.string(),
-			}),
-			prompt: [
-				`You'll receive a user-created task, and your job is to make it shorter.`,
-				`Users will usually only fill-in the 'title', and with very few details.`,
-				`You should remove everything possible that's not necessary, and that's not useful.`,
-				`Make sure to not lose any important information.`,
-				``,
-				`Here's the task:`,
-				`ID: ${task._id}`,
-				`Title: ${task.title}`,
-				`Body: ${task.body}`,
-				`Created at: ${task._creationTime}`,
-			].join('\n'),
-		});
+	// skip if there are no pending actions
+	const nextAction = await ctx.runQuery(internal.taskActions.findNext, { taskId });
+	if (!nextAction) return console.info(noPendingActionMessage(taskId));
 
-		await ctx.runMutation(api.tasks.update, {
-			taskId,
-			title: object.title,
-			body: object.body,
-		});
-
-		await ctx.runMutation(internal.taskActions.setStatus, {
-			actionId,
-			status: 'succeeded',
-		});
-
-		await ctx.scheduler.runAfter(
-			0, //
-			internal.taskActions.nextAction,
-			{ taskId },
-		);
-
-		// TODO: error handling
-		// TODO: log/persist events
-	},
-});
+	// schedule next action
+	return await scheduleAction(ctx, { taskId, actionId: nextAction._id, userId });
+}

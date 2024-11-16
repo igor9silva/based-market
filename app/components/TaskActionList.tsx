@@ -7,7 +7,7 @@ import { cn } from '~/lib/utils';
 
 export function TaskActionList({ task }: { task: Doc<'tasks'> }) {
 	//
-	const query = convexQuery(api.taskActions.list, { taskId: task._id });
+	const query = convexQuery(api.taskActions.findAll, { taskId: task._id });
 	const { data: actions } = useSuspenseQuery(query);
 
 	return (
