@@ -2,6 +2,14 @@ import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
+export const taskActionStatuses = v.union(
+	v.literal('pending'),
+	v.literal('running'),
+	v.literal('succeeded'),
+	v.literal('failed'),
+	v.literal('cancelled'),
+);
+
 export default defineSchema({
 	...authTables,
 	tasks: defineTable({
@@ -18,13 +26,7 @@ export default defineSchema({
 			// v.literal('learn'),
 			// v.literal('suggest'),
 		),
-		status: v.union(
-			v.literal('pending'), //
-			v.literal('running'),
-			v.literal('succeeded'),
-			v.literal('failed'),
-			v.literal('cancelled'),
-		),
+		status: taskActionStatuses,
 		isDone: v.boolean(),
 	}).index('by_task', ['taskId']),
 });

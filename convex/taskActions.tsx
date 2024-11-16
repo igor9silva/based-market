@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { api, internal } from './_generated/api';
 import { Doc } from './_generated/dataModel.js';
 import { internalAction, internalMutation, internalQuery, mutation, query } from './_generated/server.js';
+import { taskActionStatuses } from './schema';
 
 // TODO: from user (authorization)
 
@@ -107,13 +108,7 @@ export const enqueue = mutation({
 export const setStatus = internalMutation({
 	args: {
 		actionId: v.id('taskActions'),
-		// TODO: use same union as in schema
-		status: v.union(
-			v.literal('running'), //
-			v.literal('succeeded'),
-			v.literal('failed'),
-			v.literal('cancelled'),
-		),
+		status: taskActionStatuses,
 	},
 	handler: async (ctx, { actionId, status }) => {
 		await ctx.db.patch(actionId, {
