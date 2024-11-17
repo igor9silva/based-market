@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
+import { CardGrid } from '~/components/CardGrid';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskActionQueue } from '~/components/TaskActionQueue';
 import TaskDetail from '~/components/TaskDetail';
@@ -45,10 +46,10 @@ function TaskDetailPage() {
 					</BreadcrumbList>
 				</Breadcrumb>
 			</PageHeader>
-			<div className="flex gap-2 flex-wrap [&>*]:grow">
+			<CardGrid>
 				<TaskDetail task={task} className="basis-3/5" />
 				<TaskActionQueue task={task} />
-			</div>
+			</CardGrid>
 		</>
 	);
 }

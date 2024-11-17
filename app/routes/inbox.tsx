@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { CardGrid } from '~/components/CardGrid';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskComposer } from '~/components/TaskComposer';
 import { TaskList } from '~/components/TaskList';
@@ -23,10 +24,10 @@ export default function Inbox() {
 					</BreadcrumbList>
 				</Breadcrumb>
 			</PageHeader>
-			<div className="flex gap-2 flex-wrap [&>*]:grow">
+			<CardGrid>
 				<TaskList className="basis-3/5" />
 				<TaskComposer />
-			</div>
+			</CardGrid>
 		</>
 	);
 }
