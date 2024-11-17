@@ -1,4 +1,7 @@
+'use node';
+
 import { openai } from '@ai-sdk/openai';
+import FirecrawlApp from '@mendable/firecrawl-js';
 import { generateObject, generateText, tool } from 'ai';
 import { v } from 'convex/values';
 import { z } from 'zod';
@@ -82,16 +85,17 @@ const ACTIONS = {
 		} = await generateText({
 			model: openai('gpt-4o-mini'),
 			maxSteps: 1,
-			prompt: [
+			system: [
 				`You'll receive a user-created task, and your job is to scrape the web for information.`,
 				`Grab all URLs from the task body or title.`,
 				`You have access to a set of tools to scrape the web.`,
-				`Use the tools to get the content of each URL.`,
+				`Use the tools to get the content of *the main* URL only (do not scrape multiple URLs).`,
 				`The result of the tool calls will be attached to the task.`,
 				`The 'scrapeWeb' tool is a generic tool that will scrape any website.`,
 				`The 'scrapeTwitter' tool is specific to Twitter/X URLs.`,
 				`Always prefer specific tools over the generic one.`,
-				``,
+			].join('\n'),
+			prompt: [
 				`Here's the task as of now:`,
 				`ID: ${task._id}`,
 				`Title: ${task.title}`,
@@ -104,7 +108,20 @@ const ACTIONS = {
 					parameters: z.object({
 						url: z.string().describe('The URL to scrape. Must be a valid and public URL.'),
 					}),
-					execute: async ({ url }) => `DEMO: ${url}`,
+					execute: async ({ url }) => {
+						//
+						const crawler = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY }); // TODO: use typed env
+
+						console.debug('Will scrape URL:', url);
+						const result = await crawler.scrapeUrl(url, {
+							formats: ['markdown'],
+							onlyMainContent: true,
+						});
+						console.debug('Did scrape URL:', result);
+
+						if (result.success) return result.markdown;
+						else throw new Error(result.error);
+					},
 				}),
 				scrapeTwitter: tool({
 					description: 'Scrape Twitter for information',
