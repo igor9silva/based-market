@@ -13,6 +13,7 @@ export const taskActionStatuses = v.union(
 export const taskActionKinds = v.union(
 	v.literal('fill'),
 	v.literal('minify'),
+	v.literal('scrape'),
 	// v.literal('learn'),
 	// v.literal('suggest'),
 );

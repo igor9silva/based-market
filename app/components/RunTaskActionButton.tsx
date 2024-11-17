@@ -1,10 +1,17 @@
 import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
+import { taskActionKinds } from 'convex/schema';
+import { Infer } from 'convex/values';
 import { Button } from '~/components/ui/button';
 
-export function FillTaskButton({ task }: { task: Doc<'tasks'> }) {
-	//
+export function RunTaskActionButton({
+	task, //
+	kind,
+}: {
+	task: Doc<'tasks'>;
+	kind: Infer<typeof taskActionKinds>;
+}) {
 	// TODO: write a prettier abstraction for optmistc updates
 	const enqueueAction = useMutation(api.taskActions.enqueue);
 	// .withOptimisticUpdate((store, args) => {
@@ -27,11 +34,11 @@ export function FillTaskButton({ task }: { task: Doc<'tasks'> }) {
 			onClick={() =>
 				enqueueAction({
 					taskId: task._id,
-					kind: 'fill',
+					kind: kind,
 				})
 			}
 		>
-			Fill
+			{kind.charAt(0).toUpperCase() + kind.slice(1)}
 		</Button>
 	);
 }

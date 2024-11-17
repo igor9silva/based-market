@@ -74,11 +74,15 @@ export const _findOne = internalQuery({
 export const _update = internalMutation({
 	args: {
 		taskId: v.id('tasks'),
-		title: v.string(),
-		body: v.string(),
+		title: v.optional(v.string()),
+		body: v.optional(v.string()),
 	},
 	handler: async (ctx, { taskId, title, body }) => {
-		return ctx.db.patch(taskId, { title, body });
+		//
+		return ctx.db.patch(taskId, {
+			...(title !== undefined && { title }),
+			...(body !== undefined && { body }),
+		});
 	},
 });
 

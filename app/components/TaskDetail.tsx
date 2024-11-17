@@ -1,7 +1,6 @@
 import { Doc } from 'convex/_generated/dataModel';
 import { formatDistanceToNow } from 'date-fns';
-import { FillTaskButton } from '~/components/FillTaskButton';
-import { MinifyTaskButton } from '~/components/MinifyTaskButton';
+import { RunTaskActionButton } from '~/components/RunTaskActionButton';
 import { Card, CardContent, CardFooter } from '~/components/ui/card';
 import { cn } from '~/lib/utils';
 
@@ -26,8 +25,9 @@ export default function TaskDetail({
 				</div>
 			</CardContent>
 			<CardFooter className="flex gap-2">
-				<FillTaskButton task={task} />
-				<MinifyTaskButton task={task} />
+				<RunTaskActionButton task={task} kind="fill" />
+				<RunTaskActionButton task={task} kind="minify" />
+				<RunTaskActionButton task={task} kind="scrape" />
 			</CardFooter>
 		</Card>
 	);

@@ -1,16 +1,17 @@
 import { openai } from '@ai-sdk/openai';
-import { generateObject } from 'ai';
+import { generateObject, generateText, tool } from 'ai';
 import { v } from 'convex/values';
 import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc } from './_generated/dataModel';
-import { internalAction } from './_generated/server';
+import { ActionCtx, internalAction } from './_generated/server';
 import { scheduleNextActionIfNeeded, setActionStatus } from './taskActions';
 
 // TODO: move to DB
 const ACTIONS = {
-	fill(task: Doc<'tasks'>) {
-		return {
+	async fill(ctx: ActionCtx, task: Doc<'tasks'>) {
+		//
+		const { object } = await generateObject({
 			model: openai('gpt-4o'),
 			// TODO: think about how to use the same schema
 			schema: z.object({
@@ -28,10 +29,18 @@ const ACTIONS = {
 				`Body: ${task.body}`,
 				`Created at: ${task._creationTime}`,
 			].join('\n'),
-		};
+		});
+
+		// update the task
+		await ctx.runMutation(internal.tasks._update, {
+			taskId: task._id,
+			title: object.title,
+			body: object.body,
+		});
 	},
-	minify(task: Doc<'tasks'>) {
-		return {
+	async minify(ctx: ActionCtx, task: Doc<'tasks'>) {
+		//
+		const { object } = await generateObject({
 			model: openai('gpt-4o'),
 			// TODO: think about how to use the same schema
 			schema: z.object({
@@ -50,7 +59,104 @@ const ACTIONS = {
 				`Body: ${task.body}`,
 				`Created at: ${task._creationTime}`,
 			].join('\n'),
-		};
+		});
+
+		// update the task
+		await ctx.runMutation(internal.tasks._update, {
+			taskId: task._id,
+			title: object.title,
+			body: object.body,
+		});
+	},
+	async scrape(ctx: ActionCtx, task: Doc<'tasks'>) {
+		//
+		const {
+			text, //
+			finishReason,
+			toolCalls,
+			toolResults,
+			steps,
+			usage,
+			warnings,
+			responseMessages,
+		} = await generateText({
+			model: openai('gpt-4o-mini'),
+			maxSteps: 1,
+			prompt: [
+				`You'll receive a user-created task, and your job is to scrape the web for information.`,
+				`Grab all URLs from the task body or title.`,
+				`You have access to a set of tools to scrape the web.`,
+				`Use the tools to get the content of each URL.`,
+				`The result of the tool calls will be attached to the task.`,
+				`The 'scrapeWeb' tool is a generic tool that will scrape any website.`,
+				`The 'scrapeTwitter' tool is specific to Twitter/X URLs.`,
+				`Always prefer specific tools over the generic one.`,
+				``,
+				`Here's the task as of now:`,
+				`ID: ${task._id}`,
+				`Title: ${task.title}`,
+				`Body: ${task.body}`,
+				`Created at: ${task._creationTime}`,
+			].join('\n'),
+			tools: {
+				scrapeWeb: tool({
+					description: 'Scrape the web for information',
+					parameters: z.object({
+						url: z.string().describe('The URL to scrape. Must be a valid and public URL.'),
+					}),
+					execute: async ({ url }) => `DEMO: ${url}`,
+				}),
+				scrapeTwitter: tool({
+					description: 'Scrape Twitter for information',
+					parameters: z.object({
+						url: z
+							.string()
+							.describe('The URL to scrape. Must be a Twitter/X valid URL such as twitter.com or x.com.'),
+					}),
+					execute: async ({ url }) => await fetch(url).then((r) => r.text()),
+				}),
+				invalidRequest: tool({
+					description:
+						'You are unable to fulfill the request for any reason. e.g. you could not find any URLs in the task.',
+					parameters: z.object({
+						reason: z.string().describe('The reason you are unable to fulfill the request.'),
+					}),
+					execute: async ({ reason }) => reason,
+				}),
+			},
+			toolChoice: 'required',
+		});
+
+		if (toolCalls.length > 1) {
+			console.warn('More than one tool call is not expected.');
+		} else if (toolCalls.length === 0) {
+			console.warn('Tool call was expected.');
+			throw new Error('Tool call was expected.');
+		}
+
+		const result = toolResults.at(0)?.result;
+
+		if (!result) {
+			console.warn('Tool result was expected.');
+			throw new Error('Tool result was expected.');
+		}
+
+		console.debug({
+			text,
+			finishReason,
+			toolCalls,
+			// toolResults,
+			// steps,
+			usage,
+			warnings,
+			// responseMessages,
+		});
+
+		// update the task
+		await ctx.runMutation(internal.tasks._update, {
+			taskId: task._id,
+			body: result,
+		});
 	},
 };
 
@@ -70,14 +176,16 @@ export const run = internalAction({
 		const action = await ctx.runQuery(internal.taskActions._findOne, { actionId });
 
 		// invoke magic rock
-		const { object } = await generateObject(ACTIONS[action.kind](task));
+		try {
+			await ACTIONS[action.kind](ctx, task);
+		} catch (error) {
+			//
+			// TODO: this will stop the queue
 
-		// update task
-		await ctx.runMutation(internal.tasks._update, {
-			taskId,
-			title: object.title,
-			body: object.body,
-		});
+			// set action as 'failed'
+			await setActionStatus(ctx, { actionId, status: 'failed' });
+			throw error;
+		}
 
 		// set action as 'succeeded'
 		await setActionStatus(ctx, { actionId, status: 'succeeded' });
