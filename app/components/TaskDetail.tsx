@@ -2,6 +2,7 @@ import { Doc } from 'convex/_generated/dataModel';
 import { formatDistanceToNow } from 'date-fns';
 import { RunTaskActionButton } from '~/components/RunTaskActionButton';
 import { Card, CardContent, CardFooter } from '~/components/ui/card';
+import { useMDX } from '~/hooks/useMDX';
 import { cn } from '~/lib/utils';
 
 export default function TaskDetail({
@@ -11,6 +12,8 @@ export default function TaskDetail({
 	className?: string;
 	task: Doc<'tasks'>;
 }) {
+	const Content = useMDX(task.body ?? '');
+
 	return (
 		<Card className={cn('whitespace-pre-wrap', className)}>
 			<CardContent className="pt-6">
@@ -21,7 +24,7 @@ export default function TaskDetail({
 							{formatDistanceToNow(new Date(task._creationTime), { addSuffix: true })}
 						</span>
 					</div>
-					{task.body && <p className="text-sm text-muted-foreground">{task.body}</p>}
+					<Content />
 				</div>
 			</CardContent>
 			<CardFooter className="flex gap-2">

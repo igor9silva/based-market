@@ -48,7 +48,7 @@ function TaskDetailPage() {
 			</PageHeader>
 			<CardGrid>
 				<TaskDetail task={task} className="basis-3/5" />
-				<TaskActionQueue task={task} />
+				<TaskActionQueue task={task} className="min-w-80" />
 			</CardGrid>
 		</>
 	);

@@ -83,17 +83,18 @@ const ACTIONS = {
 			warnings,
 			responseMessages,
 		} = await generateText({
-			model: openai('gpt-4o-mini'),
+			model: openai('gpt-4o'),
 			maxSteps: 1,
 			system: [
 				`You'll receive a user-created task, and your job is to scrape the web for information.`,
-				`Grab all URLs from the task body or title.`,
+				`Grab the main URL from the task title or body.`,
 				`You have access to a set of tools to scrape the web.`,
 				`Use the tools to get the content of *the main* URL only (do not scrape multiple URLs).`,
-				`The result of the tool calls will be attached to the task.`,
+				`Your answer will be attached to the task as the URL content.`,
 				`The 'scrapeWeb' tool is a generic tool that will scrape any website.`,
 				`The 'scrapeTwitter' tool is specific to Twitter/X URLs.`,
 				`Always prefer specific tools over the generic one.`,
+				`Reply with ONLY the scraped content.`,
 			].join('\n'),
 			prompt: [
 				`Here's the task as of now:`,
@@ -119,6 +120,7 @@ const ACTIONS = {
 						});
 						console.debug('Did scrape URL:', result);
 
+						// TODO: do something with .metadata, .warning, .error
 						if (result.success) return result.markdown;
 						else throw new Error(result.error);
 					},
@@ -151,9 +153,9 @@ const ACTIONS = {
 			throw new Error('Tool call was expected.');
 		}
 
-		const result = toolResults.at(0)?.result;
+		const scrapped = toolResults.at(0)?.result;
 
-		if (!result) {
+		if (!scrapped) {
 			console.warn('Tool result was expected.');
 			throw new Error('Tool result was expected.');
 		}
@@ -169,10 +171,20 @@ const ACTIONS = {
 			// responseMessages,
 		});
 
+		const { text: cleaned } = await generateText({
+			model: openai('gpt-4o'),
+			prompt: scrapped,
+			system: [
+				`You'll receive a scraped webpage as markdown.`,
+				`Your job is to remove all images and other non-text content.`,
+				`Reply with ONLY the cleaned markdown.`,
+			].join('\n'),
+		});
+
 		// update the task
 		await ctx.runMutation(internal.tasks._update, {
 			taskId: task._id,
-			body: result,
+			body: cleaned,
 		});
 	},
 };
