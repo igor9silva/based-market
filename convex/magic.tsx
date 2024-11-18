@@ -4,6 +4,7 @@ import { openai } from '@ai-sdk/openai';
 import FirecrawlApp from '@mendable/firecrawl-js';
 import { generateObject, generateText, tool } from 'ai';
 import { v } from 'convex/values';
+import { TwitterApi } from 'twitter-api-v2';
 import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc } from './_generated/dataModel';
@@ -21,11 +22,14 @@ const ACTIONS = {
 				title: z.string(),
 				body: z.string(),
 			}),
-			prompt: [
+			system: [
 				`You'll receive a user-created task, and your job is to fix and improve it.`,
-				`Users will usually only fill-in the 'title', and with very few details.`,
-				`You should fill everything possible based on info already in the task, plus everything else you know, is able to infer or is able to find on the web.`,
-				``,
+				`You should fill everything possible based on info already in the task, plus:`,
+				`- everything else you know`,
+				`- anything you can infer`,
+				`- anything you can find on the web`,
+			].join('\n'),
+			prompt: [
 				`Here's the task:`,
 				`ID: ${task._id}`,
 				`Title: ${task.title}`,
@@ -50,12 +54,13 @@ const ACTIONS = {
 				title: z.string(),
 				body: z.string(),
 			}),
-			prompt: [
+			system: [
 				`You'll receive a user-created task, and your job is to make it shorter.`,
 				`Users will usually only fill-in the 'title', and with very few details.`,
 				`You should remove everything possible that's not necessary, and that's not useful.`,
 				`Make sure to not lose any important information.`,
-				``,
+			].join('\n'),
+			prompt: [
 				`Here's the task:`,
 				`ID: ${task._id}`,
 				`Title: ${task.title}`,
@@ -132,7 +137,32 @@ const ACTIONS = {
 							.string()
 							.describe('The URL to scrape. Must be a Twitter/X valid URL such as twitter.com or x.com.'),
 					}),
-					execute: async ({ url }) => await fetch(url).then((r) => r.text()),
+					execute: async ({ url }) => {
+						//
+						// TODO: use typed env
+						const client = new TwitterApi(process.env.TWITTER_API_KEY as string);
+
+						const tweetId = url.split('/').pop();
+						if (!tweetId) throw new Error('No tweet ID found in the URL.');
+
+						console.debug('Will scrape Twitter URL:', url, tweetId);
+						const tweet = await client.v2.singleTweet(tweetId, {
+							expansions: [
+								'attachments.poll_ids',
+								'attachments.media_keys',
+								'author_id',
+								'referenced_tweets.id',
+								'in_reply_to_user_id',
+								'edit_history_tweet_ids',
+								'geo.place_id',
+								'entities.mentions.username',
+								'referenced_tweets.id.author_id',
+							],
+						});
+						console.debug('Did scrape Twitter:', tweet);
+
+						return tweet.data.text;
+					},
 				}),
 				invalidRequest: tool({
 					description:
@@ -184,7 +214,13 @@ const ACTIONS = {
 		// update the task
 		await ctx.runMutation(internal.tasks._update, {
 			taskId: task._id,
-			body: cleaned,
+			// appending instead of replacing the original task body
+			body: [
+				task.body,
+				`------------------------------------`,
+				`Link data scraped at ${new Date().toISOString()}:`,
+				cleaned,
+			].join('\n'),
 		});
 	},
 };
