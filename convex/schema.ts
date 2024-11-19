@@ -14,6 +14,7 @@ export const taskActionKinds = v.union(
 	v.literal('fill'),
 	v.literal('minify'),
 	v.literal('scrape'),
+	v.literal('factCheck'),
 	// v.literal('learn'),
 	// v.literal('suggest'),
 );

@@ -31,6 +31,7 @@ export default function TaskDetail({
 				<RunTaskActionButton task={task} kind="fill" />
 				<RunTaskActionButton task={task} kind="minify" />
 				<RunTaskActionButton task={task} kind="scrape" />
+				<RunTaskActionButton task={task} kind="factCheck" />
 			</CardFooter>
 		</Card>
 	);

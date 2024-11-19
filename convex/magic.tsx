@@ -223,6 +223,57 @@ const ACTIONS = {
 			].join('\n'),
 		});
 	},
+	async factCheck(ctx: ActionCtx, task: Doc<'tasks'>) {
+		//
+		const {
+			text, //
+			finishReason,
+			toolCalls,
+			toolResults,
+			steps,
+			usage,
+			warnings,
+			responseMessages,
+		} = await generateText({
+			model: openai('gpt-4o'),
+			maxSteps: 1,
+			system: [
+				`You'll receive a user-created task, and your job is to fact-check the information in the task.`,
+				`Your answer will be attached to the task as the fact-checked information.`,
+				`Reply with ONLY the fact-checked information.`,
+			].join('\n'),
+			prompt: [
+				`Here's the task as of now:`,
+				`ID: ${task._id}`,
+				`Title: ${task.title}`,
+				`Body: ${task.body}`,
+				`Created at: ${task._creationTime}`,
+			].join('\n'),
+		});
+
+		console.debug({
+			text,
+			finishReason,
+			toolCalls,
+			// toolResults,
+			// steps,
+			usage,
+			warnings,
+			// responseMessages,
+		});
+
+		// update the task
+		await ctx.runMutation(internal.tasks._update, {
+			taskId: task._id,
+			// appending instead of replacing the original task body
+			body: [
+				task.body,
+				`------------------------------------`,
+				`Fact-checked at ${new Date().toISOString()}:`,
+				text,
+			].join('\n'),
+		});
+	},
 };
 
 export const run = internalAction({
