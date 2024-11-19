@@ -1,3 +1,5 @@
+'use node';
+
 import { openai } from '@ai-sdk/openai';
 import { generateObject, generateText } from 'ai';
 import { z } from 'zod';
