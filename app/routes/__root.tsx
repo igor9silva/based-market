@@ -1,7 +1,7 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import { QueryClient } from '@tanstack/react-query';
 import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router';
-import { Body, Head, Html, Meta, Scripts } from '@tanstack/start';
+import { Meta, Scripts } from '@tanstack/start';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
 import { MainSidebar } from '~/components/MainSidebar';
@@ -11,22 +11,24 @@ import thinkingEmojiUrl from '~/static/thinking-emoji.gif';
 import appCss from '~/styles/app.css?url';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-	meta: () => [
-		{ title: 'Meseeks' },
-		{ charSet: 'utf-8' },
-		{
-			name: 'viewport',
-			content: [
-				'width=device-width',
-				'initial-scale=1',
-				'minimum-scale=1',
-				'maximum-scale=1',
-				'user-scalable=no',
-				'viewport-fit=cover',
-			].join(', '),
-		},
-	],
-	links: () => [{ rel: 'stylesheet', href: appCss }],
+	head: () => ({
+		meta: [
+			{ title: 'Meseeks' },
+			{ charSet: 'utf-8' },
+			{
+				name: 'viewport',
+				content: [
+					'width=device-width',
+					'initial-scale=1',
+					'minimum-scale=1',
+					'maximum-scale=1',
+					'user-scalable=no',
+					'viewport-fit=cover',
+				].join(', '),
+			},
+		],
+		links: [{ rel: 'stylesheet', href: appCss }],
+	}),
 	component: RootComponent,
 });
 
@@ -40,16 +42,16 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<Html>
-			<Head>
+		<html>
+			<head>
 				<Meta />
-			</Head>
-			<Body>
+			</head>
+			<body>
 				<RootLayout>{children}</RootLayout>
 				<ScrollRestoration />
 				<Scripts />
-			</Body>
-		</Html>
+			</body>
+		</html>
 	);
 }
 
@@ -73,6 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 
 function AccessDenied() {
+	//
 	const { signIn } = useAuthActions();
 	const doSignIn = () => signIn('google');
 
