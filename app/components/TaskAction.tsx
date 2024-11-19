@@ -1,0 +1,61 @@
+import { api } from 'convex/_generated/api';
+import { Doc } from 'convex/_generated/dataModel';
+import { useMutation } from 'convex/react';
+import { formatDistanceToNow } from 'date-fns';
+import { ChevronLast, RotateCw } from 'lucide-react';
+import { Button } from '~/components/ui/button';
+import { cn } from '~/lib/utils';
+
+export function TaskAction({
+	action, //
+	className,
+}: {
+	action: Doc<'taskActions'>;
+	className?: string;
+}) {
+	const skipAction = useMutation(api.taskActions.skip);
+	const retryAction = useMutation(api.taskActions.retry);
+
+	return (
+		<div key={action._id} className={cn('flex flex-row gap-1 justify-between', className)}>
+			<div className="flex flex-col">
+				<div className="flex flex-row gap-1 items-baseline">
+					<div className={cn('text-lg font-medium', action.isDone && 'line-through')}>{action.kind}</div>
+					<div className="text-sm text-muted-foreground">{action.status}</div>
+				</div>
+				{action.errorMessage && <div className="text-xs text-red-500">{action.errorMessage}</div>}
+				<div className="text-xs text-muted-foreground">
+					enqueued {formatDistanceToNow(new Date(action._creationTime), { addSuffix: true })}
+				</div>
+			</div>
+			<div className="flex items-center justify-between">
+				<div className="flex items-center gap-1">
+					{isEnabled(action, 'skip') && (
+						<Button variant="secondary" onClick={() => skipAction({ actionId: action._id })}>
+							<ChevronLast />
+						</Button>
+					)}
+					{isEnabled(action, 'retry') && (
+						<Button variant="secondary" onClick={() => retryAction({ actionId: action._id })}>
+							<RotateCw />
+						</Button>
+					)}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function isEnabled(
+	action: Doc<'taskActions'>, //
+	kind: 'skip' | 'retry',
+) {
+	switch (kind) {
+		case 'skip':
+			return action.status === 'pending' || action.status === 'failed';
+		case 'retry':
+			return action.status === 'failed';
+		default:
+			return false;
+	}
+}

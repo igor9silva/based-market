@@ -54,21 +54,15 @@ export const enqueue = mutation({
 
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 
-		// find all running actions
-		const runningActions = await findAllRunning(ctx, { taskId });
-
 		// insert the new action as 'running' or 'pending'
 		const actionId = await ctx.db.insert('taskActions', {
 			taskId,
 			kind,
-			status: runningActions.length > 0 ? 'pending' : 'running', // important to avoid race condition
+			status: 'pending',
 			isDone: false,
 		});
 
-		// if no running actions, run next pending action immediately
-		if (runningActions.length === 0) {
-			await scheduleAction(ctx, { taskId, actionId, userId: currentUser._id });
-		}
+		await scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });
 
 		console.debug(`[END] enqueue action for taskId '${taskId}' of kind '${kind}'`);
 
@@ -76,7 +70,7 @@ export const enqueue = mutation({
 	},
 });
 
-export const cancel = mutation({
+export const skip = mutation({
 	args: {
 		actionId: v.id('taskActions'),
 	},
@@ -85,11 +79,33 @@ export const cancel = mutation({
 		const action = await ctx.db.get(actionId);
 		if (!action) throw new Error('Action not found');
 
-		await ensureTaskOwner(ctx, { taskId: action.taskId });
+		const { currentUser } = await ensureTaskOwner(ctx, { taskId: action.taskId });
 
-		if (action.status !== 'pending') throw new Error(`Cannot cancel ${action.status} actions`);
+		// skip is only allowed for pending or failed actions
+		if (action.status !== 'pending' && action.status !== 'failed') {
+			throw new Error(`Cannot skip ${action.status} actions`);
+		}
 
-		await setStatus(ctx, { actionId, status: 'cancelled' });
+		await setStatus(ctx, { actionId, status: 'skipped' });
+		await scheduleNextActionIfNeeded(ctx, { taskId: action.taskId, userId: currentUser._id });
+	},
+});
+
+export const retry = mutation({
+	args: {
+		actionId: v.id('taskActions'),
+	},
+	handler: async (ctx, { actionId }) => {
+		//
+		const action = await ctx.db.get(actionId);
+		if (!action) throw new Error('Action not found');
+
+		const { currentUser } = await ensureTaskOwner(ctx, { taskId: action.taskId });
+
+		// retry is only allowed for failed actions
+		if (action.status !== 'failed') throw new Error(`Cannot retry ${action.status} actions`);
+
+		await scheduleAction(ctx, { taskId: action.taskId, actionId, userId: currentUser._id });
 	},
 });
 
@@ -117,6 +133,15 @@ export const findAllRunning = internalQuery({
 	},
 });
 
+export const findAllFailed = internalQuery({
+	args: {
+		taskId: v.id('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		return await findByStatus(ctx, { taskId, status: 'failed' }).collect();
+	},
+});
+
 export const findNext = internalQuery({
 	args: {
 		taskId: v.id('tasks'),
@@ -130,11 +155,13 @@ export const setStatus = internalMutation({
 	args: {
 		actionId: v.id('taskActions'),
 		status: taskActionStatuses,
+		errorMessage: v.optional(v.string()),
 	},
-	handler: async (ctx, { actionId, status }) => {
+	handler: async (ctx, { actionId, status, errorMessage }) => {
 		await ctx.db.patch(actionId, {
 			status,
-			isDone: status === 'succeeded' || status === 'failed' || status === 'cancelled',
+			isDone: status === 'succeeded' || status === 'failed' || status === 'skipped',
+			errorMessage,
 		});
 	},
 });
@@ -172,6 +199,7 @@ export async function setActionStatus(
 	args: {
 		actionId: Id<'taskActions'>;
 		status: Infer<typeof taskActionStatuses>;
+		errorMessage?: string;
 	},
 ) {
 	return await ctx.runMutation(internal.taskActions.setStatus, args);
@@ -189,7 +217,7 @@ async function scheduleAction(
 }
 
 export async function scheduleNextActionIfNeeded(
-	ctx: ActionCtx,
+	ctx: ActionCtx | MutationCtx,
 	{
 		taskId,
 		userId,
@@ -204,9 +232,16 @@ export async function scheduleNextActionIfNeeded(
 	const noPendingActionMessage = (taskId: Id<'tasks'>) =>
 		`Skipping scheduling next action for task ${taskId} because there are no more pending actions.`;
 
+	const failedMessage = (amount: number, taskId: Id<'tasks'>) =>
+		`Skipping scheduling next action for task ${taskId} because there is ${amount} failed action(s). Retry or skip it first.`;
+
 	// skip if there are running actions
 	const runningActions = await ctx.runQuery(internal.taskActions.findAllRunning, { taskId });
 	if (runningActions.length > 0) return console.info(busyMessage(runningActions.length, taskId));
+
+	// skip if there are failed actions
+	const failedActions = await ctx.runQuery(internal.taskActions.findAllFailed, { taskId });
+	if (failedActions.length > 0) return console.info(failedMessage(failedActions.length, taskId));
 
 	// skip if there are no pending actions
 	const nextAction = await ctx.runQuery(internal.taskActions.findNext, { taskId });

@@ -7,7 +7,7 @@ export const taskActionStatuses = v.union(
 	v.literal('running'),
 	v.literal('succeeded'),
 	v.literal('failed'),
-	v.literal('cancelled'),
+	v.literal('skipped'),
 );
 
 export const taskActionKinds = v.union(
@@ -31,5 +31,6 @@ export default defineSchema({
 		kind: taskActionKinds,
 		status: taskActionStatuses,
 		isDone: v.boolean(),
+		errorMessage: v.optional(v.string()),
 	}).index('by_task', ['taskId']),
 });

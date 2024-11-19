@@ -296,10 +296,10 @@ export const run = internalAction({
 			await ACTIONS[action.kind](ctx, task);
 		} catch (error) {
 			//
-			// TODO: this will stop the queue
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
 			// set action as 'failed'
-			await setActionStatus(ctx, { actionId, status: 'failed' });
+			await setActionStatus(ctx, { actionId, status: 'failed', errorMessage });
 			throw error;
 		}
 
