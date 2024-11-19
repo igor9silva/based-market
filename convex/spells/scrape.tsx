@@ -8,13 +8,14 @@ import invalidRequest from '~/tools/invalidRequest';
 import scrapeTwitter from '~/tools/scrapeTwitter';
 import scrapeWeb from '~/tools/scrapeWeb';
 
-const promptForTask = (task: Doc<'tasks'>) => [
-	`Here's the task as of now:`,
-	`ID: ${task._id}`,
-	`Title: ${task.title}`,
-	`Body: ${task.body}`,
-	`Created at: ${task._creationTime}`,
-].join('\n');
+const promptForTask = (task: Doc<'tasks'>) =>
+	[
+		`Here's the task as of now:`,
+		`ID: ${task._id}`,
+		`Title: ${task.title}`,
+		`Body: ${task.body}`,
+		`Created at: ${task._creationTime}`,
+	].join('\n');
 
 async function fill(ctx: ActionCtx, task: Doc<'tasks'>) {
 	//
@@ -193,7 +194,7 @@ async function factCheck(ctx: ActionCtx, task: Doc<'tasks'>) {
 			text,
 		].join('\n'),
 	});
-},
+}
 
 // TODO: move to DB
 export default {
