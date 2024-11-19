@@ -4,7 +4,6 @@ import { openai } from '@ai-sdk/openai';
 import FirecrawlApp from '@mendable/firecrawl-js';
 import { generateObject, generateText, tool } from 'ai';
 import { v } from 'convex/values';
-import { TwitterApi } from 'twitter-api-v2';
 import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc } from './_generated/dataModel';
@@ -139,29 +138,30 @@ const ACTIONS = {
 					}),
 					execute: async ({ url }) => {
 						//
-						// TODO: use typed env
-						const client = new TwitterApi(process.env.TWITTER_API_KEY as string);
-
-						const tweetId = url.split('/').pop();
+						// get tweet ID from URL
+						// TODO: abstract away calling external APIs
+						const tweetId = new URL(url).pathname
+							.split('/')
+							.filter(Boolean) // removes empty strings
+							.at(-1);
 						if (!tweetId) throw new Error('No tweet ID found in the URL.');
 
+						// build the API call
+						const apiURL = `https://twitter154.p.rapidapi.com/tweet/details?tweet_id=${tweetId}`;
+						const options = {
+							method: 'GET',
+							headers: {
+								'x-rapidapi-key': process.env.RAPID_API_KEY as string, // TODO: use typed env
+							},
+						};
+
 						console.debug('Will scrape Twitter URL:', url, tweetId);
-						const tweet = await client.v2.singleTweet(tweetId, {
-							expansions: [
-								'attachments.poll_ids',
-								'attachments.media_keys',
-								'author_id',
-								'referenced_tweets.id',
-								'in_reply_to_user_id',
-								'edit_history_tweet_ids',
-								'geo.place_id',
-								'entities.mentions.username',
-								'referenced_tweets.id.author_id',
-							],
-						});
+						const response = await fetch(apiURL, options);
+						const tweet = await response.json(); // TODO: add type, validation
 						console.debug('Did scrape Twitter:', tweet);
 
-						return tweet.data.text;
+						// TODO: persist the whole tweet somewhere
+						return tweet.text;
 					},
 				}),
 				invalidRequest: tool({
@@ -224,6 +224,8 @@ const ACTIONS = {
 		});
 	},
 	async factCheck(ctx: ActionCtx, task: Doc<'tasks'>) {
+		//
+		console.debug('Fact-checking task:', task);
 		//
 		const {
 			text, //
