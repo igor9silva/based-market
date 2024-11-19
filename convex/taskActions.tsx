@@ -76,6 +76,23 @@ export const enqueue = mutation({
 	},
 });
 
+export const cancel = mutation({
+	args: {
+		actionId: v.id('taskActions'),
+	},
+	handler: async (ctx, { actionId }) => {
+		//
+		const action = await ctx.db.get(actionId);
+		if (!action) throw new Error('Action not found');
+
+		await ensureTaskOwner(ctx, { taskId: action.taskId });
+
+		if (action.status !== 'pending') throw new Error(`Cannot cancel ${action.status} actions`);
+
+		await setStatus(ctx, { actionId, status: 'cancelled' });
+	},
+});
+
 // Internal (no authorization)------------------------------------
 
 export const _findOne = internalQuery({
