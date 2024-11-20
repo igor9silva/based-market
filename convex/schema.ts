@@ -28,14 +28,17 @@ export const actionResultErrorTaskEventSchema = v.object({
 	taskId: v.id('tasks'),
 	author: author,
 	actionId: v.id('taskActions'),
+	actionKind: taskActionKinds,
 	kind: v.literal('actionResult'),
 	error: v.string(),
+	result: v.null(),
 });
 
 export const actionResultSuccessTaskEventSchema = v.object({
 	taskId: v.id('tasks'),
 	author: author,
 	actionId: v.id('taskActions'),
+	actionKind: taskActionKinds,
 	kind: v.literal('actionResult'),
 	result: v.string(),
 	error: v.null(),
@@ -52,7 +55,7 @@ export const actionRequestTaskEventSchema = v.object({
 	taskId: v.id('tasks'),
 	author: author,
 	kind: v.literal('actionRequest'),
-	action: taskActionKinds,
+	actionKind: taskActionKinds,
 });
 
 export const taskEventSchema = v.union(

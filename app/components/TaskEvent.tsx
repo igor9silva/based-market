@@ -19,7 +19,7 @@ export function TaskEvent({
 				<div className="flex flex-col">
 					<div className="flex flex-row justify-between items-baseline">
 						<div>
-							<strong>{event.action}</strong> requested by <Author author={event.author} />
+							<strong>{event.actionKind}</strong> requested by <Author author={event.author} />
 						</div>
 						<span className="text-xs text-muted-foreground">
 							<TimeAgo date={event._creationTime} />
@@ -30,8 +30,20 @@ export function TaskEvent({
 			);
 		case 'actionResult':
 			return (
-				<div>
-					{event.kind} finished. {event.error ?? event.result}
+				<div className="flex flex-col">
+					<div className="flex flex-row justify-between items-baseline">
+						<div>
+							<strong>{event.actionKind}</strong> finished
+							{event.error && <span className="text-xs text-red-500"> with error: {event.error}.</span>}
+							{event.result && (
+								<span className="text-xs text-green-500"> with result: {event.result}.</span>
+							)}
+						</div>
+						<span className="text-xs text-muted-foreground">
+							<TimeAgo date={event._creationTime} />
+						</span>
+					</div>
+					<span className="text-xs text-muted-foreground">#{event.taskId}</span>
 				</div>
 			);
 		case 'message':

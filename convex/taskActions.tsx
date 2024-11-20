@@ -67,7 +67,7 @@ export const enqueue = mutation({
 			taskId,
 			kind: 'actionRequest',
 			author: currentUser._id,
-			action: kind,
+			actionKind: kind,
 		});
 
 		await scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });

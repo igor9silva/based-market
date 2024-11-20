@@ -19,7 +19,7 @@ const promptForTask = (task: Doc<'tasks'>) =>
 		`Created at: ${task._creationTime}`,
 	].join('\n');
 
-async function fill(ctx: ActionCtx, task: Doc<'tasks'>) {
+async function fill(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
 	//
 	const { object } = await generateObject({
 		model: openai('gpt-4o'),
@@ -46,7 +46,7 @@ async function fill(ctx: ActionCtx, task: Doc<'tasks'>) {
 	});
 }
 
-async function minify(ctx: ActionCtx, task: Doc<'tasks'>) {
+async function minify(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
 	//
 	const { object } = await generateObject({
 		model: openai('gpt-4o'),
@@ -72,7 +72,7 @@ async function minify(ctx: ActionCtx, task: Doc<'tasks'>) {
 	});
 }
 
-async function scrape(ctx: ActionCtx, task: Doc<'tasks'>) {
+async function scrape(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
 	//
 	const {
 		text,
@@ -139,20 +139,18 @@ async function scrape(ctx: ActionCtx, task: Doc<'tasks'>) {
 		].join('\n'),
 	});
 
-	// update the task
-	await ctx.runMutation(internal.tasks._update, {
+	await ctx.runMutation(internal.taskEvents.addActionResultSuccess, {
+		actionId: action._id,
+		actionKind: action.kind,
 		taskId: task._id,
-		// appending instead of replacing the original task body
-		body: [
-			task.body,
-			`------------------------------------`,
-			`Link data scraped at ${new Date().toISOString()}:`,
-			cleaned,
-		].join('\n'),
+		author: 'meseeks',
+		result: cleaned,
+		error: null,
+		kind: 'actionResult',
 	});
 }
 
-async function factCheck(ctx: ActionCtx, task: Doc<'tasks'>) {
+async function factCheck(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
 	//
 	console.debug('Fact-checking task:', task);
 	//
@@ -185,16 +183,14 @@ async function factCheck(ctx: ActionCtx, task: Doc<'tasks'>) {
 		warnings,
 	});
 
-	// update the task
-	await ctx.runMutation(internal.tasks._update, {
+	await ctx.runMutation(internal.taskEvents.addActionResultSuccess, {
+		actionId: action._id,
+		actionKind: action.kind,
 		taskId: task._id,
-		// appending instead of replacing the original task body
-		body: [
-			task.body,
-			`------------------------------------`,
-			`Fact-checked at ${new Date().toISOString()}:`,
-			text,
-		].join('\n'),
+		author: 'meseeks',
+		result: text,
+		error: null,
+		kind: 'actionResult',
 	});
 }
 

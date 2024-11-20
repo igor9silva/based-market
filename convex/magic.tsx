@@ -23,7 +23,7 @@ export const run = internalAction({
 
 		// invoke magic rock
 		try {
-			await SPELLS[action.kind](ctx, task);
+			await SPELLS[action.kind](ctx, task, action);
 		} catch (error) {
 			//
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -32,6 +32,17 @@ export const run = internalAction({
 
 			// set action as 'failed'
 			await setActionStatus(ctx, { actionId, status: 'failed', errorMessage });
+
+			await ctx.runMutation(internal.taskEvents.addActionResultError, {
+				actionId: action._id,
+				actionKind: action.kind,
+				taskId: task._id,
+				author: 'meseeks',
+				error: errorMessage,
+				result: null,
+				kind: 'actionResult',
+			});
+
 			throw error;
 		}
 
