@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Doc } from 'convex/_generated/dataModel';
-import { formatDistanceToNow } from 'date-fns';
+import { TimeAgo } from '~/components/TimeAgo';
 import { Card, CardContent } from '~/components/ui/card';
 
 export function Task({ task }: { task: Doc<'tasks'> }) {
@@ -14,7 +14,7 @@ export function Task({ task }: { task: Doc<'tasks'> }) {
 								{task.title}
 							</h3>
 							<span className="text-sm text-muted-foreground">
-								{formatDistanceToNow(new Date(task._creationTime), { addSuffix: true })}
+								<TimeAgo date={task._creationTime} />
 							</span>
 						</div>
 						{task.body && (

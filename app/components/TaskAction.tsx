@@ -1,8 +1,8 @@
 import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
-import { formatDistanceToNow } from 'date-fns';
 import { ChevronLast, RotateCw } from 'lucide-react';
+import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
 
@@ -25,7 +25,7 @@ export function TaskAction({
 				</div>
 				{action.errorMessage && <div className="text-xs text-red-500">{action.errorMessage}</div>}
 				<div className="text-xs text-muted-foreground">
-					enqueued {formatDistanceToNow(new Date(action._creationTime), { addSuffix: true })}
+					enqueued <TimeAgo date={action._creationTime} />
 				</div>
 			</div>
 			<div className="flex items-center justify-between">

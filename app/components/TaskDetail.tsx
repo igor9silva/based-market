@@ -1,6 +1,6 @@
 import { Doc } from 'convex/_generated/dataModel';
-import { formatDistanceToNow } from 'date-fns';
 import { RunTaskActionButton } from '~/components/RunTaskActionButton';
+import { TimeAgo } from '~/components/TimeAgo';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
 import { useMDX } from '~/hooks/useMDX';
 import { cn } from '~/lib/utils';
@@ -20,7 +20,7 @@ export default function TaskDetail({
 				<div className="flex flex-col">
 					<h1 className="text-2xl font-bold leading-none break-all">{task.title}</h1>
 					<span className="text-sm text-muted-foreground shrink-0">
-						{formatDistanceToNow(new Date(task._creationTime), { addSuffix: true })}
+						<TimeAgo date={task._creationTime} />
 					</span>
 				</div>
 				<div className="flex flex-row flex-wrap items-baseline gap-2">

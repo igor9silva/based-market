@@ -38,6 +38,7 @@ export const actionResultSuccessTaskEventSchema = v.object({
 	actionId: v.id('taskActions'),
 	kind: v.literal('actionResult'),
 	result: v.string(),
+	error: v.null(),
 });
 
 export const messageTaskEventSchema = v.object({
