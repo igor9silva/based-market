@@ -1,10 +1,10 @@
 'use node';
 
 import { v } from 'convex/values';
-import { internal } from '~/_generated/api';
-import { internalAction } from '~/_generated/server';
-import SPELLS from '~/spells/scrape';
-import { scheduleNextActionIfNeeded, setActionStatus } from '~/taskActions';
+import { internal } from './_generated/api';
+import { internalAction } from './_generated/server';
+import SPELLS from './spells/scrape';
+import { scheduleNextActionIfNeeded, setActionStatus } from './taskActions';
 
 export const run = internalAction({
 	args: {

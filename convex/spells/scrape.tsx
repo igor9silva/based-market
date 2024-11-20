@@ -3,12 +3,12 @@
 import { openai } from '@ai-sdk/openai';
 import { generateObject, generateText } from 'ai';
 import { z } from 'zod';
-import { internal } from '~/_generated/api';
-import { Doc } from '~/_generated/dataModel';
-import { ActionCtx } from '~/_generated/server';
-import invalidRequest from '~/tools/invalidRequest';
-import scrapeTwitter from '~/tools/scrapeTwitter';
-import scrapeWeb from '~/tools/scrapeWeb';
+import { internal } from '../_generated/api';
+import { Doc } from '../_generated/dataModel';
+import { ActionCtx } from '../_generated/server';
+import invalidRequest from '../tools/invalidRequest';
+import scrapeTwitter from '../tools/scrapeTwitter';
+import scrapeWeb from '../tools/scrapeWeb';
 
 const promptForTask = (task: Doc<'tasks'>) =>
 	[

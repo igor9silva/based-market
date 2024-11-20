@@ -11,6 +11,7 @@ import {
 	QueryCtx,
 } from './_generated/server.js';
 import { taskActionKinds, taskActionStatuses } from './schema';
+import { addActionRequest } from './taskEvents';
 import { ensureTaskOwner } from './tasks';
 
 // Exposed -------------------------------------
@@ -54,12 +55,19 @@ export const enqueue = mutation({
 
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 
-		// insert the new action as 'running' or 'pending'
+		// insert the new action as 'pending'
 		const actionId = await ctx.db.insert('taskActions', {
 			taskId,
 			kind,
 			status: 'pending',
 			isDone: false,
+		});
+
+		await addActionRequest(ctx, {
+			taskId,
+			kind: 'actionRequest',
+			author: currentUser._id,
+			action: kind,
 		});
 
 		await scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });

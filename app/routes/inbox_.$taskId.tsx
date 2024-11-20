@@ -7,6 +7,7 @@ import { Grid } from '~/components/Grid';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskActionQueue } from '~/components/TaskActionQueue';
 import TaskDetail from '~/components/TaskDetail';
+import { TaskEvents } from '~/components/TaskEvents';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -54,6 +55,7 @@ function TaskDetailPage() {
 				</Grid.Main>
 				<Grid.Side>
 					<TaskActionQueue task={task} />
+					<TaskEvents task={task} />
 				</Grid.Side>
 			</Grid>
 		</>

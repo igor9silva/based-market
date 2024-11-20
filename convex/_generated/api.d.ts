@@ -18,6 +18,7 @@ import type * as http from "../http.js";
 import type * as magic from "../magic.js";
 import type * as spells_scrape from "../spells/scrape.js";
 import type * as taskActions from "../taskActions.js";
+import type * as taskEvents from "../taskEvents.js";
 import type * as tasks from "../tasks.js";
 import type * as tools_invalidRequest from "../tools/invalidRequest.js";
 import type * as tools_scrapeTwitter from "../tools/scrapeTwitter.js";
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   magic: typeof magic;
   "spells/scrape": typeof spells_scrape;
   taskActions: typeof taskActions;
+  taskEvents: typeof taskEvents;
   tasks: typeof tasks;
   "tools/invalidRequest": typeof tools_invalidRequest;
   "tools/scrapeTwitter": typeof tools_scrapeTwitter;
