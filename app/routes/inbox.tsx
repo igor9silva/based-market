@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { CardGrid } from '~/components/CardGrid';
+import { Grid } from '~/components/Grid';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskComposer } from '~/components/TaskComposer';
 import { TaskList } from '~/components/TaskList';
@@ -24,10 +24,14 @@ export default function Inbox() {
 					</BreadcrumbList>
 				</Breadcrumb>
 			</PageHeader>
-			<CardGrid>
-				<TaskList className="basis-3/5" />
-				<TaskComposer />
-			</CardGrid>
+			<Grid>
+				<Grid.Main>
+					<TaskList />
+				</Grid.Main>
+				<Grid.Side>
+					<TaskComposer />
+				</Grid.Side>
+			</Grid>
 		</>
 	);
 }

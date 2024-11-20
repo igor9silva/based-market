@@ -3,7 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
-import { CardGrid } from '~/components/CardGrid';
+import { Grid } from '~/components/Grid';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskActionQueue } from '~/components/TaskActionQueue';
 import TaskDetail from '~/components/TaskDetail';
@@ -40,16 +40,22 @@ function TaskDetailPage() {
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link to={`/inbox/${taskId}`}>{task.title}</Link>
+								<Link className="break-all" to={`/inbox/${taskId}`}>
+									{task.title}
+								</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 					</BreadcrumbList>
 				</Breadcrumb>
 			</PageHeader>
-			<CardGrid>
-				<TaskDetail task={task} className="basis-3/5" />
-				<TaskActionQueue task={task} className="min-w-80" />
-			</CardGrid>
+			<Grid>
+				<Grid.Main>
+					<TaskDetail task={task} />
+				</Grid.Main>
+				<Grid.Side>
+					<TaskActionQueue task={task} />
+				</Grid.Side>
+			</Grid>
 		</>
 	);
 }

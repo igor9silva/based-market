@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import * as React from 'react';
 
 import { File, Inbox, Send } from 'lucide-react';
+import { Suspense } from 'react';
 import { UserMenuItem } from '~/components/UserMenuItem';
 import {
 	Sidebar,
@@ -88,7 +89,9 @@ export function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
 				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>
-				<UserMenuItem />
+				<Suspense fallback={null}>
+					<UserMenuItem />
+				</Suspense>
 			</SidebarFooter>
 		</Sidebar>
 	);

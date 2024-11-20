@@ -21,7 +21,7 @@ export function TaskActionQueue({
 			<CardContent className="space-y-4">
 				<h3 className="text-lg font-semibold">Action Queue</h3>
 				{actions.map((action) => (
-					<TaskAction action={action} />
+					<TaskAction key={action._id} action={action} />
 				))}
 			</CardContent>
 		</Card>
