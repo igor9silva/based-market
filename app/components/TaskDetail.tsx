@@ -30,7 +30,7 @@ export default function TaskDetail({
 					<RunTaskActionButton task={task} kind="factCheck" />
 				</div>
 			</CardHeader>
-			<CardContent className="[&>*]:whitespace-break-spaces [&>*]:break-all">
+			<CardContent className="[&>*]:whitespace-break-spaces [&>*]:break-all pt-0">
 				<Content />
 			</CardContent>
 		</Card>

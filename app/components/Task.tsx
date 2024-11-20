@@ -9,7 +9,7 @@ export function Task({ task }: { task: Doc<'tasks'> }) {
 			<Card key={task._id}>
 				<CardContent className="pt-6">
 					<div className="space-y-1">
-						<div className="flex items-start justify-between">
+						<div className="flex items-start justify-between gap-2">
 							<h3 className="font-semibold leading-none tracking-tight whitespace-pre-wrap break-all">
 								{task.title}
 							</h3>
