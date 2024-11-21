@@ -5,7 +5,7 @@ import { TaskComposer } from '~/components/TaskComposer';
 import { TaskList } from '~/components/TaskList';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from '~/components/ui/breadcrumb';
 
-export const Route = createFileRoute('/inbox')({
+export const Route = createFileRoute('/')({
 	// TODO: poderia ter um loader para as tasks aqui, pensar um racional para decidir isso
 	component: Inbox,
 });
@@ -18,7 +18,7 @@ export default function Inbox() {
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link to="/inbox">Inbox</Link>
+								<Link to="/">Inbox</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 					</BreadcrumbList>

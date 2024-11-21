@@ -4,6 +4,7 @@ import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack
 import { Meta, Scripts } from '@tanstack/start';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
+import { Loading } from '~/components/Loading';
 import { MainSidebar } from '~/components/MainSidebar';
 import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
@@ -59,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<SidebarProvider open={false}>
 			<AuthLoading>
-				<div className="flex flex-col items-center justify-center h-screen w-full gap-4">Loading...</div>
+				<Loading />
 			</AuthLoading>
 			<Authenticated>
 				<MainSidebar />

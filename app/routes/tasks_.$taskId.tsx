@@ -16,7 +16,7 @@ import {
 	BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb';
 
-export const Route = createFileRoute('/inbox_/$taskId')({
+export const Route = createFileRoute('/tasks_/$taskId')({
 	component: TaskDetailPage,
 });
 
@@ -35,13 +35,13 @@ function TaskDetailPage() {
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link to="/inbox">Inbox</Link>
+								<Link to="/">Inbox</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link className="break-all" to={`/inbox/${taskId}`}>
+								<Link className="break-all" to={`/tasks/${taskId}`}>
 									{task.title}
 								</Link>
 							</BreadcrumbLink>

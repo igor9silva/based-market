@@ -19,7 +19,7 @@ import {
 const menuItems = [
 	{
 		title: 'Inbox',
-		url: '/inbox',
+		url: '/',
 		icon: Inbox,
 	},
 	{

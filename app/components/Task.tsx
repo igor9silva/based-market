@@ -5,7 +5,7 @@ import { Card, CardContent } from '~/components/ui/card';
 
 export function Task({ task }: { task: Doc<'tasks'> }) {
 	return (
-		<Link to="/inbox/$taskId" params={{ taskId: task._id }}>
+		<Link to="/tasks/$taskId" params={{ taskId: task._id }}>
 			<Card key={task._id}>
 				<CardContent className="pt-6">
 					<div className="space-y-1">

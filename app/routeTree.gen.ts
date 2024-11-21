@@ -11,27 +11,20 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as InboxImport } from './routes/inbox'
-import { Route as IgorRouteImport } from './routes/igor/route'
-import { Route as InboxTaskIdImport } from './routes/inbox_.$taskId'
+import { Route as IndexImport } from './routes/index'
+import { Route as TasksTaskIdImport } from './routes/tasks_.$taskId'
 
 // Create/Update Routes
 
-const InboxRoute = InboxImport.update({
-  id: '/inbox',
-  path: '/inbox',
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const IgorRouteRoute = IgorRouteImport.update({
-  id: '/igor',
-  path: '/igor',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const InboxTaskIdRoute = InboxTaskIdImport.update({
-  id: '/inbox_/$taskId',
-  path: '/inbox/$taskId',
+const TasksTaskIdRoute = TasksTaskIdImport.update({
+  id: '/tasks_/$taskId',
+  path: '/tasks/$taskId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -39,25 +32,18 @@ const InboxTaskIdRoute = InboxTaskIdImport.update({
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/igor': {
-      id: '/igor'
-      path: '/igor'
-      fullPath: '/igor'
-      preLoaderRoute: typeof IgorRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/inbox': {
-      id: '/inbox'
-      path: '/inbox'
-      fullPath: '/inbox'
-      preLoaderRoute: typeof InboxImport
-      parentRoute: typeof rootRoute
-    }
-    '/inbox_/$taskId': {
-      id: '/inbox_/$taskId'
-      path: '/inbox/$taskId'
-      fullPath: '/inbox/$taskId'
-      preLoaderRoute: typeof InboxTaskIdImport
+    '/tasks_/$taskId': {
+      id: '/tasks_/$taskId'
+      path: '/tasks/$taskId'
+      fullPath: '/tasks/$taskId'
+      preLoaderRoute: typeof TasksTaskIdImport
       parentRoute: typeof rootRoute
     }
   }
@@ -66,43 +52,38 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/igor': typeof IgorRouteRoute
-  '/inbox': typeof InboxRoute
-  '/inbox/$taskId': typeof InboxTaskIdRoute
+  '/': typeof IndexRoute
+  '/tasks/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRoutesByTo {
-  '/igor': typeof IgorRouteRoute
-  '/inbox': typeof InboxRoute
-  '/inbox/$taskId': typeof InboxTaskIdRoute
+  '/': typeof IndexRoute
+  '/tasks/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/igor': typeof IgorRouteRoute
-  '/inbox': typeof InboxRoute
-  '/inbox_/$taskId': typeof InboxTaskIdRoute
+  '/': typeof IndexRoute
+  '/tasks_/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/igor' | '/inbox' | '/inbox/$taskId'
+  fullPaths: '/' | '/tasks/$taskId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/igor' | '/inbox' | '/inbox/$taskId'
-  id: '__root__' | '/igor' | '/inbox' | '/inbox_/$taskId'
+  to: '/' | '/tasks/$taskId'
+  id: '__root__' | '/' | '/tasks_/$taskId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IgorRouteRoute: typeof IgorRouteRoute
-  InboxRoute: typeof InboxRoute
-  InboxTaskIdRoute: typeof InboxTaskIdRoute
+  IndexRoute: typeof IndexRoute
+  TasksTaskIdRoute: typeof TasksTaskIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IgorRouteRoute: IgorRouteRoute,
-  InboxRoute: InboxRoute,
-  InboxTaskIdRoute: InboxTaskIdRoute,
+  IndexRoute: IndexRoute,
+  TasksTaskIdRoute: TasksTaskIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -115,19 +96,15 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/igor",
-        "/inbox",
-        "/inbox_/$taskId"
+        "/",
+        "/tasks_/$taskId"
       ]
     },
-    "/igor": {
-      "filePath": "igor/route.tsx"
+    "/": {
+      "filePath": "index.tsx"
     },
-    "/inbox": {
-      "filePath": "inbox.tsx"
-    },
-    "/inbox_/$taskId": {
-      "filePath": "inbox_.$taskId.tsx"
+    "/tasks_/$taskId": {
+      "filePath": "tasks_.$taskId.tsx"
     }
   }
 }
