@@ -1,6 +1,7 @@
 import { Activity, Check, Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useClickOutside } from '~/hooks/useClickOutside';
 
 interface Task {
 	id: string;
@@ -13,14 +14,20 @@ const TRANSITION = { duration: 0.25, type: 'spring' };
 
 export function ActionIsland() {
 	//
+	const ref = useRef<HTMLDivElement>(null);
 	const [isExpanded, setIsExpanded] = useState(false);
+
 	const [tasks, setTasks] = useState<Task[]>([
 		{ id: '1', title: 'Uploading files...', status: 'running', timestamp: 'Just now' },
 		{ id: '2', title: 'Task completed', status: 'completed', timestamp: '2m ago' },
 	]);
 
+	// if click outside, close
+	useClickOutside(ref, () => setIsExpanded(false), isExpanded);
+
 	return (
 		<motion.div
+			ref={ref}
 			className="bg-secondary text-secondary-foreground rounded-lg cursor-pointer right-2 absolute"
 			transition={TRANSITION}
 			initial={{
