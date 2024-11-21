@@ -1,3 +1,4 @@
+import { useAuthActions } from '@convex-dev/auth/react';
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
@@ -22,6 +23,7 @@ export function UserMenuItem() {
 	const { data: user } = useSuspenseQuery(query);
 
 	const { isMobile } = useSidebar();
+	const { signOut } = useAuthActions();
 
 	return (
 		<SidebarMenu>
@@ -84,9 +86,9 @@ export function UserMenuItem() {
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>
+						<DropdownMenuItem onClick={signOut}>
 							<LogOut />
-							Log out
+							Sign out
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
