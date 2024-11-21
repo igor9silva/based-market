@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
+import { ActionIsland } from '~/components/ActionIsland';
 import { Grid } from '~/components/Grid';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskActionQueue } from '~/components/TaskActionQueue';
@@ -30,7 +31,7 @@ function TaskDetailPage() {
 
 	return (
 		<>
-			<PageHeader>
+			<PageHeader className="flex justify-between items-center">
 				<Breadcrumb>
 					<BreadcrumbList>
 						<BreadcrumbItem>
@@ -48,6 +49,7 @@ function TaskDetailPage() {
 						</BreadcrumbItem>
 					</BreadcrumbList>
 				</Breadcrumb>
+				<ActionIsland />
 			</PageHeader>
 			<Grid>
 				<Grid.Main>
