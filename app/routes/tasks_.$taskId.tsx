@@ -4,7 +4,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { ActionIsland } from '~/components/ActionIsland';
-import { Grid } from '~/components/Grid';
+import { TwoColumn } from '~/components/layout/TwoCollumn';
 import { PageHeader } from '~/components/PageHeader';
 import TaskDetail from '~/components/TaskDetail';
 import { TaskEvents } from '~/components/TaskEvents';
@@ -50,14 +50,10 @@ function TaskDetailPage() {
 				</Breadcrumb>
 				<ActionIsland task={task} />
 			</PageHeader>
-			<Grid>
-				<Grid.Main>
-					<TaskDetail task={task} />
-				</Grid.Main>
-				<Grid.Side>
-					<TaskEvents task={task} />
-				</Grid.Side>
-			</Grid>
+			<TwoColumn>
+				<TaskEvents task={task} />
+				<TaskDetail task={task} />
+			</TwoColumn>
 		</>
 	);
 }

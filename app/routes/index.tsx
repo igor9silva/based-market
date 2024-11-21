@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Grid } from '~/components/Grid';
+import { Grid } from '~/components/layout/Grid';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskComposer } from '~/components/TaskComposer';
 import { TaskList } from '~/components/TaskList';
