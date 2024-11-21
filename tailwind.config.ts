@@ -84,8 +84,9 @@ export default {
 		},
 	},
 	plugins: [
-		require('@tailwindcss/typography'), //
+		require('@tailwindcss/typography'),
 		require('tailwindcss-animate'),
 		require('tailwindcss-displaymodes'),
+		require('tailwind-scrollbar'),
 	],
 } satisfies Config;
