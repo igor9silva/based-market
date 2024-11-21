@@ -51,8 +51,8 @@ function TaskDetailPage() {
 				<ActionIsland task={task} />
 			</PageHeader>
 			<TwoColumn>
-				<TaskEvents task={task} />
 				<TaskDetail task={task} />
+				<TaskEvents task={task} />
 			</TwoColumn>
 		</>
 	);

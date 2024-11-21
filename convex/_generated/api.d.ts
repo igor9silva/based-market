@@ -16,6 +16,10 @@ import type {
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as magic from "../magic.js";
+import type * as spells_factCheck from "../spells/factCheck.js";
+import type * as spells_fill from "../spells/fill.js";
+import type * as spells_index from "../spells/index.js";
+import type * as spells_minify from "../spells/minify.js";
 import type * as spells_scrape from "../spells/scrape.js";
 import type * as taskActions from "../taskActions.js";
 import type * as taskEvents from "../taskEvents.js";
@@ -37,6 +41,10 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
   magic: typeof magic;
+  "spells/factCheck": typeof spells_factCheck;
+  "spells/fill": typeof spells_fill;
+  "spells/index": typeof spells_index;
+  "spells/minify": typeof spells_minify;
   "spells/scrape": typeof spells_scrape;
   taskActions: typeof taskActions;
   taskEvents: typeof taskEvents;

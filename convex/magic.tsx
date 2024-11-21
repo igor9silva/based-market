@@ -3,7 +3,7 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { internalAction } from './_generated/server';
-import SPELLS from './spells/scrape';
+import SPELLS from './spells';
 import { scheduleNextActionIfNeeded, setActionStatus } from './taskActions';
 
 export const run = internalAction({
