@@ -42,9 +42,10 @@ export function ActionIsland({ task }: { task: Doc<'tasks'> }) {
 	);
 }
 
-function Expanded({ actions }: { actions: Doc<'taskActions'>[] }) {
+const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(({ actions }, ref) => {
 	return (
 		<motion.div
+			ref={ref}
 			key="expanded"
 			transition={TRANSITION}
 			initial={{ opacity: 0, height: 0 }}
@@ -64,7 +65,8 @@ function Expanded({ actions }: { actions: Doc<'taskActions'>[] }) {
 			</div>
 		</motion.div>
 	);
-}
+});
+Expanded.displayName = 'Expanded';
 
 const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(({ actions }, ref) => {
 	return (
