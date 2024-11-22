@@ -4,7 +4,7 @@ import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { Activity } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useRef, useState } from 'react';
+import { forwardRef, useRef, useState } from 'react';
 import { TaskAction } from '~/components/TaskAction';
 import { useClickOutside } from '~/hooks/useClickOutside';
 
@@ -66,17 +66,12 @@ function Expanded({ actions }: { actions: Doc<'taskActions'>[] }) {
 	);
 }
 
-function Collapsed({ actions }: { actions: Doc<'taskActions'>[] }) {
+const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(({ actions }, ref) => {
 	return (
-		<motion.div
-			key="collapsed"
-			transition={TRANSITION}
-			initial={{ opacity: 0 }}
-			animate={{ opacity: 1 }}
-			className="h-8 flex items-center justify-center gap-2 text-sm px-3 truncate"
-		>
+		<div ref={ref} className="h-8 flex items-center justify-center gap-2 text-sm px-3 truncate">
 			<Activity className="size-4" />
 			<span>{actions.length} actions</span>
-		</motion.div>
+		</div>
 	);
-}
+});
+Collapsed.displayName = 'Collapsed';
