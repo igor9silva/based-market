@@ -53,6 +53,7 @@ export const actionRequestTaskEventSchema = v.object({
 	kind: v.literal('actionRequest'),
 	taskId: v.id('tasks'),
 	author: authorSchema,
+	actionId: v.id('taskActions'),
 	actionKind: taskActionKinds,
 });
 

@@ -56,7 +56,7 @@ export const request = mutation({
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 
 		const actionId = await _add(ctx, { taskId, kind }); // insert the new action as 'pending'
-		await _addActionRequestEvent(ctx, { taskId, actionKind: kind, author: currentUser._id });
+		await _addActionRequestEvent(ctx, { taskId, actionId, actionKind: kind, author: currentUser._id });
 		await _scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });
 
 		console.debug(`[END] request action for taskId '${taskId}' of kind '${kind}'`);

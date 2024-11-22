@@ -40,7 +40,7 @@ export function TaskEvent({
 							<TimeAgo date={event._creationTime} />
 						</span>
 					</div>
-					<span className="text-xs text-muted-foreground">#{event.taskId}</span>
+					<span className="text-xs text-muted-foreground">#{event.actionId}</span>
 				</div>
 			);
 		case 'actionResult':

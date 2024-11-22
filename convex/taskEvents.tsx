@@ -63,14 +63,13 @@ export const _addActionRequestEvent = async (
 	ctx: ActionCtx | MutationCtx,
 	event: {
 		taskId: Id<'tasks'>;
+		actionId: Id<'taskActions'>;
 		actionKind: Doc<'taskActions'>['kind'];
 		author: Infer<typeof authorSchema>;
 	},
 ) => {
 	return await addTaskEvent(ctx, {
-		taskId: event.taskId,
-		actionKind: event.actionKind,
-		author: event.author,
+		...event,
 		kind: 'actionRequest',
 	});
 };
