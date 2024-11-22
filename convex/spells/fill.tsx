@@ -7,6 +7,7 @@ import { promptForTask } from '.';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
+import { _addActionResultEvent } from '../taskEvents';
 
 export default async function fill(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
 	//
@@ -33,4 +34,6 @@ export default async function fill(ctx: ActionCtx, task: Doc<'tasks'>, action: D
 		title: object.title,
 		body: object.body,
 	});
+
+	await _addActionResultEvent(ctx, { taskId: task._id, action, result: 'Task updated' });
 }
