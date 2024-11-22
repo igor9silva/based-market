@@ -2,9 +2,8 @@ import { Infer, v } from 'convex/values';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx, internalMutation, MutationCtx, query } from './_generated/server';
-import { taskEventSchema } from './schema';
+import { authorSchema, taskEventSchema } from './schema';
 import { ensureTaskOwner } from './tasks';
-
 // Exposed -------------------------------------
 
 export const findAll = query({
@@ -46,12 +45,26 @@ const addTaskEvent = async (
 	}
 };
 
+export const _addTaskAddEvent = async (
+	ctx: ActionCtx | MutationCtx, //
+	event: {
+		taskId: Id<'tasks'>;
+		author: Infer<typeof authorSchema>;
+	},
+) => {
+	return await addTaskEvent(ctx, {
+		taskId: event.taskId,
+		author: event.author,
+		kind: 'add',
+	});
+};
+
 export const _addActionRequestEvent = async (
 	ctx: ActionCtx | MutationCtx,
 	event: {
 		taskId: Id<'tasks'>;
 		actionKind: Doc<'taskActions'>['kind'];
-		author: Id<'users'> | 'meseeks';
+		author: Infer<typeof authorSchema>;
 	},
 ) => {
 	return await addTaskEvent(ctx, {
@@ -75,9 +88,9 @@ export const _addActionResultEvent = async (
 		author: 'meseeks',
 		actionId: event.action._id,
 		actionKind: event.action.kind,
-		kind: 'actionResult',
 		error: null,
 		result: event.result,
+		kind: 'actionResult',
 	});
 };
 
@@ -95,8 +108,8 @@ export const _addActionErrorEvent = async (
 		author: 'meseeks',
 		actionId: event.action._id,
 		actionKind: event.action.kind,
-		kind: 'actionResult',
 		error: event.error,
 		result: null,
+		kind: 'actionResult',
 	});
 };

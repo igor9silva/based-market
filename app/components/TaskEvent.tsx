@@ -1,7 +1,9 @@
-import { Doc, Id } from 'convex/_generated/dataModel';
+import { Doc } from 'convex/_generated/dataModel';
+import { authorSchema } from 'convex/schema';
+import { Infer } from 'convex/values';
 import { TimeAgo } from '~/components/TimeAgo';
 
-function Author({ author }: { author: Id<'users'> | 'meseeks' }) {
+function Author({ author }: { author: Infer<typeof authorSchema> }) {
 	return <strong>{author === 'meseeks' ? 'Meseeks' : 'you'}</strong>;
 }
 
@@ -14,6 +16,19 @@ export function TaskEvent({
 }) {
 	//
 	switch (event.kind) {
+		case 'add':
+			return (
+				<div className="flex flex-col">
+					<div className="flex flex-row justify-between items-baseline">
+						<div>
+							Task added by <Author author={event.author} />.
+						</div>
+						<span className="text-xs text-muted-foreground">
+							<TimeAgo date={event._creationTime} />
+						</span>
+					</div>
+				</div>
+			);
 		case 'actionRequest':
 			return (
 				<div className="flex flex-col">

@@ -2,6 +2,14 @@ import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
+// #region Global -------------------------------------
+export const authorSchema = v.union(
+	v.id('users'), //
+	v.literal('meseeks'),
+);
+// #endregion
+
+// #region Task Actions -------------------------------------
 export const taskActionStatuses = v.union(
 	v.literal('pending'),
 	v.literal('running'),
@@ -18,44 +26,47 @@ export const taskActionKinds = v.union(
 	// v.literal('learn'),
 	// v.literal('suggest'),
 );
+// #endregion
 
-const author = v.union(
-	v.id('users'), //
-	v.literal('meseeks'),
-);
-
+// #region Task Events -------------------------------------
 export const actionResultErrorTaskEventSchema = v.object({
+	kind: v.literal('actionResult'),
 	taskId: v.id('tasks'),
-	author: author,
+	author: authorSchema,
 	actionId: v.id('taskActions'),
 	actionKind: taskActionKinds,
-	kind: v.literal('actionResult'),
 	error: v.string(),
 	result: v.null(),
 });
 
 export const actionResultSuccessTaskEventSchema = v.object({
+	kind: v.literal('actionResult'),
 	taskId: v.id('tasks'),
-	author: author,
+	author: authorSchema,
 	actionId: v.id('taskActions'),
 	actionKind: taskActionKinds,
-	kind: v.literal('actionResult'),
 	result: v.string(),
 	error: v.null(),
 });
 
-export const messageTaskEventSchema = v.object({
+export const actionRequestTaskEventSchema = v.object({
+	kind: v.literal('actionRequest'),
 	taskId: v.id('tasks'),
-	author: author,
+	author: authorSchema,
+	actionKind: taskActionKinds,
+});
+
+export const messageTaskEventSchema = v.object({
 	kind: v.literal('message'),
+	taskId: v.id('tasks'),
+	author: authorSchema,
 	message: v.string(),
 });
 
-export const actionRequestTaskEventSchema = v.object({
+export const addTaskEventSchema = v.object({
+	kind: v.literal('add'),
 	taskId: v.id('tasks'),
-	author: author,
-	kind: v.literal('actionRequest'),
-	actionKind: taskActionKinds,
+	author: authorSchema,
 });
 
 export const taskEventSchema = v.union(
@@ -63,7 +74,9 @@ export const taskEventSchema = v.union(
 	actionResultErrorTaskEventSchema,
 	actionResultSuccessTaskEventSchema,
 	messageTaskEventSchema,
+	addTaskEventSchema,
 );
+// #endregion
 
 export default defineSchema({
 	...authTables,

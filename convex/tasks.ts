@@ -1,6 +1,7 @@
 import { v } from 'convex/values';
 import { Id } from './_generated/dataModel';
 import { internalMutation, internalQuery, mutation, MutationCtx, query, QueryCtx } from './_generated/server.js';
+import { _addTaskAddEvent } from './taskEvents';
 import { current as getCurrentUser } from './users.js';
 
 // Exposed ------------------------------------
@@ -37,7 +38,7 @@ export const add = mutation({
 	handler: async (ctx, { title, body, owner }) => {
 		//
 		const taskId = await ctx.db.insert('tasks', { title, body, owner });
-
+		await _addTaskAddEvent(ctx, { taskId, author: owner });
 		return taskId;
 	},
 });
