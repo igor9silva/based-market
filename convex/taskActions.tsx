@@ -11,7 +11,7 @@ import {
 	QueryCtx,
 } from './_generated/server.js';
 import { taskActionKinds, taskActionStatuses } from './schema';
-import { addActionRequest } from './taskEvents';
+import { _addTaskEvent } from './taskEvents';
 import { ensureTaskOwner } from './tasks';
 
 // Exposed -------------------------------------
@@ -44,14 +44,14 @@ export const findOne = query({
 	},
 });
 
-export const enqueue = mutation({
+export const request = mutation({
 	args: {
 		taskId: v.id('tasks'),
 		kind: taskActionKinds,
 	},
 	handler: async (ctx, { taskId, kind }) => {
 		//
-		console.debug(`[START] enqueue action for taskId '${taskId}' of kind '${kind}'`);
+		console.debug(`[START] request action for taskId '${taskId}' of kind '${kind}'`);
 
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 
@@ -63,16 +63,16 @@ export const enqueue = mutation({
 			isDone: false,
 		});
 
-		await addActionRequest(ctx, {
+		await _addTaskEvent(ctx, {
 			taskId,
 			kind: 'actionRequest',
 			author: currentUser._id,
 			actionKind: kind,
 		});
 
-		await scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });
+		await _scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });
 
-		console.debug(`[END] enqueue action for taskId '${taskId}' of kind '${kind}'`);
+		console.debug(`[END] request action for taskId '${taskId}' of kind '${kind}'`);
 
 		return actionId;
 	},
@@ -94,8 +94,8 @@ export const skip = mutation({
 			throw new Error(`Cannot skip ${action.status} actions`);
 		}
 
-		await setStatus(ctx, { actionId, status: 'skipped' });
-		await scheduleNextActionIfNeeded(ctx, { taskId: action.taskId, userId: currentUser._id });
+		await _setStatus(ctx, { actionId, status: 'skipped' });
+		await _scheduleNextActionIfNeeded(ctx, { taskId: action.taskId, userId: currentUser._id });
 	},
 });
 
@@ -113,7 +113,7 @@ export const retry = mutation({
 		// retry is only allowed for failed actions
 		if (action.status !== 'failed') throw new Error(`Cannot retry ${action.status} actions`);
 
-		await scheduleAction(ctx, { taskId: action.taskId, actionId, userId: currentUser._id });
+		await _scheduleAction(ctx, { taskId: action.taskId, actionId, userId: currentUser._id });
 	},
 });
 
@@ -132,34 +132,34 @@ export const _findOne = internalQuery({
 	},
 });
 
-export const findAllRunning = internalQuery({
+export const _findAllRunning = internalQuery({
 	args: {
 		taskId: v.id('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
-		return await findByStatus(ctx, { taskId, status: 'running' }).collect();
+		return await _findByStatus(ctx, { taskId, status: 'running' }).collect();
 	},
 });
 
-export const findAllFailed = internalQuery({
+export const _findAllFailed = internalQuery({
 	args: {
 		taskId: v.id('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
-		return await findByStatus(ctx, { taskId, status: 'failed' }).collect();
+		return await _findByStatus(ctx, { taskId, status: 'failed' }).collect();
 	},
 });
 
-export const findNext = internalQuery({
+export const _findNext = internalQuery({
 	args: {
 		taskId: v.id('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
-		return await findByStatus(ctx, { taskId, status: 'pending' }).first();
+		return await _findByStatus(ctx, { taskId, status: 'pending' }).first();
 	},
 });
 
-export const setStatus = internalMutation({
+export const _setStatus = internalMutation({
 	args: {
 		actionId: v.id('taskActions'),
 		status: taskActionStatuses,
@@ -185,7 +185,7 @@ export const setStatus = internalMutation({
  * @param args.status The status to filter the actions by
  * @returns A query builder for task actions filtered by task and status
  */
-function findByStatus(
+function _findByStatus(
 	ctx: QueryCtx,
 	{
 		taskId,
@@ -202,7 +202,7 @@ function findByStatus(
 		.order('asc');
 }
 
-export async function setActionStatus(
+export async function _setActionStatus(
 	ctx: ActionCtx,
 	args: {
 		actionId: Id<'taskActions'>;
@@ -210,10 +210,10 @@ export async function setActionStatus(
 		errorMessage?: string;
 	},
 ) {
-	return await ctx.runMutation(internal.taskActions.setStatus, args);
+	return await ctx.runMutation(internal.taskActions._setStatus, args);
 }
 
-async function scheduleAction(
+async function _scheduleAction(
 	ctx: ActionCtx | MutationCtx,
 	args: {
 		userId: Id<'users'>;
@@ -221,10 +221,10 @@ async function scheduleAction(
 		actionId: Id<'taskActions'>;
 	},
 ) {
-	return ctx.scheduler.runAfter(0, internal.magic.run, args);
+	return ctx.scheduler.runAfter(0, internal.magic._run, args);
 }
 
-export async function scheduleNextActionIfNeeded(
+export async function _scheduleNextActionIfNeeded(
 	ctx: ActionCtx | MutationCtx,
 	{
 		taskId,
@@ -244,17 +244,17 @@ export async function scheduleNextActionIfNeeded(
 		`Skipping scheduling next action for task ${taskId} because there is ${amount} failed action(s). Retry or skip it first.`;
 
 	// skip if there are running actions
-	const runningActions = await ctx.runQuery(internal.taskActions.findAllRunning, { taskId });
+	const runningActions = await ctx.runQuery(internal.taskActions._findAllRunning, { taskId });
 	if (runningActions.length > 0) return console.info(busyMessage(runningActions.length, taskId));
 
 	// skip if there are failed actions
-	const failedActions = await ctx.runQuery(internal.taskActions.findAllFailed, { taskId });
+	const failedActions = await ctx.runQuery(internal.taskActions._findAllFailed, { taskId });
 	if (failedActions.length > 0) return console.info(failedMessage(failedActions.length, taskId));
 
 	// skip if there are no pending actions
-	const nextAction = await ctx.runQuery(internal.taskActions.findNext, { taskId });
+	const nextAction = await ctx.runQuery(internal.taskActions._findNext, { taskId });
 	if (!nextAction) return console.info(noPendingActionMessage(taskId));
 
 	// schedule next action
-	return await scheduleAction(ctx, { taskId, actionId: nextAction._id, userId });
+	return await _scheduleAction(ctx, { taskId, actionId: nextAction._id, userId });
 }

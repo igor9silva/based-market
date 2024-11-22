@@ -35,13 +35,11 @@ export const add = mutation({
 		owner: v.id('users'),
 	},
 	handler: async (ctx, { title, body, owner }) => {
-		return ctx.db.insert('tasks', { title, body, owner });
+		//
+		const taskId = await ctx.db.insert('tasks', { title, body, owner });
+
+		return taskId;
 	},
-	// TODO: auto-schedule actions
-	// - fill
-	// - learn
-	// = suggest
-	// - ...
 });
 
 export const update = mutation({

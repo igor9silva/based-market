@@ -13,26 +13,12 @@ export function RunTaskActionButton({
 	kind: Infer<typeof taskActionKinds>;
 }) {
 	// TODO: write a prettier abstraction for optmistc updates
-	const enqueueAction = useMutation(api.taskActions.enqueue);
-	// .withOptimisticUpdate((store, args) => {
-	// 	//
-	// 	const existing = store.getQuery(api.tasks.findOne, { taskId: args.taskId });
-	// 	if (!existing) return;
-
-	// 	store.setQuery(
-	// 		api.tasks.findOne,
-	// 		{ taskId: args.taskId },
-	// 		{
-	// 			...existing,
-	// 			effects: [...(existing.effects || []), 'filling'],
-	// 		},
-	// 	);
-	// });
+	const requestAction = useMutation(api.taskActions.request);
 
 	return (
 		<Button
 			onClick={() =>
-				enqueueAction({
+				requestAction({
 					taskId: task._id,
 					kind: kind,
 				})

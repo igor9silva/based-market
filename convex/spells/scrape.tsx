@@ -2,14 +2,14 @@
 
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { internal } from '../_generated/api';
+import { promptForTask } from '.';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
+import { _addTaskEvent } from '../taskEvents';
 import invalidRequest from '../tools/invalidRequest';
 import scrapeTwitter from '../tools/scrapeTwitter';
 import scrapeWeb from '../tools/scrapeWeb';
 
-import { promptForTask } from '.';
 export default async function scrape(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
 	//
 	const {
@@ -77,7 +77,7 @@ export default async function scrape(ctx: ActionCtx, task: Doc<'tasks'>, action:
 		].join('\n'),
 	});
 
-	await ctx.runMutation(internal.taskEvents.addActionResultSuccess, {
+	await _addTaskEvent(ctx, {
 		actionId: action._id,
 		actionKind: action.kind,
 		taskId: task._id,

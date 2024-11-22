@@ -30,7 +30,7 @@ export function TaskAction({
 				</div>
 				{/* {action.errorMessage && <div className="text-xs text-red-500">{action.errorMessage}</div>} */}
 				<div className="text-xs text-muted-foreground">
-					enqueued <TimeAgo date={action._creationTime} />
+					requested <TimeAgo date={action._creationTime} />
 				</div>
 			</div>
 			<div className="flex items-center justify-between">

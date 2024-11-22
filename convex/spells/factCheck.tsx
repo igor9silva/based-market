@@ -3,9 +3,9 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { promptForTask } from '.';
-import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
+import { _addTaskEvent } from '../taskEvents';
 
 export default async function factCheck(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
 	//
@@ -40,7 +40,7 @@ export default async function factCheck(ctx: ActionCtx, task: Doc<'tasks'>, acti
 		warnings,
 	});
 
-	await ctx.runMutation(internal.taskEvents.addActionResultSuccess, {
+	await _addTaskEvent(ctx, {
 		actionId: action._id,
 		actionKind: action.kind,
 		taskId: task._id,

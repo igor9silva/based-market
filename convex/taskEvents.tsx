@@ -1,11 +1,7 @@
-import { v } from 'convex/values';
-import { internalMutation, query } from './_generated/server';
-import {
-	actionRequestTaskEventSchema,
-	actionResultErrorTaskEventSchema,
-	actionResultSuccessTaskEventSchema,
-	messageTaskEventSchema,
-} from './schema';
+import { Infer, v } from 'convex/values';
+import { internal } from './_generated/api';
+import { ActionCtx, internalMutation, MutationCtx, query } from './_generated/server';
+import { taskEventSchema } from './schema';
 import { ensureTaskOwner } from './tasks';
 
 // Exposed -------------------------------------
@@ -24,38 +20,27 @@ export const findAll = query({
 });
 
 // Internal (no authorization)------------------------------------
-export const addActionRequest = internalMutation({
-	args: actionRequestTaskEventSchema,
-	handler: async (ctx, event) => {
+export const _add = internalMutation({
+	args: {
+		event: taskEventSchema,
+	},
+	handler: async (ctx, { event }) => {
 		//
 		console.debug('add event', event);
+
 		return await ctx.db.insert('taskEvents', event);
 	},
 });
 
-export const addActionResultError = internalMutation({
-	args: actionResultErrorTaskEventSchema,
-	handler: async (ctx, event) => {
-		//
-		console.debug('add event', event);
-		return await ctx.db.insert('taskEvents', event);
-	},
-});
+// Helper functions ------------------------------------
 
-export const addActionResultSuccess = internalMutation({
-	args: actionResultSuccessTaskEventSchema,
-	handler: async (ctx, event) => {
-		//
-		console.debug('add event', event);
-		return await ctx.db.insert('taskEvents', event);
-	},
-});
-
-export const addMessage = internalMutation({
-	args: messageTaskEventSchema,
-	handler: async (ctx, event) => {
-		//
-		console.debug('add event', event);
-		return await ctx.db.insert('taskEvents', event);
-	},
-});
+export const _addTaskEvent = async (
+	ctx: ActionCtx | MutationCtx, //
+	event: Infer<typeof taskEventSchema>,
+) => {
+	if ('runAction' in ctx) {
+		return await ctx.runMutation(internal.taskEvents._add, { event });
+	} else {
+		return await _add(ctx as MutationCtx, { event });
+	}
+};
