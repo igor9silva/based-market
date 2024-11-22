@@ -5,7 +5,7 @@ import { generateText } from 'ai';
 import { promptForTask } from '.';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { _addTaskEvent } from '../taskEvents';
+import { _addActionResultEvent } from '../taskEvents';
 import invalidRequest from '../tools/invalidRequest';
 import scrapeTwitter from '../tools/scrapeTwitter';
 import scrapeWeb from '../tools/scrapeWeb';
@@ -77,13 +77,5 @@ export default async function scrape(ctx: ActionCtx, task: Doc<'tasks'>, action:
 		].join('\n'),
 	});
 
-	await _addTaskEvent(ctx, {
-		actionId: action._id,
-		actionKind: action.kind,
-		taskId: task._id,
-		author: 'meseeks',
-		result: cleaned,
-		error: null,
-		kind: 'actionResult',
-	});
+	await _addActionResultEvent(ctx, { taskId: task._id, action, result: cleaned });
 }

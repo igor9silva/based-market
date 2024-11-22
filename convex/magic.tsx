@@ -5,7 +5,7 @@ import { internal } from './_generated/api';
 import { internalAction } from './_generated/server';
 import SPELLS from './spells';
 import { _scheduleNextActionIfNeeded, _setActionStatus } from './taskActions';
-import { _addTaskEvent } from './taskEvents';
+import { _addActionErrorEvent } from './taskEvents';
 
 export const _run = internalAction({
 	args: {
@@ -30,20 +30,8 @@ export const _run = internalAction({
 			//
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-			// TODO: notify errors
-
-			// set action as 'failed'
-			await _setActionStatus(ctx, { actionId, status: 'failed', errorMessage });
-
-			await _addTaskEvent(ctx, {
-				actionId: action._id,
-				actionKind: action.kind,
-				taskId: task._id,
-				author: 'meseeks',
-				error: errorMessage,
-				result: null,
-				kind: 'actionResult',
-			});
+			await _setActionStatus(ctx, { status: 'failed', actionId, errorMessage });
+			await _addActionErrorEvent(ctx, { taskId: task._id, action, error: errorMessage });
 
 			throw error;
 		}
@@ -53,7 +41,5 @@ export const _run = internalAction({
 
 		// schedule next action
 		await _scheduleNextActionIfNeeded(ctx, { taskId, userId });
-
-		// TODO: log/persist events
 	},
 });

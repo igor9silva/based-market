@@ -11,7 +11,7 @@ import {
 	QueryCtx,
 } from './_generated/server.js';
 import { taskActionKinds, taskActionStatuses } from './schema';
-import { _addTaskEvent } from './taskEvents';
+import { _addActionRequestEvent } from './taskEvents';
 import { ensureTaskOwner } from './tasks';
 
 // Exposed -------------------------------------
@@ -55,21 +55,8 @@ export const request = mutation({
 
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 
-		// insert the new action as 'pending'
-		const actionId = await ctx.db.insert('taskActions', {
-			taskId,
-			kind,
-			status: 'pending',
-			isDone: false,
-		});
-
-		await _addTaskEvent(ctx, {
-			taskId,
-			kind: 'actionRequest',
-			author: currentUser._id,
-			actionKind: kind,
-		});
-
+		const actionId = await _add(ctx, { taskId, kind }); // insert the new action as 'pending'
+		await _addActionRequestEvent(ctx, { taskId, actionKind: kind, author: currentUser._id });
 		await _scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });
 
 		console.debug(`[END] request action for taskId '${taskId}' of kind '${kind}'`);
@@ -156,6 +143,21 @@ export const _findNext = internalQuery({
 	},
 	handler: async (ctx, { taskId }) => {
 		return await _findByStatus(ctx, { taskId, status: 'pending' }).first();
+	},
+});
+
+export const _add = internalMutation({
+	args: {
+		taskId: v.id('tasks'),
+		kind: taskActionKinds,
+	},
+	handler: async (ctx, { taskId, kind }) => {
+		return await ctx.db.insert('taskActions', {
+			taskId,
+			kind,
+			status: 'pending',
+			isDone: false,
+		});
 	},
 });
 

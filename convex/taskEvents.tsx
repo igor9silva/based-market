@@ -1,5 +1,6 @@
 import { Infer, v } from 'convex/values';
 import { internal } from './_generated/api';
+import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx, internalMutation, MutationCtx, query } from './_generated/server';
 import { taskEventSchema } from './schema';
 import { ensureTaskOwner } from './tasks';
@@ -34,7 +35,7 @@ export const _add = internalMutation({
 
 // Helper functions ------------------------------------
 
-export const _addTaskEvent = async (
+const addTaskEvent = async (
 	ctx: ActionCtx | MutationCtx, //
 	event: Infer<typeof taskEventSchema>,
 ) => {
@@ -43,4 +44,59 @@ export const _addTaskEvent = async (
 	} else {
 		return await _add(ctx as MutationCtx, { event });
 	}
+};
+
+export const _addActionRequestEvent = async (
+	ctx: ActionCtx | MutationCtx,
+	event: {
+		taskId: Id<'tasks'>;
+		actionKind: Doc<'taskActions'>['kind'];
+		author: Id<'users'> | 'meseeks';
+	},
+) => {
+	return await addTaskEvent(ctx, {
+		taskId: event.taskId,
+		actionKind: event.actionKind,
+		author: event.author,
+		kind: 'actionRequest',
+	});
+};
+
+export const _addActionResultEvent = async (
+	ctx: ActionCtx | MutationCtx,
+	event: {
+		taskId: Id<'tasks'>;
+		action: Doc<'taskActions'>;
+		result: string;
+	},
+) => {
+	return await addTaskEvent(ctx, {
+		taskId: event.taskId,
+		author: 'meseeks',
+		actionId: event.action._id,
+		actionKind: event.action.kind,
+		kind: 'actionResult',
+		error: null,
+		result: event.result,
+	});
+};
+
+export const _addActionErrorEvent = async (
+	ctx: ActionCtx | MutationCtx,
+	event: {
+		taskId: Id<'tasks'>;
+		action: Doc<'taskActions'>;
+		error: string;
+	},
+) => {
+	// TODO: notify errors
+	return await addTaskEvent(ctx, {
+		taskId: event.taskId,
+		author: 'meseeks',
+		actionId: event.action._id,
+		actionKind: event.action.kind,
+		kind: 'actionResult',
+		error: event.error,
+		result: null,
+	});
 };

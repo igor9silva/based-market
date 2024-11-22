@@ -5,7 +5,7 @@ import { generateText } from 'ai';
 import { promptForTask } from '.';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { _addTaskEvent } from '../taskEvents';
+import { _addActionResultEvent } from '../taskEvents';
 
 export default async function factCheck(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
 	//
@@ -40,13 +40,5 @@ export default async function factCheck(ctx: ActionCtx, task: Doc<'tasks'>, acti
 		warnings,
 	});
 
-	await _addTaskEvent(ctx, {
-		actionId: action._id,
-		actionKind: action.kind,
-		taskId: task._id,
-		author: 'meseeks',
-		result: text,
-		error: null,
-		kind: 'actionResult',
-	});
+	await _addActionResultEvent(ctx, { taskId: task._id, action, result: text });
 }
