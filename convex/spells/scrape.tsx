@@ -10,8 +10,11 @@ import invalidRequest from '../tools/invalidRequest';
 import scrapeTwitter from '../tools/scrapeTwitter';
 import scrapeWeb from '../tools/scrapeWeb';
 
-export default async function scrape(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
-	//
+export default async function scrape(
+	ctx: ActionCtx, //
+	task: Doc<'tasks'>,
+	action: Doc<'taskActions'>,
+) {
 	const {
 		text,
 		finishReason,
@@ -43,9 +46,9 @@ export default async function scrape(ctx: ActionCtx, task: Doc<'tasks'>, action:
 		},
 	});
 
-	if (toolCalls.length > 1) {
+	if (toolResults.length > 1) {
 		console.warn('More than one tool call is not expected.');
-	} else if (toolCalls.length === 0) {
+	} else if (toolResults.length === 0) {
 		console.warn('Tool call was expected.');
 		throw new Error('Tool call was expected.');
 	}
@@ -61,7 +64,7 @@ export default async function scrape(ctx: ActionCtx, task: Doc<'tasks'>, action:
 		text,
 		finishReason,
 		toolCalls,
-		// toolResults,
+		toolResults,
 		// steps,
 		usage,
 		warnings,

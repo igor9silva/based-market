@@ -27,6 +27,7 @@ import type * as tasks from "../tasks.js";
 import type * as tools_invalidRequest from "../tools/invalidRequest.js";
 import type * as tools_scrapeTwitter from "../tools/scrapeTwitter.js";
 import type * as tools_scrapeWeb from "../tools/scrapeWeb.js";
+import type * as tools_updateTask from "../tools/updateTask.js";
 import type * as users from "../users.js";
 
 /**
@@ -52,6 +53,7 @@ declare const fullApi: ApiFromModules<{
   "tools/invalidRequest": typeof tools_invalidRequest;
   "tools/scrapeTwitter": typeof tools_scrapeTwitter;
   "tools/scrapeWeb": typeof tools_scrapeWeb;
+  "tools/updateTask": typeof tools_updateTask;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

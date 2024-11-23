@@ -78,6 +78,7 @@ export const _update = internalMutation({
 	},
 	handler: async (ctx, { taskId, title, body }) => {
 		//
+		// TODO: add updated event
 		return ctx.db.patch(taskId, {
 			...(title !== undefined && { title }),
 			...(body !== undefined && { body }),
