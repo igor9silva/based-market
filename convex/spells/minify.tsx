@@ -5,11 +5,15 @@ import { generateText } from 'ai';
 import { promptForTask } from '.';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { _addActionResultEvent } from '../taskEvents';
 import updateTask from '../tools/updateTask';
 
-export default async function minify(ctx: ActionCtx, task: Doc<'tasks'>, action: Doc<'taskActions'>) {
-	//
+export default async function minify(
+	ctx: ActionCtx, //
+	task: Doc<'tasks'>,
+	action: Doc<'taskActions'>,
+) {
+	console.debug('Minifying task:', task);
+
 	const {
 		text,
 		finishReason,
@@ -60,5 +64,5 @@ export default async function minify(ctx: ActionCtx, task: Doc<'tasks'>, action:
 		warnings,
 	});
 
-	await _addActionResultEvent(ctx, { taskId: task._id, action, result: text });
+	return { result: text };
 }

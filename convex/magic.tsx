@@ -5,7 +5,7 @@ import { internal } from './_generated/api';
 import { internalAction } from './_generated/server';
 import SPELLS from './spells';
 import { _scheduleNextActionIfNeeded, _setActionStatus } from './taskActions';
-import { _addActionErrorEvent } from './taskEvents';
+import { _addActionErrorEvent, _addActionResultEvent } from './taskEvents';
 
 export const _run = internalAction({
 	args: {
@@ -24,7 +24,8 @@ export const _run = internalAction({
 
 		try {
 			// invoke magic rock
-			await SPELLS[action.kind](ctx, task, action);
+			const { result } = await SPELLS[action.kind](ctx, task, action);
+			await _addActionResultEvent(ctx, { taskId: task._id, action, result });
 			//
 		} catch (error) {
 			//

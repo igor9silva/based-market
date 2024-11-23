@@ -2,7 +2,7 @@ import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
-import { Activity } from 'lucide-react';
+import { Activity, Loader2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { forwardRef, useRef, useState } from 'react';
 import { TaskAction } from '~/components/TaskAction';
@@ -71,9 +71,44 @@ Expanded.displayName = 'Expanded';
 const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(({ actions }, ref) => {
 	return (
 		<div ref={ref} className="h-8 flex items-center justify-center gap-2 text-sm px-3 truncate">
-			<Activity className="size-4" />
-			<span>{actions.length} actions</span>
+			<CollapsedContent actions={actions} />
 		</div>
 	);
 });
 Collapsed.displayName = 'Collapsed';
+
+const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
+	//
+	const runningActions = actions.filter((action) => action.status === 'running');
+	const pendingActions = actions.filter((action) => action.status === 'pending');
+	const failedActions = actions.filter((action) => action.status === 'failed');
+
+	if (runningActions.length > 0) {
+		return (
+			<>
+				<Loader2 className="size-4 animate-spin" />
+				<span>
+					{runningActions.length} running{pendingActions.length > 0 && `, ${pendingActions.length} pending`}
+				</span>
+			</>
+		);
+	}
+
+	if (failedActions.length > 0) {
+		return (
+			<>
+				<X className="size-4" />
+				<span>
+					{failedActions.length} failed{pendingActions.length > 0 && `, ${pendingActions.length} pending`}
+				</span>
+			</>
+		);
+	}
+
+	return (
+		<>
+			<Activity className="size-4" />
+			<span>{actions.length} done</span>
+		</>
+	);
+};

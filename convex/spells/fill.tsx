@@ -5,7 +5,6 @@ import { generateText } from 'ai';
 import { promptForTask } from '.';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { _addActionResultEvent } from '../taskEvents';
 import updateTask from '../tools/updateTask';
 
 export default async function fill(
@@ -13,6 +12,8 @@ export default async function fill(
 	task: Doc<'tasks'>,
 	action: Doc<'taskActions'>,
 ) {
+	console.debug('Filling task:', task);
+
 	const {
 		text,
 		finishReason,
@@ -64,5 +65,5 @@ export default async function fill(
 		warnings,
 	});
 
-	await _addActionResultEvent(ctx, { taskId: task._id, action, result: text });
+	return { result: text };
 }

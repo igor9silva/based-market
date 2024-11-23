@@ -5,7 +5,6 @@ import { generateText } from 'ai';
 import { promptForTask } from '.';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { _addActionResultEvent } from '../taskEvents';
 import invalidRequest from '../tools/invalidRequest';
 import scrapeTwitter from '../tools/scrapeTwitter';
 import scrapeWeb from '../tools/scrapeWeb';
@@ -15,6 +14,8 @@ export default async function scrape(
 	task: Doc<'tasks'>,
 	action: Doc<'taskActions'>,
 ) {
+	console.debug('Scraping task:', task);
+
 	const {
 		text,
 		finishReason,
@@ -80,5 +81,5 @@ export default async function scrape(
 		].join('\n'),
 	});
 
-	await _addActionResultEvent(ctx, { taskId: task._id, action, result: cleaned });
+	return { result: cleaned };
 }
