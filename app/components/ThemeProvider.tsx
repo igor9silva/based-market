@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-// TODO: vision
+// TODO:personalization: vision
 // - persist config to server, load during SSR toghether with user data
 // - mode = dark, light or system (auto, tied with OS)
 // - theme = customizable everything (from corner radius to spacing)
@@ -46,7 +46,7 @@ export function ThemeProvider({ children, mode = 'system', ...props }: ThemeProv
 
 	const customSetTheme = (theme: ThemeMode) => {
 		setTheme(theme);
-		// TODO: persist config to server
+		// TODO:personalization: persist config to server
 	};
 
 	return (

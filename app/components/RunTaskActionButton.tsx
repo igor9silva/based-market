@@ -12,7 +12,6 @@ export function RunTaskActionButton({
 	task: Doc<'tasks'>;
 	kind: Infer<typeof taskActionKinds>;
 }) {
-	// TODO: write a prettier abstraction for optmistc updates
 	const requestAction = useMutation(api.taskActions.request);
 
 	return (

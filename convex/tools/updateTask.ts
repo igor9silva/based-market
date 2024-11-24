@@ -7,7 +7,7 @@ import { ActionCtx } from '../_generated/server';
 export default (ctx: ActionCtx) =>
 	tool({
 		description: 'Update the task with improved title and body',
-		// TODO: think about how to use the same schema (v.())
+		// TODO: think about how to use the same schema (v.()) // there is something on Convex Helpers
 		parameters: z.object({
 			taskId: z.string(),
 			title: z.string().describe('The improved title for the task'),
