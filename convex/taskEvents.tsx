@@ -59,6 +59,22 @@ export const _addTaskAddEvent = async (
 	});
 };
 
+export const _addTaskUpdateEvent = async (
+	ctx: ActionCtx | MutationCtx, //
+	event: {
+		taskId: Id<'tasks'>;
+		author: Infer<typeof authorSchema>;
+		changes: string;
+	},
+) => {
+	return await addTaskEvent(ctx, {
+		taskId: event.taskId,
+		author: event.author,
+		kind: 'update',
+		changes: event.changes,
+	});
+};
+
 export const _addActionRequestEvent = async (
 	ctx: ActionCtx | MutationCtx,
 	event: {

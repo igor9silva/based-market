@@ -29,6 +29,19 @@ export function TaskEvent({
 					</div>
 				</div>
 			);
+		case 'update':
+			return (
+				<div className="flex flex-col">
+					<div className="flex flex-row justify-between items-baseline">
+						<div>
+							Task updated by <Author author={event.author} />.
+						</div>
+						<span className="text-xs text-muted-foreground">
+							<TimeAgo date={event._creationTime} />
+						</span>
+					</div>
+				</div>
+			);
 		case 'actionRequest':
 			return (
 				<div className="flex flex-col">

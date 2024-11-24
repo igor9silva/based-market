@@ -1,7 +1,8 @@
 import { v } from 'convex/values';
 import { Id } from './_generated/dataModel';
 import { internalMutation, internalQuery, mutation, MutationCtx, query, QueryCtx } from './_generated/server.js';
-import { _addTaskAddEvent } from './taskEvents';
+import { authorSchema } from './schema';
+import { _addTaskAddEvent, _addTaskUpdateEvent } from './taskEvents';
 import { current as getCurrentUser } from './users.js';
 
 // Exposed ------------------------------------
@@ -51,8 +52,8 @@ export const update = mutation({
 		body: v.string(),
 	},
 	handler: async (ctx, { taskId, title, body }) => {
-		await ensureTaskOwner(ctx, { taskId });
-		return ctx.db.patch(taskId, { title, body });
+		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
+		return _update(ctx, { taskId, title, body, author: currentUser._id });
 	},
 });
 
@@ -76,14 +77,16 @@ export const _update = internalMutation({
 		taskId: v.id('tasks'),
 		title: v.optional(v.string()),
 		body: v.optional(v.string()),
+		author: authorSchema,
 	},
-	handler: async (ctx, { taskId, title, body }) => {
+	handler: async (ctx, { taskId, title, body, author }) => {
 		//
-		// TODO: add updated event
-		return ctx.db.patch(taskId, {
+		await ctx.db.patch(taskId, {
 			...(title !== undefined && { title }),
 			...(body !== undefined && { body }),
 		});
+
+		await _addTaskUpdateEvent(ctx, { taskId, author, changes: 'TODO: not implemented yet' });
 	},
 });
 

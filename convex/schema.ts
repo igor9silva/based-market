@@ -70,12 +70,20 @@ export const addTaskEventSchema = v.object({
 	author: authorSchema,
 });
 
+export const updateTaskEventSchema = v.object({
+	kind: v.literal('update'),
+	taskId: v.id('tasks'),
+	author: authorSchema,
+	changes: v.string(),
+});
+
 export const taskEventSchema = v.union(
 	actionRequestTaskEventSchema,
 	actionResultErrorTaskEventSchema,
 	actionResultSuccessTaskEventSchema,
 	messageTaskEventSchema,
 	addTaskEventSchema,
+	updateTaskEventSchema,
 );
 // #endregion
 

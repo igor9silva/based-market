@@ -19,6 +19,7 @@ export default (ctx: ActionCtx) =>
 				taskId: taskId as Id<'tasks'>,
 				title,
 				body,
+				author: 'meseeks',
 			});
 
 			return 'Task updated';
