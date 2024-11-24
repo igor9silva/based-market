@@ -29,7 +29,9 @@ export function EditableContent({
 	const handleClick = () => setIsEditing(true);
 	const saveChanges = () => {
 		setIsEditing(false);
-		onSave(editedValue);
+
+		// only save if the value has changed
+		if (editedValue !== value) onSave(editedValue);
 	};
 
 	// cancel on ESC, confirm on Enter (or CMD+Enter for multiline)
