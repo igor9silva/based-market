@@ -32,13 +32,14 @@ export const findOne = query({
 export const add = mutation({
 	args: {
 		title: v.string(),
-		body: v.string(),
-		owner: v.id('users'),
+		body: v.optional(v.string()),
 	},
-	handler: async (ctx, { title, body, owner }) => {
+	handler: async (ctx, { title, body }) => {
 		//
-		const taskId = await ctx.db.insert('tasks', { title, body, owner });
-		await _addTaskAddEvent(ctx, { taskId, author: owner });
+		const currentUser = await getCurrentUser(ctx, {});
+		const taskId = await ctx.db.insert('tasks', { title, body, owner: currentUser._id });
+		await _addTaskAddEvent(ctx, { taskId, author: currentUser._id });
+
 		return taskId;
 	},
 });

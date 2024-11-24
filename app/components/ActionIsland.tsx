@@ -54,7 +54,7 @@ const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>((
 		>
 			<div className="p-4">
 				<div className="flex items-center justify-between mb-4">
-					<h3 className="font-medium">Background Tasks</h3>
+					<h3 className="font-medium">Background Activity</h3>
 					<span className="text-sm text-gray-400">{actions.length} actions</span>
 				</div>
 				<div className="space-y-3">
@@ -108,7 +108,11 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 	return (
 		<>
 			<Activity className="size-4" />
-			<span>{actions.length} done</span>
+			{actions.length > 0 ? ( //
+				<span>{actions.length} done</span>
+			) : (
+				<span>No activity</span>
+			)}
 		</>
 	);
 };

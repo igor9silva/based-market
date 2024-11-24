@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Grid } from '~/components/layout/Grid';
 import { PageHeader } from '~/components/PageHeader';
-import { TaskComposer } from '~/components/TaskComposer';
+import { QuickAdd } from '~/components/QuickAdd';
 import { TaskList } from '~/components/TaskList';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from '~/components/ui/breadcrumb';
 
@@ -29,7 +29,7 @@ export default function Inbox() {
 					<TaskList />
 				</Grid.Main>
 				<Grid.Side>
-					<TaskComposer />
+					<QuickAdd />
 				</Grid.Side>
 			</Grid>
 		</>
