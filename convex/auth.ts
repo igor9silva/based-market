@@ -28,7 +28,7 @@ import { convexAuth } from '@convex-dev/auth/server';
 export const { auth, signIn, signOut, store } = convexAuth({
 	providers: [Google],
 	jwt: {
-		durationMs: Number(process.env.JWT_SESSION_DURATION_MS || 60 * 60 * 24 * 7 /* 7 days */), // TODO: use typed env
+		durationMs: Number(process.env.JWT_SESSION_DURATION_MS || 1000 * 60 * 60 * 24 * 7 /* 7 days */), // TODO: use typed env
 	},
 	callbacks: {
 		async afterUserCreatedOrUpdated(ctx, args) {
