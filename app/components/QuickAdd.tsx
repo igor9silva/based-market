@@ -1,32 +1,27 @@
-import { convexQuery } from '@convex-dev/react-query';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
+import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
+import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { cn } from '~/lib/utils';
 
 export function QuickAdd({ className }: { className?: string }) {
 	//
-	const query = convexQuery(api.users.current, {});
-	const { data: user } = useSuspenseQuery(query);
-
+	const navigate = useNavigate();
 	const addTask = useMutation(api.tasks.add);
 
-	if (!user) return null;
-
-	// TODO: create a `handleSubmit` hook abstraction that receives just a function
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		//
-		e.preventDefault();
-		const formData = new FormData(e.currentTarget);
-
-		addTask({ title: formData.get('title') as string });
-
-		// Reset the form
-		e.currentTarget.reset();
-	};
+	const handleSubmit = useHandleSubmit({
+		schema: z.object({
+			title: z.string().min(1, 'Title is required'),
+		}),
+		handler: async (data) => {
+			const taskId = await addTask({ title: data.title });
+			navigate({ to: '/tasks/$taskId', params: { taskId } });
+		},
+	});
 
 	return (
 		<Card className={cn('max-h-fit', className)}>
@@ -42,3 +37,4 @@ export function QuickAdd({ className }: { className?: string }) {
 		</Card>
 	);
 }
+z;
