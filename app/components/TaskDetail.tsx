@@ -22,6 +22,7 @@ export default function TaskDetail({
 			<CardHeader className="max-w-full">
 				<div className="flex flex-col">
 					<EditableContent
+						key={task.title}
 						value={task.title}
 						onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
 						viewClassName="text-2xl font-bold leading-none break-all"
@@ -40,6 +41,7 @@ export default function TaskDetail({
 			</CardHeader>
 			<CardContent className="[&>*]:whitespace-break-spaces [&>*]:break-all pt-0">
 				<EditableContent
+					key={task.body}
 					value={task.body ?? ''}
 					onSave={(newBody) => updateTask({ taskId: task._id, body: newBody })}
 					multiline
@@ -48,7 +50,7 @@ export default function TaskDetail({
 							<MDX text={value} />
 						</div>
 					)}
-					editClassName="min-h-32 font-mono"
+					editClassName="min-h-32"
 				/>
 			</CardContent>
 		</Card>
