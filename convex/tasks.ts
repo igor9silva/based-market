@@ -48,8 +48,8 @@ export const add = mutation({
 export const update = mutation({
 	args: {
 		taskId: v.id('tasks'),
-		title: v.string(),
-		body: v.string(),
+		title: v.optional(v.string()),
+		body: v.optional(v.string()),
 	},
 	handler: async (ctx, { taskId, title, body }) => {
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
