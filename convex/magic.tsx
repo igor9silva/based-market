@@ -15,7 +15,6 @@ export const _run = internalAction({
 	},
 	handler: async (ctx, { taskId, actionId, userId }) => {
 		//
-		// set action as 'running'
 		await _setActionStatus(ctx, { actionId, status: 'running' });
 
 		// grab the task and action
@@ -25,6 +24,9 @@ export const _run = internalAction({
 		try {
 			// invoke magic rock
 			const { result } = await SPELLS[action.kind](ctx, task, action);
+
+			await _setActionStatus(ctx, { actionId, status: 'succeeded' });
+			await _scheduleNextActionIfNeeded(ctx, { taskId, userId });
 			await _addActionResultEvent(ctx, { taskId: task._id, action, result });
 			//
 		} catch (error) {
@@ -36,11 +38,5 @@ export const _run = internalAction({
 
 			throw error;
 		}
-
-		// set action as 'succeeded'
-		await _setActionStatus(ctx, { actionId, status: 'succeeded' });
-
-		// schedule next action
-		await _scheduleNextActionIfNeeded(ctx, { taskId, userId });
 	},
 });
