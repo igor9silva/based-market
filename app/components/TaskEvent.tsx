@@ -21,7 +21,7 @@ export function TaskEvent({
 				<div className="flex flex-col">
 					<div className="flex flex-row justify-between items-baseline">
 						<div>
-							Task added by <Author author={event.author} />.
+							Added by <Author author={event.author} />.
 						</div>
 						<span className="text-xs text-muted-foreground">
 							<TimeAgo date={event._creationTime} />
@@ -34,7 +34,21 @@ export function TaskEvent({
 				<div className="flex flex-col">
 					<div className="flex flex-row justify-between items-baseline">
 						<div>
-							Task updated by <Author author={event.author} />.
+							Updated by <Author author={event.author} />.
+						</div>
+						<span className="text-xs text-muted-foreground">
+							<TimeAgo date={event._creationTime} />
+						</span>
+					</div>
+				</div>
+			);
+		case 'markAsDone':
+			return (
+				<div className="flex flex-col">
+					<div className="flex flex-row justify-between items-baseline">
+						<div>
+							Marked as <strong>{event.isDone ? 'done' : 'not done'}</strong> by{' '}
+							<Author author={event.author} />.
 						</div>
 						<span className="text-xs text-muted-foreground">
 							<TimeAgo date={event._creationTime} />
@@ -81,19 +95,4 @@ export function TaskEvent({
 				</div>
 			);
 	}
-
-	// return (
-	// 	<Card className={cn('p-4', className)}>
-	// 		<div className="flex flex-col gap-2">
-	// 			{/* Event Type */}
-	// 			<div className="text-sm font-medium text-muted-foreground">{getEventDetails()}</div>
-
-	// 			{/* Author */}
-	// 			<div className="text-base">By: {formatAuthor(event.author)}</div>
-
-	// 			{/* Timestamp */}
-	// 			<div className="text-xs text-muted-foreground">{new Date(event._creationTime).toLocaleString()}</div>
-	// 		</div>
-	// 	</Card>
-	// );
 }

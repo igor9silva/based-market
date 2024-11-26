@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { Doc } from 'convex/_generated/dataModel';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Card, CardContent } from '~/components/ui/card';
+import { cn } from '~/lib/utils';
 
 export function Task({ task }: { task: Doc<'tasks'> }) {
 	return (
@@ -10,7 +11,12 @@ export function Task({ task }: { task: Doc<'tasks'> }) {
 				<CardContent className="pt-6">
 					<div className="space-y-1">
 						<div className="flex items-start justify-between gap-2">
-							<h3 className="font-semibold leading-none tracking-tight whitespace-pre-wrap break-all">
+							<h3
+								className={cn(
+									'font-semibold leading-none tracking-tight whitespace-pre-wrap break-all',
+									task.isDone && 'line-through',
+								)}
+							>
 								{task.title}
 							</h3>
 							<span className="text-sm text-muted-foreground">

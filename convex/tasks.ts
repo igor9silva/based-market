@@ -2,7 +2,7 @@ import { v } from 'convex/values';
 import { Id } from './_generated/dataModel';
 import { internalMutation, internalQuery, mutation, MutationCtx, query, QueryCtx } from './_generated/server.js';
 import { authorSchema } from './schema';
-import { _addTaskAddEvent, _addTaskUpdateEvent } from './taskEvents';
+import { _addTaskAddEvent, _addTaskMarkAsDoneEvent, _addTaskUpdateEvent } from './taskEvents';
 import { current as getCurrentUser } from './users.js';
 
 // Exposed ------------------------------------
@@ -15,7 +15,7 @@ export const findAll = query({
 
 		return await ctx.db
 			.query('tasks')
-			.withIndex('by_owner', (q) => q.eq('owner', currentUser._id))
+			.withIndex('by_owner_isDone', (q) => q.eq('owner', currentUser._id))
 			.collect();
 	},
 });
@@ -38,7 +38,7 @@ export const add = mutation({
 	handler: async (ctx, { title, body }) => {
 		//
 		const currentUser = await getCurrentUser(ctx, {});
-		const taskId = await ctx.db.insert('tasks', { title, body, owner: currentUser._id });
+		const taskId = await ctx.db.insert('tasks', { title, body, owner: currentUser._id, isDone: false });
 		await _addTaskAddEvent(ctx, { taskId, author: currentUser._id });
 
 		return taskId;
@@ -54,6 +54,18 @@ export const update = mutation({
 	handler: async (ctx, { taskId, title, body }) => {
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 		return _update(ctx, { taskId, title, body, author: currentUser._id });
+	},
+});
+
+export const markAsDone = mutation({
+	args: {
+		taskId: v.id('tasks'),
+		isDone: v.boolean(),
+	},
+	handler: async (ctx, { taskId, isDone }) => {
+		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
+		await ctx.db.patch(taskId, { isDone });
+		await _addTaskMarkAsDoneEvent(ctx, { taskId, author: currentUser._id, isDone });
 	},
 });
 

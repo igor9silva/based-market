@@ -18,6 +18,7 @@ import {
 
 export const Route = createFileRoute('/tasks_/$taskId')({
 	component: TaskDetailPage,
+	errorComponent: () => <div>Task not found or something else went wrong.</div>,
 });
 
 function TaskDetailPage() {

@@ -77,6 +77,13 @@ export const updateTaskEventSchema = v.object({
 	changes: v.string(),
 });
 
+export const markAsDoneTaskEventSchema = v.object({
+	kind: v.literal('markAsDone'),
+	taskId: v.id('tasks'),
+	author: authorSchema,
+	isDone: v.boolean(),
+});
+
 export const taskEventSchema = v.union(
 	actionRequestTaskEventSchema,
 	actionResultErrorTaskEventSchema,
@@ -84,6 +91,7 @@ export const taskEventSchema = v.union(
 	messageTaskEventSchema,
 	addTaskEventSchema,
 	updateTaskEventSchema,
+	markAsDoneTaskEventSchema,
 );
 // #endregion
 
@@ -93,7 +101,8 @@ export default defineSchema({
 		owner: v.id('users'),
 		title: v.string(),
 		body: v.optional(v.string()),
-	}).index('by_owner', ['owner']),
+		isDone: v.boolean(),
+	}).index('by_owner_isDone', ['owner', 'isDone']),
 	taskActions: defineTable({
 		taskId: v.id('tasks'),
 		kind: taskActionKinds,

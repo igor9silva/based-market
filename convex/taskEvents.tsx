@@ -75,6 +75,22 @@ export const _addTaskUpdateEvent = async (
 	});
 };
 
+export const _addTaskMarkAsDoneEvent = async (
+	ctx: ActionCtx | MutationCtx, //
+	event: {
+		taskId: Id<'tasks'>;
+		author: Infer<typeof authorSchema>;
+		isDone: boolean;
+	},
+) => {
+	return await addTaskEvent(ctx, {
+		taskId: event.taskId,
+		author: event.author,
+		isDone: event.isDone,
+		kind: 'markAsDone',
+	});
+};
+
 export const _addActionRequestEvent = async (
 	ctx: ActionCtx | MutationCtx,
 	event: {

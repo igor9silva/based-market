@@ -3,6 +3,7 @@ import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { RunTaskActionButton } from '~/components/RunTaskActionButton';
 import { TimeAgo } from '~/components/TimeAgo';
+import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
 import MDX from '~/components/ui/mdx';
 import { cn } from '~/lib/utils';
@@ -16,6 +17,7 @@ export default function TaskDetail({
 	task: Doc<'tasks'>;
 }) {
 	const updateTask = useMutation(api.tasks.update);
+	const markAsDone = useMutation(api.tasks.markAsDone);
 
 	return (
 		<Card className={cn('whitespace-pre-wrap', className)}>
@@ -26,13 +28,20 @@ export default function TaskDetail({
 						value={task.title}
 						onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
 						viewClassName="text-2xl font-bold leading-none break-all"
-						as="h1"
+						asView={({ value, onClick, className }) => (
+							<h1 onClick={onClick} className={cn(task.isDone && 'line-through', className)}>
+								{value}
+							</h1>
+						)}
 					/>
 					<span className="text-sm text-muted-foreground shrink-0">
 						<TimeAgo date={task._creationTime} />
 					</span>
 				</div>
 				<div className="flex flex-row flex-wrap items-baseline gap-2">
+					<Button onClick={() => markAsDone({ taskId: task._id, isDone: !task.isDone })}>
+						{task.isDone ? 'Unmark' : 'Mark'} as done
+					</Button>
 					<RunTaskActionButton task={task} kind="fill" />
 					<RunTaskActionButton task={task} kind="minify" />
 					<RunTaskActionButton task={task} kind="scrape" />
