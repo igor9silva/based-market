@@ -1,9 +1,9 @@
 import { Doc } from 'convex/_generated/dataModel';
 import { authorSchema } from 'convex/schema';
-import { Infer } from 'convex/values';
+import { z } from 'zod';
 import { TimeAgo } from '~/components/TimeAgo';
 
-function Author({ author }: { author: Infer<typeof authorSchema> }) {
+function Author({ author }: { author: z.infer<typeof authorSchema> }) {
 	return <strong>{author === 'meseeks' ? 'Meseeks' : 'you'}</strong>;
 }
 

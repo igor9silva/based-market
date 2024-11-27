@@ -1,16 +1,10 @@
-import { Infer, v } from 'convex/values';
+import { zid } from 'convex-helpers/server/zod';
+import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Id } from './_generated/dataModel.js';
-import {
-	ActionCtx,
-	internalMutation,
-	internalQuery,
-	mutation,
-	MutationCtx,
-	query,
-	QueryCtx,
-} from './_generated/server.js';
-import { taskActionKinds, taskActionStatuses } from './schema';
+import { ActionCtx, MutationCtx, QueryCtx } from './_generated/server.js';
+import { internalMutation, internalQuery, mutation, query } from './lib';
+import { taskActionKindSchema, taskActionStatusSchema } from './schema';
 import { _addActionRequestEvent } from './taskEvents';
 import { ensureTaskOwner } from './tasks';
 
@@ -18,10 +12,12 @@ import { ensureTaskOwner } from './tasks';
 
 export const findAll = query({
 	args: {
-		taskId: v.id('tasks'),
+		taskId: zid('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
+		//
 		await ensureTaskOwner(ctx, { taskId });
+
 		return await ctx.db
 			.query('taskActions')
 			.withIndex('by_task', (q) => q.eq('taskId', taskId))
@@ -31,7 +27,7 @@ export const findAll = query({
 
 export const findOne = query({
 	args: {
-		actionId: v.id('taskActions'),
+		actionId: zid('taskActions'),
 	},
 	handler: async (ctx, { actionId }) => {
 		//
@@ -46,8 +42,8 @@ export const findOne = query({
 
 export const request = mutation({
 	args: {
-		taskId: v.id('tasks'),
-		kind: taskActionKinds,
+		taskId: zid('tasks'),
+		kind: taskActionKindSchema,
 	},
 	handler: async (ctx, { taskId, kind }) => {
 		//
@@ -67,7 +63,7 @@ export const request = mutation({
 
 export const skip = mutation({
 	args: {
-		actionId: v.id('taskActions'),
+		actionId: zid('taskActions'),
 	},
 	handler: async (ctx, { actionId }) => {
 		//
@@ -88,7 +84,7 @@ export const skip = mutation({
 
 export const retry = mutation({
 	args: {
-		actionId: v.id('taskActions'),
+		actionId: zid('taskActions'),
 	},
 	handler: async (ctx, { actionId }) => {
 		//
@@ -108,7 +104,7 @@ export const retry = mutation({
 
 export const _findOne = internalQuery({
 	args: {
-		actionId: v.id('taskActions'),
+		actionId: zid('taskActions'),
 	},
 	handler: async (ctx, { actionId }) => {
 		//
@@ -121,7 +117,7 @@ export const _findOne = internalQuery({
 
 export const _findAllRunning = internalQuery({
 	args: {
-		taskId: v.id('tasks'),
+		taskId: zid('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
 		return await _findByStatus(ctx, { taskId, status: 'running' }).collect();
@@ -130,7 +126,7 @@ export const _findAllRunning = internalQuery({
 
 export const _findAllFailed = internalQuery({
 	args: {
-		taskId: v.id('tasks'),
+		taskId: zid('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
 		return await _findByStatus(ctx, { taskId, status: 'failed' }).collect();
@@ -139,7 +135,7 @@ export const _findAllFailed = internalQuery({
 
 export const _findNext = internalQuery({
 	args: {
-		taskId: v.id('tasks'),
+		taskId: zid('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
 		return await _findByStatus(ctx, { taskId, status: 'pending' }).first();
@@ -148,8 +144,8 @@ export const _findNext = internalQuery({
 
 export const _add = internalMutation({
 	args: {
-		taskId: v.id('tasks'),
-		kind: taskActionKinds,
+		taskId: zid('tasks'),
+		kind: taskActionKindSchema,
 	},
 	handler: async (ctx, { taskId, kind }) => {
 		return await ctx.db.insert('taskActions', {
@@ -163,9 +159,9 @@ export const _add = internalMutation({
 
 export const _setStatus = internalMutation({
 	args: {
-		actionId: v.id('taskActions'),
-		status: taskActionStatuses,
-		errorMessage: v.optional(v.string()),
+		actionId: zid('taskActions'),
+		status: taskActionStatusSchema,
+		errorMessage: z.optional(z.string()),
 	},
 	handler: async (ctx, { actionId, status, errorMessage }) => {
 		await ctx.db.patch(actionId, {
@@ -194,7 +190,7 @@ function _findByStatus(
 		status,
 	}: {
 		taskId: Id<'tasks'>;
-		status: Infer<typeof taskActionStatuses>;
+		status: z.infer<typeof taskActionStatusSchema>;
 	},
 ) {
 	return ctx.db
@@ -208,7 +204,7 @@ export async function _setActionStatus(
 	ctx: ActionCtx,
 	args: {
 		actionId: Id<'taskActions'>;
-		status: Infer<typeof taskActionStatuses>;
+		status: z.infer<typeof taskActionStatusSchema>;
 		errorMessage?: string;
 	},
 ) {

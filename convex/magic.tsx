@@ -1,17 +1,17 @@
 'use node';
 
-import { v } from 'convex/values';
+import { zid } from 'convex-helpers/server/zod';
 import { internal } from './_generated/api';
-import { internalAction } from './_generated/server';
+import { internalAction } from './lib';
 import SPELLS from './spells';
 import { _scheduleNextActionIfNeeded, _setActionStatus } from './taskActions';
 import { _addActionErrorEvent, _addActionResultEvent } from './taskEvents';
 
 export const _run = internalAction({
 	args: {
-		userId: v.id('users'),
-		taskId: v.id('tasks'),
-		actionId: v.id('taskActions'),
+		userId: zid('users'),
+		taskId: zid('tasks'),
+		actionId: zid('taskActions'),
 	},
 	handler: async (ctx, { taskId, actionId, userId }) => {
 		//

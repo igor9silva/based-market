@@ -1,6 +1,8 @@
-import { v } from 'convex/values';
+import { zid } from 'convex-helpers/server/zod';
+import { z } from 'zod';
 import { Id } from './_generated/dataModel';
-import { internalMutation, internalQuery, mutation, MutationCtx, query, QueryCtx } from './_generated/server.js';
+import { MutationCtx, QueryCtx } from './_generated/server';
+import { internalMutation, internalQuery, mutation, query } from './lib';
 import { authorSchema } from './schema';
 import { _addTaskAddEvent, _addTaskMarkAsDoneEvent, _addTaskUpdateEvent } from './taskEvents';
 import { current as getCurrentUser } from './users.js';
@@ -22,7 +24,7 @@ export const findAll = query({
 
 export const findOne = query({
 	args: {
-		taskId: v.id('tasks'),
+		taskId: zid('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
 		const { task } = await ensureTaskOwner(ctx, { taskId });
@@ -32,8 +34,8 @@ export const findOne = query({
 
 export const add = mutation({
 	args: {
-		title: v.string(),
-		body: v.optional(v.string()),
+		title: z.string(),
+		body: z.optional(z.string()),
 	},
 	handler: async (ctx, { title, body }) => {
 		//
@@ -47,9 +49,9 @@ export const add = mutation({
 
 export const update = mutation({
 	args: {
-		taskId: v.id('tasks'),
-		title: v.optional(v.string()),
-		body: v.optional(v.string()),
+		taskId: zid('tasks'),
+		title: z.optional(z.string()),
+		body: z.optional(z.string()),
 	},
 	handler: async (ctx, { taskId, title, body }) => {
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
@@ -59,8 +61,8 @@ export const update = mutation({
 
 export const markAsDone = mutation({
 	args: {
-		taskId: v.id('tasks'),
-		isDone: v.boolean(),
+		taskId: zid('tasks'),
+		isDone: z.boolean(),
 	},
 	handler: async (ctx, { taskId, isDone }) => {
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
@@ -73,7 +75,7 @@ export const markAsDone = mutation({
 
 export const _findOne = internalQuery({
 	args: {
-		taskId: v.id('tasks'),
+		taskId: zid('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
 		//
@@ -86,9 +88,9 @@ export const _findOne = internalQuery({
 
 export const _update = internalMutation({
 	args: {
-		taskId: v.id('tasks'),
-		title: v.optional(v.string()),
-		body: v.optional(v.string()),
+		taskId: zid('tasks'),
+		title: z.optional(z.string()),
+		body: z.optional(z.string()),
 		author: authorSchema,
 	},
 	handler: async (ctx, { taskId, title, body, author }) => {

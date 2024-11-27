@@ -1,8 +1,8 @@
 import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
-import { taskActionKinds } from 'convex/schema';
-import { Infer } from 'convex/values';
+import { taskActionKindSchema } from 'convex/schema';
+import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 
 export function RunTaskActionButton({
@@ -10,7 +10,7 @@ export function RunTaskActionButton({
 	kind,
 }: {
 	task: Doc<'tasks'>;
-	kind: Infer<typeof taskActionKinds>;
+	kind: z.infer<typeof taskActionKindSchema>;
 }) {
 	const requestAction = useMutation(api.taskActions.request);
 

@@ -37,4 +37,3 @@ export function QuickAdd({ className }: { className?: string }) {
 		</Card>
 	);
 }
-z;

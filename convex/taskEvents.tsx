@@ -1,13 +1,15 @@
-import { Infer, v } from 'convex/values';
+import { zid } from 'convex-helpers/server/zod';
+import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
-import { ActionCtx, internalMutation, MutationCtx, query } from './_generated/server';
+import { ActionCtx, MutationCtx } from './_generated/server';
+import { internalMutation, query } from './lib';
 import { authorSchema, taskEventSchema } from './schema';
 import { ensureTaskOwner } from './tasks';
 // Exposed -------------------------------------
 
 export const findAll = query({
-	args: { taskId: v.id('tasks') },
+	args: { taskId: zid('tasks') },
 	handler: async (ctx, { taskId }) => {
 		//
 		await ensureTaskOwner(ctx, { taskId });
@@ -36,7 +38,7 @@ export const _add = internalMutation({
 
 const addTaskEvent = async (
 	ctx: ActionCtx | MutationCtx, //
-	event: Infer<typeof taskEventSchema>,
+	event: z.infer<typeof taskEventSchema>,
 ) => {
 	if ('runAction' in ctx) {
 		return await ctx.runMutation(internal.taskEvents._add, { event });
@@ -49,7 +51,7 @@ export const _addTaskAddEvent = async (
 	ctx: ActionCtx | MutationCtx, //
 	event: {
 		taskId: Id<'tasks'>;
-		author: Infer<typeof authorSchema>;
+		author: z.infer<typeof authorSchema>;
 	},
 ) => {
 	return await addTaskEvent(ctx, {
@@ -63,7 +65,7 @@ export const _addTaskUpdateEvent = async (
 	ctx: ActionCtx | MutationCtx, //
 	event: {
 		taskId: Id<'tasks'>;
-		author: Infer<typeof authorSchema>;
+		author: z.infer<typeof authorSchema>;
 		changes: string;
 	},
 ) => {
@@ -79,7 +81,7 @@ export const _addTaskMarkAsDoneEvent = async (
 	ctx: ActionCtx | MutationCtx, //
 	event: {
 		taskId: Id<'tasks'>;
-		author: Infer<typeof authorSchema>;
+		author: z.infer<typeof authorSchema>;
 		isDone: boolean;
 	},
 ) => {
@@ -97,7 +99,7 @@ export const _addActionRequestEvent = async (
 		taskId: Id<'tasks'>;
 		actionId: Id<'taskActions'>;
 		actionKind: Doc<'taskActions'>['kind'];
-		author: Infer<typeof authorSchema>;
+		author: z.infer<typeof authorSchema>;
 	},
 ) => {
 	return await addTaskEvent(ctx, {
