@@ -15,19 +15,22 @@ export function Task({ task }: { task: Doc<'tasks'> }) {
 								className={cn(
 									'font-semibold leading-none tracking-tight whitespace-pre-wrap break-all',
 									task.isDone && 'line-through',
+									!task.title && 'text-muted-foreground',
 								)}
 							>
-								{task.title}
+								{task.title || 'Untitled task'}
 							</h3>
 							<span className="text-sm text-muted-foreground">
 								<TimeAgo date={task._creationTime} />
 							</span>
 						</div>
-						{task.body && (
+						{task.body ? (
 							<p className="text-sm text-muted-foreground whitespace-pre-wrap break-all">
 								{task.body.slice(0, 100)}
 								{task.body.length > 100 && '...'}
 							</p>
+						) : (
+							<p className="text-sm text-muted-foreground">No description</p>
 						)}
 					</div>
 				</CardContent>
