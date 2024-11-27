@@ -9,7 +9,12 @@ type EditableContentProps = {
 	multiline?: boolean;
 	viewClassName?: string;
 	editClassName?: string;
-	asView?: (props: { value: string; className?: string; onClick: () => void }) => React.ReactNode;
+	asView?: (props: {
+		value: string; //
+		className?: string;
+		onClick: () => void;
+		isEmpty: boolean;
+	}) => React.ReactNode;
 	as?: keyof JSX.IntrinsicElements;
 };
 
@@ -53,6 +58,8 @@ export function EditableContent({
 
 	const InputComponent = multiline ? Textarea : Input;
 
+	const isEmpty = !editedValue.trim();
+
 	if (isEditing) {
 		return (
 			<InputComponent
@@ -74,6 +81,7 @@ export function EditableContent({
 			value: editedValue,
 			className: cn('cursor-pointer hover:opacity-80', viewClassName),
 			onClick: handleClick,
+			isEmpty,
 		});
 	}
 

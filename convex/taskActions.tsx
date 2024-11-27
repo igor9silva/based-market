@@ -78,6 +78,7 @@ export const skip = mutation({
 		}
 
 		await _setStatus(ctx, { actionId, status: 'skipped' });
+		// TODO: add event
 		await _scheduleNextActionIfNeeded(ctx, { taskId: action.taskId, userId: currentUser._id });
 	},
 });
@@ -97,6 +98,7 @@ export const retry = mutation({
 		if (action.status !== 'failed') throw new Error(`Cannot retry ${action.status} actions`);
 
 		await _scheduleAction(ctx, { taskId: action.taskId, actionId, userId: currentUser._id });
+		// TODO: add event
 	},
 });
 
