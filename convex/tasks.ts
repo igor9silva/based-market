@@ -86,16 +86,12 @@ export const _findOne = internalQuery({
 	},
 });
 
-export const _updateArgs = {
-	taskId: zid('tasks'),
-	title: z.string().optional().describe('The improved title for the task'),
-	body: z.string().optional().describe('The improved body/description for the task'),
-};
-
 export const _update = internalMutation({
 	args: {
-		..._updateArgs,
+		taskId: zid('tasks'),
 		author: authorSchema,
+		title: z.string().optional(),
+		body: z.string().optional(),
 	},
 	handler: async (ctx, { taskId, title, body, author }) => {
 		//

@@ -36,7 +36,7 @@ export default async function minify(
 		prompt: promptForTask(task),
 		toolChoice: 'required',
 		tools: {
-			updateTask: updateTask(ctx),
+			updateTask: updateTask(ctx, task._id),
 		},
 	});
 
