@@ -4,7 +4,7 @@ import { internal } from './_generated/api';
 import { Id } from './_generated/dataModel.js';
 import { ActionCtx, MutationCtx, QueryCtx } from './_generated/server.js';
 import { internalMutation, internalQuery, mutation, query } from './lib';
-import { taskActionKindSchema, taskActionStatusSchema } from './schema';
+import { taskActionKindSchema, taskActionStatusSchema } from './schemas/taskAction';
 import { _addActionRequestEvent } from './taskEvents';
 import { ensureTaskOwner } from './tasks';
 

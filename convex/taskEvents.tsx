@@ -4,7 +4,8 @@ import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx, MutationCtx } from './_generated/server';
 import { internalMutation, query } from './lib';
-import { authorSchema, taskEventSchema } from './schema';
+import { authorSchema } from './schemas/author';
+import { taskEventSchema } from './schemas/taskEvent';
 import { ensureTaskOwner } from './tasks';
 // Exposed -------------------------------------
 
