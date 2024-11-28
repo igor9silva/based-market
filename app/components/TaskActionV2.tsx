@@ -30,15 +30,17 @@ export function TaskAction({
 
 	return (
 		<div className={cn(className, 'flex flex-row justify-between')}>
-			<div className="flex flex-row gap-1 items-center">
-				{action.status === 'running' && <Loader2 className="size-4 animate-spin" />}
-				{action.status === 'succeeded' && <Check className="size-4" />}
-				{action.status === 'failed' && <X className="size-4" />}
+			<div className="flex flex-col gap-1">
+				<div className="flex flex-row gap-1 items-center">
+					<Author className={cn({ 'text-purple-300': action.author === 'meseeks' })} author={action.author} />
+					{action.status === 'running' && <Loader2 className="size-4 shrink-0 animate-spin" />}
+					{action.status === 'succeeded' && <Check className="size-4 shrink-0" />}
+					{action.status === 'failed' && <X className="size-4 shrink-0" />}
+				</div>
 
-				<Author className={cn({ 'text-purple-300': action.author === 'meseeks' })} author={action.author} />
-				<span className={cn(action.status === 'skipped' && 'line-through')}>
+				<div className={cn(action.status === 'skipped' && 'line-through')}>
 					{action.kind === 'mutation' ? action.changes : action.message}
-				</span>
+				</div>
 			</div>
 
 			<div className="flex items-center gap-1">

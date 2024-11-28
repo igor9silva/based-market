@@ -7,7 +7,7 @@ import { Id } from 'convex/_generated/dataModel';
 import { ActionIsland } from '~/components/ActionIsland';
 import { TwoColumn } from '~/components/layout/TwoColumn';
 import { PageHeader } from '~/components/PageHeader';
-import { TaskActions } from '~/components/TaskActions';
+import { TaskConversation } from '~/components/TaskConversation';
 import TaskDetail from '~/components/TaskDetail';
 import {
 	Breadcrumb,
@@ -53,7 +53,7 @@ function TaskDetailPage() {
 				<ActionIsland task={task} />
 			</PageHeader>
 			<TwoColumn>
-				<TaskActions task={task} />
+				<TaskConversation task={task} />
 				<TaskDetail task={task} />
 			</TwoColumn>
 		</>

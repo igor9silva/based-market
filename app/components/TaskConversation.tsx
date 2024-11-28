@@ -7,7 +7,7 @@ import { TaskAction } from '~/components/TaskActionV2';
 import { Card, CardContent } from '~/components/ui/card';
 import { cn } from '~/lib/utils';
 
-export function TaskActions({
+export function TaskConversation({
 	className, //
 	task,
 }: {
