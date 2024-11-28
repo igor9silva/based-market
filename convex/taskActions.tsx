@@ -4,8 +4,8 @@ import { internal } from './_generated/api';
 import { Id } from './_generated/dataModel.js';
 import { ActionCtx, MutationCtx, QueryCtx } from './_generated/server.js';
 import { internalMutation, internalQuery, mutation, query } from './lib';
-import { taskActionKindSchema, taskActionStatusSchema } from './schemas/taskAction';
-import { _addActionRequestEvent } from './taskEvents';
+import { authorSchema } from './schemas/author';
+import { taskActionStatusSchema } from './schemas/taskAction';
 import { ensureTaskOwner } from './tasks';
 
 // Exposed -------------------------------------
@@ -31,8 +31,7 @@ export const findOne = query({
 	},
 	handler: async (ctx, { actionId }) => {
 		//
-		const action = await ctx.db.get(actionId);
-		if (!action) throw new Error('Action not found');
+		const action = await _findOne(ctx, { actionId });
 
 		await ensureTaskOwner(ctx, { taskId: action.taskId });
 
@@ -40,22 +39,20 @@ export const findOne = query({
 	},
 });
 
-export const request = mutation({
+export const sendMessage = mutation({
 	args: {
 		taskId: zid('tasks'),
-		kind: taskActionKindSchema,
+		message: z.string(),
 	},
-	handler: async (ctx, { taskId, kind }) => {
+	handler: async (ctx, { taskId, message }) => {
 		//
-		console.debug(`[START] request action for taskId '${taskId}' of kind '${kind}'`);
+		console.debug(`[START] send message to taskId '${taskId}'`);
 
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
-
-		const actionId = await _add(ctx, { taskId, kind }); // insert the new action as 'pending'
-		await _addActionRequestEvent(ctx, { taskId, actionId, actionKind: kind, author: currentUser._id });
+		const actionId = await _sendMessage(ctx, { taskId, message, author: currentUser._id });
 		await _scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });
 
-		console.debug(`[END] request action for taskId '${taskId}' of kind '${kind}'`);
+		console.debug(`[END] send message to taskId '${taskId}'`);
 
 		return actionId;
 	},
@@ -144,15 +141,39 @@ export const _findNext = internalQuery({
 	},
 });
 
-export const _add = internalMutation({
+export const _sendMessage = internalMutation({
 	args: {
 		taskId: zid('tasks'),
-		kind: taskActionKindSchema,
+		message: z.string(),
+		author: authorSchema,
+		status: taskActionStatusSchema.default('pending'),
 	},
-	handler: async (ctx, { taskId, kind }) => {
+	handler: async (ctx, { taskId, message, author, status }) => {
+		//
 		return await ctx.db.insert('taskActions', {
 			taskId,
-			kind,
+			author,
+			kind: 'message',
+			message,
+			status,
+			isDone: isStatusDone(status),
+		});
+	},
+});
+
+export const _reportMutation = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		changes: z.string(),
+		author: authorSchema,
+	},
+	handler: async (ctx, { taskId, changes, author }) => {
+		//
+		return await ctx.db.insert('taskActions', {
+			taskId,
+			author,
+			kind: 'mutation',
+			changes,
 			status: 'pending',
 			isDone: false,
 		});
@@ -163,13 +184,11 @@ export const _setStatus = internalMutation({
 	args: {
 		actionId: zid('taskActions'),
 		status: taskActionStatusSchema,
-		errorMessage: z.optional(z.string()),
 	},
-	handler: async (ctx, { actionId, status, errorMessage }) => {
+	handler: async (ctx, { actionId, status }) => {
 		await ctx.db.patch(actionId, {
 			status,
-			isDone: status === 'succeeded' || status === 'failed' || status === 'skipped',
-			errorMessage,
+			isDone: isStatusDone(status),
 		});
 	},
 });
@@ -185,6 +204,10 @@ export const _setStatus = internalMutation({
  * @param args.status The status to filter the actions by
  * @returns A query builder for task actions filtered by task and status
  */
+function isStatusDone(status: z.infer<typeof taskActionStatusSchema>) {
+	return status === 'succeeded' || status === 'failed' || status === 'skipped';
+}
+
 function _findByStatus(
 	ctx: QueryCtx,
 	{
@@ -207,7 +230,6 @@ export async function _setActionStatus(
 	args: {
 		actionId: Id<'taskActions'>;
 		status: z.infer<typeof taskActionStatusSchema>;
-		errorMessage?: string;
 	},
 ) {
 	return await ctx.runMutation(internal.taskActions._setStatus, args);
@@ -257,4 +279,19 @@ export async function _scheduleNextActionIfNeeded(
 
 	// schedule next action
 	return await _scheduleAction(ctx, { taskId, actionId: nextAction._id, userId });
+}
+
+export function _sendMeseeksMessage(
+	ctx: ActionCtx,
+	args: {
+		taskId: Id<'tasks'>;
+		message: string;
+	},
+) {
+	return ctx.runMutation(internal.taskActions._sendMessage, {
+		taskId: args.taskId,
+		message: args.message,
+		author: 'meseeks',
+		status: 'succeeded',
+	});
 }

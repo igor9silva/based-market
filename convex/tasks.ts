@@ -4,7 +4,7 @@ import { Id } from './_generated/dataModel';
 import { MutationCtx, QueryCtx } from './_generated/server';
 import { internalMutation, internalQuery, mutation, query } from './lib';
 import { authorSchema } from './schemas/author';
-import { _addTaskAddEvent, _addTaskMarkAsDoneEvent, _addTaskUpdateEvent } from './taskEvents';
+import { _reportMutation } from './taskActions';
 import { current as getCurrentUser } from './users.js';
 
 // Exposed ------------------------------------
@@ -41,7 +41,8 @@ export const add = mutation({
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 		const taskId = await ctx.db.insert('tasks', { title, body, owner: currentUser._id, isDone: false });
-		await _addTaskAddEvent(ctx, { taskId, author: currentUser._id });
+
+		await _reportMutation(ctx, { taskId, changes: 'Added this task.', author: currentUser._id });
 
 		return taskId;
 	},
@@ -65,9 +66,13 @@ export const markAsDone = mutation({
 		isDone: z.boolean(),
 	},
 	handler: async (ctx, { taskId, isDone }) => {
+		//
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
+
 		await ctx.db.patch(taskId, { isDone });
-		await _addTaskMarkAsDoneEvent(ctx, { taskId, author: currentUser._id, isDone });
+
+		const changes = isDone ? 'Marked as done.' : 'Marked as not done.';
+		await _reportMutation(ctx, { taskId, changes, author: currentUser._id });
 	},
 });
 
@@ -100,7 +105,11 @@ export const _update = internalMutation({
 			...(body !== undefined && { body }),
 		});
 
-		await _addTaskUpdateEvent(ctx, { taskId, author, changes: 'TODO: not implemented yet' });
+		const updatedFields = [title !== undefined && 'title', body !== undefined && 'body'].filter(Boolean);
+
+		const changes = updatedFields.length ? `Updated ${updatedFields.join(' and ')}.` : 'No fields were updated.';
+
+		await _reportMutation(ctx, { taskId, changes, author });
 	},
 });
 

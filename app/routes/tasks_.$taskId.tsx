@@ -3,11 +3,12 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
+
 import { ActionIsland } from '~/components/ActionIsland';
 import { TwoColumn } from '~/components/layout/TwoCollumn';
 import { PageHeader } from '~/components/PageHeader';
+import { TaskActions } from '~/components/TaskActions';
 import TaskDetail from '~/components/TaskDetail';
-import { TaskEvents } from '~/components/TaskEvents';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -52,8 +53,8 @@ function TaskDetailPage() {
 				<ActionIsland task={task} />
 			</PageHeader>
 			<TwoColumn>
+				<TaskActions task={task} />
 				<TaskDetail task={task} />
-				<TaskEvents task={task} />
 			</TwoColumn>
 		</>
 	);

@@ -3,9 +3,7 @@
 import { zid } from 'convex-helpers/server/zod';
 import { internal } from './_generated/api';
 import { internalAction } from './lib';
-import SPELLS from './spells';
-import { _scheduleNextActionIfNeeded, _setActionStatus } from './taskActions';
-import { _addActionErrorEvent, _addActionResultEvent } from './taskEvents';
+import { _scheduleNextActionIfNeeded, _sendMeseeksMessage, _setActionStatus } from './taskActions';
 
 export const _run = internalAction({
 	args: {
@@ -15,7 +13,7 @@ export const _run = internalAction({
 	},
 	handler: async (ctx, { taskId, actionId, userId }) => {
 		//
-		await _setActionStatus(ctx, { actionId, status: 'running' });
+		await _setActionStatus(ctx, { status: 'running', actionId });
 
 		// grab the task and action
 		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
@@ -23,18 +21,21 @@ export const _run = internalAction({
 
 		try {
 			// invoke magic rock
-			const { result } = await SPELLS[action.kind](ctx, task, action);
+			// const { result } = await SPELLS[action.kind](ctx, task, action);
 
-			await _setActionStatus(ctx, { actionId, status: 'succeeded' });
+			// TODO: do the magic
+			const result = 'test';
+
+			await _sendMeseeksMessage(ctx, { taskId: task._id, message: result });
+			await _setActionStatus(ctx, { status: 'succeeded', actionId });
 			await _scheduleNextActionIfNeeded(ctx, { taskId, userId });
-			await _addActionResultEvent(ctx, { taskId: task._id, action, result });
 			//
 		} catch (error) {
 			//
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-			await _setActionStatus(ctx, { status: 'failed', actionId, errorMessage });
-			await _addActionErrorEvent(ctx, { taskId: task._id, action, error: errorMessage });
+			await _sendMeseeksMessage(ctx, { taskId: task._id, message: errorMessage });
+			await _setActionStatus(ctx, { status: 'failed', actionId });
 
 			throw error;
 		}

@@ -1,5 +1,6 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
+import { authorSchema } from './author';
 
 export const taskActionStatusSchema = z.enum([
 	'pending', //
@@ -10,18 +11,28 @@ export const taskActionStatusSchema = z.enum([
 ]);
 
 export const taskActionKindSchema = z.enum([
-	'fill', //
-	'minify',
-	'scrape',
-	'factCheck',
-	// 'learn',
-	// 'suggest',
+	'message', //
+	'mutation',
 ]);
 
-export const taskActionSchema = z.object({
+export const coreActionSchema = z.object({
 	taskId: zid('tasks'),
-	kind: taskActionKindSchema,
+	author: authorSchema,
 	status: taskActionStatusSchema,
 	isDone: z.boolean(),
-	errorMessage: z.string().optional(),
 });
+
+export const messageActionSchema = coreActionSchema.extend({
+	kind: z.literal('message'),
+	message: z.string(),
+});
+
+export const mutationActionSchema = coreActionSchema.extend({
+	kind: z.literal('mutation'),
+	changes: z.string(),
+});
+
+export const taskActionSchema = z.discriminatedUnion('kind', [
+	messageActionSchema, //
+	mutationActionSchema,
+]);

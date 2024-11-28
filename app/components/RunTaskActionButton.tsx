@@ -1,8 +1,6 @@
 import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
-import { taskActionKindSchema } from 'convex/schema';
-import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 
 export function RunTaskActionButton({
@@ -10,19 +8,14 @@ export function RunTaskActionButton({
 	kind,
 }: {
 	task: Doc<'tasks'>;
-	kind: z.infer<typeof taskActionKindSchema>;
+	kind: string;
 }) {
-	const requestAction = useMutation(api.taskActions.request);
+	const sendMessage = useMutation(api.taskActions.sendMessage);
+	const onClick = () => sendMessage({ taskId: task._id, message: kind });
 
 	return (
-		<Button
-			onClick={() =>
-				requestAction({
-					taskId: task._id,
-					kind: kind,
-				})
-			}
-		>
+		<Button onClick={onClick}>
+			{/* */}
 			{kind.charAt(0).toUpperCase() + kind.slice(1)}
 		</Button>
 	);

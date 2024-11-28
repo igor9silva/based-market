@@ -3,7 +3,6 @@ import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
 import { taskSchema } from './schemas/task';
 import { taskActionSchema } from './schemas/taskAction';
-import { taskEventSchema } from './schemas/taskEvent';
 
 export default defineSchema({
 	//
@@ -18,13 +17,6 @@ export default defineSchema({
 
 	taskActions: defineTable(
 		zodToConvex(taskActionSchema), //
-	).index(
-		'by_task', //
-		['taskId'],
-	),
-
-	taskEvents: defineTable(
-		zodToConvex(taskEventSchema), //
 	).index(
 		'by_task', //
 		['taskId'],
