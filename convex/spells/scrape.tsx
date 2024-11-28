@@ -81,5 +81,5 @@ export default async function scrape(
 		].join('\n'),
 	});
 
-	return { result: cleaned };
+	return cleaned;
 }

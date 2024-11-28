@@ -65,5 +65,5 @@ export default async function fill(
 		warnings,
 	});
 
-	return { result: text };
+	return text;
 }

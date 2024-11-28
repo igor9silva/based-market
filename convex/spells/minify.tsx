@@ -64,5 +64,5 @@ export default async function minify(
 		warnings,
 	});
 
-	return { result: text };
+	return text;
 }

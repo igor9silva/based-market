@@ -22,6 +22,7 @@ import type * as schemas_task from "../schemas/task.js";
 import type * as schemas_taskAction from "../schemas/taskAction.js";
 import type * as spells_factCheck from "../spells/factCheck.js";
 import type * as spells_fill from "../spells/fill.js";
+import type * as spells_generic from "../spells/generic.js";
 import type * as spells_index from "../spells/index.js";
 import type * as spells_minify from "../spells/minify.js";
 import type * as spells_scrape from "../spells/scrape.js";
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   "schemas/taskAction": typeof schemas_taskAction;
   "spells/factCheck": typeof spells_factCheck;
   "spells/fill": typeof spells_fill;
+  "spells/generic": typeof spells_generic;
   "spells/index": typeof spells_index;
   "spells/minify": typeof spells_minify;
   "spells/scrape": typeof spells_scrape;

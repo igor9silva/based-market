@@ -169,13 +169,15 @@ export const _reportMutation = internalMutation({
 	},
 	handler: async (ctx, { taskId, changes, author }) => {
 		//
+		const status = author === 'meseeks' ? 'succeeded' : 'pending';
+
 		return await ctx.db.insert('taskActions', {
 			taskId,
 			author,
 			kind: 'mutation',
 			changes,
-			status: 'pending',
-			isDone: false,
+			status,
+			isDone: isStatusDone(status),
 		});
 	},
 });

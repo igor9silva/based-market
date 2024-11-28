@@ -7,6 +7,7 @@ import minify from './minify';
 import scrape from './scrape';
 
 // TODO: move spells to DB
+export { genericSpell } from './generic';
 export default {
 	fill,
 	minify,
