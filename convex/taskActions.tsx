@@ -228,7 +228,7 @@ function _findByStatus(
 }
 
 export async function _setActionStatus(
-	ctx: ActionCtx,
+	ctx: ActionCtx | MutationCtx,
 	args: {
 		actionId: Id<'taskActions'>;
 		status: z.infer<typeof taskActionStatusSchema>;
@@ -245,6 +245,9 @@ async function _scheduleAction(
 		actionId: Id<'taskActions'>;
 	},
 ) {
+	// ideally `running` would be set in the action itself, but that'd lead into a race condition
+	await _setActionStatus(ctx, { status: 'running', actionId: args.actionId });
+
 	return ctx.scheduler.runAfter(0, internal.magic._run, args);
 }
 
@@ -275,7 +278,7 @@ export async function _scheduleNextActionIfNeeded(
 	const failedActions = await ctx.runQuery(internal.taskActions._findAllFailed, { taskId });
 	if (failedActions.length > 0) return console.info(failedMessage(failedActions.length, taskId));
 
-	// skip if there are no pending actions
+	// grab next pending action, skip if there are none
 	const nextAction = await ctx.runQuery(internal.taskActions._findNext, { taskId });
 	if (!nextAction) return console.info(noPendingActionMessage(taskId));
 

@@ -16,8 +16,6 @@ export const _run = internalAction({
 	},
 	handler: async (ctx, { taskId, actionId, userId }) => {
 		//
-		await _setActionStatus(ctx, { status: 'running', actionId });
-
 		// grab the task and action
 		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
 		const action = await ctx.runQuery(internal.taskActions._findOne, { actionId });
