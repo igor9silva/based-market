@@ -1,7 +1,7 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { authorSchema } from './author';
-import { taskActionKindSchema, taskActionStatusSchema } from './taskAction';
+import { taskActionKindSchema } from './taskAction';
 
 export const actionResultErrorTaskEventSchema = z.object({
 	kind: z.literal('actionResult'),
@@ -67,18 +67,3 @@ export const taskEventSchema = z.union([
 	updateTaskEventSchema,
 	markAsDoneTaskEventSchema,
 ]);
-
-export const taskSchema = z.object({
-	owner: zid('users'),
-	title: z.string(),
-	body: z.string().optional(),
-	isDone: z.boolean(),
-});
-
-export const taskActionSchema = z.object({
-	taskId: zid('tasks'),
-	kind: taskActionKindSchema,
-	status: taskActionStatusSchema,
-	isDone: z.boolean(),
-	errorMessage: z.string().optional(),
-});
