@@ -5,7 +5,7 @@ import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 
 import { ActionIsland } from '~/components/ActionIsland';
-import { TwoColumn } from '~/components/layout/TwoCollumn';
+import { TwoColumn } from '~/components/layout/TwoColumn';
 import { PageHeader } from '~/components/PageHeader';
 import { TaskActions } from '~/components/TaskActions';
 import TaskDetail from '~/components/TaskDetail';
