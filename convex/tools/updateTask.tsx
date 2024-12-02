@@ -1,11 +1,15 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { internal } from '../_generated/api';
-import { Id } from '../_generated/dataModel';
+import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 
-export default (ctx: ActionCtx, taskId: Id<'tasks'>) =>
-	tool({
+export const updateTask = (
+	ctx: ActionCtx, //
+	task: Doc<'tasks'>,
+	action: Doc<'taskActions'>,
+) => {
+	return tool({
 		description: 'Update the task with improved title and body',
 		parameters: z.object({
 			title: z.string().optional().describe('The improved title for the task'),
@@ -14,12 +18,13 @@ export default (ctx: ActionCtx, taskId: Id<'tasks'>) =>
 		execute: async ({ title, body }) => {
 			//
 			await ctx.runMutation(internal.tasks._update, {
-				taskId,
+				taskId: task._id,
 				title,
 				body,
-				author: 'meseeks',
+				author: action._id,
 			});
 
 			return 'Task updated';
 		},
 	});
+};

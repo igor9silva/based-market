@@ -17,11 +17,7 @@ export const findAll = query({
 	handler: async (ctx, { taskId }) => {
 		//
 		await ensureTaskOwner(ctx, { taskId });
-
-		return await ctx.db
-			.query('taskActions')
-			.withIndex('by_task', (q) => q.eq('taskId', taskId))
-			.collect();
+		return await _findAll(ctx, { taskId });
 	},
 });
 
@@ -46,7 +42,7 @@ export const sendMessage = mutation({
 	},
 	handler: async (ctx, { taskId, message }) => {
 		//
-		console.debug(`[START] send message to taskId '${taskId}'`);
+		console.debug(`[START] send message '${message}' to taskId '${taskId}'`);
 
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 		const actionId = await _sendMessage(ctx, { taskId, message, author: currentUser._id });
@@ -100,6 +96,18 @@ export const retry = mutation({
 });
 
 // Internal (no authorization)------------------------------------
+
+export const _findAll = internalQuery({
+	args: {
+		taskId: zid('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		return await ctx.db
+			.query('taskActions')
+			.withIndex('by_task', (q) => q.eq('taskId', taskId))
+			.collect();
+	},
+});
 
 export const _findOne = internalQuery({
 	args: {
@@ -169,13 +177,15 @@ export const _reportMutation = internalMutation({
 	},
 	handler: async (ctx, { taskId, changes, author }) => {
 		//
-		const status = author === 'meseeks' ? 'succeeded' : 'pending';
+		// If it's a message from the user, it should be handled. Otherwise it's done.
+		// TODO: check if this comparison is working (looks like it is)
+		const status = author.__tableName === 'users' ? 'pending' : 'succeeded';
 
 		return await ctx.db.insert('taskActions', {
 			taskId,
 			author,
 			kind: 'mutation',
-			changes,
+			changes, // TODO: persist a diff
 			status,
 			isDone: isStatusDone(status),
 		});
@@ -290,13 +300,14 @@ export function _sendMeseeksMessage(
 	ctx: ActionCtx,
 	args: {
 		taskId: Id<'tasks'>;
+		actionId: Id<'taskActions'>;
 		message: string;
 	},
 ) {
 	return ctx.runMutation(internal.taskActions._sendMessage, {
 		taskId: args.taskId,
 		message: args.message,
-		author: 'meseeks',
+		author: args.actionId,
 		status: 'succeeded',
 	});
 }

@@ -3,5 +3,5 @@ import { z } from 'zod';
 
 export const authorSchema = z.union([
 	zid('users'), //
-	z.literal('meseeks'),
+	zid('taskActions'),
 ]);

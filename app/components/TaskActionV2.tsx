@@ -1,3 +1,5 @@
+import { convexQuery } from '@convex-dev/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
@@ -14,7 +16,14 @@ function Author({
 	className?: string;
 	author: z.infer<typeof authorSchema>;
 }) {
-	return <strong className={className}>{author === 'meseeks' ? 'Meseeks' : 'you'}:</strong>;
+	const query = convexQuery(api.users.current, {});
+	const { data: user } = useSuspenseQuery(query);
+
+	return (
+		<strong className={cn(className, { 'text-purple-300': author !== user._id })}>
+			{author === user._id ? 'you' : 'Meseeks'}:
+		</strong>
+	);
 }
 
 export function TaskAction({
@@ -32,7 +41,7 @@ export function TaskAction({
 		<div className={cn(className, 'flex flex-row justify-between')}>
 			<div className="flex flex-col gap-1">
 				<div className="flex flex-row gap-1 items-center">
-					<Author className={cn({ 'text-purple-300': action.author === 'meseeks' })} author={action.author} />
+					<Author author={action.author} />
 					{action.status === 'running' && <Loader2 className="size-4 shrink-0 animate-spin" />}
 					{action.status === 'succeeded' && <Check className="size-4 shrink-0" />}
 					{action.status === 'failed' && <X className="size-4 shrink-0" />}

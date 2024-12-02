@@ -4,21 +4,22 @@ import { defineSchema, defineTable } from 'convex/server';
 import { taskSchema } from './schemas/task';
 import { taskActionSchema } from './schemas/taskAction';
 
+// prettier-ignore
 export default defineSchema({
-	//
+
 	...authTables,
 
 	tasks: defineTable(
-		zodToConvex(taskSchema), //
+		zodToConvex(taskSchema),
 	).index(
-		'by_owner_isDone', //
-		['owner', 'isDone'],
+		'by_owner_isDone', ['owner', 'isDone'],
 	),
 
 	taskActions: defineTable(
-		zodToConvex(taskActionSchema), //
+		zodToConvex(taskActionSchema),
 	).index(
-		'by_task', //
-		['taskId'],
+		'by_task', ['taskId'],
+	).index(
+		'by_author', ['author'],
 	),
 });
