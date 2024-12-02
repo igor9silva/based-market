@@ -65,10 +65,10 @@ function MenuItem(item: (typeof menuItems)[number]) {
 export function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	//
 	// TODO:personalization: allow user to choose between floating and inset
-	// const variant = 'floating';
-	// const width = '3rem';
-	const variant = 'inset';
-	const width = '2.5rem';
+	const variant = 'floating';
+	const width = '3rem';
+	// const variant = 'inset';
+	// const width = '2.5rem';
 
 	return (
 		<Sidebar
