@@ -68,11 +68,7 @@ export const markAsDone = mutation({
 	handler: async (ctx, { taskId, isDone }) => {
 		//
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
-
-		await ctx.db.patch(taskId, { isDone });
-
-		const changes = isDone ? 'Marked as done.' : 'Marked as not done.';
-		await _reportMutation(ctx, { taskId, changes, author: currentUser._id });
+		await _markAsDone(ctx, { taskId, isDone, author: currentUser._id });
 	},
 });
 
@@ -109,6 +105,21 @@ export const _update = internalMutation({
 
 		const changes = updatedFields.length ? `Updated ${updatedFields.join(' and ')}.` : 'No fields were updated.';
 
+		await _reportMutation(ctx, { taskId, changes, author });
+	},
+});
+
+export const _markAsDone = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		isDone: z.boolean(),
+		author: authorSchema,
+	},
+	handler: async (ctx, { taskId, isDone, author }) => {
+		//
+		await ctx.db.patch(taskId, { isDone });
+
+		const changes = isDone ? 'Marked as done.' : 'Marked as not done.';
 		await _reportMutation(ctx, { taskId, changes, author });
 	},
 });

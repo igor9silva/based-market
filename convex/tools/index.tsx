@@ -9,6 +9,7 @@ import { authorSchema } from '../schemas/authorSchema';
 import { _runNextActionIfNeeded, _setActionStatus } from '../taskActions';
 import { checkFact } from './checkFact';
 import { doNothing } from './doNothing';
+import { markAsDone } from './markAsDone';
 import { scrapeLink } from './scrapeLink';
 import { sendMessage } from './sendMessage';
 import { updateTask } from './updateTask';
@@ -22,6 +23,7 @@ export const coreTools = (
 	sendMessage: sendMessage(ctx, task, action),
 	doNothing: doNothing(ctx, task, action),
 	updateTask: updateTask(ctx, task, action),
+	markAsDone: markAsDone(ctx, task, action),
 	// fillTask: fillTask(ctx, task, action),
 	// minifyDescription: minifyDescription(ctx, task, action),
 	scrapeLink: scrapeLink(ctx, task, action),

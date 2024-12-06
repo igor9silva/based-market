@@ -28,6 +28,7 @@ import type * as tools_checkFact from "../tools/checkFact.js";
 import type * as tools_doNothing from "../tools/doNothing.js";
 import type * as tools_fillTask from "../tools/fillTask.js";
 import type * as tools_index from "../tools/index.js";
+import type * as tools_markAsDone from "../tools/markAsDone.js";
 import type * as tools_minifyDescription from "../tools/minifyDescription.js";
 import type * as tools_scrape_invalidRequest from "../tools/scrape/invalidRequest.js";
 import type * as tools_scrape_scrapeTwitter from "../tools/scrape/scrapeTwitter.js";
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   "tools/doNothing": typeof tools_doNothing;
   "tools/fillTask": typeof tools_fillTask;
   "tools/index": typeof tools_index;
+  "tools/markAsDone": typeof tools_markAsDone;
   "tools/minifyDescription": typeof tools_minifyDescription;
   "tools/scrape/invalidRequest": typeof tools_scrape_invalidRequest;
   "tools/scrape/scrapeTwitter": typeof tools_scrape_scrapeTwitter;
