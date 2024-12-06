@@ -25,6 +25,7 @@ import type * as taskActions from "../taskActions.js";
 import type * as taskEvents from "../taskEvents.js";
 import type * as tasks from "../tasks.js";
 import type * as tools_checkFact from "../tools/checkFact.js";
+import type * as tools_doNothing from "../tools/doNothing.js";
 import type * as tools_fillTask from "../tools/fillTask.js";
 import type * as tools_index from "../tools/index.js";
 import type * as tools_minifyDescription from "../tools/minifyDescription.js";
@@ -32,6 +33,7 @@ import type * as tools_scrape_invalidRequest from "../tools/scrape/invalidReques
 import type * as tools_scrape_scrapeTwitter from "../tools/scrape/scrapeTwitter.js";
 import type * as tools_scrape_scrapeWeb from "../tools/scrape/scrapeWeb.js";
 import type * as tools_scrapeLink from "../tools/scrapeLink.js";
+import type * as tools_sendMessage from "../tools/sendMessage.js";
 import type * as tools_updateTask from "../tools/updateTask.js";
 import type * as users from "../users.js";
 
@@ -56,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   taskEvents: typeof taskEvents;
   tasks: typeof tasks;
   "tools/checkFact": typeof tools_checkFact;
+  "tools/doNothing": typeof tools_doNothing;
   "tools/fillTask": typeof tools_fillTask;
   "tools/index": typeof tools_index;
   "tools/minifyDescription": typeof tools_minifyDescription;
@@ -63,6 +66,7 @@ declare const fullApi: ApiFromModules<{
   "tools/scrape/scrapeTwitter": typeof tools_scrape_scrapeTwitter;
   "tools/scrape/scrapeWeb": typeof tools_scrape_scrapeWeb;
   "tools/scrapeLink": typeof tools_scrapeLink;
+  "tools/sendMessage": typeof tools_sendMessage;
   "tools/updateTask": typeof tools_updateTask;
   users: typeof users;
 }>;

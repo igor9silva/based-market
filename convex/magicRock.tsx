@@ -26,17 +26,36 @@ export const _think = internalAction({
 
 		try {
 			// invoke magic rock
-			const result = await invokeMagicRock(ctx, task, action);
+			const result = await _askMagicRock(ctx, task, action);
 
 			switch (result.finishReason) {
 				//
 				case 'tool-calls':
 					//
-					if (result.toolCalls.length !== 1) throw new Error('Expected one tool call.');
+					let calls = result.toolCalls;
+					if (calls.length !== 1) throw new Error('Expected one tool call.');
 
-					// TODO: think about multiple tool calls
+					if (calls[0].toolName === 'doNothing') {
+						//
+						console.debug('Doing nothing:', task._id);
+						calls = calls.slice(1);
+
+						if (calls.length > 0) throw new Error('Expected no more tool calls.');
+						//
+					} else if (calls[0].toolName === 'sendMessage') {
+						//
+						await _sendMeseeksMessage(ctx, {
+							taskId: task._id,
+							actionId: action._id,
+							message: calls[0].args.message,
+						});
+
+						calls = calls.slice(1);
+					}
+
+					// TODO: think about parallelizing tool calls
 					const toolCalls = await Promise.allSettled(
-						result.toolCalls.map((call) =>
+						calls.map((call) =>
 							_addMeseeksToolCall(ctx, {
 								taskId: task._id,
 								author: action._id,
@@ -109,7 +128,7 @@ export const _think = internalAction({
 	},
 });
 
-async function invokeMagicRock(
+async function _askMagicRock(
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
 	action: Doc<'taskActions'>,
@@ -125,24 +144,25 @@ async function invokeMagicRock(
 	} = await generateText({
 		model: openai('gpt-4o'),
 		maxSteps: 1,
+		temperature: 0.7,
 		system: [
 			`You're the most helpful assistant on earth, Meseeks.`,
 			`Meseeks knows everything about the user, so it feels like a clone.`,
 			`Meseeks also has access to the same tools as the user.`,
-			`Meseeks' access to all user knowledge combined with all user tools makes it incredibly powerful.`,
-			`You are Meseeks, act accordingly.`,
-			`What you reply will be sent to the user. You may choose to say nothing.`,
+			`You have 3 possible responses: say something, say nothing or do something (call a tool).`,
+			`Most of the time you should say nothing, it's your call.`,
+			`You will have a chance to think every time something happens on the task (like you or the user says something, or a change is made to it).`,
+			`Do not reply to yourself!`,
 			//
 			`## Context`,
 			`User is talking to you inside a task (anything he wants to achieve is a task).`,
 			`The task is the object of the conversation.`,
 			`You're solving the request the user did on their last message.`,
-			`You'll be invoked everytime something happens on the task. e.g. everytime it's updated, or there is a new message - INCLUDING YOURS!!!`,
 			`If you have nothing to say, say nothing.`,
 			`If you are not sure what is expected, just ask.`,
-			`Never repeat yourself. If you see a message from you, maybe it's done and you should say nothing.`,
-			`If you see an empty message from yourself, it means your previous invocation decided it has nothing to say or do.`,
-			`If the last message is a tool call, it's likely that you are expecting that result to proceed.`,
+			`If you are not sure what what to do next, just ask.`,
+			`NEVER EVER repeat yourself.`,
+			`If you have already said something and got invoked again, it's NOT A BUG. Think what to do next and remember you can do nothing.`,
 			//
 			`## Notes`,
 			`When updating the task, you should think of it as a TASK.`,
@@ -151,7 +171,7 @@ async function invokeMagicRock(
 			`	exemplo CORRETO: 'Shave body' (as in 'the user wants to shave their body')`,
 			`	exemplo CORRETO: 'Learn to shave body' (as in 'the user wants to learn how to shave their body')`,
 			`	exemplo INCORRETO: 'How to shave body'`,
-			`You see messages in the following format:`,
+			`You ***see*** (DO NOT WRITE) messages in the following format:`,
 			'```',
 			`<date>ISO8601 date</date>`,
 			`<kind>message|mutation</kind>`,
@@ -182,6 +202,7 @@ async function invokeMagicRock(
 		// assuming task.owner is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task._id, task.owner),
 		tools: coreTools(ctx, task),
+		toolChoice: 'required',
 	});
 
 	const result = {
@@ -192,8 +213,8 @@ async function invokeMagicRock(
 		warnings,
 	};
 
-	console.debug('responseMessages', JSON.stringify(response.messages, null, 2));
-	console.debug('replyToUser', result);
+	console.debug('askMagicRock', result);
+	console.debug('askMagicRock/responseMessages', JSON.stringify(response.messages, null, 2));
 
 	return result;
 }

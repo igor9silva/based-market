@@ -8,9 +8,9 @@ import { internalAction } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { _runNextActionIfNeeded, _setActionStatus } from '../taskActions';
 import { checkFact } from './checkFact';
-import { fillTask } from './fillTask';
-import { minifyDescription } from './minifyDescription';
+import { doNothing } from './doNothing';
 import { scrapeLink } from './scrapeLink';
+import { sendMessage } from './sendMessage';
 import { updateTask } from './updateTask';
 
 // TODO: move to DB
@@ -19,9 +19,11 @@ export const coreTools = (
 	task: Doc<'tasks'>,
 	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => ({
+	sendMessage: sendMessage(ctx, task, action),
+	doNothing: doNothing(ctx, task, action),
 	updateTask: updateTask(ctx, task, action),
-	fillTask: fillTask(ctx, task, action),
-	minifyDescription: minifyDescription(ctx, task, action),
+	// fillTask: fillTask(ctx, task, action),
+	// minifyDescription: minifyDescription(ctx, task, action),
 	scrapeLink: scrapeLink(ctx, task, action),
 	checkFact: checkFact(ctx, task, action),
 });
@@ -29,11 +31,10 @@ export const coreTools = (
 // TODO: a more robust one
 export const promptForTask = (task: Doc<'tasks'>) =>
 	[
-		`Here's the task as of now:`,
-		`ID: ${task._id}`,
-		`Title: ${task.title}`,
-		`Body: ${task.body}`,
-		`Created at: ${task._creationTime}`,
+		`<id>${task._id}</id>`, //
+		`<title>${task.title}</title>`,
+		`<body>${task.body}</body>`,
+		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
 	].join('\n');
 
 export const _run = internalAction({

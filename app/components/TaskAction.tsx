@@ -26,7 +26,9 @@ export function TaskAction({
 					<div className={cn('text-xl font-medium', action.status === 'skipped' && 'line-through')}>
 						{action.kind}
 					</div>
-					<div className="text-sm text-muted-foreground">{action.status}</div>
+					{action.kind === 'run-tool' && (
+						<div className="text-sm text-muted-foreground">{action.toolName}</div>
+					)}
 				</div>
 				{/* {action.errorMessage && <div className="text-xs text-red-500">{action.errorMessage}</div>} */}
 				<div className="text-xs text-muted-foreground">
