@@ -182,21 +182,6 @@ async function invokeMagicRock(
 		// assuming task.owner is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task._id, task.owner),
 		tools: coreTools(ctx, task),
-
-		onStepFinish({ text, toolCalls, toolResults, finishReason, usage, warnings, isContinued, stepType }) {
-			//
-			// const messages = toolCalls.map((call) => eventToCoreMessage(call, 'assistant'));
-			console.debug('onStepFinish', {
-				stepType,
-				finishReason,
-				text,
-				usage,
-				warnings,
-				isContinued,
-				toolCalls,
-				toolResults,
-			});
-		},
 	});
 
 	const result = {
@@ -278,9 +263,25 @@ async function renderHistory(
 	const history = events
 		.map((event) => ({ event, author: event.author === userId ? ('user' as const) : ('assistant' as const) }))
 		.map(eventToCoreMessage)
-		.filter((event): event is CoreMessage => event !== undefined);
+		.filter((event): event is CoreMessage => event !== undefined)
+		.flatMap((message) => message);
 
 	console.debug('renderHistory', history);
 
-	return history.flatMap((message) => message);
+	validateHistory(history);
+
+	return history;
+}
+
+function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
+	//
+	const maxConsecutiveMeseeksEvents = 5; // TODO: env var
+	const lastMessages = history.slice(-maxConsecutiveMeseeksEvents);
+
+	// throw if last {maxConsecutiveMeseeksEvents} events are from meseeks
+	if (lastMessages.every((message) => message.role === 'assistant')) {
+		throw new Error(`Too many (${maxConsecutiveMeseeksEvents}) consecutive meseeks events.`);
+	}
+
+	return history;
 }
