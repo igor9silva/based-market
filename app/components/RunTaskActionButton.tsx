@@ -10,8 +10,13 @@ export function RunTaskActionButton({
 	task: Doc<'tasks'>;
 	kind: string;
 }) {
-	const sendMessage = useMutation(api.taskActions.sendMessage);
-	const onClick = () => sendMessage({ taskId: task._id, message: kind });
+	const callTool = useMutation(api.taskEvents.callTool);
+	const onClick = () =>
+		callTool({
+			toolName: kind,
+			taskId: task._id,
+			args: {},
+		});
 
 	return (
 		<Button onClick={onClick}>

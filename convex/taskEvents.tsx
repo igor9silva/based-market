@@ -1,3 +1,4 @@
+import { generateId } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internal } from './_generated/api';
@@ -65,7 +66,7 @@ export const callTool = mutation({
 	args: {
 		taskId: zid('tasks'),
 		toolName: z.string(),
-		toolCallId: z.string(),
+		toolCallId: z.string().optional(),
 		args: z.record(z.any()),
 	},
 	handler: async (ctx, { taskId, toolName, toolCallId, args }) => {
@@ -157,7 +158,7 @@ export const _callTool = internalMutation({
 		taskId: zid('tasks'),
 		author: authorSchema,
 		toolName: z.string(),
-		toolCallId: z.string(),
+		toolCallId: z.string().optional(),
 		args: z.record(z.any()),
 		statusText: z.string().optional(),
 	},
@@ -168,12 +169,12 @@ export const _callTool = internalMutation({
 			author,
 			kind: 'tool-call',
 			toolName,
-			toolCallId,
+			toolCallId: toolCallId ?? generateId(),
 			args,
 			statusText,
 		});
 
-		await _requestRunTool(ctx, { eventId, taskId, author, toolName, args });
+		await _requestRunTool(ctx, { origin: eventId, taskId, author, toolName, args });
 
 		return eventId;
 	},

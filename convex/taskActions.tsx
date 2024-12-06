@@ -35,38 +35,6 @@ export const findOne = query({
 	},
 });
 
-export const requestThink = mutation({
-	args: {
-		taskId: zid('tasks'),
-		eventId: zid('taskEvents'),
-	},
-	handler: async (ctx, { taskId, eventId }) => {
-		//
-		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
-		return await _requestThink(ctx, { eventId, taskId, author: currentUser._id });
-	},
-});
-
-export const requestRunTool = mutation({
-	args: {
-		taskId: zid('tasks'),
-		eventId: zid('taskEvents'),
-		toolName: z.string(),
-		args: z.record(z.any()),
-	},
-	handler: async (ctx, { taskId, eventId, toolName, args }) => {
-		//
-		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
-		return await _requestRunTool(ctx, {
-			eventId,
-			taskId,
-			author: currentUser._id,
-			toolName,
-			args,
-		});
-	},
-});
-
 export const skip = mutation({
 	args: {
 		actionId: zid('taskActions'),
@@ -203,17 +171,17 @@ export const _requestThink = internalMutation({
 
 export const _requestRunTool = internalMutation({
 	args: {
-		eventId: zid('taskEvents'),
+		origin: zid('taskEvents'),
 		taskId: zid('tasks'),
 		author: authorSchema,
 		toolName: z.string(),
 		args: z.record(z.any()),
 	},
-	handler: async (ctx, { eventId, taskId, author, toolName, args }) => {
+	handler: async (ctx, { origin, taskId, author, toolName, args }) => {
 		//
 		const actionId = await ctx.db.insert('taskActions', {
 			kind: 'run-tool',
-			origin: eventId,
+			origin,
 			author,
 			taskId,
 			toolName,

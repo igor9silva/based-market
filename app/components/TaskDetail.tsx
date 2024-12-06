@@ -1,7 +1,6 @@
 import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
-import { RunTaskActionButton } from '~/components/RunTaskActionButton';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
@@ -42,10 +41,10 @@ export default function TaskDetail({
 					<Button onClick={() => markAsDone({ taskId: task._id, isDone: !task.isDone })}>
 						{task.isDone ? 'Unmark' : 'Mark'} as done
 					</Button>
-					<RunTaskActionButton task={task} kind="fill" />
+					{/* <RunTaskActionButton task={task} kind="fill" />
 					<RunTaskActionButton task={task} kind="minify" />
 					<RunTaskActionButton task={task} kind="scrape" />
-					<RunTaskActionButton task={task} kind="factCheck" />
+					<RunTaskActionButton task={task} kind="factCheck" /> */}
 				</div>
 			</CardHeader>
 			<CardContent className="[&>*]:whitespace-break-spaces [&>*]:break-all pt-0">

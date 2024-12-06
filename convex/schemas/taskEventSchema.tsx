@@ -25,7 +25,7 @@ export const mutationEventSchema = coreEventSchema.extend({
 
 export const toolCallEventSchema = coreEventSchema.extend({
 	kind: z.literal('tool-call'),
-	toolCallId: z.string(), // the one from the provider if comes from LLM, otherwise same as `._id`
+	toolCallId: z.string(), // the one from the provider if comes from LLM, otherwise we generate one
 	toolName: z.string(),
 	args: z.record(z.any()),
 	statusText: z.string().optional(), // can be optionally set by the LLM multiple times, will be rendered to the user
