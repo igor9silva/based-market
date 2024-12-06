@@ -1,17 +1,23 @@
 'use node';
 
+import { zid } from 'convex-helpers/server/zod';
+import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
+import { internalAction } from '../lib';
+import { authorSchema } from '../schemas/authorSchema';
+import { _runNextActionIfNeeded, _setActionStatus } from '../taskActions';
 import { checkFact } from './checkFact';
 import { fillTask } from './fillTask';
 import { minifyDescription } from './minifyDescription';
 import { scrapeLink } from './scrapeLink';
 import { updateTask } from './updateTask';
 
+// TODO: move to DB
 export const coreTools = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => ({
 	updateTask: updateTask(ctx, task, action),
 	fillTask: fillTask(ctx, task, action),
@@ -29,3 +35,56 @@ export const promptForTask = (task: Doc<'tasks'>) =>
 		`Body: ${task.body}`,
 		`Created at: ${task._creationTime}`,
 	].join('\n');
+
+export const _run = internalAction({
+	args: {
+		author: authorSchema,
+		taskId: zid('tasks'),
+		actionId: zid('taskActions'),
+	},
+	handler: async (ctx, { taskId, actionId, author }) => {
+		//
+		// make sure the action is a tool call
+		const action = await ctx.runQuery(internal.taskActions._findOne, { actionId });
+		if (action.kind !== 'run-tool') throw new Error('Expected a tool call action.');
+
+		// grab the task
+		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
+
+		try {
+			//
+			const availableTools = coreTools(ctx, task, action);
+			const tool = availableTools[action.toolName as keyof typeof availableTools];
+
+			if (!tool) throw new Error(`Unknown tool: ${action.toolName}`);
+
+			const parsedArgs = tool.parameters.safeParse(action.args);
+			if (!parsedArgs.success) throw new Error(`Invalid tool args: ${parsedArgs.error.message}`);
+
+			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
+			const result = await tool.execute(parsedArgs.data);
+
+			await ctx.runMutation(internal.taskEvents._setToolCallResult, {
+				eventId: action.origin,
+				result,
+			});
+
+			await _setActionStatus(ctx, { status: 'succeeded', actionId });
+			await _runNextActionIfNeeded(ctx, { taskId, author });
+			//
+		} catch (error) {
+			//
+			console.error('error in tool', error); // TODO: notify
+
+			await ctx.runMutation(internal.taskEvents._setToolCallResult, {
+				eventId: action.origin,
+				result: `Failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+				isError: true,
+			});
+
+			await _setActionStatus(ctx, { status: 'failed', actionId });
+
+			throw error;
+		}
+	},
+});

@@ -7,16 +7,22 @@ import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 import { updateTask } from './updateTask';
 
+const metadata = {
+	description: 'Minify the task description to fit in a tweet.',
+	parameters: z.object({
+		description: z.string(),
+	}),
+};
+
 export const minifyDescription = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => {
+	if (!action) return tool(metadata);
+
 	return tool({
-		description: 'Minify the task description to fit in a tweet.',
-		parameters: z.object({
-			description: z.string(),
-		}),
+		...metadata,
 		execute: async ({ description }) => {
 			//
 			console.debug('Minifying task:', task._id);

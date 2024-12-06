@@ -3,25 +3,38 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText, tool } from 'ai';
 import { z } from 'zod';
+import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 import { invalidRequest } from './scrape/invalidRequest';
 import { scrapeTwitter } from './scrape/scrapeTwitter';
 import { scrapeWeb } from './scrape/scrapeWeb';
 
+const metadata = {
+	description: "Scrape the URL provided and return it's content.",
+	parameters: z.object({
+		url: z.string().url(),
+	}),
+};
+
 export const scrapeLink = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => {
+	if (!action) return tool(metadata);
+
 	return tool({
-		description: "Scrape the URL provided and return it's content.",
-		parameters: z.object({
-			url: z.string().url(),
-		}),
-		execute: async ({ url }) => {
+		...metadata,
+		execute: async (args) => {
 			//
+			const { url } = args;
 			console.debug(`Scraping ${url} from task: ${task._id}`);
+
+			await ctx.runMutation(internal.taskEvents._setToolCallStatusText, {
+				eventId: action.origin,
+				text: `Scraping ${url}`,
+			});
 
 			const {
 				text,
@@ -53,24 +66,18 @@ export const scrapeLink = (
 				},
 			});
 
-			if (toolResults.length > 1) {
-				console.warn('More than one tool call is not expected.');
-			} else if (toolResults.length === 0) {
-				console.warn('Tool call was expected.');
-				throw new Error('Tool call was expected.');
-			}
+			if (toolResults.length !== 1) throw new Error('Expected one tool result.');
+			const scrapped = toolResults.at(0)?.result as string;
 
-			const scrapped = toolResults.at(0)?.result;
-
-			if (!scrapped) {
-				console.warn('Tool result was expected.');
-				throw new Error('Tool result was expected.');
-			}
+			await ctx.runMutation(internal.taskEvents._setToolCallStatusText, {
+				eventId: action.origin,
+				text: `Scraped done, removing noise`,
+			});
 
 			console.debug('scrapeLink', {
 				text,
 				finishReason,
-				// toolCalls,
+				toolCalls,
 				toolResults,
 				// steps,
 				usage,

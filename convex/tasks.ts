@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { Id } from './_generated/dataModel';
 import { MutationCtx, QueryCtx } from './_generated/server';
 import { internalMutation, internalQuery, mutation, query } from './lib';
-import { authorSchema } from './schemas/author';
-import { _reportMutation } from './taskActions';
+import { authorSchema } from './schemas/authorSchema';
+import { _reportMutation } from './taskEvents';
 import { current as getCurrentUser } from './users.js';
 
 // Exposed ------------------------------------

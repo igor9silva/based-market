@@ -8,14 +8,20 @@ import { ActionCtx } from '../_generated/server';
 import { promptForTask } from '../tools';
 import { updateTask } from './updateTask';
 
+const metadata = {
+	description: 'Fill and improve all possible task fields based on info we know.',
+	parameters: z.object({}),
+};
+
 export const fillTask = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => {
+	if (!action) return tool(metadata);
+
 	return tool({
-		description: 'Fill and improve all possible task fields based on info we know.',
-		parameters: z.object({}),
+		...metadata,
 		execute: async () => {
 			//
 			console.debug('Filling task:', task._id);

@@ -4,17 +4,23 @@ import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 
+const metadata = {
+	description: 'Update the task with improved title and body',
+	parameters: z.object({
+		title: z.string().optional().describe('The improved title for the task'),
+		body: z.string().optional().describe('The improved body/description for the task'),
+	}),
+};
+
 export const updateTask = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => {
+	if (!action) return tool(metadata);
+
 	return tool({
-		description: 'Update the task with improved title and body',
-		parameters: z.object({
-			title: z.string().optional().describe('The improved title for the task'),
-			body: z.string().optional().describe('The improved body/description for the task'),
-		}),
+		...metadata,
 		execute: async ({ title, body }) => {
 			//
 			await ctx.runMutation(internal.tasks._update, {

@@ -6,16 +6,23 @@ import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 
+const metadata = {
+	description: 'Check if a fact is true or false.',
+	parameters: z.object({
+		claim: z.string(),
+	}),
+};
+
+// TODO: build a nicer meseeksTool() abstraction
 export const checkFact = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => {
+	if (!action) return tool(metadata);
+
 	return tool({
-		description: 'Check if a fact is true or false.',
-		parameters: z.object({
-			claim: z.string(),
-		}),
+		...metadata,
 		execute: async ({ claim }) => {
 			//
 			console.debug('Fact-checking task:', task._id);

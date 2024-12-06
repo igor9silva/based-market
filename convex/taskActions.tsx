@@ -4,8 +4,8 @@ import { internal } from './_generated/api';
 import { Id } from './_generated/dataModel.js';
 import { ActionCtx, MutationCtx, QueryCtx } from './_generated/server.js';
 import { internalMutation, internalQuery, mutation, query } from './lib';
-import { authorSchema } from './schemas/author';
-import { taskActionStatusSchema } from './schemas/taskAction';
+import { authorSchema } from './schemas/authorSchema';
+import { taskActionKindSchema, taskActionStatusSchema } from './schemas/taskActionSchema';
 import { ensureTaskOwner } from './tasks';
 
 // Exposed -------------------------------------
@@ -35,22 +35,35 @@ export const findOne = query({
 	},
 });
 
-export const sendMessage = mutation({
+export const requestThink = mutation({
 	args: {
 		taskId: zid('tasks'),
-		message: z.string(),
+		eventId: zid('taskEvents'),
 	},
-	handler: async (ctx, { taskId, message }) => {
+	handler: async (ctx, { taskId, eventId }) => {
 		//
-		console.debug(`[START] send message '${message}' to taskId '${taskId}'`);
-
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
-		const actionId = await _sendMessage(ctx, { taskId, message, author: currentUser._id });
-		await _scheduleNextActionIfNeeded(ctx, { taskId, userId: currentUser._id });
+		return await _requestThink(ctx, { eventId, taskId, author: currentUser._id });
+	},
+});
 
-		console.debug(`[END] send message to taskId '${taskId}'`);
-
-		return actionId;
+export const requestRunTool = mutation({
+	args: {
+		taskId: zid('tasks'),
+		eventId: zid('taskEvents'),
+		toolName: z.string(),
+		args: z.record(z.any()),
+	},
+	handler: async (ctx, { taskId, eventId, toolName, args }) => {
+		//
+		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
+		return await _requestRunTool(ctx, {
+			eventId,
+			taskId,
+			author: currentUser._id,
+			toolName,
+			args,
+		});
 	},
 });
 
@@ -72,7 +85,7 @@ export const skip = mutation({
 
 		await _setStatus(ctx, { actionId, status: 'skipped' });
 		// TODO: add event
-		await _scheduleNextActionIfNeeded(ctx, { taskId: action.taskId, userId: currentUser._id });
+		await _runNextActionIfNeeded(ctx, { taskId: action.taskId, author: currentUser._id });
 	},
 });
 
@@ -90,7 +103,12 @@ export const retry = mutation({
 		// retry is only allowed for failed actions
 		if (action.status !== 'failed') throw new Error(`Cannot retry ${action.status} actions`);
 
-		await _scheduleAction(ctx, { taskId: action.taskId, actionId, userId: currentUser._id });
+		await _runAction(ctx, {
+			taskId: action.taskId,
+			actionId,
+			author: currentUser._id,
+			actionKind: action.kind,
+		});
 		// TODO: add event
 	},
 });
@@ -149,46 +167,64 @@ export const _findNext = internalQuery({
 	},
 });
 
-export const _sendMessage = internalMutation({
+export const _requestThink = internalMutation({
 	args: {
+		eventId: zid('taskEvents'),
 		taskId: zid('tasks'),
-		message: z.string(),
 		author: authorSchema,
-		status: taskActionStatusSchema.default('pending'),
 	},
-	handler: async (ctx, { taskId, message, author, status }) => {
+	handler: async (ctx, { eventId, taskId, author }) => {
 		//
-		return await ctx.db.insert('taskActions', {
-			taskId,
+		// skip if there is already a pending think action
+		const pendingThink = await _findByStatus(ctx, { taskId, status: 'pending' })
+			.filter((q) => q.eq(q.field('kind'), 'think'))
+			.first();
+
+		if (pendingThink) {
+			return console.debug(
+				`Skipping scheduling think action for task ${taskId} because there is already a pending think action.`,
+			);
+		}
+
+		const actionId = await ctx.db.insert('taskActions', {
+			kind: 'think',
+			origin: eventId,
 			author,
-			kind: 'message',
-			message,
-			status,
-			isDone: isStatusDone(status),
+			taskId,
+			status: 'pending',
+			isDone: false,
 		});
+
+		await _runNextActionIfNeeded(ctx, { taskId, author });
+
+		return actionId;
 	},
 });
 
-export const _reportMutation = internalMutation({
+export const _requestRunTool = internalMutation({
 	args: {
+		eventId: zid('taskEvents'),
 		taskId: zid('tasks'),
-		changes: z.string(),
 		author: authorSchema,
+		toolName: z.string(),
+		args: z.record(z.any()),
 	},
-	handler: async (ctx, { taskId, changes, author }) => {
+	handler: async (ctx, { eventId, taskId, author, toolName, args }) => {
 		//
-		// If it's a message from the user, it should be handled. Otherwise it's done.
-		// TODO: check if this comparison is working (looks like it is)
-		const status = author.__tableName === 'users' ? 'pending' : 'succeeded';
-
-		return await ctx.db.insert('taskActions', {
-			taskId,
+		const actionId = await ctx.db.insert('taskActions', {
+			kind: 'run-tool',
+			origin: eventId,
 			author,
-			kind: 'mutation',
-			changes, // TODO: persist a diff
-			status,
-			isDone: isStatusDone(status),
+			taskId,
+			toolName,
+			args,
+			status: 'pending',
+			isDone: false,
 		});
+
+		await _runNextActionIfNeeded(ctx, { taskId, author });
+
+		return actionId;
 	},
 });
 
@@ -232,8 +268,11 @@ function _findByStatus(
 ) {
 	return ctx.db
 		.query('taskActions')
-		.withIndex('by_task', (q) => q.eq('taskId', taskId))
-		.filter((q) => q.eq(q.field('status'), status))
+		.withIndex('by_task_status', (q) =>
+			q
+				.eq('taskId', taskId) //
+				.eq('status', status),
+		)
 		.order('asc');
 }
 
@@ -247,28 +286,40 @@ export async function _setActionStatus(
 	return await ctx.runMutation(internal.taskActions._setStatus, args);
 }
 
-async function _scheduleAction(
+async function _runAction(
 	ctx: ActionCtx | MutationCtx,
 	args: {
-		userId: Id<'users'>;
+		author: z.infer<typeof authorSchema>;
 		taskId: Id<'tasks'>;
 		actionId: Id<'taskActions'>;
+		actionKind: z.infer<typeof taskActionKindSchema>;
 	},
 ) {
 	// ideally `running` would be set in the action itself, but that'd lead into a race condition
 	await _setActionStatus(ctx, { status: 'running', actionId: args.actionId });
 
-	return ctx.scheduler.runAfter(0, internal.magic._run, args);
+	const params = {
+		taskId: args.taskId,
+		actionId: args.actionId,
+		author: args.author,
+	};
+
+	switch (args.actionKind) {
+		case 'think':
+			return ctx.scheduler.runAfter(0, internal.magicRock._think, params);
+		case 'run-tool':
+			return ctx.scheduler.runAfter(0, internal.tools.index._run, params);
+	}
 }
 
-export async function _scheduleNextActionIfNeeded(
+export async function _runNextActionIfNeeded(
 	ctx: ActionCtx | MutationCtx,
 	{
 		taskId,
-		userId,
+		author,
 	}: {
 		taskId: Id<'tasks'>;
-		userId: Id<'users'>;
+		author: z.infer<typeof authorSchema>;
 	},
 ) {
 	const busyMessage = (amount: number, taskId: Id<'tasks'>) =>
@@ -293,21 +344,10 @@ export async function _scheduleNextActionIfNeeded(
 	if (!nextAction) return console.info(noPendingActionMessage(taskId));
 
 	// schedule next action
-	return await _scheduleAction(ctx, { taskId, actionId: nextAction._id, userId });
-}
-
-export function _sendMeseeksMessage(
-	ctx: ActionCtx,
-	args: {
-		taskId: Id<'tasks'>;
-		actionId: Id<'taskActions'>;
-		message: string;
-	},
-) {
-	return ctx.runMutation(internal.taskActions._sendMessage, {
-		taskId: args.taskId,
-		message: args.message,
-		author: args.actionId,
-		status: 'succeeded',
+	return await _runAction(ctx, {
+		taskId,
+		actionId: nextAction._id,
+		author,
+		actionKind: nextAction.kind,
 	});
 }

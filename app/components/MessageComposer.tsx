@@ -12,13 +12,11 @@ import { cn } from '~/lib/utils';
 export function MessageComposer({
 	className, //
 	task,
-	actions,
 }: {
 	className?: string;
 	task: Doc<'tasks'>;
-	actions: Array<Doc<'taskActions'>>;
 }) {
-	const sendMessage = useMutation(api.taskActions.sendMessage);
+	const sendMessage = useMutation(api.taskEvents.sendMessage);
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({

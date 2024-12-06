@@ -3,7 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { MessageComposer } from '~/components/MessageComposer';
-import { TaskAction } from '~/components/TaskActionV2';
+import { TaskEvent } from '~/components/TaskEvent';
 import { Card, CardContent } from '~/components/ui/card';
 import { cn } from '~/lib/utils';
 
@@ -14,18 +14,18 @@ export function TaskConversation({
 	className?: string;
 	task: Doc<'tasks'>;
 }) {
-	const query = convexQuery(api.taskActions.findAll, { taskId: task._id });
-	const { data: actions } = useSuspenseQuery(query);
+	const query = convexQuery(api.taskEvents.findAll, { taskId: task._id });
+	const { data: events } = useSuspenseQuery(query);
 
 	return (
 		<Card className={cn('whitespace-pre-wrap', className)}>
 			<CardContent className="space-y-4">
 				<h3 className="text-lg font-semibold">Conversation</h3>
-				{actions.map((action) => (
-					<TaskAction key={action._id} action={action} />
+				{events.map((event) => (
+					<TaskEvent key={event._id} event={event} />
 				))}
 			</CardContent>
-			<MessageComposer task={task} actions={actions} />
+			<MessageComposer task={task} />
 		</Card>
 	);
 }
