@@ -7,10 +7,17 @@ import { AnimatePresence, motion } from 'motion/react';
 import { forwardRef, useRef, useState } from 'react';
 import { TaskAction } from '~/components/TaskAction';
 import { useClickOutside } from '~/hooks/useClickOutside';
+import { cn } from '~/lib/utils';
 
 const TRANSITION = { duration: 0.25, type: 'spring' };
 
-export function ActionIsland({ task }: { task: Doc<'tasks'> }) {
+export function ActionIsland({
+	task, //
+	className,
+}: {
+	task: Doc<'tasks'>;
+	className?: string;
+}) {
 	//
 	const ref = useRef<HTMLDivElement>(null);
 	const [isExpanded, setIsExpanded] = useState(false);
@@ -24,7 +31,10 @@ export function ActionIsland({ task }: { task: Doc<'tasks'> }) {
 	return (
 		<motion.div
 			ref={ref}
-			className="bg-secondary text-secondary-foreground rounded-lg cursor-pointer right-2 absolute overflow-hidden z-20"
+			className={cn(
+				'absolute bg-secondary text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[90%]',
+				className,
+			)}
 			transition={TRANSITION}
 			initial={{
 				top: 'auto',

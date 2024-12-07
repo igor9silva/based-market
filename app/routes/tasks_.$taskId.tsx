@@ -32,8 +32,8 @@ function TaskDetailPage() {
 
 	return (
 		<div className="flex flex-col absolute h-full w-full overflow-hidden">
-			<PageHeader className="flex justify-between items-center">
-				<Breadcrumb>
+			<PageHeader className="flex md:justify-start items-center">
+				<Breadcrumb className="flex-grow">
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
@@ -50,7 +50,7 @@ function TaskDetailPage() {
 						</BreadcrumbItem>
 					</BreadcrumbList>
 				</Breadcrumb>
-				<ActionIsland task={task} />
+				<ActionIsland task={task} className="right-2 z-20" />
 			</PageHeader>
 			<TwoColumn className="overflow-hidden flex-grow">
 				<TaskConversation task={task} />
