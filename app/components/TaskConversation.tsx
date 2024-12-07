@@ -18,8 +18,10 @@ export function TaskConversation({
 
 	return (
 		<div className={cn('flex flex-col whitespace-pre-wrap overflow-auto', className)}>
-			<h3 className="text-lg font-semibold sticky top-0 bg-background/75 p-4">Conversation</h3>
-			<div className="p-4">
+			<h2 className="text-2xl font-bold leading-none break-all sticky top-0 bg-background/75 p-4">
+				Conversation
+			</h2>
+			<div className="p-4 flex-grow flex flex-col justify-end">
 				{events.map((event) => (
 					<TaskEvent key={event._id} event={event} />
 				))}

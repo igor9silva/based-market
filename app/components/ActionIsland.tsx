@@ -24,7 +24,7 @@ export function ActionIsland({ task }: { task: Doc<'tasks'> }) {
 	return (
 		<motion.div
 			ref={ref}
-			className="bg-secondary text-secondary-foreground rounded-lg cursor-pointer right-2 absolute overflow-hidden"
+			className="bg-secondary text-secondary-foreground rounded-lg cursor-pointer right-2 absolute overflow-hidden z-20"
 			transition={TRANSITION}
 			initial={{
 				top: 'auto',
