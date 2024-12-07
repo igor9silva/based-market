@@ -11,7 +11,7 @@ export const Route = createFileRoute('/')({
 
 export default function Inbox() {
 	return (
-		<>
+		<div>
 			<PageHeader>
 				<Breadcrumb>
 					<BreadcrumbList>
@@ -31,6 +31,6 @@ export default function Inbox() {
 					<QuickAdd />
 				</Grid.Side>
 			</Grid>
-		</>
+		</div>
 	);
 }

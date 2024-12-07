@@ -87,6 +87,8 @@
 @layer base {
 	* {
 		@apply border-border;
+		/* style all scrollbars */
+		@apply scrollbar-thin scrollbar-track-muted/30 scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/90;
 	}
 	body {
 		@apply bg-background text-foreground;

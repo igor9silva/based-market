@@ -50,7 +50,7 @@ const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>((
 			transition={TRANSITION}
 			initial={{ opacity: 0, height: 0 }}
 			animate={{ opacity: 1, height: 'auto' }}
-			className="max-h-[90dvh] overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/50 hover:scrollbar-thumb-muted-foreground/80 scrollbar-track-rounded-full scrollbar-thumb-rounded-full"
+			className="max-h-[90dvh] overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/50 hover:scrollbar-thumb-muted-foreground/80"
 		>
 			<div className="p-4">
 				<div className="flex items-center justify-between mb-4">

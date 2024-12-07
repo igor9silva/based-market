@@ -19,8 +19,8 @@ export default function TaskDetail({
 	const markAsDone = useMutation(api.tasks.markAsDone);
 
 	return (
-		<Card className={cn('whitespace-pre-wrap', className)}>
-			<CardHeader className="max-w-full">
+		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto', className)}>
+			<CardHeader className="p-4 max-w-full sticky top-0 bg-background/75 z-10">
 				<div className="flex flex-col">
 					<EditableContent
 						key={task.title}
@@ -47,7 +47,7 @@ export default function TaskDetail({
 					<RunTaskActionButton task={task} kind="factCheck" /> */}
 				</div>
 			</CardHeader>
-			<CardContent className="[&>*]:whitespace-break-spaces [&>*]:break-all pt-0">
+			<CardContent className="p-4 [&>*]:whitespace-break-spaces [&>*]:break-all pt-0">
 				<EditableContent
 					key={task.body}
 					value={task.body ?? ''}
@@ -62,7 +62,7 @@ export default function TaskDetail({
 							)}
 						</div>
 					)}
-					editClassName="min-h-32"
+					editClassName="min-h-56"
 				/>
 			</CardContent>
 		</Card>

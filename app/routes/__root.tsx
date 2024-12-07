@@ -25,7 +25,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 					'maximum-scale=1',
 					'user-scalable=no',
 					'viewport-fit=cover',
-				].join(', '),
+				].join(','),
 			},
 		],
 		links: [{ rel: 'stylesheet', href: appCss }],
@@ -62,15 +62,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<AuthLoading>
 				<Loading />
 			</AuthLoading>
-			<Authenticated>
-				<MainSidebar />
-				<SidebarInset className="w-full p-2">
-					<div className="flex flex-col gap-2 m-2">{children}</div>
-				</SidebarInset>
-			</Authenticated>
 			<Unauthenticated>
 				<AccessDenied />
 			</Unauthenticated>
+			<Authenticated>
+				<MainSidebar />
+				<SidebarInset className="w-full">{children}</SidebarInset>
+			</Authenticated>
 		</SidebarProvider>
 	);
 }

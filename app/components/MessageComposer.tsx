@@ -4,7 +4,6 @@ import { useMutation } from 'convex/react';
 import { SendIcon } from 'lucide-react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
-import { Card, CardContent } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { cn } from '~/lib/utils';
@@ -28,15 +27,13 @@ export function MessageComposer({
 	});
 
 	return (
-		<Card className={cn('max-h-fit', className)}>
-			<CardContent className="p-4">
-				<form onSubmit={handleSubmit} className="flex flex-row gap-2">
-					<Input type="text" name="message" required />
-					<Button type="submit">
-						<SendIcon className="size-4" />
-					</Button>
-				</form>
-			</CardContent>
-		</Card>
+		<div className={cn('p-4 max-h-fit', className)}>
+			<form onSubmit={handleSubmit} className="flex flex-row gap-2">
+				<Input type="text" name="message" required />
+				<Button type="submit">
+					<SendIcon className="size-4" />
+				</Button>
+			</form>
+		</div>
 	);
 }

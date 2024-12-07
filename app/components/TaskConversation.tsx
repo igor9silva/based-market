@@ -4,7 +4,6 @@ import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { MessageComposer } from '~/components/MessageComposer';
 import { TaskEvent } from '~/components/TaskEvent';
-import { Card, CardContent } from '~/components/ui/card';
 import { cn } from '~/lib/utils';
 
 export function TaskConversation({
@@ -18,14 +17,14 @@ export function TaskConversation({
 	const { data: events } = useSuspenseQuery(query);
 
 	return (
-		<Card className={cn('whitespace-pre-wrap', className)}>
-			<CardContent className="space-y-4">
-				<h3 className="text-lg font-semibold">Conversation</h3>
+		<div className={cn('flex flex-col whitespace-pre-wrap overflow-auto', className)}>
+			<h3 className="text-lg font-semibold sticky top-0 bg-background/75 p-4">Conversation</h3>
+			<div className="p-4">
 				{events.map((event) => (
 					<TaskEvent key={event._id} event={event} />
 				))}
-			</CardContent>
-			<MessageComposer task={task} />
-		</Card>
+			</div>
+			<MessageComposer className="sticky bottom-0 bg-background/75 p-4" task={task} />
+		</div>
 	);
 }

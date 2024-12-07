@@ -31,7 +31,7 @@ function TaskDetailPage() {
 	const { data: task } = useSuspenseQuery(query);
 
 	return (
-		<>
+		<div className="flex flex-col absolute h-full overflow-hidden">
 			<PageHeader className="flex justify-between items-center">
 				<Breadcrumb>
 					<BreadcrumbList>
@@ -52,10 +52,10 @@ function TaskDetailPage() {
 				</Breadcrumb>
 				<ActionIsland task={task} />
 			</PageHeader>
-			<TwoColumn>
+			<TwoColumn className="overflow-hidden">
 				<TaskConversation task={task} />
 				<TaskDetail task={task} />
 			</TwoColumn>
-		</>
+		</div>
 	);
 }
