@@ -5,6 +5,7 @@ import { Doc } from 'convex/_generated/dataModel';
 import { authorSchema } from 'convex/schemas/authorSchema';
 import { useMemo } from 'react';
 import { z } from 'zod';
+import MDX from '~/components/ui/mdx';
 import { useAnimatedText } from '~/hooks/useAnimatedText';
 import { cn } from '~/lib/utils';
 
@@ -38,9 +39,10 @@ export function TaskEvent({
 	const content = useMemo(() => {
 		// prettier-ignore
 		switch (event.kind) {
-			case 'tool-call': return event.result ?? event.statusText;
+			case 'tool-call': return event.result ?? event.statusText ?? '';
 			case 'message': return event.message;
 			case 'mutation': return event.changes;
+			default: return '';
 		}
 	}, [event]);
 
@@ -56,7 +58,7 @@ export function TaskEvent({
 				</div>
 
 				<div className={cn(event.kind === 'tool-call' && !event.result && 'animate-pulse')}>
-					{isNew ? <AnimatedContent content={content ?? ''} /> : content}
+					{isNew ? <AnimatedContent content={content} /> : <Content content={content} />}
 				</div>
 			</div>
 		</div>
@@ -64,5 +66,10 @@ export function TaskEvent({
 }
 
 function AnimatedContent({ content }: { content: string }) {
-	return <>{useAnimatedText(content)}</>;
+	const text = useAnimatedText(content);
+	return <Content content={text} />;
+}
+
+function Content({ content }: { content: string }) {
+	return <MDX text={content} />;
 }

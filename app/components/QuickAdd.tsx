@@ -4,7 +4,7 @@ import { useMutation } from 'convex/react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
-import { Input } from '~/components/ui/input';
+import { Textarea } from '~/components/ui/textarea';
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { cn } from '~/lib/utils';
 
@@ -15,21 +15,21 @@ export function QuickAdd({ className }: { className?: string }) {
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
-			title: z.string().min(1, 'Title is required'),
+			body: z.string().min(1, 'Body is required'),
 		}),
 		handler: async (data) => {
-			const taskId = await addTask({ title: data.title });
+			const taskId = await addTask({ body: data.body });
 			navigate({ to: '/tasks/$taskId', params: { taskId } });
 		},
 	});
 
 	return (
-		<Card className={cn('max-h-fit', className)}>
+		<Card className={cn('max-h-fit border-none rounded-none', className)}>
 			<CardContent className="p-4">
 				<form onSubmit={handleSubmit} className="flex flex-col gap-2">
 					<h3 className="text-md font-semibold">Quick add</h3>
 					<div className="flex flex-col gap-0.5">
-						<Input type="text" name="title" required />
+						<Textarea name="body" required />
 					</div>
 					<Button type="submit">Create</Button>
 				</form>

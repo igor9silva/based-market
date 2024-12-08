@@ -34,7 +34,7 @@ export const findOne = query({
 
 export const add = mutation({
 	args: {
-		title: z.string(),
+		title: z.optional(z.string()),
 		body: z.optional(z.string()),
 	},
 	handler: async (ctx, { title, body }) => {

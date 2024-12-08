@@ -25,10 +25,10 @@ export default function Inbox() {
 			</PageHeader>
 			<Grid>
 				<Grid.Main>
-					<TaskList />
+					<QuickAdd />
 				</Grid.Main>
 				<Grid.Side>
-					<QuickAdd />
+					<TaskList />
 				</Grid.Side>
 			</Grid>
 		</div>
