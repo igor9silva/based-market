@@ -5,6 +5,7 @@ import { Doc } from 'convex/_generated/dataModel';
 import { authorSchema } from 'convex/schemas/authorSchema';
 import { useMemo } from 'react';
 import { z } from 'zod';
+import { useAnimatedText } from '~/hooks/useAnimatedText';
 import { cn } from '~/lib/utils';
 
 function Author({
@@ -27,9 +28,11 @@ function Author({
 export function TaskEvent({
 	className, //
 	event,
+	initialRenderDate,
 }: {
 	className?: string;
 	event: Doc<'taskEvents'>;
+	initialRenderDate: Date;
 }) {
 	//
 	const content = useMemo(() => {
@@ -41,6 +44,10 @@ export function TaskEvent({
 		}
 	}, [event]);
 
+	const isNew = useMemo(() => {
+		return new Date(event._creationTime) > initialRenderDate;
+	}, [event, initialRenderDate]);
+
 	return (
 		<div className={cn(className, 'flex flex-row justify-between')}>
 			<div className="flex flex-col gap-1">
@@ -48,8 +55,14 @@ export function TaskEvent({
 					<Author author={event.author} />
 				</div>
 
-				<div className={cn(event.kind === 'tool-call' && !event.result && 'animate-pulse')}>{content}</div>
+				<div className={cn(event.kind === 'tool-call' && !event.result && 'animate-pulse')}>
+					{isNew ? <AnimatedContent content={content ?? ''} /> : content}
+				</div>
 			</div>
 		</div>
 	);
+}
+
+function AnimatedContent({ content }: { content: string }) {
+	return <>{useAnimatedText(content)}</>;
 }
