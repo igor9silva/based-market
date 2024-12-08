@@ -47,7 +47,7 @@ export default function TaskDetail({
 					<RunTaskActionButton task={task} kind="factCheck" /> */}
 				</div>
 			</CardHeader>
-			<CardContent className="p-4 [&>*]:whitespace-break-spaces [&>*]:break-all pt-0">
+			<CardContent className="p-4 pt-0">
 				<EditableContent
 					key={task.body}
 					value={task.body ?? ''}
