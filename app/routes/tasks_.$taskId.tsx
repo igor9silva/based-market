@@ -53,8 +53,8 @@ function TaskDetailPage() {
 				<ActionIsland task={task} className="right-2 z-20" />
 			</PageHeader>
 			<TwoColumn className="overflow-hidden flex-grow">
-				<TaskConversation task={task} />
-				<TaskDetail task={task} />
+				<TaskConversation task={task} className="md:order-1 order-2" />
+				<TaskDetail task={task} className="md:order-2 order-1" />
 			</TwoColumn>
 		</div>
 	);
