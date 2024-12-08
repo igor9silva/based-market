@@ -1,13 +1,17 @@
 import { compile, run } from '@mdx-js/mdx';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import * as runtime from 'react/jsx-runtime';
+import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 
 async function compileMDX(mdx: string) {
 	return String(
 		await compile(mdx, {
 			outputFormat: 'function-body',
-			remarkPlugins: [remarkGfm],
+			remarkPlugins: [
+				remarkGfm, //
+				remarkBreaks,
+			],
 		}),
 	);
 }
