@@ -23,10 +23,19 @@ export function QuickAdd({ className }: { className?: string }) {
 		},
 	});
 
+	// confirm on CMD+Enter
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+		//
+		if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			e.currentTarget.requestSubmit();
+		}
+	};
+
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none', className)}>
 			<CardContent className="p-4">
-				<form onSubmit={handleSubmit} className="flex flex-col gap-2">
+				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
 					<h3 className="text-md font-semibold">Quick add</h3>
 					<div className="flex flex-col gap-0.5">
 						<Textarea name="body" required />

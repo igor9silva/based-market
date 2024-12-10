@@ -34,15 +34,14 @@ export const findOne = query({
 
 export const add = mutation({
 	args: {
-		title: z.optional(z.string()),
 		body: z.optional(z.string()),
 	},
-	handler: async (ctx, { title, body }) => {
+	handler: async (ctx, { body }) => {
 		//
 		const currentUser = await getCurrentUser(ctx, {});
-		const taskId = await ctx.db.insert('tasks', { title, body, owner: currentUser._id, isDone: false });
+		const taskId = await ctx.db.insert('tasks', { body, owner: currentUser._id, isDone: false });
 
-		await _reportMutation(ctx, { taskId, changes: 'Added this task.', author: currentUser._id });
+		await _reportMutation(ctx, { taskId, changes: `Added this task with "${body}".`, author: currentUser._id });
 
 		return taskId;
 	},
