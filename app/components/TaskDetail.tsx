@@ -38,7 +38,7 @@ export default function TaskDetail({
 					</span>
 				</div>
 				<div className="flex flex-row flex-wrap items-baseline gap-2">
-					<Button onClick={() => markAsDone({ taskId: task._id, isDone: !task.isDone })}>
+					<Button variant="secondary" onClick={() => markAsDone({ taskId: task._id, isDone: !task.isDone })}>
 						{task.isDone ? 'Unmark' : 'Mark'} as done
 					</Button>
 					{/* <RunTaskActionButton task={task} kind="fill" />
