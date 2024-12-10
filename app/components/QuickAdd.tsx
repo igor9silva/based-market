@@ -36,11 +36,12 @@ export function QuickAdd({ className }: { className?: string }) {
 		<Card className={cn('max-h-fit border-none rounded-none', className)}>
 			<CardContent className="p-4">
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
-					<h3 className="text-md font-semibold">Quick add</h3>
 					<div className="flex flex-col gap-0.5">
-						<Textarea name="body" required />
+						<Textarea name="body" placeholder="What are you seeking to achieve?" required />
 					</div>
-					<Button type="submit">Create</Button>
+					<Button variant="default" type="submit">
+						Add
+					</Button>
 				</form>
 			</CardContent>
 		</Card>
