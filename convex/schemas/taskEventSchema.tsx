@@ -6,6 +6,7 @@ export const taskEventKindSchema = z.enum([
 	'message', //
 	'mutation',
 	'tool-call',
+	// TODO: add error
 ]);
 
 export const coreEventSchema = z.object({
