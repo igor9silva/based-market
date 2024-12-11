@@ -24,7 +24,7 @@ export default function TaskDetail({
 				<div className="flex flex-col">
 					<EditableContent
 						key={task.title}
-						value={task.title}
+						value={task.title ?? ''}
 						onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
 						viewClassName="text-2xl font-bold leading-none break-all"
 						asView={({ value, onClick, className, isEmpty }) => (
