@@ -11,14 +11,14 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as IndexImport } from './routes/index'
+import { Route as SplatImport } from './routes/$'
 import { Route as TasksTaskIdImport } from './routes/tasks_.$taskId'
 
 // Create/Update Routes
 
-const IndexRoute = IndexImport.update({
-  id: '/',
-  path: '/',
+const SplatRoute = SplatImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -32,11 +32,11 @@ const TasksTaskIdRoute = TasksTaskIdImport.update({
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatImport
       parentRoute: typeof rootRoute
     }
     '/tasks_/$taskId': {
@@ -52,37 +52,37 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/tasks/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/tasks_/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/tasks/$taskId'
+  fullPaths: '/$' | '/tasks/$taskId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/tasks/$taskId'
-  id: '__root__' | '/' | '/tasks_/$taskId'
+  to: '/$' | '/tasks/$taskId'
+  id: '__root__' | '/$' | '/tasks_/$taskId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
   TasksTaskIdRoute: typeof TasksTaskIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
   TasksTaskIdRoute: TasksTaskIdRoute,
 }
 
@@ -96,12 +96,12 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
+        "/$",
         "/tasks_/$taskId"
       ]
     },
-    "/": {
-      "filePath": "index.tsx"
+    "/$": {
+      "filePath": "$.tsx"
     },
     "/tasks_/$taskId": {
       "filePath": "tasks_.$taskId.tsx"

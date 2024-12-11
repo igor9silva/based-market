@@ -19,7 +19,7 @@ import {
 
 export const Route = createFileRoute('/tasks_/$taskId')({
 	component: TaskDetailPage,
-	errorComponent: () => <div>Task not found or something else went wrong.</div>,
+	errorComponent: () => <div>Not found (or something else went wrong).</div>,
 });
 
 function TaskDetailPage() {
@@ -30,6 +30,9 @@ function TaskDetailPage() {
 	const query = convexQuery(api.tasks.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(query);
 
+	const parentQuery = convexQuery(api.tasks.findOneOrNot, { taskId: task?.parentId });
+	const { data: parentTask } = useSuspenseQuery(parentQuery);
+
 	return (
 		<div className="flex flex-col absolute h-full w-full overflow-hidden">
 			<PageHeader className="flex md:justify-start items-center">
@@ -37,7 +40,9 @@ function TaskDetailPage() {
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link to="/">Inbox</Link>
+								<Link to="/$" params={{ _splat: parentTask?._id }}>
+									{parentTask?.title ?? 'Inbox'}
+								</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />

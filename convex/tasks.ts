@@ -9,7 +9,7 @@ import { current as getCurrentUser } from './users.js';
 
 // Exposed ------------------------------------
 
-export const findAll = query({
+export const findAllAtInbox = query({
 	args: {},
 	handler: async (ctx) => {
 		//
@@ -17,7 +17,28 @@ export const findAll = query({
 
 		return await ctx.db
 			.query('tasks')
-			.withIndex('by_owner_isDone', (q) => q.eq('owner', currentUser._id))
+			.withIndex('by_owner_parentId_isDone', (q) =>
+				q
+					.eq('owner', currentUser._id) //
+					.eq('parentId', undefined),
+			)
+			.collect();
+	},
+});
+
+export const findAll = query({
+	args: {
+		parentId: zid('tasks').optional(),
+	},
+	handler: async (ctx, { parentId }) => {
+		//
+		if (!parentId) return await findAllAtInbox(ctx, {});
+
+		await ensureTaskOwner(ctx, { taskId: parentId });
+
+		return await ctx.db
+			.query('tasks')
+			.withIndex('by_parent_isDone', (q) => q.eq('parentId', parentId))
 			.collect();
 	},
 });
@@ -28,6 +49,20 @@ export const findOne = query({
 	},
 	handler: async (ctx, { taskId }) => {
 		const { task } = await ensureTaskOwner(ctx, { taskId });
+		return task;
+	},
+});
+
+export const findOneOrNot = query({
+	args: {
+		taskId: zid('tasks').optional(),
+	},
+	handler: async (ctx, { taskId }) => {
+		//
+		if (!taskId) return undefined;
+
+		const { task } = await ensureTaskOwner(ctx, { taskId });
+
 		return task;
 	},
 });
@@ -68,6 +103,28 @@ export const markAsDone = mutation({
 		//
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 		await _markAsDone(ctx, { taskId, isDone, author: currentUser._id });
+	},
+});
+
+export const move = mutation({
+	args: {
+		taskId: zid('tasks'),
+		newParentId: zid('tasks').optional(),
+	},
+	handler: async (ctx, { taskId, newParentId }) => {
+		//
+		const { task, currentUser } = await ensureTaskOwner(ctx, { taskId });
+
+		if (newParentId) {
+			// ensure we also have permission on the new parent
+			await ensureTaskOwner(ctx, { taskId: newParentId });
+		}
+
+		if (task.parentId === newParentId) {
+			throw new Error('Task is already in this list.');
+		}
+
+		await _move(ctx, { taskId, newParentId, author: currentUser._id });
 	},
 });
 
@@ -120,6 +177,23 @@ export const _markAsDone = internalMutation({
 
 		const changes = isDone ? 'Marked as done.' : 'Marked as not done.';
 		await _reportMutation(ctx, { taskId, changes, author });
+	},
+});
+
+export const _move = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		newParentId: zid('tasks').optional(),
+		author: authorSchema,
+	},
+	handler: async (ctx, { taskId, newParentId, author }) => {
+		//
+		await ctx.db.patch(taskId, { parentId: newParentId });
+
+		const changes = newParentId ? `Moved to ${newParentId}.` : 'Moved to Inbox.';
+		await _reportMutation(ctx, { taskId, changes, author });
+
+		// TODO: report to parents as well, old and new
 	},
 });
 

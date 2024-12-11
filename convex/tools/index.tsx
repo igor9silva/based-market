@@ -20,10 +20,12 @@ export const coreTools = (
 	task: Doc<'tasks'>,
 	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => ({
-	sendMessage: sendMessage(ctx, task, action),
-	doNothing: doNothing(ctx, task, action),
+	// mutate the task
 	updateTask: updateTask(ctx, task, action),
 	markAsDone: markAsDone(ctx, task, action),
+
+	sendMessage: sendMessage(ctx, task, action),
+	doNothing: doNothing(ctx, task, action),
 	// fillTask: fillTask(ctx, task, action),
 	// minifyDescription: minifyDescription(ctx, task, action),
 	scrapeLink: scrapeLink(ctx, task, action),
