@@ -3,7 +3,7 @@ import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
 import { taskActionSchema } from './schemas/taskActionSchema';
 import { taskEventSchema } from './schemas/taskEventSchema';
-import { taskSchema } from './schemas/taskSchema';
+import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
 
 // prettier-ignore
 export default defineSchema({
@@ -16,7 +16,17 @@ export default defineSchema({
 		'by_owner_parentId_isDone', ['owner', 'parentId', 'isDone'],
 	).index(
 		'by_parent_isDone', ['parentId', 'isDone'],
+	).index(
+		'by_embeddingId', ['embeddingId'],
 	),
+
+	taskEmbeddings: defineTable(
+		zodToConvex(taskEmbeddingsSchema),
+	).vectorIndex("by_embedding", {
+		dimensions: 3072,
+		vectorField: 'embedding',
+		filterFields: ['isDone'],
+	}),
 
 	taskEvents: defineTable(
 		zodToConvex(taskEventSchema),

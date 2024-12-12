@@ -7,4 +7,11 @@ export const taskSchema = z.object({
 	body: z.string().optional(),
 	parentId: zid('tasks').optional(),
 	isDone: z.boolean(),
+	embeddingId: zid('taskEmbeddings').optional(),
+});
+
+export const taskEmbeddingsSchema = z.object({
+	taskId: zid('tasks'),
+	embedding: z.array(z.number()),
+	isDone: z.boolean(),
 });
