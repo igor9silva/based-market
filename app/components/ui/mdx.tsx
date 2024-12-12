@@ -1,10 +1,36 @@
+import { toast } from 'sonner';
 import { useMDX } from '~/hooks/useMDX';
 
+import { ChatHistory } from '~/components/ChatHistory';
+import { Loading } from '~/components/Loading';
+import { Button } from '~/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
+import { Separator } from '~/components/ui/separator';
+
+const components = {
+	ChatHistory,
+	Separator,
+	Button,
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+};
+
 export default function MDX({ text }: { text: string }) {
-	const Content = useMDX(text);
+	//
+	const { Component, error, isPending } = useMDX(text);
+
+	if (isPending) return <Loading />;
+	if (error) return <MDXError error={error} />;
+
+	if (!Component) throw new Error('No component found');
+
 	return (
 		<div className="whitespace-normal [&>*]:break-all">
-			<Content
+			<Component
 				components={{
 					pre: ({ children }) => <pre className="">{children}</pre>,
 					code: ({ children }) => <code className="">{children}</code>,
@@ -30,8 +56,34 @@ export default function MDX({ text }: { text: string }) {
 					strong: ({ children }) => <strong className="font-bold">{children}</strong>,
 					em: ({ children }) => <em className="italic">{children}</em>,
 					del: ({ children }) => <del className="line-through">{children}</del>,
+					...components,
 				}}
 			/>
+		</div>
+	);
+}
+
+function MDXError({ error }: { error: Error }) {
+	//
+	const handleErrorClick = (e: React.MouseEvent<HTMLPreElement>) => {
+		e.stopPropagation();
+		navigator.clipboard.writeText(error.message);
+		toast('Error copied to clipboard.');
+	};
+
+	const handleFixClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
+		toast.error('Not implemented yet.');
+	};
+
+	return (
+		<div>
+			<p>Error loading content:</p>
+			<pre onClick={handleErrorClick} className="text-red-500 whitespace-pre-wrap">
+				{error.message}
+			</pre>
+			<br />
+			<Button onClick={handleFixClick}>Fix it</Button>
 		</div>
 	);
 }

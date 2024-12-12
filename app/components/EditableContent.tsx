@@ -32,6 +32,7 @@ export function EditableContent({
 	const [editedValue, setEditedValue] = useState(value);
 
 	const handleClick = () => setIsEditing(true);
+
 	const saveChanges = () => {
 		setIsEditing(false);
 
