@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Textarea } from '~/components/ui/textarea';
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
+import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
 import { cn } from '~/lib/utils';
 
 export function MessageComposer({
@@ -26,14 +27,7 @@ export function MessageComposer({
 		},
 	});
 
-	// send on CMD+Enter
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-		//
-		if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-			e.preventDefault();
-			e.currentTarget.requestSubmit();
-		}
-	};
+	const handleKeyDown = useSubmitHotkey();
 
 	return (
 		<div className={cn('p-4 max-h-fit', className)}>
