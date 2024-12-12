@@ -54,7 +54,7 @@ export default function TaskDetail({
 					onSave={(newBody) => updateTask({ taskId: task._id, body: newBody })}
 					multiline
 					asView={({ value, onClick, className, isEmpty }) => (
-						<div onClick={onClick} className={className}>
+						<div onClick={onClick} className={cn('overflow-x-auto', className)}>
 							{isEmpty ? (
 								<div className="text-muted-foreground">No description</div>
 							) : (
