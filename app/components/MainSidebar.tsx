@@ -24,7 +24,7 @@ const menuItems = [
 	},
 	{
 		title: 'Finances',
-		url: '/finances/kh70vk1fpyg3mkf0jg1wmeerg9768ngv',
+		url: '/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv',
 		icon: DollarSign,
 	},
 	{

@@ -2,10 +2,13 @@ import { toast } from 'sonner';
 import { useMDX } from '~/hooks/useMDX';
 
 import { ChatHistory } from '~/components/ChatHistory';
+import { Grid } from '~/components/layout/Grid';
 import { TwoColumn } from '~/components/layout/TwoColumn';
 import { Loading } from '~/components/Loading';
+import { QuickAdd } from '~/components/QuickAdd';
 import { TaskConversation } from '~/components/TaskConversation';
 import TaskDetail from '~/components/TaskDetail';
+import { TaskList } from '~/components/TaskList';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
 import { Separator } from '~/components/ui/separator';
@@ -23,6 +26,9 @@ const components = {
 	TwoColumn,
 	TaskConversation,
 	TaskDetail,
+	Grid,
+	QuickAdd,
+	TaskList,
 };
 
 export default function MDX({
