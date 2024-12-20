@@ -2,7 +2,10 @@ import { toast } from 'sonner';
 import { useMDX } from '~/hooks/useMDX';
 
 import { ChatHistory } from '~/components/ChatHistory';
+import { TwoColumn } from '~/components/layout/TwoColumn';
 import { Loading } from '~/components/Loading';
+import { TaskConversation } from '~/components/TaskConversation';
+import TaskDetail from '~/components/TaskDetail';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
 import { Separator } from '~/components/ui/separator';
@@ -17,14 +20,23 @@ const components = {
 	CardFooter,
 	CardHeader,
 	CardTitle,
+	TwoColumn,
+	TaskConversation,
+	TaskDetail,
 };
 
-export default function MDX({ text }: { text: string }) {
+export default function MDX({
+	text, //
+	onClickFix,
+}: {
+	text: string;
+	onClickFix?: (e: React.MouseEvent) => void;
+}) {
 	//
 	const { Component, error, isPending } = useMDX(text);
 
 	if (isPending) return <Loading />;
-	if (error) return <MDXError error={error} />;
+	if (error) return <MDXError error={error} onClickFix={onClickFix} />;
 
 	if (!Component) throw new Error('No component found');
 
@@ -63,7 +75,13 @@ export default function MDX({ text }: { text: string }) {
 	);
 }
 
-function MDXError({ error }: { error: Error }) {
+function MDXError({
+	error, //
+	onClickFix,
+}: {
+	error: Error;
+	onClickFix?: (e: React.MouseEvent) => void;
+}) {
 	//
 	const handleErrorClick = (e: React.MouseEvent<HTMLPreElement>) => {
 		e.stopPropagation();
@@ -73,6 +91,7 @@ function MDXError({ error }: { error: Error }) {
 
 	const handleFixClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
+		if (onClickFix) return onClickFix(e);
 		toast.error('Not implemented yet.');
 	};
 

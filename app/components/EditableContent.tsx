@@ -12,7 +12,7 @@ type EditableContentProps = {
 	asView?: (props: {
 		value: string; //
 		className?: string;
-		onClick: () => void;
+		enterEditMode: (e: React.MouseEvent | React.TouchEvent) => void;
 		isEmpty: boolean;
 	}) => React.ReactNode;
 	as?: keyof JSX.IntrinsicElements;
@@ -31,7 +31,11 @@ export function EditableContent({
 	const [isEditing, setIsEditing] = useState(false);
 	const [editedValue, setEditedValue] = useState(value);
 
-	const handleClick = () => setIsEditing(true);
+	const enterEditMode = (e: React.MouseEvent | React.TouchEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setIsEditing(true);
+	};
 
 	const saveChanges = () => {
 		setIsEditing(false);
@@ -77,18 +81,21 @@ export function EditableContent({
 		);
 	}
 
-	if (asView) {
-		return asView({
-			value: editedValue,
-			className: cn('cursor-pointer hover:opacity-80', viewClassName),
-			onClick: handleClick,
-			isEmpty,
-		});
-	}
-
 	return (
-		<Component className={cn('cursor-pointer hover:opacity-80', viewClassName)} onClick={handleClick}>
-			{editedValue}
+		<Component
+			className={cn('cursor-magic', viewClassName)}
+			onMouseUp={(e) => {
+				//
+				// middle click
+				if (e.button === 1) enterEditMode(e);
+			}}
+			onTouchStart={(e) => {
+				//
+				// three finger tap
+				if (e.touches.length === 3) enterEditMode(e);
+			}}
+		>
+			{asView ? asView({ value, enterEditMode, className: viewClassName, isEmpty }) : editedValue}
 		</Component>
 	);
 }

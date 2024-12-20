@@ -81,6 +81,9 @@ export default {
 			transitionTimingFunction: {
 				'out-quart': 'cubic-bezier(0.25, 1, 0.5, 1)',
 			},
+			cursor: {
+				magic: 'url("/_build/app/static/magic-cursor.svg") 16 16, pointer',
+			},
 		},
 	},
 	plugins: [

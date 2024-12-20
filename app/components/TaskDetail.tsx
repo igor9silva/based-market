@@ -32,8 +32,8 @@ export default function TaskDetail({
 						value={task.title ?? ''}
 						onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
 						viewClassName="text-2xl font-bold leading-none break-all"
-						asView={({ value, onClick, className, isEmpty }) => (
-							<h1 onClick={onClick} className={cn(task.isDone && 'line-through', className)}>
+						asView={({ value, className, isEmpty }) => (
+							<h1 className={cn(task.isDone && 'line-through', className)}>
 								{isEmpty ? <span className="text-muted-foreground">Untitled task</span> : value}
 							</h1>
 						)}
@@ -58,12 +58,12 @@ export default function TaskDetail({
 					value={task.body ?? ''}
 					onSave={(newBody) => updateTask({ taskId: task._id, body: newBody })}
 					multiline
-					asView={({ value, onClick, className, isEmpty }) => (
-						<div onClick={onClick} className={cn('overflow-x-auto', className)}>
+					asView={({ value, enterEditMode, className, isEmpty }) => (
+						<div className={cn('overflow-x-auto', className)}>
 							{isEmpty ? (
 								<div className="text-muted-foreground">No description</div>
 							) : (
-								<MDX text={value} />
+								<MDX text={value} onClickFix={enterEditMode} />
 							)}
 						</div>
 					)}
