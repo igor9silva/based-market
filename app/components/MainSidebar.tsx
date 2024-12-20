@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import * as React from 'react';
 
-import { File, Inbox, Send } from 'lucide-react';
+import { DollarSign, Inbox, Send } from 'lucide-react';
 import { Suspense } from 'react';
 import { UserMenuItem } from '~/components/UserMenuItem';
 import {
@@ -23,9 +23,9 @@ const menuItems = [
 		icon: Inbox,
 	},
 	{
-		title: 'Drafts',
-		url: '/igor',
-		icon: File,
+		title: 'Finances',
+		url: '/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv',
+		icon: DollarSign,
 	},
 	{
 		title: 'Sent',

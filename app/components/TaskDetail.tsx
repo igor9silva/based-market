@@ -1,5 +1,7 @@
+import { convexQuery } from '@convex-dev/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
-import { Doc } from 'convex/_generated/dataModel';
+import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
@@ -9,12 +11,15 @@ import { cn } from '~/lib/utils';
 import { EditableContent } from './EditableContent';
 
 export default function TaskDetail({
+	taskId,
 	className, //
-	task,
 }: {
+	taskId: Id<'tasks'>;
 	className?: string;
-	task: Doc<'tasks'>;
 }) {
+	const query = convexQuery(api.tasks.findOne, { taskId });
+	const { data: task } = useSuspenseQuery(query);
+
 	const updateTask = useMutation(api.tasks.update);
 	const markAsDone = useMutation(api.tasks.markAsDone);
 
@@ -24,11 +29,11 @@ export default function TaskDetail({
 				<div className="flex flex-col">
 					<EditableContent
 						key={task.title}
-						value={task.title}
+						value={task.title ?? ''}
 						onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
 						viewClassName="text-2xl font-bold leading-none break-all"
-						asView={({ value, onClick, className, isEmpty }) => (
-							<h1 onClick={onClick} className={cn(task.isDone && 'line-through', className)}>
+						asView={({ value, className, isEmpty }) => (
+							<h1 className={cn(task.isDone && 'line-through', className)}>
 								{isEmpty ? <span className="text-muted-foreground">Untitled task</span> : value}
 							</h1>
 						)}
@@ -53,12 +58,12 @@ export default function TaskDetail({
 					value={task.body ?? ''}
 					onSave={(newBody) => updateTask({ taskId: task._id, body: newBody })}
 					multiline
-					asView={({ value, onClick, className, isEmpty }) => (
-						<div onClick={onClick} className={className}>
+					asView={({ value, enterEditMode, className, isEmpty }) => (
+						<div className={cn('overflow-x-auto', className)}>
 							{isEmpty ? (
 								<div className="text-muted-foreground">No description</div>
 							) : (
-								<MDX text={value} />
+								<MDX text={value} onClickFix={enterEditMode} />
 							)}
 						</div>
 					)}

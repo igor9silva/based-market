@@ -1,18 +1,20 @@
 import { tool } from 'ai';
+import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 
 const metadata = {
-	description: 'Update the task with improved title and body',
+	description: 'Move the task to a new parent',
 	parameters: z.object({
-		title: z.string().optional().describe('The improved title for the task'),
-		body: z.string().optional().describe('The improved body/description for the task'),
+		newParentId: zid('tasks')
+			.optional()
+			.describe('The new parent id for the task. If not provided, the task will be moved to the Inbox.'),
 	}),
 };
 
-export const updateTask = (
+export const moveTask = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
 	action?: Doc<'taskActions'> & { kind: 'run-tool' },
@@ -21,13 +23,11 @@ export const updateTask = (
 
 	return tool({
 		...metadata,
-		execute: async ({ title, body }) => {
+		execute: async ({ newParentId }) => {
 			//
-			// TODO: review authorization for all mutation tools - Meseeks should inherit it's user's permissions
-			await ctx.runMutation(internal.tasks._update, {
+			await ctx.runMutation(internal.tasks._move, {
 				taskId: task._id,
-				title,
-				body,
+				newParentId,
 				author: action._id,
 			});
 

@@ -1,5 +1,5 @@
 import { compile, run } from '@mdx-js/mdx';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import * as runtime from 'react/jsx-runtime';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
@@ -28,7 +28,12 @@ async function runMDX(code: string) {
 
 export function useMDX(mdx: string) {
 	//
-	const { data: Component } = useSuspenseQuery({
+	const {
+		data: Component,
+		error,
+		isPending,
+	} = useQuery({
+		retry: false,
 		queryKey: ['mdx', mdx],
 		queryFn: async () => {
 			const code = await compileMDX(mdx);
@@ -36,5 +41,5 @@ export function useMDX(mdx: string) {
 		},
 	});
 
-	return Component;
+	return { Component, error, isPending };
 }

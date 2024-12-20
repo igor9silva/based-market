@@ -52,7 +52,7 @@ export function TaskEvent({
 
 	return (
 		<div className={cn(className, 'flex flex-row justify-between')}>
-			<div className="flex flex-col gap-1">
+			<div className="flex flex-col gap-1 overflow-x-auto">
 				<div className="flex flex-row gap-1 items-center">
 					<Author author={event.author} />
 				</div>

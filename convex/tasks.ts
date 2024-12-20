@@ -1,15 +1,18 @@
+import { openai } from '@ai-sdk/openai';
+import { embed } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { Id } from './_generated/dataModel';
+import { internal } from './_generated/api';
+import { Doc, Id } from './_generated/dataModel';
 import { MutationCtx, QueryCtx } from './_generated/server';
-import { internalMutation, internalQuery, mutation, query } from './lib';
+import { internalAction, internalMutation, internalQuery, mutation, query } from './lib';
 import { authorSchema } from './schemas/authorSchema';
 import { _reportMutation } from './taskEvents';
 import { current as getCurrentUser } from './users.js';
 
 // Exposed ------------------------------------
 
-export const findAll = query({
+export const findAllAtInbox = query({
 	args: {},
 	handler: async (ctx) => {
 		//
@@ -17,7 +20,28 @@ export const findAll = query({
 
 		return await ctx.db
 			.query('tasks')
-			.withIndex('by_owner_isDone', (q) => q.eq('owner', currentUser._id))
+			.withIndex('by_owner_parentId_isDone', (q) =>
+				q
+					.eq('owner', currentUser._id) //
+					.eq('parentId', undefined),
+			)
+			.collect();
+	},
+});
+
+export const findAll = query({
+	args: {
+		parentId: zid('tasks').optional(),
+	},
+	handler: async (ctx, { parentId }) => {
+		//
+		if (!parentId) return await findAllAtInbox(ctx, {});
+
+		await ensureTaskOwner(ctx, { taskId: parentId });
+
+		return await ctx.db
+			.query('tasks')
+			.withIndex('by_parent_isDone', (q) => q.eq('parentId', parentId))
 			.collect();
 	},
 });
@@ -28,6 +52,20 @@ export const findOne = query({
 	},
 	handler: async (ctx, { taskId }) => {
 		const { task } = await ensureTaskOwner(ctx, { taskId });
+		return task;
+	},
+});
+
+export const findOneOrNot = query({
+	args: {
+		taskId: zid('tasks').optional(),
+	},
+	handler: async (ctx, { taskId }) => {
+		//
+		if (!taskId) return undefined;
+
+		const { task } = await ensureTaskOwner(ctx, { taskId });
+
 		return task;
 	},
 });
@@ -71,6 +109,28 @@ export const markAsDone = mutation({
 	},
 });
 
+export const move = mutation({
+	args: {
+		taskId: zid('tasks'),
+		newParentId: zid('tasks').optional(),
+	},
+	handler: async (ctx, { taskId, newParentId }) => {
+		//
+		const { task, currentUser } = await ensureTaskOwner(ctx, { taskId });
+
+		if (newParentId) {
+			// ensure we also have permission on the new parent
+			await ensureTaskOwner(ctx, { taskId: newParentId });
+		}
+
+		if (task.parentId === newParentId) {
+			throw new Error('Task is already in this list.');
+		}
+
+		await _move(ctx, { taskId, newParentId, author: currentUser._id });
+	},
+});
+
 // Internal (no authorization) ------------------------------------
 
 export const _findOne = internalQuery({
@@ -83,6 +143,140 @@ export const _findOne = internalQuery({
 		if (!task) throw new Error('Task not found');
 
 		return task;
+	},
+});
+
+export const _findAllNotEmbedded = internalQuery({
+	args: {},
+	handler: async (ctx) => {
+		//
+		return await ctx.db
+			.query('tasks')
+			.withIndex('by_embeddingId', (q) => q.eq('embeddingId', undefined))
+			.collect();
+	},
+});
+
+export const _findAllByEmbeddingIds = internalQuery({
+	args: {
+		embeddings: z.array(
+			z.object({
+				_id: zid('taskEmbeddings'),
+				_score: z.number(),
+			}),
+		),
+	},
+	handler: async (ctx, { embeddings }) => {
+		//
+		const tasks = await Promise.all(
+			embeddings.map(async ({ _id, _score }) => {
+				const task = await ctx.db
+					.query('tasks')
+					.withIndex('by_embeddingId', (q) => q.eq('embeddingId', _id))
+					.unique();
+
+				if (!task) return null;
+
+				return {
+					...task,
+					body: undefined, // not sending body to avoid too much data
+					_score,
+				};
+			}),
+		);
+
+		return tasks.filter((task) => task !== null);
+	},
+});
+
+export const _semanticSearch = internalAction({
+	args: {
+		query: z.string(),
+	},
+	handler: async (ctx, { query }): Promise<Array<Doc<'tasks'> & { _score: number }>> => {
+		//
+		const { embedding, usage } = await embed({
+			model: openai.embedding('text-embedding-3-large'),
+			value: query,
+		});
+
+		console.log('embedding usage', usage);
+
+		const results = await ctx.vectorSearch('taskEmbeddings', 'by_embedding', {
+			vector: embedding,
+			limit: 16,
+			// filter: (q) => q.eq('isDone', false),
+		});
+
+		const tasks = await ctx.runQuery(internal.tasks._findAllByEmbeddingIds, {
+			embeddings: results,
+		});
+
+		return tasks;
+	},
+});
+
+export const _addEmbedding = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		embedding: z.array(z.number()),
+		isDone: z.boolean(),
+	},
+	handler: async (ctx, { taskId, embedding, isDone }) => {
+		//
+		const embeddingId = await ctx.db.insert('taskEmbeddings', { taskId, embedding, isDone });
+		await ctx.db.patch(taskId, { embeddingId });
+	},
+});
+
+export const _removeEmbedding = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		//
+		const task = await _findOne(ctx, { taskId });
+		if (!task.embeddingId) return;
+
+		await ctx.db.patch(taskId, { embeddingId: undefined });
+		await ctx.db.delete(task.embeddingId);
+	},
+});
+
+export const _embedTask = internalAction({
+	args: {
+		taskId: zid('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		//
+		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
+
+		if (!task.body) return;
+
+		const { embedding, usage } = await embed({
+			model: openai.embedding('text-embedding-3-large'),
+			value: task.body,
+		});
+
+		console.log('embedding usage', usage);
+
+		await ctx.runMutation(internal.tasks._addEmbedding, {
+			taskId,
+			embedding,
+			isDone: task.isDone,
+		});
+	},
+});
+
+export const _embedAllMissingTasks = internalAction({
+	args: {},
+	handler: async (ctx) => {
+		//
+		const tasks = await ctx.runQuery(internal.tasks._findAllNotEmbedded);
+
+		for (const task of tasks) {
+			await ctx.runAction(internal.tasks._embedTask, { taskId: task._id });
+		}
 	},
 });
 
@@ -120,6 +314,23 @@ export const _markAsDone = internalMutation({
 
 		const changes = isDone ? 'Marked as done.' : 'Marked as not done.';
 		await _reportMutation(ctx, { taskId, changes, author });
+	},
+});
+
+export const _move = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		newParentId: zid('tasks').optional(),
+		author: authorSchema,
+	},
+	handler: async (ctx, { taskId, newParentId, author }) => {
+		//
+		await ctx.db.patch(taskId, { parentId: newParentId });
+
+		const changes = newParentId ? `Moved to ${newParentId}.` : 'Moved to Inbox.';
+		await _reportMutation(ctx, { taskId, changes, author });
+
+		// TODO: report to parents as well, old and new
 	},
 });
 

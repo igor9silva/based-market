@@ -6,6 +6,7 @@ import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Textarea } from '~/components/ui/textarea';
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
+import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
 import { cn } from '~/lib/utils';
 
 export function QuickAdd({ className }: { className?: string }) {
@@ -24,13 +25,7 @@ export function QuickAdd({ className }: { className?: string }) {
 	});
 
 	// confirm on CMD+Enter
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-		//
-		if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-			e.preventDefault();
-			e.currentTarget.requestSubmit();
-		}
-	};
+	const handleKeyDown = useSubmitHotkey();
 
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none', className)}>

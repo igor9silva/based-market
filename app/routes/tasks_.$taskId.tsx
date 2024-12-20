@@ -1,25 +1,14 @@
-import { convexQuery } from '@convex-dev/react-query';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { api } from 'convex/_generated/api';
+import { createFileRoute } from '@tanstack/react-router';
 import { Id } from 'convex/_generated/dataModel';
+import { BasicError } from '~/components/BasicError';
 
-import { ActionIsland } from '~/components/ActionIsland';
 import { TwoColumn } from '~/components/layout/TwoColumn';
-import { PageHeader } from '~/components/PageHeader';
 import { TaskConversation } from '~/components/TaskConversation';
 import TaskDetail from '~/components/TaskDetail';
-import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbSeparator,
-} from '~/components/ui/breadcrumb';
 
 export const Route = createFileRoute('/tasks_/$taskId')({
 	component: TaskDetailPage,
-	errorComponent: () => <div>Task not found or something else went wrong.</div>,
+	errorComponent: () => <BasicError text="Not found (or something else went wrong)." />,
 });
 
 function TaskDetailPage() {
@@ -27,17 +16,16 @@ function TaskDetailPage() {
 	const params = Route.useParams();
 	const taskId = params.taskId as Id<'tasks'>;
 
-	const query = convexQuery(api.tasks.findOne, { taskId });
-	const { data: task } = useSuspenseQuery(query);
-
 	return (
 		<div className="flex flex-col absolute h-full w-full overflow-hidden">
-			<PageHeader className="flex md:justify-start items-center">
+			{/* <PageHeader className="flex md:justify-start items-center">
 				<Breadcrumb className="flex-grow">
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link to="/">Inbox</Link>
+								<Link to="/$" params={{ _splat: parentTask?._id }}>
+									{parentTask?.title ?? 'Inbox'}
+								</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
@@ -51,10 +39,10 @@ function TaskDetailPage() {
 					</BreadcrumbList>
 				</Breadcrumb>
 				<ActionIsland task={task} className="right-2 z-20" />
-			</PageHeader>
+			</PageHeader> */}
 			<TwoColumn className="overflow-hidden flex-grow">
-				<TaskConversation task={task} className="md:order-1 order-2" />
-				<TaskDetail task={task} className="md:order-2 order-1" />
+				<TaskConversation taskId={taskId} className="md:order-1 order-2" />
+				<TaskDetail taskId={taskId} className="md:order-2 order-1" />
 			</TwoColumn>
 		</div>
 	);

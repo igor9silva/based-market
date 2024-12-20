@@ -8,6 +8,7 @@ import { Loading } from '~/components/Loading';
 import { MainSidebar } from '~/components/MainSidebar';
 import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
+import { Toaster } from '~/components/ui/sonner';
 import thinkingEmojiUrl from '~/static/thinking-emoji.gif';
 import appCss from '~/styles/app.css?url';
 
@@ -51,6 +52,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<RootLayout>{children}</RootLayout>
 				<ScrollRestoration />
 				<Scripts />
+				<Toaster />
 			</body>
 		</html>
 	);

@@ -4,8 +4,9 @@ import { useMutation } from 'convex/react';
 import { SendIcon } from 'lucide-react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
+import { Textarea } from '~/components/ui/textarea';
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
+import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
 import { cn } from '~/lib/utils';
 
 export function MessageComposer({
@@ -26,10 +27,12 @@ export function MessageComposer({
 		},
 	});
 
+	const handleKeyDown = useSubmitHotkey();
+
 	return (
 		<div className={cn('p-4 max-h-fit', className)}>
-			<form onSubmit={handleSubmit} className="flex flex-row gap-2">
-				<Input type="text" name="message" required />
+			<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-row gap-2">
+				<Textarea name="message" required />
 				<Button type="submit">
 					<SendIcon className="size-4" />
 				</Button>

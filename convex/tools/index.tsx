@@ -10,7 +10,9 @@ import { _runNextActionIfNeeded, _setActionStatus } from '../taskActions';
 import { checkFact } from './checkFact';
 import { doNothing } from './doNothing';
 import { markAsDone } from './markAsDone';
+import { moveTask } from './moveTask';
 import { scrapeLink } from './scrapeLink';
+import { searchTasks } from './searchTasks';
 import { sendMessage } from './sendMessage';
 import { updateTask } from './updateTask';
 
@@ -20,10 +22,15 @@ export const coreTools = (
 	task: Doc<'tasks'>,
 	action?: Doc<'taskActions'> & { kind: 'run-tool' },
 ) => ({
-	sendMessage: sendMessage(ctx, task, action),
-	doNothing: doNothing(ctx, task, action),
+	// mutate the task
 	updateTask: updateTask(ctx, task, action),
 	markAsDone: markAsDone(ctx, task, action),
+	moveTask: moveTask(ctx, task, action),
+
+	searchTasks: searchTasks(ctx, task, action),
+
+	sendMessage: sendMessage(ctx, task, action),
+	doNothing: doNothing(ctx, task, action),
 	// fillTask: fillTask(ctx, task, action),
 	// minifyDescription: minifyDescription(ctx, task, action),
 	scrapeLink: scrapeLink(ctx, task, action),
