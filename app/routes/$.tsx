@@ -1,50 +1,58 @@
-import { convexQuery } from '@convex-dev/react-query';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { api } from 'convex/_generated/api';
+import { createFileRoute } from '@tanstack/react-router';
+import { zid } from 'convex-helpers/server/zod';
 import { Id } from 'convex/_generated/dataModel';
+import { z } from 'zod';
+import { BasicError } from '~/components/BasicError';
 import { Grid } from '~/components/layout/Grid';
-import { PageHeader } from '~/components/PageHeader';
 import { QuickAdd } from '~/components/QuickAdd';
 import { TaskList } from '~/components/TaskList';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from '~/components/ui/breadcrumb';
+
+const searchSchema = z.object({
+	selectedSubtaskId: zid('tasks').optional(),
+});
 
 export const Route = createFileRoute('/$')({
 	component: TaskListPage,
-	errorComponent: () => <div>Not found (or something else went wrong).</div>,
+	errorComponent: () => <BasicError text="Not found (or something else went wrong)." />,
+	validateSearch: searchSchema,
 });
 
 export default function TaskListPage() {
 	//
-	// get the parent task from URL, defaults to Inbox
+	// get the task from URL, defaults to Inbox (no parent)
 	const { _splat } = Route.useParams();
-	const firstPart = _splat?.split('/').pop();
-	const parentId = firstPart ? (firstPart as Id<'tasks'>) : undefined;
+	const parts = _splat?.split('/') ?? [];
 
-	const query = convexQuery(api.tasks.findOneOrNot, { taskId: parentId });
-	const { data: task } = useSuspenseQuery(query);
+	// /page or /page/taskId - else throw
+	if (parts.length < 1 || parts.length > 2) {
+		throw new Error('Invalid URL');
+	}
+
+	// get the task from URL, defaults to Inbox (no parent)
+	const pageSlug = parts.at(0) as string; // TODO: Id<'pages'>
+	const taskId = parts.at(1) as Id<'tasks'> | undefined;
 
 	return (
 		<div>
-			<PageHeader>
+			{/* <PageHeader>
 				<Breadcrumb>
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link to="/$" params={{ _splat: parentId }}>
+								<Link to="/$" params={{ _splat: taskId }}>
 									{task?.title ?? 'Inbox'}
 								</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 					</BreadcrumbList>
 				</Breadcrumb>
-			</PageHeader>
+			</PageHeader> */}
 			<Grid>
 				<Grid.Main>
 					<QuickAdd />
 				</Grid.Main>
 				<Grid.Side>
-					<TaskList parentId={parentId} />
+					<TaskList taskId={taskId ?? 'inbox'} />
 				</Grid.Side>
 			</Grid>
 		</div>

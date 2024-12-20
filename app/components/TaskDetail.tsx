@@ -1,5 +1,7 @@
+import { convexQuery } from '@convex-dev/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
-import { Doc } from 'convex/_generated/dataModel';
+import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
@@ -9,12 +11,15 @@ import { cn } from '~/lib/utils';
 import { EditableContent } from './EditableContent';
 
 export default function TaskDetail({
+	taskId,
 	className, //
-	task,
 }: {
+	taskId: Id<'tasks'>;
 	className?: string;
-	task: Doc<'tasks'>;
 }) {
+	const query = convexQuery(api.tasks.findOne, { taskId });
+	const { data: task } = useSuspenseQuery(query);
+
 	const updateTask = useMutation(api.tasks.update);
 	const markAsDone = useMutation(api.tasks.markAsDone);
 

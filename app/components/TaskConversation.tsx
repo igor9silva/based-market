@@ -1,7 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
-import { Doc } from 'convex/_generated/dataModel';
+import { Id } from 'convex/_generated/dataModel';
 import { MoveDown } from 'lucide-react';
 import { useMemo } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
@@ -11,16 +11,19 @@ import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
 
 export function TaskConversation({
-	className, //
-	task,
+	taskId, //
+	className,
 }: {
+	taskId: Id<'tasks'>;
 	className?: string;
-	task: Doc<'tasks'>;
 }) {
-	const query = convexQuery(api.taskEvents.findAll, { taskId: task._id });
-	const { data: events } = useSuspenseQuery(query);
+	const taskQuery = convexQuery(api.tasks.findOne, { taskId });
+	const { data: task } = useSuspenseQuery(taskQuery);
 
-	const [initialRenderDate] = useMemo(() => [new Date()], []);
+	const eventsQuery = convexQuery(api.taskEvents.findAll, { taskId: task._id });
+	const { data: events } = useSuspenseQuery(eventsQuery);
+
+	const initialRenderDate = useMemo(() => new Date(), []);
 
 	return (
 		<StickToBottom mass={1} className={cn('flex flex-col whitespace-pre-wrap overflow-auto', className)}>
