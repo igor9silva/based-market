@@ -1,8 +1,10 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
+import { Maximize2 } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
@@ -13,9 +15,11 @@ import { EditableContent } from './EditableContent';
 export default function TaskDetail({
 	taskId,
 	className, //
+	showExpand = false,
 }: {
 	taskId: Id<'tasks'>;
 	className?: string;
+	showExpand?: boolean;
 }) {
 	const query = convexQuery(api.tasks.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(query);
@@ -27,17 +31,26 @@ export default function TaskDetail({
 		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto', className)}>
 			<CardHeader className="p-4 max-w-full sticky top-0 bg-background/75 z-10">
 				<div className="flex flex-col">
-					<EditableContent
-						key={task.title}
-						value={task.title ?? ''}
-						onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
-						viewClassName="text-2xl font-bold leading-none break-all"
-						asView={({ value, className, isEmpty }) => (
-							<h1 className={cn(task.isDone && 'line-through', className)}>
-								{isEmpty ? <span className="text-muted-foreground">Untitled task</span> : value}
-							</h1>
+					<div className="flex flex-row justify-between gap-2">
+						<EditableContent
+							key={task.title}
+							value={task.title ?? ''}
+							onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
+							viewClassName="text-2xl font-bold leading-none break-all"
+							asView={({ value, className, isEmpty }) => (
+								<h1 className={cn(task.isDone && 'line-through', className)}>
+									{isEmpty ? <span className="text-muted-foreground">Untitled task</span> : value}
+								</h1>
+							)}
+						/>
+						{showExpand && (
+							<Link to="/$" params={{ _splat: `/chat/${task._id}` }}>
+								<Button variant="ghost" size="icon">
+									<Maximize2 className="size-4" />
+								</Button>
+							</Link>
 						)}
-					/>
+					</div>
 					<span className="text-sm text-muted-foreground shrink-0">
 						<TimeAgo date={task._creationTime} />
 					</span>

@@ -44,7 +44,7 @@ export function TaskList({
 				selectedSubtaskId && (
 					<Suspense fallback={<Loading />}>
 						<ErrorBoundary fallback={<BasicError text="Not found (or something else went wrong)." />}>
-							<TaskDetail taskId={selectedSubtaskId} />
+							<TaskDetail taskId={selectedSubtaskId} showExpand={true} />
 						</ErrorBoundary>
 					</Suspense>
 				)
