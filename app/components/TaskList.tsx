@@ -3,9 +3,15 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
+import { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { cn } from '~/lib/utils';
+
+import { BasicError } from '~/components/BasicError';
+import { ListAndDetail } from '~/components/layout/ListAndDetail';
+import { Loading } from '~/components/Loading';
 import TaskDetail from '~/components/TaskDetail';
 import { TaskItem } from '~/components/TaskItem';
-import { cn } from '~/lib/utils';
 
 export function TaskList({
 	taskId, //
@@ -21,15 +27,28 @@ export function TaskList({
 	const { selectedSubtaskId } = useSearch({ strict: false });
 
 	return (
-		<div className={cn('flex flex-col', className)}>
-			{selectedSubtaskId && <TaskDetail taskId={selectedSubtaskId} />}
-			<div>
-				{subtasks.map((task) => (
-					<Link key={task._id} to="/$" search={{ selectedSubtaskId: task._id }}>
-						<TaskItem task={task} />
-					</Link>
-				))}
-			</div>
-		</div>
+		<ListAndDetail
+			list={
+				<div className="overflow-auto h-full">
+					{subtasks.map((task) => (
+						<Link key={task._id} to="/$" search={{ selectedSubtaskId: task._id }} resetScroll={false}>
+							<TaskItem
+								className={cn(selectedSubtaskId === task._id && 'bg-muted rounded-lg')}
+								task={task}
+							/>
+						</Link>
+					))}
+				</div>
+			}
+			detail={
+				selectedSubtaskId && (
+					<Suspense fallback={<Loading />}>
+						<ErrorBoundary fallback={<BasicError text="Not found (or something else went wrong)." />}>
+							<TaskDetail taskId={selectedSubtaskId} />
+						</ErrorBoundary>
+					</Suspense>
+				)
+			}
+		/>
 	);
 }

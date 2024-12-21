@@ -4,11 +4,13 @@ import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack
 import { Meta, Scripts } from '@tanstack/start';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
+
 import { Loading } from '~/components/Loading';
 import { MainSidebar } from '~/components/MainSidebar';
 import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
+
 import thinkingEmojiUrl from '~/static/thinking-emoji.gif';
 import appCss from '~/styles/app.css?url';
 
@@ -69,7 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			</Unauthenticated>
 			<Authenticated>
 				<MainSidebar />
-				<SidebarInset className="w-full">{children}</SidebarInset>
+				<SidebarInset className="w-full h-svh overflow-hidden">{children}</SidebarInset>
 			</Authenticated>
 		</SidebarProvider>
 	);

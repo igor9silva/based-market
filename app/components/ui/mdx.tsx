@@ -47,7 +47,7 @@ export default function MDX({
 	if (!Component) throw new Error('No component found');
 
 	return (
-		<div className="whitespace-normal [&>*]:break-all">
+		<div className="whitespace-normal [&>*]:break-all h-full">
 			<Component
 				components={{
 					pre: ({ children }) => <pre className="">{children}</pre>,
