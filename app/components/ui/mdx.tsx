@@ -3,6 +3,7 @@ import { useMDX } from '~/hooks/useMDX';
 
 import { ChatHistory } from '~/components/ChatHistory';
 import { Grid } from '~/components/layout/Grid';
+import { ListAndDetail } from '~/components/layout/ListAndDetail';
 import { TwoColumn } from '~/components/layout/TwoColumn';
 import { Loading } from '~/components/Loading';
 import { QuickAdd } from '~/components/QuickAdd';
@@ -29,6 +30,7 @@ const components = {
 	Grid,
 	QuickAdd,
 	TaskList,
+	ListAndDetail,
 };
 
 export default function MDX({

@@ -26,7 +26,7 @@ export function TaskConversation({
 	const initialRenderDate = useMemo(() => new Date(), []);
 
 	return (
-		<StickToBottom mass={1} className={cn('flex flex-col whitespace-pre-wrap overflow-auto', className)}>
+		<StickToBottom mass={1} className={cn('flex flex-col h-full whitespace-pre-wrap overflow-auto', className)}>
 			<StickToBottom.Content className="relative h-full">
 				<h2 className="text-2xl font-bold leading-none break-all sticky top-0 bg-background/75 p-4">
 					Conversation

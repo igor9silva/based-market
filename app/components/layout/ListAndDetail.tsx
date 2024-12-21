@@ -6,9 +6,11 @@ export function ListAndDetail({
 	list,
 	detail,
 	className,
+	defaultListSize = 35,
 }: {
 	list: React.ReactNode;
 	detail?: React.ReactNode;
+	defaultListSize?: number;
 	className?: string;
 }) {
 	const isMobile = useIsMobile();
@@ -16,12 +18,12 @@ export function ListAndDetail({
 
 	return (
 		<ResizablePanelGroup direction={direction} className={cn('overflow-hidden', className)}>
-			<ResizablePanel id="list" order={0} defaultSize={detail ? 35 : 100}>
+			<ResizablePanel id="list" order={0} defaultSize={detail ? defaultListSize : 100}>
 				{list}
 			</ResizablePanel>
 			{detail && <ResizableHandle />}
 			{detail && (
-				<ResizablePanel id="detail" order={1} defaultSize={65}>
+				<ResizablePanel id="detail" order={1} defaultSize={100 - defaultListSize}>
 					{detail}
 				</ResizablePanel>
 			)}
