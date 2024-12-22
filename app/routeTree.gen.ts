@@ -12,19 +12,12 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SplatImport } from './routes/$'
-import { Route as TasksTaskIdImport } from './routes/tasks_.$taskId'
 
 // Create/Update Routes
 
 const SplatRoute = SplatImport.update({
   id: '/$',
   path: '/$',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const TasksTaskIdRoute = TasksTaskIdImport.update({
-  id: '/tasks_/$taskId',
-  path: '/tasks/$taskId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -39,13 +32,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatImport
       parentRoute: typeof rootRoute
     }
-    '/tasks_/$taskId': {
-      id: '/tasks_/$taskId'
-      path: '/tasks/$taskId'
-      fullPath: '/tasks/$taskId'
-      preLoaderRoute: typeof TasksTaskIdImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -53,37 +39,32 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
-  '/tasks/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
-  '/tasks/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/$': typeof SplatRoute
-  '/tasks_/$taskId': typeof TasksTaskIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/$' | '/tasks/$taskId'
+  fullPaths: '/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$' | '/tasks/$taskId'
-  id: '__root__' | '/$' | '/tasks_/$taskId'
+  to: '/$'
+  id: '__root__' | '/$'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
-  TasksTaskIdRoute: typeof TasksTaskIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
-  TasksTaskIdRoute: TasksTaskIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -96,15 +77,11 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/$",
-        "/tasks_/$taskId"
+        "/$"
       ]
     },
     "/$": {
       "filePath": "$.tsx"
-    },
-    "/tasks_/$taskId": {
-      "filePath": "tasks_.$taskId.tsx"
     }
   }
 }
