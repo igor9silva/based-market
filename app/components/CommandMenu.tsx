@@ -1,6 +1,6 @@
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { useNavigate } from '@tanstack/react-router';
-import { PlusIcon } from 'lucide-react';
+import { DollarSign, Inbox, Plus } from 'lucide-react';
 // import { api } from 'convex/_generated/api';
 // import { useQuery } from 'convex/react';
 import * as React from 'react';
@@ -12,6 +12,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
+	CommandSeparator,
 } from '~/components/ui/command';
 
 export function CommandMenu() {
@@ -49,32 +50,50 @@ export function CommandMenu() {
 			<CommandInput placeholder="Type a command or search..." />
 			<CommandList>
 				<CommandEmpty>No results found.</CommandEmpty>
-				<CommandGroup heading="Navigation">
-					<CommandItem value="/new" onSelect={onSelect}>
-						<PlusIcon className="mr-2" />
+				{/* <CommandSeparator /> */}
+				<CommandGroup heading="Sidebar">
+					<CommandItem value="/new" keywords={['new', 'task']} onSelect={onSelect}>
+						<Plus className="mr-2" />
 						New Task
 					</CommandItem>
-					<CommandItem value="/" onSelect={onSelect}>
+					<CommandItem value="/" keywords={['inbox']} onSelect={onSelect}>
 						{/* <Link to="/$" params={{ _splat: '' }}> */}
-						<MagnifyingGlassIcon className="mr-2" />
+						<Inbox className="mr-2" />
 						Inbox
 						{/* </Link> */}
 					</CommandItem>
-					<CommandItem value="/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv" onSelect={onSelect}>
-						<MagnifyingGlassIcon className="mr-2" />
+					<CommandItem
+						value="/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv"
+						keywords={['finances']}
+						onSelect={onSelect}
+					>
+						<DollarSign className="mr-2" />
 						Finances
 					</CommandItem>
 				</CommandGroup>
-				<CommandGroup heading="Test Tasks">
-					<CommandItem value="/chat/kh73ekz89d5awan6pejdwdp5v176690k" onSelect={onSelect}>
+				<CommandSeparator />
+				<CommandGroup heading="Pinned Tasks">
+					<CommandItem
+						value="/chat/kh73ekz89d5awan6pejdwdp5v176690k"
+						keywords={['test', 'task', 'pinned', 'task 1']}
+						onSelect={onSelect}
+					>
 						<MagnifyingGlassIcon className="mr-2" />
 						Test Task 1
 					</CommandItem>
-					<CommandItem value="/chat/kh753rpp5dz4pn4zc8x2jdz3cs763kp1" onSelect={onSelect}>
+					<CommandItem
+						value="/chat/kh753rpp5dz4pn4zc8x2jdz3cs763kp1"
+						keywords={['test', 'task', 'pinned', 'task 2']}
+						onSelect={onSelect}
+					>
 						<MagnifyingGlassIcon className="mr-2" />
 						Test Task 2
 					</CommandItem>
-					<CommandItem value="/chat/kh78yn9ffq0ph7g5cgqmh482a9763de2" onSelect={onSelect}>
+					<CommandItem
+						value="/chat/kh78yn9ffq0ph7g5cgqmh482a9763de2"
+						keywords={['test', 'task', 'pinned', 'task 3']}
+						onSelect={onSelect}
+					>
 						<MagnifyingGlassIcon className="mr-2" />
 						Test Task 3
 					</CommandItem>
