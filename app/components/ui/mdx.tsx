@@ -8,8 +8,8 @@ import { TwoColumn } from '~/components/layout/TwoColumn';
 import { Loading } from '~/components/Loading';
 import { QuickAdd } from '~/components/QuickAdd';
 import { TaskConversation } from '~/components/TaskConversation';
-import TaskDetail from '~/components/TaskDetail';
-import { TaskList } from '~/components/TaskList';
+import TaskDetailAndSubstasks from '~/components/TaskDetailAndSubstasks';
+import { TaskListAndDetail } from '~/components/TaskListAndDetail';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
 import { Separator } from '~/components/ui/separator';
@@ -26,10 +26,10 @@ const components = {
 	CardTitle,
 	TwoColumn,
 	TaskConversation,
-	TaskDetail,
+	TaskDetailAndSubstasks,
 	Grid,
 	QuickAdd,
-	TaskList,
+	TaskListAndDetail,
 	ListAndDetail,
 };
 

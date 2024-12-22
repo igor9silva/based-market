@@ -1,0 +1,33 @@
+import { convexQuery } from '@convex-dev/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
+import { api } from 'convex/_generated/api';
+import { Id } from 'convex/_generated/dataModel';
+
+import { TaskItem } from '~/components/TaskItem';
+import { cn } from '~/lib/utils';
+
+export function SubtaskList({
+	taskId, //
+	className,
+}: {
+	taskId: Id<'tasks'>;
+	className?: string;
+}) {
+	const query = convexQuery(api.tasks.findAll, { parentId: taskId });
+	const { data: subtasks } = useSuspenseQuery(query);
+
+	if (subtasks.length === 0) {
+		return <div className="flex flex-col items-center justify-center h-full w-full">No subtasks.</div>;
+	}
+
+	return (
+		<div className={cn('overflow-auto h-full', className)}>
+			{subtasks.map((task) => (
+				<Link key={task._id} to="/$" params={{ _splat: `/chat/${task._id}` }} resetScroll={false}>
+					<TaskItem task={task} />
+				</Link>
+			))}
+		</div>
+	);
+}
