@@ -20,25 +20,31 @@ export const Route = createFileRoute('/$')({
 
 export default function MDXPage() {
 	//
-	// get the task from URL, defaults to Inbox (no parent)
-	const { _splat } = Route.useParams();
+	const params = paramsFromURL(Route);
+
+	const slug = params.slug || 'list';
+	const pageQuery = convexQuery(api.pages.findOneBySlug, { slug });
+	const { data: page } = useSuspenseQuery(pageQuery);
+
+	// prepend the taskId to the body so that MDX can read it
+	const taskId = params.taskId || page.defaultTaskId || 'inbox';
+	const body = `export const taskId = '${taskId}';\n\n${page.body}`;
+
+	return <MDX text={body} />;
+}
+
+function paramsFromURL(route: typeof Route) {
+	//
+	const { _splat } = route.useParams();
 	const parts = _splat?.split('/') ?? [];
 
-	// `/`, `/page` or `/page/taskId` - else throw
+	// must be `/`, `/page` or `/page/taskId`
 	if (parts.length > 2) {
 		throw new Error('Invalid URL');
 	}
 
-	// get the task from URL, defaults to Inbox (no parent)
-	const slug = (parts.at(0) as string) ?? ''; // TODO: Id<'pages'>
-	const taskId = parts.at(1) as Id<'tasks'> | undefined;
-
-	const pageQuery = convexQuery(api.pages.findOneBySlug, { slug });
-	const { data: page } = useSuspenseQuery(pageQuery);
-
-	// prepend the taskId to the body so that the MDX can read it
-	const id = taskId ?? page.defaultTaskId ?? 'inbox';
-	const body = `export const taskId = '${id}';\n\n${page.body}`;
-
-	return <MDX text={body} />;
+	return {
+		slug: parts.at(0) as string,
+		taskId: parts.at(1) as Id<'tasks'> | undefined,
+	};
 }
