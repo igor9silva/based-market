@@ -1,7 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
-import { Doc } from 'convex/_generated/dataModel';
+import { Doc, Id } from 'convex/_generated/dataModel';
 import { Activity, Loader2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { forwardRef, useRef, useState } from 'react';
@@ -12,17 +12,17 @@ import { cn } from '~/lib/utils';
 const TRANSITION = { duration: 0.25, type: 'spring' };
 
 export function ActionIsland({
-	task, //
+	taskId, //
 	className,
 }: {
-	task: Doc<'tasks'>;
+	taskId: Id<'tasks'>;
 	className?: string;
 }) {
 	//
 	const ref = useRef<HTMLDivElement>(null);
 	const [isExpanded, setIsExpanded] = useState(false);
 
-	const query = convexQuery(api.taskActions.findAll, { taskId: task._id });
+	const query = convexQuery(api.taskActions.findAll, { taskId });
 	const { data: actions } = useSuspenseQuery(query);
 
 	// if click outside, close
@@ -32,16 +32,18 @@ export function ActionIsland({
 		<motion.div
 			ref={ref}
 			className={cn(
-				'absolute bg-secondary text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[90%]',
+				'bg-secondary text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[90%]',
 				className,
 			)}
 			transition={TRANSITION}
-			initial={{
-				top: 'auto',
-			}}
+			initial={
+				{
+					// top: 'auto',
+				}
+			}
 			animate={{
 				width: isExpanded ? '24rem' : 'auto',
-				top: '0.5rem',
+				// top: '0.5rem',
 			}}
 			onClick={() => !isExpanded && setIsExpanded(true)}
 		>
@@ -80,7 +82,7 @@ Expanded.displayName = 'Expanded';
 
 const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(({ actions }, ref) => {
 	return (
-		<div ref={ref} className="h-8 flex items-center justify-center gap-2 text-sm px-3 truncate">
+		<div ref={ref} className="h-full flex items-center justify-center gap-2 text-sm px-3 truncate">
 			<CollapsedContent actions={actions} />
 		</div>
 	);

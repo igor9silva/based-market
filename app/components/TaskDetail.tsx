@@ -5,6 +5,7 @@ import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { Maximize2 } from 'lucide-react';
+import { ActionIsland } from '~/components/ActionIsland';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
@@ -55,14 +56,20 @@ export default function TaskDetail({
 						<TimeAgo date={task._creationTime} />
 					</span>
 				</div>
-				<div className="flex flex-row flex-wrap items-baseline gap-2">
-					<Button variant="secondary" onClick={() => markAsDone({ taskId: task._id, isDone: !task.isDone })}>
-						{task.isDone ? 'Unmark' : 'Mark'} as done
-					</Button>
-					{/* <RunTaskActionButton task={task} kind="fill" />
+				<div className="flex flex-row justify-between">
+					<div className="flex flex-row flex-wrap items-baseline gap-2">
+						<Button
+							variant="secondary"
+							onClick={() => markAsDone({ taskId: task._id, isDone: !task.isDone })}
+						>
+							{task.isDone ? 'Unmark' : 'Mark'} as done
+						</Button>
+						{/* <RunTaskActionButton task={task} kind="fill" />
 					<RunTaskActionButton task={task} kind="minify" />
 					<RunTaskActionButton task={task} kind="scrape" />
 					<RunTaskActionButton task={task} kind="factCheck" /> */}
+					</div>
+					<ActionIsland taskId={task._id} />
 				</div>
 			</CardHeader>
 			<CardContent className="p-4 pt-0">
