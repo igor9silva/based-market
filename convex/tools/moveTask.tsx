@@ -8,9 +8,14 @@ import { ActionCtx } from '../_generated/server';
 const metadata = {
 	description: 'Move the task to a new parent',
 	parameters: z.object({
-		newParentId: zid('tasks')
-			.optional()
-			.describe('The new parent id for the task. If not provided, the task will be moved to the Inbox.'),
+		newParentId: z
+			.union([
+				zid('tasks'), //
+				z.literal('inbox'),
+			])
+			.describe(
+				'The new parent id for the task. Use "inbox" to move the task to the Inbox (aka root, no parent).',
+			),
 	}),
 };
 
@@ -27,7 +32,7 @@ export const moveTask = (
 			//
 			await ctx.runMutation(internal.tasks._move, {
 				taskId: task._id,
-				newParentId,
+				newParentId: newParentId === 'inbox' ? undefined : newParentId,
 				author: action._id,
 			});
 

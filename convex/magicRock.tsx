@@ -33,7 +33,7 @@ export const _think = internalAction({
 				case 'tool-calls':
 					//
 					let calls = result.toolCalls;
-					if (calls.length !== 1) throw new Error('Expected one tool call.');
+					if (calls.length < 1) throw new Error('Expected at least one tool call.');
 
 					if (calls[0].toolName === 'doNothing') {
 						//
@@ -42,28 +42,27 @@ export const _think = internalAction({
 
 						if (calls.length > 0) throw new Error('Expected no more tool calls.');
 						//
-					} else if (calls[0].toolName === 'sendMessage') {
-						//
-						await _sendMeseeksMessage(ctx, {
-							taskId: task._id,
-							actionId: action._id,
-							message: calls[0].args.message,
-						});
-
-						calls = calls.slice(1);
 					}
 
 					// TODO: think about parallelizing tool calls
 					const toolCalls = await Promise.allSettled(
-						calls.map((call) =>
-							_addMeseeksToolCall(ctx, {
-								taskId: task._id,
-								author: action._id,
-								toolName: call.toolName,
-								toolCallId: call.toolCallId,
-								args: call.args,
-							}),
-						),
+						calls.map(async (call) => {
+							if (call.toolName === 'sendMessage') {
+								await _sendMeseeksMessage(ctx, {
+									taskId: task._id,
+									actionId,
+									message: call.args.message,
+								});
+							} else {
+								await _addMeseeksToolCall(ctx, {
+									taskId: task._id,
+									author: action._id,
+									toolName: call.toolName,
+									toolCallId: call.toolCallId,
+									args: call.args,
+								});
+							}
+						}),
 					);
 
 					// TODO: notify errors
