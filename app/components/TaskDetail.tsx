@@ -28,7 +28,7 @@ export default function TaskDetail({
 	const markAsDone = useMutation(api.tasks.markAsDone);
 
 	return (
-		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto', className)}>
+		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto h-full', className)}>
 			<CardHeader className="p-4 max-w-full sticky top-0 bg-background/75 z-10">
 				<div className="flex flex-col">
 					<div className="flex flex-row justify-between gap-2">
