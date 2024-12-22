@@ -5,6 +5,7 @@ import { Meta, Scripts } from '@tanstack/start';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
 
+import { CommandMenu } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
 import { MainSidebar } from '~/components/MainSidebar';
 import { Button } from '~/components/ui/button';
@@ -55,6 +56,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<ScrollRestoration />
 				<Scripts />
 				<Toaster />
+				<CommandMenu />
 			</body>
 		</html>
 	);
