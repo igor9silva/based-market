@@ -2,6 +2,7 @@ import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { SendIcon } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Textarea } from '~/components/ui/textarea';
@@ -16,7 +17,12 @@ export function MessageComposer({
 	className?: string;
 	task: Doc<'tasks'>;
 }) {
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const sendMessage = useMutation(api.taskEvents.sendMessage);
+
+	useEffect(() => {
+		textareaRef.current?.focus();
+	}, []);
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
@@ -32,7 +38,7 @@ export function MessageComposer({
 	return (
 		<div className={cn('p-4 max-h-fit', className)}>
 			<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-row gap-2">
-				<Textarea name="message" required />
+				<Textarea ref={textareaRef} name="message" required />
 				<Button type="submit">
 					<SendIcon className="size-4" />
 				</Button>
