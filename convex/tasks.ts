@@ -327,9 +327,10 @@ export const _move = internalMutation({
 		//
 		await ctx.db.patch(taskId, { parentId: newParentId });
 
-		const changes = newParentId ? `Moved to ${newParentId}.` : 'Moved to Inbox.';
+		const changes = `Moved ${taskId} to ${newParentId || 'Inbox'}.`;
 		await _reportMutation(ctx, { taskId, changes, author });
 
+		// TODO: forbid adding to itself
 		// TODO: report to parents as well, old and new
 	},
 });

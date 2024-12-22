@@ -8,6 +8,7 @@ import { ActionCtx } from '../_generated/server';
 const metadata = {
 	description: 'Move the task to a new parent',
 	parameters: z.object({
+		taskId: zid('tasks').describe('The task id to be moved.'),
 		newParentId: z
 			.union([
 				zid('tasks'), //
@@ -28,10 +29,10 @@ export const moveTask = (
 
 	return tool({
 		...metadata,
-		execute: async ({ newParentId }) => {
+		execute: async ({ taskId, newParentId }) => {
 			//
 			await ctx.runMutation(internal.tasks._move, {
-				taskId: task._id,
+				taskId,
 				newParentId: newParentId === 'inbox' ? undefined : newParentId,
 				author: action._id,
 			});

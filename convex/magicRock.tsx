@@ -1,7 +1,7 @@
 'use node';
 
 import { openai } from '@ai-sdk/openai';
-import { CoreMessage, generateText } from 'ai';
+import { CoreMessage, generateId, generateText, InvalidToolArgumentsError } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
@@ -202,6 +202,21 @@ async function _askMagicRock(
 		messages: await renderHistory(ctx, task._id, task.owner),
 		tools: coreTools(ctx, task),
 		toolChoice: 'required',
+	}).catch((error) => {
+		//
+		if (!InvalidToolArgumentsError.isInstance(error)) throw error;
+
+		// TODO: remove this hack as soon as AI SDK supports not throwing for invalid tool calls
+		return {
+			finishReason: 'tool-calls',
+			toolCalls: [
+				{
+					toolCallId: generateId(),
+					toolName: error.toolName,
+					args: error.toolArgs,
+				},
+			],
+		};
 	});
 
 	const result = {

@@ -12,7 +12,7 @@ export function TaskItem({
 }) {
 	return (
 		<Card key={task._id} className={cn('border-none rounded-none', className)}>
-			<CardContent className="pt-6">
+			<CardContent className="p-4">
 				<div className="space-y-1">
 					<div className="flex items-start justify-between gap-2">
 						<h3

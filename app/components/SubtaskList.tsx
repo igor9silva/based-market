@@ -22,12 +22,15 @@ export function SubtaskList({
 	}
 
 	return (
-		<div className={cn('overflow-auto h-full', className)}>
-			{subtasks.map((task) => (
-				<Link key={task._id} to="/$" params={{ _splat: `/chat/${task._id}` }} resetScroll={false}>
-					<TaskItem task={task} />
-				</Link>
-			))}
+		<div className="flex flex-col gap-2 p-4">
+			<h3 className="text-xl font-medium">Subtasks</h3>
+			<div className={cn('overflow-auto h-full', className)}>
+				{subtasks.map((task) => (
+					<Link key={task._id} to="/$" params={{ _splat: `/chat/${task._id}` }} resetScroll={false}>
+						<TaskItem task={task} />
+					</Link>
+				))}
+			</div>
 		</div>
 	);
 }

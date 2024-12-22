@@ -86,13 +86,13 @@ export const _run = internalAction({
 			//
 			console.error('error in tool', error); // TODO: notify
 
+			await _setActionStatus(ctx, { status: 'failed', actionId });
+
 			await ctx.runMutation(internal.taskEvents._setToolCallResult, {
 				eventId: action.origin,
 				result: `Failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 				isError: true,
 			});
-
-			await _setActionStatus(ctx, { status: 'failed', actionId });
 
 			throw error;
 		}
