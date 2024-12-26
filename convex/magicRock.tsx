@@ -1,7 +1,7 @@
 'use node';
 
 import { openai } from '@ai-sdk/openai';
-import { CoreMessage, generateText } from 'ai';
+import { CoreMessage, generateObject, generateText, NoSuchToolError } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
@@ -202,6 +202,31 @@ async function _askMagicRock(
 		messages: await renderHistory(ctx, task._id, task.owner),
 		tools: coreTools(ctx, task),
 		toolChoice: 'required',
+
+		experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
+			//
+			if (NoSuchToolError.isInstance(error)) {
+				return null; // do not attempt to fix invalid tool names
+			}
+
+			// TODO: trace this call, maybe aggregate to the main call usage data
+
+			const tool = tools[toolCall.toolName as keyof typeof tools];
+
+			const { object: repairedArgs } = await generateObject({
+				model: openai('gpt-4o', { structuredOutputs: true }),
+				schema: tool.parameters,
+				prompt: [
+					`The model tried to call the tool "${toolCall.toolName}"` + ` with the following arguments:`,
+					JSON.stringify(toolCall.args),
+					`The tool accepts the following schema:`,
+					JSON.stringify(parameterSchema(toolCall)),
+					'Please fix the arguments.',
+				].join('\n'),
+			});
+
+			return { ...toolCall, args: JSON.stringify(repairedArgs) };
+		},
 	});
 
 	const result = {
