@@ -42,7 +42,7 @@
 		"@tanstack/start": "^1.85.7",
 		"@types/mdx": "^2.0.13",
 		"@vitejs/plugin-react": "^4.3.4",
-		"ai": "4.0.*",
+		"ai": "^4.0.22",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "1.2.1",
 		"cmdk": "1.0.0",
