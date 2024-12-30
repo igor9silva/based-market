@@ -144,3 +144,22 @@ function AccessDenied() {
 // •	launch_handler: Manages how the app launches if it’s already open.
 // •	prefer_related_applications and related_applications: Suggests native apps related to your PWA.
 // •	iarc_rating_id: International Age Rating Coalition identifier for store listings.
+
+// TODO: add SEO Tags, e.g. from TanStack
+//     { title },
+//     { name: 'description', content: description },
+//     { name: 'keywords', content: keywords },
+//     { name: 'twitter:title', content: title },
+//     { name: 'twitter:description', content: description },
+//     { name: 'twitter:creator', content: '@tannerlinsley' },
+//     { name: 'twitter:site', content: '@tannerlinsley' },
+//     { name: 'og:type', content: 'website' },
+//     { name: 'og:title', content: title },
+//     { name: 'og:description', content: description },
+//     ...(image
+//       ? [
+//           { name: 'twitter:image', content: image },
+//           { name: 'twitter:card', content: 'summary_large_image' },
+//           { name: 'og:image', content: image },
+//         ]
+//       : []),
