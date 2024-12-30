@@ -1,6 +1,9 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { query } from './lib';
 
+const ALLOWED_DOMAINS = process.env.ALLOWED_DOMAINS?.split(',') || []; // TODO: typed env
+const ALLOWED_EMAILS = process.env.ALLOWED_EMAILS?.split(',') || []; // TODO: typed env
+
 export const current = query({
 	args: {},
 	handler: async (ctx) => {
@@ -11,6 +14,17 @@ export const current = query({
 		const user = await ctx.db.get(userId);
 		if (!user) throw new Error('Not found');
 
+		const email = user.email;
+		if (!email) throw new Error(`No email found for user ${userId}`);
+		if (!isAllowed(email)) throw new Error(`Email ${email} not allowed`);
+
 		return user;
 	},
 });
+
+// Helper functions ------------------------------------
+
+function isAllowed(email: string) {
+	const domain = email.split('@')[1];
+	return ALLOWED_DOMAINS.includes(domain) || ALLOWED_EMAILS.includes(email);
+}

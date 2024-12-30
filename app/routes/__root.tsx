@@ -87,20 +87,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 function AccessDenied() {
 	//
 	const { signIn } = useAuthActions();
-	const doSignIn = () => signIn('google');
-
-	const isSpecial = typeof location !== 'undefined' && location.pathname !== '/saifora';
 
 	return (
 		<div className="h-screen w-full flex flex-col items-center justify-center gap-4">
-			{isSpecial ? (
-				<>
-					<p>Who the f are you?!</p>
-					<img src={`/static/thinking-emoji.gif`} alt="Access denied" className="object-contain" />
-				</>
-			) : (
-				<Button onClick={doSignIn}>Sign in</Button>
-			)}
+			<Button onClick={() => signIn('google')}>Sign in</Button>
 		</div>
 	);
 }
