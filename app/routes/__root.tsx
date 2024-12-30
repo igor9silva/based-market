@@ -13,7 +13,6 @@ import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
 
 import appCss from '~/styles/app.css?url';
-import thinkingEmojiUrl from '/static/thinking-emoji.gif';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
 	head: () => ({
@@ -91,7 +90,7 @@ function AccessDenied() {
 			{isSpecial ? (
 				<>
 					<p>Who the f are you?!</p>
-					<img src={thinkingEmojiUrl} alt="Access denied" className="object-contain" />
+					<img src={`/static/thinking-emoji.gif`} alt="Access denied" className="object-contain" />
 				</>
 			) : (
 				<Button onClick={doSignIn}>Sign in</Button>
