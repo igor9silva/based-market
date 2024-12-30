@@ -33,10 +33,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 		],
 		links: [
 			{ rel: 'stylesheet', href: appCss },
+
+			{ name: 'application-name', content: 'Meseeks' },
+			{ name: 'apple-mobile-web-app-title', content: 'Meseeks' },
+
+			// PWA Manifest
 			{ rel: 'manifest', href: '/static/site.webmanifest' },
-			{ rel: 'apple-touch-icon', sizes: '180x180', href: '/static/logo-dark-192.png' },
+
+			// Theme Color
 			{ name: 'theme-color', content: '#000000', media: '(prefers-color-scheme: dark)' },
 			{ name: 'theme-color', content: '#ffffff', media: '(prefers-color-scheme: light)' },
+
+			// Full screen mode
+			{ name: 'mobile-web-app-capable', content: 'yes' },
+			{ name: 'apple-mobile-web-app-capable', content: 'yes' },
+
+			// Styling
+			{ name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+			{ rel: 'apple-touch-icon', sizes: '180x180', href: '/static/logo-dark-192.png' },
 		],
 	}),
 	component: RootComponent,
