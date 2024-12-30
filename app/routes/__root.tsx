@@ -13,7 +13,7 @@ import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
 
 import appCss from '~/styles/app.css?url';
-import thinkingEmojiUrl from '/static/thinking-emoji.gif?url';
+import thinkingEmojiUrl from '/static/thinking-emoji.gif';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
 	head: () => ({
