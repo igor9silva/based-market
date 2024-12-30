@@ -31,7 +31,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 				].join(','),
 			},
 		],
-		links: [{ rel: 'stylesheet', href: appCss }],
+		links: [
+			{ rel: 'stylesheet', href: appCss },
+			{ rel: 'manifest', href: '/static/site.webmanifest' },
+			{ rel: 'apple-touch-icon', sizes: '180x180', href: '/static/logo-dark-192.png' },
+			{ name: 'theme-color', content: '#000000', media: '(prefers-color-scheme: dark)' },
+			{ name: 'theme-color', content: '#ffffff', media: '(prefers-color-scheme: light)' },
+		],
 	}),
 	component: RootComponent,
 });
@@ -98,3 +104,43 @@ function AccessDenied() {
 		</div>
 	);
 }
+
+// TODO: .webmanifest
+
+// show on chrome install
+// "screenshots": [
+//   {
+//     "src": "screenshots/home.png",
+//     "sizes": "1280x720",
+//     "type": "image/png"
+//   },
+//   {
+//     "src": "screenshots/settings.png",
+//     "sizes": "1280x720",
+//     "type": "image/png"
+//   }
+// ]
+
+// SEO
+// "categories": ["productivity", "utilities", "ai"]
+
+// Define quick actions for users via long-press on the app icon (on supported devices).
+// "shortcuts": [
+//   {
+//     "name": "New Task",
+//     "short_name": "Task",
+//     "description": "Create a new task instantly",
+//     "url": "/new-task",
+//     "icons": [{ "src": "icons/shortcut-task.png", "sizes": "192x192" }]
+//   }
+// ]
+
+// other
+// •	share_target: Lets your PWA receive shared content.
+// •	protocol_handlers: Registers your app to handle custom URI schemes.
+// •	file_handlers: Allows your PWA to open or handle specific file types.
+// •	display_override: Overrides the display property with a fallback sequence.
+// •	capture_links: Specifies how links to your domain should open (e.g., in-app).
+// •	launch_handler: Manages how the app launches if it’s already open.
+// •	prefer_related_applications and related_applications: Suggests native apps related to your PWA.
+// •	iarc_rating_id: International Age Rating Coalition identifier for store listings.
