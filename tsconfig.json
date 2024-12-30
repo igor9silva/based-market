@@ -2,6 +2,7 @@
 	"include": ["**/*.ts", "**/*.tsx"],
 	"exclude": ["node_modules"],
 	"compilerOptions": {
+		"types": ["vinxi/types/client"],
 		"esModuleInterop": true,
 		"jsx": "react-jsx",
 		"module": "ESNext",
