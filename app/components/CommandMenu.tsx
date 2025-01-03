@@ -2,7 +2,7 @@ import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { DollarSign, Inbox, Plus } from 'lucide-react';
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
 	CommandDialog,
@@ -77,6 +77,10 @@ export function CommandMenuDialog() {
 		setSearch(pathname + searchStr);
 	}, [pathname, searchStr]);
 
+	const shouldFilter = useMemo(() => {
+		return search !== pathname + searchStr;
+	}, [search, pathname, searchStr]);
+
 	const onSelect = useCallback(
 		(value: string) => {
 			close();
@@ -86,7 +90,7 @@ export function CommandMenuDialog() {
 	);
 
 	return (
-		<CommandDialog open={isOpen} onOpenChange={close}>
+		<CommandDialog shouldFilter={shouldFilter} open={isOpen} onOpenChange={close}>
 			<DialogTitle className="hidden">Global command menu</DialogTitle>
 			<DialogDescription className="hidden">Search for tasks, notes, files, and more.</DialogDescription>
 			<CommandInput placeholder="Type a command or search..." value={search} onValueChange={setSearch} />
