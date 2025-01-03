@@ -1,7 +1,8 @@
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { useNavigate } from '@tanstack/react-router';
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import { DollarSign, Inbox, Plus } from 'lucide-react';
 import * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
 	CommandDialog,
@@ -12,6 +13,7 @@ import {
 	CommandList,
 	CommandSeparator,
 } from '~/components/ui/command';
+import { DialogDescription, DialogTitle } from '~/components/ui/dialog';
 
 interface CommandMenuContextType {
 	isOpen: boolean;
@@ -66,19 +68,28 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
 export function CommandMenuDialog() {
 	//
 	const { isOpen, close } = useCommandMenu();
+	const { pathname, searchStr } = useLocation();
 	const navigate = useNavigate();
 
-	const onSelect = React.useCallback(
+	const [search, setSearch] = useState(pathname + searchStr);
+
+	useEffect(() => {
+		setSearch(pathname + searchStr);
+	}, [pathname, searchStr]);
+
+	const onSelect = useCallback(
 		(value: string) => {
 			close();
-			navigate({ to: value as any });
+			navigate({ to: value });
 		},
 		[navigate, close],
 	);
 
 	return (
 		<CommandDialog open={isOpen} onOpenChange={close}>
-			<CommandInput placeholder="Type a command or search..." />
+			<DialogTitle className="hidden">Global command menu</DialogTitle>
+			<DialogDescription className="hidden">Search for tasks, notes, files, and more.</DialogDescription>
+			<CommandInput placeholder="Type a command or search..." value={search} onValueChange={setSearch} />
 			<CommandList>
 				<CommandEmpty>No results found.</CommandEmpty>
 				{/* <CommandSeparator /> */}

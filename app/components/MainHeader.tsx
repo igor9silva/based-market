@@ -43,7 +43,9 @@ export function MainHeader({ className }: { className?: string }) {
 					{pathname}
 					{searchStr}
 				</span>
-				<span className="text-xs">⌘K</span>
+				<kbd className="inline-flex h-5 items-center gap-0.5 rounded border bg-muted px-1 font-mono font-medium text-muted-foreground text-xs">
+					<span className="text-base">⌘</span>K
+				</kbd>
 			</Button>
 
 			<div className="flex gap-1">
