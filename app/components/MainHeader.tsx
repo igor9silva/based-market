@@ -2,17 +2,20 @@ import { useLocation, useRouter } from '@tanstack/react-router';
 import { ArrowLeft, ArrowRight, ArrowUp, Share } from 'lucide-react';
 import { cn } from '~/lib/utils';
 
+import { toast } from 'sonner';
+import { useCommandMenu } from '~/components/CommandMenu';
 import { Button } from '~/components/ui/button';
 
 export function MainHeader({ className }: { className?: string }) {
 	//
 	const { history } = useRouter();
 	const { pathname, searchStr } = useLocation();
+	const { open: openCommandDialog } = useCommandMenu();
 
 	const goBack = () => history.back();
 	const goForward = () => history.forward();
 	const goUp = () => {
-		alert('Not implemented. Should go to parent task, if any.'); // TODO: implement
+		toast.error('Not implemented. Should go to parent task, if any.'); // TODO: implement
 	};
 
 	return (
@@ -33,7 +36,7 @@ export function MainHeader({ className }: { className?: string }) {
 
 			<Button
 				variant="outline"
-				onClick={() => {}}
+				onClick={openCommandDialog}
 				className="flex w-1/2 justify-between gap-2 bg-muted/40 hover:bg-accent text-muted-foreground"
 			>
 				<span className="text-sm">

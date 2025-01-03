@@ -1,8 +1,6 @@
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { useNavigate } from '@tanstack/react-router';
 import { DollarSign, Inbox, Plus } from 'lucide-react';
-// import { api } from 'convex/_generated/api';
-// import { useQuery } from 'convex/react';
 import * as React from 'react';
 
 import {
@@ -15,20 +13,45 @@ import {
 	CommandSeparator,
 } from '~/components/ui/command';
 
-export function CommandMenu() {
+interface CommandMenuContextType {
+	isOpen: boolean;
+	open: () => void;
+	close: () => void;
+}
+
+const CommandMenuContext = React.createContext<CommandMenuContextType | null>(null);
+
+export function useCommandMenu() {
 	//
-	const [open, setOpen] = React.useState(false);
-	const navigate = useNavigate();
-	// const tasks = useQuery(api.tasks.findAll);
+	const context = React.useContext(CommandMenuContext);
+
+	if (!context) {
+		throw new Error('useCommandMenu must be used within CommandMenuProvider');
+	}
+
+	return context;
+}
+
+export function CommandMenuProvider({ children }: { children: React.ReactNode }) {
+	//
+	const [isOpen, setIsOpen] = React.useState(false);
+
+	const value = React.useMemo(
+		() => ({
+			isOpen,
+			open: () => setIsOpen(true),
+			close: () => setIsOpen(false),
+		}),
+		[isOpen],
+	);
 
 	React.useEffect(() => {
 		//
 		const down = (e: KeyboardEvent) => {
 			//
-			// CMD+K
 			if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
 				e.preventDefault();
-				setOpen((open) => !open);
+				setIsOpen((open) => !open);
 			}
 		};
 
@@ -37,16 +60,24 @@ export function CommandMenu() {
 		//
 	}, []);
 
+	return <CommandMenuContext.Provider value={value}>{children}</CommandMenuContext.Provider>;
+}
+
+export function CommandMenuDialog() {
+	//
+	const { isOpen, close } = useCommandMenu();
+	const navigate = useNavigate();
+
 	const onSelect = React.useCallback(
 		(value: string) => {
-			setOpen(false);
+			close();
 			navigate({ to: value as any });
 		},
-		[navigate],
+		[navigate, close],
 	);
 
 	return (
-		<CommandDialog open={open} onOpenChange={setOpen}>
+		<CommandDialog open={isOpen} onOpenChange={close}>
 			<CommandInput placeholder="Type a command or search..." />
 			<CommandList>
 				<CommandEmpty>No results found.</CommandEmpty>

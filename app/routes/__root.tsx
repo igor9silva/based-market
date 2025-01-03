@@ -4,8 +4,8 @@ import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack
 import { Meta, Scripts } from '@tanstack/start';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
+import { CommandMenuDialog } from '~/components/CommandMenu';
 
-import { CommandMenu } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
 import { MainHeader } from '~/components/MainHeader';
 import { MainSidebar } from '~/components/MainSidebar';
@@ -75,8 +75,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<RootLayout>{children}</RootLayout>
 				<ScrollRestoration />
 				<Scripts />
-				<Toaster />
-				<CommandMenu />
 			</body>
 		</html>
 	);
@@ -97,6 +95,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					<MainHeader className="h-12" />
 					<div className="h-[calc(100%-3rem)]">{children}</div>
 				</SidebarInset>
+				<Toaster />
+				<CommandMenuDialog />
 			</Authenticated>
 		</SidebarProvider>
 	);
