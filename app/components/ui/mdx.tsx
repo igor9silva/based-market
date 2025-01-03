@@ -4,6 +4,7 @@ import { useMDX } from '~/hooks/useMDX';
 import { ChatHistory } from '~/components/ChatHistory';
 import { Grid } from '~/components/layout/Grid';
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
+import { ReversableListAndDetail } from '~/components/layout/ReversableListAndDetail';
 import { TwoColumn } from '~/components/layout/TwoColumn';
 import { Loading } from '~/components/Loading';
 import { QuickAdd } from '~/components/QuickAdd';
@@ -31,6 +32,7 @@ const components = {
 	QuickAdd,
 	TaskListAndDetail,
 	ListAndDetail,
+	ReversableListAndDetail,
 };
 
 export default function MDX({
