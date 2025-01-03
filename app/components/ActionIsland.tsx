@@ -2,12 +2,12 @@ import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
-import { Activity, Loader2, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { forwardRef, useRef, useState } from 'react';
-import { TaskAction } from '~/components/TaskAction';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useClickOutside } from '~/hooks/useClickOutside';
 import { cn } from '~/lib/utils';
+
+import { TaskAction } from '~/components/TaskAction';
 
 const TRANSITION = { duration: 0.25, type: 'spring' };
 
@@ -28,22 +28,35 @@ export function ActionIsland({
 	// if click outside, close
 	useClickOutside(ref, () => setIsExpanded(false), isExpanded);
 
+	// collapse on ESC
+	useEffect(() => {
+		//
+		if (!isExpanded) return;
+
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				setIsExpanded(false);
+			}
+		};
+
+		window.addEventListener('keydown', handleEscape);
+		return () => window.removeEventListener('keydown', handleEscape);
+	}, [isExpanded]);
+
 	return (
 		<motion.div
 			ref={ref}
 			className={cn(
-				'bg-secondary text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[90%]',
+				'z-100 bg-secondary text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[90%]',
 				className,
 			)}
 			transition={TRANSITION}
-			initial={
-				{
-					// top: 'auto',
-				}
-			}
+			initial={{
+				top: 'auto',
+			}}
 			animate={{
 				width: isExpanded ? '24rem' : 'auto',
-				// top: '0.5rem',
+				top: '0.5rem',
 			}}
 			onClick={() => !isExpanded && setIsExpanded(true)}
 		>
@@ -55,6 +68,15 @@ export function ActionIsland({
 }
 
 const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(({ actions }, ref) => {
+	//
+	// auto-scroll to bottom when rendered
+	useEffect(() => {
+		//
+		if (ref && typeof ref === 'object' && ref.current) {
+			ref.current.scrollTop = ref.current.scrollHeight;
+		}
+	}, [ref, actions]);
+
 	return (
 		<motion.div
 			ref={ref}
@@ -62,11 +84,11 @@ const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>((
 			transition={TRANSITION}
 			initial={{ opacity: 0, height: 0 }}
 			animate={{ opacity: 1, height: 'auto' }}
-			className="max-h-[90dvh] overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/50 hover:scrollbar-thumb-muted-foreground/80"
+			className="absolute max-h-96 w-96 bg-secondary rounded-lg overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/50 hover:scrollbar-thumb-muted-foreground/80 z-50"
 		>
 			<div className="p-4">
 				<div className="flex items-center justify-between mb-4">
-					<h3 className="font-medium">Background Activity</h3>
+					<h3 className="font-medium">Actions</h3>
 					<span className="text-sm text-gray-400">{actions.length} actions</span>
 				</div>
 				<div className="space-y-3">
@@ -98,7 +120,8 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 	if (runningActions.length > 0) {
 		return (
 			<>
-				<Loader2 className="size-4 animate-spin" />
+				{/* <Loader2 className="size-4 animate-spin" /> */}
+				<span className="size-1.5 animate-pulse rounded-full bg-green-500" />
 				<span>
 					{runningActions.length} running{pendingActions.length > 0 && `, ${pendingActions.length} pending`}
 				</span>
@@ -109,7 +132,8 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 	if (failedActions.length > 0) {
 		return (
 			<>
-				<X className="size-4" />
+				{/* <X className="size-4" /> */}
+				<span className="size-1.5 rounded-full bg-red-500" />
 				<span>
 					{failedActions.length} failed{pendingActions.length > 0 && `, ${pendingActions.length} pending`}
 				</span>
@@ -119,7 +143,8 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 
 	return (
 		<>
-			<Activity className="size-4" />
+			{/* <Activity className="size-4" /> */}
+			{/* <span className="size-1.5 animate-pulse rounded-full bg-blue-500" /> */}
 			{actions.length > 0 ? ( //
 				<span>{actions.length} done</span>
 			) : (

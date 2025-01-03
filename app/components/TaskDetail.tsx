@@ -5,7 +5,6 @@ import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { Maximize2 } from 'lucide-react';
-import { ActionIsland } from '~/components/ActionIsland';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
@@ -69,7 +68,6 @@ export default function TaskDetail({
 					<RunTaskActionButton task={task} kind="scrape" />
 					<RunTaskActionButton task={task} kind="factCheck" /> */}
 					</div>
-					<ActionIsland taskId={task._id} />
 				</div>
 			</CardHeader>
 			<CardContent className="p-4 pt-0">

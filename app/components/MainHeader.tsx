@@ -3,33 +3,39 @@ import { ArrowLeft, ArrowRight, ArrowUp, Share } from 'lucide-react';
 import { cn } from '~/lib/utils';
 
 import { toast } from 'sonner';
+import { ActionIsland } from '~/components/ActionIsland';
 import { useCommandMenu } from '~/components/CommandMenu';
 import { Button } from '~/components/ui/button';
+import { useSplatParams } from '~/hooks/useSplatParams';
 
 export function MainHeader({ className }: { className?: string }) {
 	//
 	const { history } = useRouter();
 	const { pathname, searchStr } = useLocation();
 	const { open: openCommandDialog } = useCommandMenu();
+	const { taskId } = useSplatParams();
 
 	const goBack = () => history.back();
 	const goForward = () => history.forward();
 	const goUp = () => {
 		toast.error('Not implemented. Should go to parent task, if any.'); // TODO: implement
 	};
+	const share = () => {
+		toast.error('Not implemented. Should share the current page.'); // TODO: implement
+	};
 
 	return (
 		<header className={cn('flex h-14 items-center justify-between border-b px-2 gap-1', className)}>
 			<div className="flex items-center gap-1">
-				<Button className="p-2" variant="outline" onClick={goBack}>
+				<Button className="p-2" variant="ghost" onClick={goBack}>
 					<ArrowLeft />
 				</Button>
-				<Button className="p-2" variant="outline" onClick={goForward}>
+				<Button className="p-2" variant="ghost" onClick={goForward}>
 					{/* TODO: dynamically enable/disable
 					https://github.com/TanStack/router/discussions/181#discussioncomment-11726923 */}
 					<ArrowRight />
 				</Button>
-				<Button className="p-2" variant="outline" onClick={goUp}>
+				<Button className="p-2" variant="ghost" onClick={goUp}>
 					<ArrowUp />
 				</Button>
 			</div>
@@ -49,13 +55,10 @@ export function MainHeader({ className }: { className?: string }) {
 			</Button>
 
 			<div className="flex gap-1">
-				<Button className="p-2" variant="ghost">
+				<Button className="p-2" variant="ghost" onClick={share}>
 					<Share />
 				</Button>
-				<div className="flex h-9 items-center gap-2 rounded-md border px-3">
-					<span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
-					<span className="text-sm">Running</span>
-				</div>
+				{taskId && <ActionIsland taskId={taskId} />}
 			</div>
 		</header>
 	);
