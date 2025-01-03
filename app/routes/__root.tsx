@@ -91,7 +91,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			</Unauthenticated>
 			<Authenticated>
 				<MainSidebar />
-				<SidebarInset className="w-full h-svh overflow-hidden">
+				<SidebarInset className="w-full h-svh overflow-hidden flex-col-reverse md:flex-col">
 					<MainHeader className="h-12" />
 					<div className="h-[calc(100%-3rem)]">{children}</div>
 				</SidebarInset>
