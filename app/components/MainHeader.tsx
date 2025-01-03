@@ -1,5 +1,6 @@
 import { useLocation, useRouter } from '@tanstack/react-router';
 import { ArrowLeft, ArrowRight, ArrowUp, Share } from 'lucide-react';
+import { Suspense } from 'react';
 import { cn } from '~/lib/utils';
 
 import { toast } from 'sonner';
@@ -58,7 +59,11 @@ export function MainHeader({ className }: { className?: string }) {
 				<Button className="p-2" variant="ghost" onClick={share}>
 					<Share />
 				</Button>
-				{taskId && <ActionIsland taskId={taskId} />}
+				{taskId && (
+					<Suspense fallback={null}>
+						<ActionIsland taskId={taskId} />
+					</Suspense>
+				)}
 			</div>
 		</header>
 	);
