@@ -13,6 +13,7 @@ import TaskDetailAndSubstasks from '~/components/TaskDetailAndSubstasks';
 import { TaskListAndDetail } from '~/components/TaskListAndDetail';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
+import { ScrollArea } from '~/components/ui/scroll-area';
 import { Separator } from '~/components/ui/separator';
 
 const components = {
@@ -33,6 +34,7 @@ const components = {
 	TaskListAndDetail,
 	ListAndDetail,
 	ReversableListAndDetail,
+	ScrollArea,
 };
 
 export default function MDX({

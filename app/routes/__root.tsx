@@ -7,6 +7,7 @@ import * as React from 'react';
 
 import { CommandMenu } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
+import { MainHeader } from '~/components/MainHeader';
 import { MainSidebar } from '~/components/MainSidebar';
 import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
@@ -92,7 +93,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			</Unauthenticated>
 			<Authenticated>
 				<MainSidebar />
-				<SidebarInset className="w-full h-svh overflow-hidden">{children}</SidebarInset>
+				<SidebarInset className="w-full h-svh overflow-hidden">
+					<MainHeader className="h-12" />
+					<div className="h-[calc(100%-3rem)]">{children}</div>
+				</SidebarInset>
 			</Authenticated>
 		</SidebarProvider>
 	);
