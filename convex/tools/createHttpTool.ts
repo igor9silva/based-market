@@ -33,30 +33,42 @@ export function createHttpTool(
 			const url = new URL(config.http.url);
 			const headers = { ...config.http.headers };
 
-			// apply parameter mappings
-			config.http.paramMappings.forEach(({ source, target, type }) => {
+			// apply parameter mappings and compute the request body
+			const bodyData = config.http.paramMappings.reduce((body, { source, target, type }) => {
 				//
-				const value = String(args[source as keyof typeof args]);
+				const value = args[source as keyof typeof args];
 
 				switch (type) {
 					case 'queryParam':
-						url.searchParams.set(target, value);
+						url.searchParams.set(target, String(value));
 						break;
 					case 'header':
-						headers[target] = value;
+						headers[target] = String(value);
 						break;
 					case 'pathParam':
-						url.pathname = url.pathname.replace(`:${target}`, value);
+						url.pathname = url.pathname.replace(`:${target}`, String(value));
+						break;
+					case 'body':
+						body[target] = value;
 						break;
 				}
-			});
 
-			console.debug('URL', url.toString(), headers, config.http.paramMappings);
+				return body;
+				//
+			}, config.http.body?.template ?? {});
+
+			const body = Object.keys(bodyData).length > 0 ? JSON.stringify(bodyData) : undefined;
+			if (body) {
+				headers['Content-Type'] = config.http.body?.contentType ?? 'application/json';
+			}
+
+			console.debug('requesting', config.http.method, url.toString(), headers, body);
 
 			// make the request
 			const response = await fetch(url.toString(), {
 				method: config.http.method,
 				headers,
+				body,
 			});
 
 			console.debug('Response', response.status, response.statusText);
@@ -65,7 +77,7 @@ export function createHttpTool(
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 
-			// treat everything as text and let the LLM do it's magic
+			// treat everything as text and let the LLM do its magic
 			const result = await response.text();
 
 			console.debug('Result', result);
