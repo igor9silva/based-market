@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as httpTools from "../httpTools.js";
 import type * as lib from "../lib.js";
 import type * as magicRock from "../magicRock.js";
 import type * as pages from "../pages.js";
@@ -56,6 +57,7 @@ import type * as utils_zodToString from "../utils/zodToString.js";
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  httpTools: typeof httpTools;
   lib: typeof lib;
   magicRock: typeof magicRock;
   pages: typeof pages;

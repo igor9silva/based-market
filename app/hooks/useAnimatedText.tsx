@@ -5,7 +5,7 @@ import { animate, useMotionValue } from 'motion/react';
 import { useState } from 'react';
 
 const DELIMITER = '';
-const CHARS_PER_SECOND = 500;
+const CHARS_PER_SECOND = 2000;
 
 export function useAnimatedText(text: string) {
 	//

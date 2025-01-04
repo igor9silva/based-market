@@ -17,7 +17,7 @@ export default defineSchema({
 	).index(
 		'by_owner', ['owner'],
 	).index(
-		'by_owner_name', ['owner', 'name'],
+		'by_name', ['name'],
 	),
 
 	tasks: defineTable(

@@ -44,7 +44,7 @@ export function MainHeader({ className }: { className?: string }) {
 			<Button
 				variant="outline"
 				onClick={openCommandDialog}
-				className="flex w-2/3 justify-between gap-2 bg-muted/40 hover:bg-accent text-muted-foreground truncate p-2"
+				className="flex w-1/3 justify-between gap-2 bg-muted/40 hover:bg-accent text-muted-foreground truncate p-2"
 			>
 				<span className="text-xs md:text-sm">
 					{pathname}

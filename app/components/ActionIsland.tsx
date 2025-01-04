@@ -122,9 +122,7 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 			<>
 				{/* <Loader2 className="size-4 animate-spin" /> */}
 				<span className="size-1.5 animate-pulse rounded-full bg-green-500" />
-				<span>
-					{runningActions.length} running{pendingActions.length > 0 && `, ${pendingActions.length} pending`}
-				</span>
+				<span>{runningActions.length} running</span>
 			</>
 		);
 	}
@@ -134,9 +132,7 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 			<>
 				{/* <X className="size-4" /> */}
 				<span className="size-1.5 rounded-full bg-red-500" />
-				<span>
-					{failedActions.length} failed{pendingActions.length > 0 && `, ${pendingActions.length} pending`}
-				</span>
+				<span>blocked</span>
 			</>
 		);
 	}

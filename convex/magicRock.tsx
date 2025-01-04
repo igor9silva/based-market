@@ -200,7 +200,7 @@ async function _askMagicRock(
 
 		// assuming task.owner is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task._id, task.owner),
-		tools: coreTools(ctx, task),
+		tools: await coreTools(ctx, task),
 		toolChoice: 'required',
 
 		experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
@@ -320,7 +320,7 @@ async function renderHistory(
 
 function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
 	//
-	const maxConsecutiveMeseeksEvents = 5; // TODO: env var
+	const maxConsecutiveMeseeksEvents = 2; // TODO: env var
 	const lastMessages = history.filter((message) => message.role !== 'tool').slice(-maxConsecutiveMeseeksEvents);
 
 	// throw if last {maxConsecutiveMeseeksEvents} events are from meseeks
