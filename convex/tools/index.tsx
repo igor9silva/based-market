@@ -1,17 +1,17 @@
 'use node';
 
 import { zid } from 'convex-helpers/server/zod';
+import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 import { internalAction } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { _runNextActionIfNeeded, _setActionStatus } from '../taskActions';
-import { checkFact } from './checkFact';
+import { createHttpTool } from './createHttpTool';
 import { doNothing } from './doNothing';
 import { markAsDone } from './markAsDone';
 import { moveTask } from './moveTask';
-import { scrapeLink } from './scrapeLink';
 import { searchTasks } from './searchTasks';
 import { sendMessage } from './sendMessage';
 import { updateTask } from './updateTask';
@@ -33,8 +33,30 @@ export const coreTools = (
 	doNothing: doNothing(ctx, task, action),
 	// fillTask: fillTask(ctx, task, action),
 	// minifyDescription: minifyDescription(ctx, task, action),
-	scrapeLink: scrapeLink(ctx, task, action),
-	checkFact: checkFact(ctx, task, action),
+	// scrapeLink: scrapeLink(ctx, task, action),
+	// checkFact: checkFact(ctx, task, action),
+
+	scrapeTweet: createHttpTool(ctx, task, action, {
+		name: 'scrapeTweet',
+		description: 'Scrape a tweet (from Twitter/X) for information',
+		parameters: z.object({
+			tweetId: z
+				.string()
+				.describe(
+					'The ID of the tweet to scrape. Must be a valid Twitter/X tweet ID. If you a URL, extract the ID from it.',
+				),
+		}),
+		http: {
+			url: 'https://twitter154.p.rapidapi.com/tweet/details',
+			method: 'GET',
+			headers: {
+				'x-rapidapi-key': process.env.RAPID_API_KEY as string, // TODO: use typed env
+			},
+			paramMappings: [
+				{ source: 'tweetId', target: 'tweet_id', type: 'queryParam' }, //
+			],
+		},
+	}),
 });
 
 // TODO: a more robust one
