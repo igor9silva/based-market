@@ -25,7 +25,8 @@ export const findAllAtInbox = query({
 					.eq('owner', currentUser._id) //
 					.eq('parentId', undefined),
 			)
-			.collect();
+			.collect()
+			.then((tasks) => tasks.sort((a, b) => b._creationTime - a._creationTime));
 	},
 });
 
@@ -42,7 +43,8 @@ export const findAll = query({
 		return await ctx.db
 			.query('tasks')
 			.withIndex('by_parent_isDone', (q) => q.eq('parentId', parentId))
-			.collect();
+			.collect()
+			.then((tasks) => tasks.sort((a, b) => b._creationTime - a._creationTime));
 	},
 });
 

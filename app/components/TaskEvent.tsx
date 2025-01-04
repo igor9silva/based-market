@@ -57,7 +57,14 @@ export function TaskEvent({
 					<Author author={event.author} />
 				</div>
 
-				<div className={cn(event.kind === 'tool-call' && !event.result && 'animate-pulse')}>
+				<div
+					className={cn({
+						'animate-pulse': event.kind === 'tool-call' && !event.result,
+						'bg-pink-700/30': event.kind === 'tool-call',
+						'bg-green-700/30': event.kind === 'mutation',
+						'bg-blue-700/30': event.kind === 'message',
+					})}
+				>
 					{isNew ? <AnimatedContent content={content} /> : <Content content={content} />}
 				</div>
 			</div>
