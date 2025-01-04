@@ -26,7 +26,7 @@ export const coreTools = async (
 
 	return {
 		// built-in tools
-		updateTask: updateTask(ctx, task, action),
+		updateTask: updateTask(ctx, task, action), // TODO: split into title and body?
 		markAsDone: markAsDone(ctx, task, action),
 		moveTask: moveTask(ctx, task, action),
 		searchTasks: searchTasks(ctx, task, action),

@@ -114,14 +114,14 @@ Collapsed.displayName = 'Collapsed';
 const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 	//
 	const runningActions = actions.filter((action) => action.status === 'running');
-	const pendingActions = actions.filter((action) => action.status === 'pending');
+	// const pendingActions = actions.filter((action) => action.status === 'pending');
 	const failedActions = actions.filter((action) => action.status === 'failed');
 
 	if (runningActions.length > 0) {
 		return (
 			<>
 				{/* <Loader2 className="size-4 animate-spin" /> */}
-				<span className="size-1.5 animate-pulse rounded-full bg-green-500" />
+				<Indicator className="animate-pulse duration-1000 bg-green-500" />
 				<span>{runningActions.length} running</span>
 			</>
 		);
@@ -131,7 +131,7 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 		return (
 			<>
 				{/* <X className="size-4" /> */}
-				<span className="size-1.5 rounded-full bg-red-500" />
+				<Indicator className="bg-red-500" />
 				<span>blocked</span>
 			</>
 		);
@@ -141,11 +141,17 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 		<>
 			{/* <Activity className="size-4" /> */}
 			{/* <span className="size-1.5 animate-pulse rounded-full bg-blue-500" /> */}
-			{actions.length > 0 ? ( //
+			{/* {actions.length > 0 ? ( //
 				<span>{actions.length} done</span>
 			) : (
 				<span>No activity</span>
-			)}
+			)} */}
+			<Indicator className="bg-gray-500" />
+			<span>idle</span>
 		</>
 	);
 };
+
+function Indicator({ className }: { className?: string }) {
+	return <span className={cn('size-1.5 rounded-full', className)} />;
+}
