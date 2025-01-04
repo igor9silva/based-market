@@ -8,6 +8,7 @@ import { ActionCtx } from '../_generated/server';
 import { internalAction } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { _runNextActionIfNeeded, _setActionStatus } from '../taskActions';
+import { zodToString } from '../utils/zodToString';
 import { createHttpTool } from './createHttpTool';
 import { doNothing } from './doNothing';
 import { markAsDone } from './markAsDone';
@@ -39,13 +40,15 @@ export const coreTools = (
 	scrapeTweet: createHttpTool(ctx, task, action, {
 		name: 'scrapeTweet',
 		description: 'Scrape a tweet (from Twitter/X) for information',
-		parameters: z.object({
-			tweetId: z
-				.string()
-				.describe(
-					'The ID of the tweet to scrape. Must be a valid Twitter/X tweet ID. If you a URL, extract the ID from it.',
-				),
-		}),
+		parametersSchema: zodToString(
+			z.object({
+				tweetId: z
+					.string()
+					.describe(
+						'The ID of the tweet to scrape. Must be a valid Twitter/X tweet ID. If you a URL, extract the ID from it.',
+					),
+			}),
+		),
 		http: {
 			url: 'https://twitter154.p.rapidapi.com/tweet/details',
 			method: 'GET',
@@ -83,11 +86,11 @@ export const _run = internalAction({
 		// grab the task
 		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
 
+		const availableTools = coreTools(ctx, task, action);
+		const tool = availableTools[action.toolName as keyof typeof availableTools];
+
 		try {
 			//
-			const availableTools = coreTools(ctx, task, action);
-			const tool = availableTools[action.toolName as keyof typeof availableTools];
-
 			if (!tool) throw new Error(`Unknown tool: ${action.toolName}`);
 
 			const parsedArgs = tool.parameters.safeParse(action.args);
@@ -112,7 +115,7 @@ export const _run = internalAction({
 
 			await ctx.runMutation(internal.taskEvents._setToolCallResult, {
 				eventId: action.origin,
-				result: `Failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+				result: `${action.toolName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 				isError: true,
 			});
 

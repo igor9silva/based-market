@@ -3,48 +3,47 @@ import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
+import { stringToZod } from '../utils/zodToString';
 
-type ParamMapping = {
-	source: string; // original parameter name
-	target: string; // name in the HTTP request
-	type: 'queryParam' | 'header' | 'pathParam';
-};
+const ParamMappingSchema = z.object({
+	source: z.string().describe('original parameter name'),
+	target: z.string().describe('name in the HTTP request'),
+	type: z.enum(['queryParam', 'header', 'pathParam']),
+});
 
-export type HttpConfig = {
-	url: string;
-	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-	headers: Record<string, string>;
-	paramMappings: ParamMapping[];
-};
+export const HttpConfigSchema = z.object({
+	url: z.string().url(),
+	method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']),
+	headers: z.record(z.string()),
+	paramMappings: z.array(ParamMappingSchema),
+});
 
-export type ToolConfig<TParams extends z.ZodType> = {
-	name: string;
-	description: string;
-	parameters: TParams;
-	http: HttpConfig;
-	jsonKeyPath?: string;
-};
+export const ToolConfigSchema = z.object({
+	name: z.string(),
+	description: z.string(),
+	parametersSchema: z.string(),
+	http: HttpConfigSchema,
+});
 
-export function createHttpTool<TParams extends z.ZodType>(
+export function createHttpTool(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: (Doc<'taskActions'> & { kind: 'run-tool' }) | undefined,
-	config: ToolConfig<TParams>,
+	config: z.infer<typeof ToolConfigSchema>,
 ) {
 	//
 	const metadata = {
 		description: config.description,
-		parameters: config.parameters,
+		parameters: stringToZod(config.parametersSchema),
 	};
 
 	if (!action) return tool(metadata);
 
 	return tool({
 		...metadata,
-		execute: async (args: z.infer<TParams>) => {
+		execute: async (args) => {
 			//
-			console.log('Running tool', config.name);
-			console.log('Args', args);
+			console.debug('Running tool', config.name, args);
 
 			await ctx.runMutation(internal.taskEvents._setToolCallStatusText, {
 				eventId: action.origin,
@@ -72,9 +71,7 @@ export function createHttpTool<TParams extends z.ZodType>(
 				}
 			});
 
-			console.log('URL', url.toString());
-			console.log('Headers', headers);
-			console.log('Params Mappings', config.http.paramMappings);
+			console.debug('URL', url.toString(), headers, config.http.paramMappings);
 
 			// Make the request
 			const response = await fetch(url.toString(), {
@@ -82,7 +79,7 @@ export function createHttpTool<TParams extends z.ZodType>(
 				headers,
 			});
 
-			console.log('Response', response);
+			console.debug('Response', response.status, response.statusText);
 
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
@@ -90,7 +87,7 @@ export function createHttpTool<TParams extends z.ZodType>(
 
 			const result = await response.text();
 
-			console.log('Result', result);
+			console.debug('Result', result);
 
 			return result;
 		},

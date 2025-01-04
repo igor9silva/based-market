@@ -43,6 +43,7 @@ import type * as tools_searchTasks from "../tools/searchTasks.js";
 import type * as tools_sendMessage from "../tools/sendMessage.js";
 import type * as tools_updateTask from "../tools/updateTask.js";
 import type * as users from "../users.js";
+import type * as utils_zodToString from "../utils/zodToString.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -83,6 +84,7 @@ declare const fullApi: ApiFromModules<{
   "tools/sendMessage": typeof tools_sendMessage;
   "tools/updateTask": typeof tools_updateTask;
   users: typeof users;
+  "utils/zodToString": typeof utils_zodToString;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
