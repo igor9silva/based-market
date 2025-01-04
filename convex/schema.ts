@@ -1,6 +1,7 @@
 import { authTables } from '@convex-dev/auth/server';
 import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
+import { httpToolSchema } from './schemas/httpToolSchema';
 import { pageSchema } from './schemas/pageSchema';
 import { taskActionSchema } from './schemas/taskActionSchema';
 import { taskEventSchema } from './schemas/taskEventSchema';
@@ -10,6 +11,14 @@ import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
 export default defineSchema({
 
 	...authTables,
+
+	httpTools: defineTable(
+		zodToConvex(httpToolSchema),
+	).index(
+		'by_owner', ['owner'],
+	).index(
+		'by_owner_name', ['owner', 'name'],
+	),
 
 	tasks: defineTable(
 		zodToConvex(taskSchema),

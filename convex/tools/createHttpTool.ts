@@ -3,35 +3,15 @@ import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
+import { httpToolSchema } from '../schemas/httpToolSchema';
 import { stringToZod } from '../utils/zodToString';
-
-const ParamMappingSchema = z.object({
-	source: z.string().describe('original parameter name'),
-	target: z.string().describe('name in the HTTP request'),
-	type: z.enum(['queryParam', 'header', 'pathParam']),
-});
-
-export const HttpConfigSchema = z.object({
-	url: z.string().url(),
-	method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']),
-	headers: z.record(z.string()),
-	paramMappings: z.array(ParamMappingSchema),
-});
-
-export const ToolConfigSchema = z.object({
-	name: z.string(),
-	description: z.string(),
-	parametersSchema: z.string(),
-	http: HttpConfigSchema,
-});
 
 export function createHttpTool(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: (Doc<'taskActions'> & { kind: 'run-tool' }) | undefined,
-	config: z.infer<typeof ToolConfigSchema>,
+	config: z.infer<typeof httpToolSchema>,
 ) {
-	//
 	const metadata = {
 		description: config.description,
 		parameters: stringToZod(config.parametersSchema),
@@ -53,7 +33,7 @@ export function createHttpTool(
 			const url = new URL(config.http.url);
 			const headers = { ...config.http.headers };
 
-			// Apply parameter mappings
+			// apply parameter mappings
 			config.http.paramMappings.forEach(({ source, target, type }) => {
 				//
 				const value = String(args[source as keyof typeof args]);
@@ -73,7 +53,7 @@ export function createHttpTool(
 
 			console.debug('URL', url.toString(), headers, config.http.paramMappings);
 
-			// Make the request
+			// make the request
 			const response = await fetch(url.toString(), {
 				method: config.http.method,
 				headers,
@@ -85,6 +65,7 @@ export function createHttpTool(
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
 
+			// treat everything as text and let the LLM do it's magic
 			const result = await response.text();
 
 			console.debug('Result', result);
