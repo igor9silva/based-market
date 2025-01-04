@@ -71,5 +71,5 @@ function AnimatedContent({ content }: { content: string }) {
 }
 
 function Content({ content }: { content: string }) {
-	return <MDX text={content} />;
+	return <MDX text={content} errorFallback={<pre className="whitespace-pre-wrap">{content}</pre>} />;
 }

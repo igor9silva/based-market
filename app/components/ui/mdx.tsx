@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 import { useMDX } from '~/hooks/useMDX';
 
+import { useState } from 'react';
 import { ChatHistory } from '~/components/ChatHistory';
 import { Grid } from '~/components/layout/Grid';
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
@@ -40,15 +41,17 @@ const components = {
 export default function MDX({
 	text, //
 	onClickFix,
+	errorFallback,
 }: {
 	text: string;
 	onClickFix?: (e: React.MouseEvent) => void;
+	errorFallback?: React.ReactNode;
 }) {
 	//
 	const { Component, error, isPending } = useMDX(text);
 
 	if (isPending) return <Loading />;
-	if (error) return <MDXError error={error} onClickFix={onClickFix} />;
+	if (error) return errorFallback ?? <MDXError text={text} error={error} onClickFix={onClickFix} />;
 
 	if (!Component) throw new Error('No component found');
 
@@ -56,6 +59,16 @@ export default function MDX({
 		<div className="whitespace-normal [&>*]:break-all h-full">
 			<Component
 				components={{
+					a: ({ children, href }) => (
+						<a
+							href={href}
+							className="text-blue-500 hover:underline"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{children}
+						</a>
+					),
 					pre: ({ children }) => <pre className="">{children}</pre>,
 					code: ({ children }) => <code className="">{children}</code>,
 					blockquote: ({ children }) => <blockquote className="">{children}</blockquote>,
@@ -88,13 +101,17 @@ export default function MDX({
 }
 
 function MDXError({
-	error, //
+	text, //
+	error,
 	onClickFix,
 }: {
+	text: string;
 	error: Error;
 	onClickFix?: (e: React.MouseEvent) => void;
 }) {
 	//
+	const [shouldShowRaw, setShouldShowRaw] = useState(false);
+
 	const handleErrorClick = (e: React.MouseEvent<HTMLPreElement>) => {
 		e.stopPropagation();
 		navigator.clipboard.writeText(error.message);
@@ -107,14 +124,27 @@ function MDXError({
 		toast.error('Not implemented yet.');
 	};
 
+	if (shouldShowRaw)
+		return (
+			<div>
+				<pre className="whitespace-pre-wrap">{text}</pre>
+				<br />
+				<Button onClick={() => setShouldShowRaw(false)}>Try rendering again</Button>
+			</div>
+		);
+
 	return (
-		<div>
-			<p>Error loading content:</p>
-			<pre onClick={handleErrorClick} className="text-red-500 whitespace-pre-wrap">
-				{error.message}
-			</pre>
-			<br />
-			<Button onClick={handleFixClick}>Fix it</Button>
+		<div className="flex flex-col gap-2">
+			<div className="flex flex-col">
+				<p>Error loading content:</p>
+				<pre onClick={handleErrorClick} className="text-red-500 whitespace-pre-wrap">
+					{error.message}
+				</pre>
+			</div>
+			<div className="flex flex-row gap-1">
+				<Button onClick={handleFixClick}>Fix it</Button>
+				<Button onClick={() => setShouldShowRaw(true)}>Show raw</Button>
+			</div>
 		</div>
 	);
 }
