@@ -30,6 +30,7 @@ import type * as taskEvents from "../taskEvents.js";
 import type * as tasks from "../tasks.js";
 import type * as tools_checkFact from "../tools/checkFact.js";
 import type * as tools_createHttpTool from "../tools/createHttpTool.js";
+import type * as tools_createSubtask from "../tools/createSubtask.js";
 import type * as tools_doNothing from "../tools/doNothing.js";
 import type * as tools_fillTask from "../tools/fillTask.js";
 import type * as tools_index from "../tools/index.js";
@@ -72,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   tasks: typeof tasks;
   "tools/checkFact": typeof tools_checkFact;
   "tools/createHttpTool": typeof tools_createHttpTool;
+  "tools/createSubtask": typeof tools_createSubtask;
   "tools/doNothing": typeof tools_doNothing;
   "tools/fillTask": typeof tools_fillTask;
   "tools/index": typeof tools_index;

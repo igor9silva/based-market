@@ -28,6 +28,8 @@ export const _think = internalAction({
 			// invoke magic rock
 			const result = await _askMagicRock(ctx, task, action);
 
+			console.debug('magicRock/result/finishReason', result.finishReason);
+
 			switch (result.finishReason) {
 				//
 				case 'tool-calls':
@@ -244,6 +246,8 @@ async function _askMagicRock(
 			if (NoSuchToolError.isInstance(error)) {
 				return null; // do not attempt to fix invalid tool names
 			}
+
+			console.debug('repairToolCall', toolCall);
 
 			// TODO: trace this call, maybe aggregate to the main call usage data
 

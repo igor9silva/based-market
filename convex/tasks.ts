@@ -75,15 +75,12 @@ export const findOneOrNot = query({
 export const add = mutation({
 	args: {
 		body: z.optional(z.string()),
+		parentId: zid('tasks').optional(),
 	},
-	handler: async (ctx, { body }) => {
+	handler: async (ctx, { body, parentId }) => {
 		//
 		const currentUser = await getCurrentUser(ctx, {});
-		const taskId = await ctx.db.insert('tasks', { body, owner: currentUser._id, isDone: false });
-
-		await _reportMutation(ctx, { taskId, changes: `Added this task with "${body}".`, author: currentUser._id });
-
-		return taskId;
+		return await _add(ctx, { userId: currentUser._id, body, parentId });
 	},
 });
 
@@ -188,6 +185,22 @@ export const _findAllByEmbeddingIds = internalQuery({
 		);
 
 		return tasks.filter((task) => task !== null);
+	},
+});
+
+export const _add = internalMutation({
+	args: {
+		userId: zid('users'),
+		body: z.optional(z.string()),
+		parentId: zid('tasks').optional(),
+	},
+	handler: async (ctx, { userId, body, parentId }) => {
+		//
+		const taskId = await ctx.db.insert('tasks', { body, owner: userId, isDone: false, parentId });
+
+		await _reportMutation(ctx, { taskId, changes: `Added this task with "${body}".`, author: userId });
+
+		return taskId;
 	},
 });
 

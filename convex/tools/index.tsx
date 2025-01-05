@@ -8,6 +8,7 @@ import { internalAction } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { _runNextActionIfNeeded, _setActionStatus } from '../taskActions';
 import { createHttpTool } from './createHttpTool';
+import { createSubtask } from './createSubtask';
 import { doNothing } from './doNothing';
 import { markAsDone } from './markAsDone';
 import { moveTask } from './moveTask';
@@ -29,6 +30,7 @@ export const coreTools = async (
 		updateTask: updateTask(ctx, task, action), // TODO: split into title and body?
 		markAsDone: markAsDone(ctx, task, action),
 		moveTask: moveTask(ctx, task, action),
+		createSubtask: createSubtask(ctx, task, action),
 		searchTasks: searchTasks(ctx, task, action),
 		sendMessage: sendMessage(ctx, task, action),
 		doNothing: doNothing(ctx, task, action),
