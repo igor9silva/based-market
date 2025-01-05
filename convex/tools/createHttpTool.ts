@@ -57,18 +57,13 @@ export function createHttpTool(
 				//
 			}, config.http.body?.template ?? {});
 
-			const body = Object.keys(bodyData).length > 0 ? JSON.stringify(bodyData) : undefined;
-			if (body) {
-				headers['Content-Type'] = config.http.body?.contentType ?? 'application/json';
-			}
-
-			console.debug('requesting', config.http.method, url.toString(), headers, body);
+			console.debug('requesting', config.http.method, url.toString(), headers, bodyData);
 
 			// make the request
 			const response = await fetch(url.toString(), {
 				method: config.http.method,
 				headers,
-				body,
+				body: Object.keys(bodyData).length > 0 ? JSON.stringify(bodyData) : undefined,
 			});
 
 			console.debug('Response', response.status, response.statusText);

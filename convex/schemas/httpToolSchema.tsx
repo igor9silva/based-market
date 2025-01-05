@@ -14,7 +14,6 @@ export const httpConfigSchema = z.object({
 	paramMappings: z.array(paramMappingSchema),
 	body: z
 		.object({
-			contentType: z.enum(['application/json']),
 			template: z.record(z.any()).describe('Base JSON object with pre-filled values'),
 		})
 		.optional(),
@@ -32,3 +31,19 @@ export const httpToolSchema = z.object({
 	http: httpConfigSchema,
 	owner: toolOwnerSchema,
 });
+
+// x = {
+// // 	query: 'string',
+// // 	startPublishedDate: 'string | undefined',
+// // 	endPublishedDate: 'string | undefined',
+// // 	includeText: 'string[] | undefined',
+// // 	excludeText: 'string[] | undefined',
+// // };
+
+// z.object({
+// 	query: z.string(),
+// 	startPublishedDate: z.string().datetime({ offset: true }).optional(),
+// 	endPublishedDate: z.string().datetime({ offset: true }).optional(),
+// 	includeText: z.array(z.string()).optional(),
+// 	excludeText: z.array(z.string()).optional(),
+// });
