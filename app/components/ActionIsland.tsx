@@ -118,11 +118,14 @@ const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
 	const failedActions = actions.filter((action) => action.status === 'failed');
 
 	if (runningActions.length > 0) {
+		//
+		const runningAction = runningActions[0];
+
 		return (
 			<>
 				{/* <Loader2 className="size-4 animate-spin" /> */}
 				<Indicator className="animate-pulse duration-1000 bg-green-500" />
-				<span>{runningActions.length} running</span>
+				<span>{runningAction.kind === 'think' ? 'thinking' : `acting`}</span>
 			</>
 		);
 	}
