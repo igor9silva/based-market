@@ -24,7 +24,7 @@ export default function TaskDetailAndSubstasks({
 					<ResizablePanel id="details" order={0} defaultSize={75}>
 						{<TaskDetail className={className} taskId={taskId} showExpand={showExpand} />}
 					</ResizablePanel>
-					<ResizableHandle />
+					<ResizableHandle withHandle />
 					<ResizablePanel id="substasks" order={1} defaultSize={25}>
 						{<SubtaskList taskId={taskId} />}
 					</ResizablePanel>

@@ -18,12 +18,12 @@ export function ListAndDetail({
 
 	return (
 		<ResizablePanelGroup direction={direction} className={cn('overflow-hidden', className)}>
-			<ResizablePanel id="list" order={1} defaultSize={detail ? defaultListSize : 100}>
+			<ResizablePanel id="list" order={0} defaultSize={detail ? defaultListSize : 100}>
 				{list}
 			</ResizablePanel>
-			{detail && <ResizableHandle />}
+			{detail && <ResizableHandle withHandle />}
 			{detail && (
-				<ResizablePanel id="detail" order={0} defaultSize={100 - defaultListSize}>
+				<ResizablePanel id="detail" order={1} defaultSize={100 - defaultListSize}>
 					{detail}
 				</ResizablePanel>
 			)}
