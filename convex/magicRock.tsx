@@ -353,7 +353,7 @@ async function renderHistory(
 
 function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
 	//
-	const maxConsecutiveMeseeksEvents = 10; // TODO: env var
+	const maxConsecutiveMeseeksEvents = 20; // TODO: env var
 	const lastMessages = history.filter((message) => message.role !== 'tool').slice(-maxConsecutiveMeseeksEvents);
 
 	// throw if last {maxConsecutiveMeseeksEvents} events are from meseeks
