@@ -5,9 +5,11 @@ import { Doc } from 'convex/_generated/dataModel';
 import { authorSchema } from 'convex/schemas/authorSchema';
 import { useMemo } from 'react';
 import { z } from 'zod';
-import MDX from '~/components/ui/mdx';
 import { useAnimatedText } from '~/hooks/useAnimatedText';
 import { cn } from '~/lib/utils';
+
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
+import MDX from '~/components/ui/mdx';
 
 function Author({
 	className, //
@@ -65,7 +67,18 @@ export function TaskEvent({
 						'bg-blue-700/30': event.kind === 'message',
 					})}
 				>
-					{isNew ? <AnimatedContent content={content} /> : <Content content={content} />}
+					{event.kind === 'tool-call' ? (
+						<Collapsible>
+							<CollapsibleTrigger>
+								Runned {event.toolName} ✅ - Args: {JSON.stringify(event.args)}
+							</CollapsibleTrigger>
+							<CollapsibleContent>
+								<Content content={content} />
+							</CollapsibleContent>
+						</Collapsible>
+					) : (
+						<Content content={content} />
+					)}
 				</div>
 			</div>
 		</div>
