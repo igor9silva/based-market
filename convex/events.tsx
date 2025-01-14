@@ -197,7 +197,7 @@ export const _setToolCallResult = internalMutation({
 		isError: z.boolean().default(false),
 	},
 	handler: async (ctx, { eventId, result, isError }) => {
-		// TODO: add task action events (so we persist all the history)
+		// TODO: add operation events (so we persist all the history)
 
 		const event = await ctx.db.get(eventId);
 		if (!event) throw new Error('Event not found');

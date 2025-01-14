@@ -5,7 +5,7 @@
   "start_url": "/",
   "id": "?pro.igorsilva.companion=v0",
   "orientation": "any",
-  "display": "standalone",
+  "display": "fullscreen",
   "lang": "en",
   "dir": "auto",
   "theme_color": "#000000",

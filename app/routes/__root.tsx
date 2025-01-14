@@ -113,8 +113,7 @@ function AccessDenied() {
 	);
 }
 
-// TODO: .webmanifest
-
+// TODO: on .webmanifest:
 // show on chrome install
 // "screenshots": [
 //   {
