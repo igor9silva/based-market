@@ -10,6 +10,7 @@ import { _addMeseeksToolCall, _sendMeseeksMessage } from './events';
 import { internalAction } from './lib';
 import { _runNextOperationIfNeeded, _setOperationStatus } from './operations';
 import { authorSchema } from './schemas/authorSchema';
+import { env } from './schemas/env';
 import { coreTools, promptForTask } from './tools';
 
 export const _think = internalAction({
@@ -362,7 +363,7 @@ async function renderHistory(
 
 function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
 	//
-	const maxConsecutiveMeseeksEvents = 20; // TODO: env var
+	const maxConsecutiveMeseeksEvents = env.MAX_CONSECUTIVE_MESEEK_EVENTS;
 	const lastMessages = history.filter((message) => message.role !== 'tool').slice(-maxConsecutiveMeseeksEvents);
 
 	// throw if last {maxConsecutiveMeseeksEvents} events are from meseeks

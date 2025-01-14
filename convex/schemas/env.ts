@@ -40,6 +40,12 @@ export const env = createEnv({
 			.describe('JWT session duration in milliseconds.'),
 
 		OPENAI_API_KEY: z.string().min(1).describe('OpenAI API key.'),
+
+		MAX_CONSECUTIVE_MESEEK_EVENTS: z
+			.number()
+			.min(1)
+			.describe('The maximum number of consecutive meseeks events.')
+			.default(20),
 	},
 
 	/**
