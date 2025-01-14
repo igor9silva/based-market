@@ -1,8 +1,9 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { query } from './lib';
+import { env } from './schemas/env';
 
-const ALLOWED_DOMAINS = process.env.ALLOWED_DOMAINS?.split(',') || []; // TODO: typed env
-const ALLOWED_EMAILS = process.env.ALLOWED_EMAILS?.split(',') || []; // TODO: typed env
+const ALLOWED_DOMAINS = env.ALLOWED_DOMAINS || [];
+const ALLOWED_EMAILS = env.ALLOWED_EMAILS || [];
 
 export const current = query({
 	args: {},
