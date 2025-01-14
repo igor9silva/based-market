@@ -13,20 +13,20 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as actions from "../actions.js";
 import type * as auth from "../auth.js";
+import type * as components_ from "../components.js";
+import type * as events from "../events.js";
 import type * as http from "../http.js";
-import type * as httpTools from "../httpTools.js";
 import type * as lib from "../lib.js";
 import type * as magicRock from "../magicRock.js";
-import type * as pages from "../pages.js";
+import type * as operations from "../operations.js";
+import type * as schemas_actionSchema from "../schemas/actionSchema.js";
 import type * as schemas_authorSchema from "../schemas/authorSchema.js";
-import type * as schemas_httpToolSchema from "../schemas/httpToolSchema.js";
-import type * as schemas_pageSchema from "../schemas/pageSchema.js";
-import type * as schemas_taskActionSchema from "../schemas/taskActionSchema.js";
-import type * as schemas_taskEventSchema from "../schemas/taskEventSchema.js";
+import type * as schemas_componentSchema from "../schemas/componentSchema.js";
+import type * as schemas_eventSchema from "../schemas/eventSchema.js";
+import type * as schemas_operationSchema from "../schemas/operationSchema.js";
 import type * as schemas_taskSchema from "../schemas/taskSchema.js";
-import type * as taskActions from "../taskActions.js";
-import type * as taskEvents from "../taskEvents.js";
 import type * as tasks from "../tasks.js";
 import type * as tools_checkFact from "../tools/checkFact.js";
 import type * as tools_createHttpTool from "../tools/createHttpTool.js";
@@ -56,20 +56,20 @@ import type * as utils_zodToString from "../utils/zodToString.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  actions: typeof actions;
   auth: typeof auth;
+  components: typeof components_;
+  events: typeof events;
   http: typeof http;
-  httpTools: typeof httpTools;
   lib: typeof lib;
   magicRock: typeof magicRock;
-  pages: typeof pages;
+  operations: typeof operations;
+  "schemas/actionSchema": typeof schemas_actionSchema;
   "schemas/authorSchema": typeof schemas_authorSchema;
-  "schemas/httpToolSchema": typeof schemas_httpToolSchema;
-  "schemas/pageSchema": typeof schemas_pageSchema;
-  "schemas/taskActionSchema": typeof schemas_taskActionSchema;
-  "schemas/taskEventSchema": typeof schemas_taskEventSchema;
+  "schemas/componentSchema": typeof schemas_componentSchema;
+  "schemas/eventSchema": typeof schemas_eventSchema;
+  "schemas/operationSchema": typeof schemas_operationSchema;
   "schemas/taskSchema": typeof schemas_taskSchema;
-  taskActions: typeof taskActions;
-  taskEvents: typeof taskEvents;
   tasks: typeof tasks;
   "tools/checkFact": typeof tools_checkFact;
   "tools/createHttpTool": typeof tools_createHttpTool;

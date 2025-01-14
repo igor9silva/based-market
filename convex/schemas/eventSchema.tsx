@@ -2,15 +2,8 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { authorSchema } from './authorSchema';
 
-export const taskEventKindSchema = z.enum([
-	'message', //
-	'mutation',
-	'tool-call',
-	// TODO: add error
-]);
-
-export const coreEventSchema = z.object({
-	taskId: zid('tasks'),
+const coreEventSchema = z.object({
+	taskId: zid('tasks'), // TODO: or action?
 	author: authorSchema,
 });
 
@@ -34,8 +27,10 @@ export const toolCallEventSchema = coreEventSchema.extend({
 	isError: z.boolean().default(false),
 });
 
-export const taskEventSchema = z.union([
-	messageEventSchema, //
-	mutationEventSchema,
-	toolCallEventSchema,
-]);
+export const eventSchema = z
+	.union([
+		messageEventSchema, //
+		mutationEventSchema,
+		toolCallEventSchema,
+	])
+	.describe('An event is anything that happens on a Task. e.g. a message, a mutation, an operation.');

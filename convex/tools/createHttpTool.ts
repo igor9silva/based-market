@@ -3,21 +3,21 @@ import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { httpToolSchema } from '../schemas/httpToolSchema';
+import { actionSchema } from '../schemas/actionSchema';
 import { stringToZod } from '../utils/zodToString';
 
 export function createHttpTool(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
-	action: (Doc<'taskActions'> & { kind: 'run-tool' }) | undefined,
-	config: z.infer<typeof httpToolSchema>,
+	operation: (Doc<'operations'> & { kind: 'run-tool' }) | undefined,
+	config: z.infer<typeof actionSchema>,
 ) {
 	const metadata = {
 		description: config.description,
 		parameters: stringToZod(config.parametersSchema),
 	};
 
-	if (!action) return tool(metadata);
+	if (!operation) return tool(metadata);
 
 	return tool({
 		...metadata,
@@ -25,8 +25,8 @@ export function createHttpTool(
 			//
 			console.debug('Running tool', config.name, args);
 
-			await ctx.runMutation(internal.taskEvents._setToolCallStatusText, {
-				eventId: action.origin,
+			await ctx.runMutation(internal.events._setToolCallStatusText, {
+				eventId: operation.origin,
 				text: `Running ${config.name}`,
 			});
 

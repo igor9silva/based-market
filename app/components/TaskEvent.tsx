@@ -34,7 +34,7 @@ export function TaskEvent({
 	initialRenderDate,
 }: {
 	className?: string;
-	event: Doc<'taskEvents'>;
+	event: Doc<'events'>;
 	initialRenderDate: Date;
 }) {
 	//

@@ -20,7 +20,7 @@ export function TaskConversation({
 	const taskQuery = convexQuery(api.tasks.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(taskQuery);
 
-	const eventsQuery = convexQuery(api.taskEvents.findAll, { taskId: task._id });
+	const eventsQuery = convexQuery(api.events.findAll, { taskId: task._id });
 	const { data: events } = useSuspenseQuery(eventsQuery);
 
 	const initialRenderDate = useMemo(() => new Date(), []);

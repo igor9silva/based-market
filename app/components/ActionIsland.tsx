@@ -22,7 +22,7 @@ export function ActionIsland({
 	const ref = useRef<HTMLDivElement>(null);
 	const [isExpanded, setIsExpanded] = useState(false);
 
-	const query = convexQuery(api.taskActions.findAll, { taskId });
+	const query = convexQuery(api.operations.findAll, { taskId });
 	const { data: actions } = useSuspenseQuery(query);
 
 	// if click outside, close
@@ -67,7 +67,7 @@ export function ActionIsland({
 	);
 }
 
-const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(({ actions }, ref) => {
+const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'operations'>[] }>(({ actions }, ref) => {
 	//
 	// auto-scroll to bottom when rendered
 	useEffect(() => {
@@ -102,7 +102,7 @@ const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>((
 });
 Expanded.displayName = 'Expanded';
 
-const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(({ actions }, ref) => {
+const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'operations'>[] }>(({ actions }, ref) => {
 	return (
 		<div ref={ref} className="h-full flex items-center justify-center gap-2 text-sm px-3 truncate">
 			<CollapsedContent actions={actions} />
@@ -111,7 +111,7 @@ const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'taskActions'>[] }>(
 });
 Collapsed.displayName = 'Collapsed';
 
-const CollapsedContent = ({ actions }: { actions: Doc<'taskActions'>[] }) => {
+const CollapsedContent = ({ actions }: { actions: Doc<'operations'>[] }) => {
 	//
 	const runningActions = actions.filter((action) => action.status === 'running');
 	// const pendingActions = actions.filter((action) => action.status === 'pending');

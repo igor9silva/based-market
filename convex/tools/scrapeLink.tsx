@@ -20,7 +20,7 @@ const metadata = {
 export const scrapeLink = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action?: Doc<'taskActions'> & { kind: 'run-tool' },
+	action?: Doc<'operations'> & { kind: 'run-tool' },
 ) => {
 	if (!action) return tool(metadata);
 
@@ -31,7 +31,7 @@ export const scrapeLink = (
 			const { url } = args;
 			console.debug(`Scraping ${url} from task: ${task._id}`);
 
-			await ctx.runMutation(internal.taskEvents._setToolCallStatusText, {
+			await ctx.runMutation(internal.events._setToolCallStatusText, {
 				eventId: action.origin,
 				text: `Scraping ${url}`,
 			});
@@ -69,7 +69,7 @@ export const scrapeLink = (
 			if (toolResults.length !== 1) throw new Error('Expected one tool result.');
 			const scrapped = toolResults.at(0)?.result as string;
 
-			await ctx.runMutation(internal.taskEvents._setToolCallStatusText, {
+			await ctx.runMutation(internal.events._setToolCallStatusText, {
 				eventId: action.origin,
 				text: `Scraped done, removing noise`,
 			});

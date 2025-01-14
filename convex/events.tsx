@@ -1,13 +1,13 @@
 import { generateId } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { internal } from './_generated/api';
+import { internal } from './_generated/api.js';
 import { Id } from './_generated/dataModel.js';
 import { ActionCtx } from './_generated/server.js';
-import { internalMutation, internalQuery, mutation, query } from './lib';
-import { authorSchema } from './schemas/authorSchema';
-import { _requestRunTool, _requestThink } from './taskActions';
-import { ensureTaskOwner } from './tasks';
+import { internalMutation, internalQuery, mutation, query } from './lib.js';
+import { _requestRunTool, _requestThink } from './operations.js';
+import { authorSchema } from './schemas/authorSchema.js';
+import { ensureTaskOwner } from './tasks.js';
 
 // Exposed -------------------------------------
 
@@ -24,7 +24,7 @@ export const findAll = query({
 
 export const findOne = query({
 	args: {
-		eventId: zid('taskEvents'),
+		eventId: zid('events'),
 	},
 	handler: async (ctx, { eventId }) => {
 		//
@@ -92,7 +92,7 @@ export const _findAll = internalQuery({
 	},
 	handler: async (ctx, { taskId }) => {
 		return await ctx.db
-			.query('taskEvents')
+			.query('events')
 			.withIndex('by_task', (q) => q.eq('taskId', taskId))
 			.collect();
 	},
@@ -100,7 +100,7 @@ export const _findAll = internalQuery({
 
 export const _findOne = internalQuery({
 	args: {
-		eventId: zid('taskEvents'),
+		eventId: zid('events'),
 	},
 	handler: async (ctx, { eventId }) => {
 		//
@@ -119,7 +119,7 @@ export const _sendMessage = internalMutation({
 	},
 	handler: async (ctx, { taskId, message, author }) => {
 		//
-		const eventId = await ctx.db.insert('taskEvents', {
+		const eventId = await ctx.db.insert('events', {
 			taskId,
 			author,
 			kind: 'message',
@@ -140,7 +140,7 @@ export const _reportMutation = internalMutation({
 	},
 	handler: async (ctx, { taskId, changes, author }) => {
 		//
-		const eventId = await ctx.db.insert('taskEvents', {
+		const eventId = await ctx.db.insert('events', {
 			taskId,
 			author,
 			kind: 'mutation',
@@ -164,7 +164,7 @@ export const _callTool = internalMutation({
 	},
 	handler: async (ctx, { taskId, author, toolName, toolCallId, args, statusText }) => {
 		//
-		const eventId = await ctx.db.insert('taskEvents', {
+		const eventId = await ctx.db.insert('events', {
 			taskId,
 			author,
 			kind: 'tool-call',
@@ -182,7 +182,7 @@ export const _callTool = internalMutation({
 
 export const _setToolCallStatusText = internalMutation({
 	args: {
-		eventId: zid('taskEvents'),
+		eventId: zid('events'),
 		text: z.string(),
 	},
 	handler: async (ctx, { eventId, text }) => {
@@ -192,7 +192,7 @@ export const _setToolCallStatusText = internalMutation({
 
 export const _setToolCallResult = internalMutation({
 	args: {
-		eventId: zid('taskEvents'),
+		eventId: zid('events'),
 		result: z.string(),
 		isError: z.boolean().default(false),
 	},
@@ -215,15 +215,15 @@ export function _sendMeseeksMessage(
 	ctx: ActionCtx,
 	args: {
 		taskId: Id<'tasks'>;
-		actionId: Id<'taskActions'>;
+		operationId: Id<'operations'>;
 		message: string;
 		isDone?: boolean;
 	},
 ) {
-	return ctx.runMutation(internal.taskEvents._sendMessage, {
+	return ctx.runMutation(internal.events._sendMessage, {
 		taskId: args.taskId,
 		message: args.message,
-		author: args.actionId,
+		author: args.operationId,
 	});
 }
 
@@ -237,5 +237,5 @@ export function _addMeseeksToolCall(
 		args: Record<string, any>;
 	},
 ) {
-	return ctx.runMutation(internal.taskEvents._callTool, args);
+	return ctx.runMutation(internal.events._callTool, args);
 }

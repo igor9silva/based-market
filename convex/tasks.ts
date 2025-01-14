@@ -5,9 +5,9 @@ import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { MutationCtx, QueryCtx } from './_generated/server';
+import { _reportMutation } from './events';
 import { internalAction, internalMutation, internalQuery, mutation, query } from './lib';
 import { authorSchema } from './schemas/authorSchema';
-import { _reportMutation } from './taskEvents';
 import { current as getCurrentUser } from './users.js';
 
 // Exposed ------------------------------------

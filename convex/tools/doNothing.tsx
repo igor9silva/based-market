@@ -13,7 +13,7 @@ const metadata = {
 export const doNothing = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action?: Doc<'taskActions'> & { kind: 'run-tool' },
+	action?: Doc<'operations'> & { kind: 'run-tool' },
 ) => {
 	if (!action) return tool(metadata);
 

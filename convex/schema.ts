@@ -1,25 +1,17 @@
 import { authTables } from '@convex-dev/auth/server';
 import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
-import { httpToolSchema } from './schemas/httpToolSchema';
-import { pageSchema } from './schemas/pageSchema';
-import { taskActionSchema } from './schemas/taskActionSchema';
-import { taskEventSchema } from './schemas/taskEventSchema';
+import { actionSchema } from './schemas/actionSchema';
+import { componentSchema } from './schemas/componentSchema';
+import { eventSchema } from './schemas/eventSchema';
+import { operationSchema } from './schemas/operationSchema';
 import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
 
 // prettier-ignore
 export default defineSchema({
 
 	...authTables,
-
-	httpTools: defineTable(
-		zodToConvex(httpToolSchema),
-	).index(
-		'by_owner', ['owner'],
-	).index(
-		'by_name', ['name'],
-	),
-
+	
 	tasks: defineTable(
 		zodToConvex(taskSchema),
 	).index(
@@ -38,14 +30,22 @@ export default defineSchema({
 		filterFields: ['isDone'],
 	}),
 
-	taskEvents: defineTable(
-		zodToConvex(taskEventSchema),
+	actions: defineTable(
+		zodToConvex(actionSchema),
+	).index(
+		'by_owner', ['owner'],
+	).index(
+		'by_name', ['name'],
+	),
+
+	events: defineTable(
+		zodToConvex(eventSchema),
 	).index(
 		'by_task', ['taskId'],
 	),
 
-	taskActions: defineTable(
-		zodToConvex(taskActionSchema),
+	operations: defineTable(
+		zodToConvex(operationSchema),
 	).index(
 		'by_task', ['taskId'],
 	).index(
@@ -54,8 +54,8 @@ export default defineSchema({
 	// .index('by_origin', ['origin'])
 	// .index('by_author', ['author']),
 
-	pages: defineTable(
-		zodToConvex(pageSchema),
+	components: defineTable(
+		zodToConvex(componentSchema),
 	).index(
 		'by_owner_slug', ['owner', 'slug'],
 	),

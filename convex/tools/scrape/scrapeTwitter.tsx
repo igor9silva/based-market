@@ -6,7 +6,7 @@ import { ActionCtx } from '../../_generated/server';
 export const scrapeTwitter = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action: Doc<'operations'>,
 ) => {
 	return tool({
 		description: 'Scrape Twitter for information',

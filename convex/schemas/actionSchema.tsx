@@ -19,31 +19,23 @@ export const httpConfigSchema = z.object({
 		.optional(),
 });
 
-export const toolOwnerSchema = z.union([
-	zid('users'), // user-defined tools
-	z.literal('built-in'), // global tools
+export const actionOwnerSchema = z.union([
+	zid('users'), // user-defined actions
+	z.literal('built-in'), // global actions
 ]);
 
-export const httpToolSchema = z.object({
+export const httpActionSchema = z.object({
 	name: z.string(),
 	description: z.string(),
 	parametersSchema: z.string(),
 	http: httpConfigSchema,
-	owner: toolOwnerSchema,
+	owner: actionOwnerSchema,
 });
 
-// x = {
-// // 	query: 'string',
-// // 	startPublishedDate: 'string | undefined',
-// // 	endPublishedDate: 'string | undefined',
-// // 	includeText: 'string[] | undefined',
-// // 	excludeText: 'string[] | undefined',
-// // };
+export const actionSchema = httpActionSchema.describe(
+	'An Action is a function that can be executed by either the user or Meseeks.',
+);
 
-// z.object({
-// 	query: z.string(),
-// 	startPublishedDate: z.string().datetime({ offset: true }).optional(),
-// 	endPublishedDate: z.string().datetime({ offset: true }).optional(),
-// 	includeText: z.array(z.string()).optional(),
-// 	excludeText: z.array(z.string()).optional(),
-// });
+// export const actionSchema = z.union([
+// 	httpActionSchema,
+// ]);

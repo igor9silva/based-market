@@ -23,7 +23,7 @@ export default function MDXPage() {
 	const params = useSplatParams();
 
 	const slug = params.slug || 'list';
-	const pageQuery = convexQuery(api.pages.findOneBySlug, { slug });
+	const pageQuery = convexQuery(api.components.findOneBySlug, { slug });
 	const { data: page } = useSuspenseQuery(pageQuery);
 
 	// prepend the taskId to the body so that MDX can read it

@@ -10,11 +10,11 @@ export function TaskAction({
 	action, //
 	className,
 }: {
-	action: Doc<'taskActions'>;
+	action: Doc<'operations'>;
 	className?: string;
 }) {
-	const skipAction = useMutation(api.taskActions.skip);
-	const retryAction = useMutation(api.taskActions.retry);
+	const skipAction = useMutation(api.operations.skip);
+	const retryAction = useMutation(api.operations.retry);
 
 	return (
 		<div key={action._id} className={cn('flex flex-row gap-1 justify-between', className)}>
@@ -54,7 +54,7 @@ export function TaskAction({
 }
 
 function isEnabled(
-	action: Doc<'taskActions'>, //
+	action: Doc<'operations'>, //
 	kind: 'skip' | 'retry',
 ) {
 	switch (kind) {

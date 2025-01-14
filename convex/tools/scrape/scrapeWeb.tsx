@@ -9,7 +9,7 @@ import { ActionCtx } from '../../_generated/server';
 export const scrapeWeb = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action: Doc<'operations'>,
 ) => {
 	return tool({
 		description: 'Scrape the web for information',

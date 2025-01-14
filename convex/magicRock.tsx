@@ -6,23 +6,23 @@ import { zid } from 'convex-helpers/server/zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx } from './_generated/server';
+import { _addMeseeksToolCall, _sendMeseeksMessage } from './events';
 import { internalAction } from './lib';
+import { _runNextOperationIfNeeded, _setOperationStatus } from './operations';
 import { authorSchema } from './schemas/authorSchema';
-import { _runNextActionIfNeeded, _setActionStatus } from './taskActions';
-import { _addMeseeksToolCall, _sendMeseeksMessage } from './taskEvents';
 import { coreTools, promptForTask } from './tools';
 
 export const _think = internalAction({
 	args: {
 		author: authorSchema,
 		taskId: zid('tasks'),
-		actionId: zid('taskActions'),
+		operationId: zid('operations'),
 	},
-	handler: async (ctx, { taskId, actionId, author }) => {
+	handler: async (ctx, { taskId, operationId, author }) => {
 		//
 		// grab the task and action
 		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
-		const action = await ctx.runQuery(internal.taskActions._findOne, { actionId });
+		const action = await ctx.runQuery(internal.operations._findOne, { operationId });
 
 		try {
 			// invoke magic rock
@@ -52,7 +52,7 @@ export const _think = internalAction({
 							if (call.toolName === 'sendMessage') {
 								await _sendMeseeksMessage(ctx, {
 									taskId: task._id,
-									actionId,
+									operationId,
 									message: call.args.message,
 								});
 							} else {
@@ -80,7 +80,7 @@ export const _think = internalAction({
 					// if (result.text.length < 1) break;
 					await _sendMeseeksMessage(ctx, {
 						taskId: task._id,
-						actionId,
+						operationId,
 						message: result.text,
 					});
 					break;
@@ -88,7 +88,7 @@ export const _think = internalAction({
 				case 'error':
 					await _sendMeseeksMessage(ctx, {
 						taskId: task._id,
-						actionId,
+						operationId,
 						message: `Failed: ${result.text}`,
 						isDone: true,
 					});
@@ -97,7 +97,7 @@ export const _think = internalAction({
 				case 'content-filter':
 					await _sendMeseeksMessage(ctx, {
 						taskId: task._id,
-						actionId,
+						operationId,
 						message: `[damn @sama] Content filter hit: ${result.warnings}`,
 						isDone: true,
 					});
@@ -111,8 +111,8 @@ export const _think = internalAction({
 					throw new Error(`Unknown finish reason: ${result.finishReason}`);
 			}
 
-			await _setActionStatus(ctx, { status: 'succeeded', actionId });
-			await _runNextActionIfNeeded(ctx, { taskId, author });
+			await _setOperationStatus(ctx, { status: 'succeeded', operationId });
+			await _runNextOperationIfNeeded(ctx, { taskId, author });
 			//
 		} catch (error) {
 			//
@@ -121,8 +121,8 @@ export const _think = internalAction({
 			console.error('error in magic', errorMessage); // TODO: alert
 
 			// TODO: update on the action itself (like we do on tools), instead of a plain message
-			await _sendMeseeksMessage(ctx, { taskId: task._id, actionId, message: errorMessage, isDone: true });
-			await _setActionStatus(ctx, { status: 'failed', actionId });
+			await _sendMeseeksMessage(ctx, { taskId: task._id, operationId, message: errorMessage, isDone: true });
+			await _setOperationStatus(ctx, { status: 'failed', operationId });
 
 			throw error;
 		}
@@ -132,7 +132,7 @@ export const _think = internalAction({
 async function _askMagicRock(
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	operation: Doc<'operations'>,
 ) {
 	const {
 		finishReason, //
@@ -230,6 +230,7 @@ async function _askMagicRock(
 			`- Name: Igor Silva`,
 			`- Twitter: @igor9silva`,
 			`- Birthday: 1997-01-22 (aged 27 as of today)`,
+			`- He is your creator. He's actively working on improving you (Meseeks, the app).`,
 			``,
 			//
 			`## The task`,
@@ -288,7 +289,7 @@ function eventToCoreMessage({
 	event,
 	author,
 }: {
-	event: Doc<'taskEvents'>;
+	event: Doc<'events'>;
 	author: 'user' | 'assistant';
 }): CoreMessage | Array<CoreMessage> | undefined {
 	//
@@ -344,7 +345,7 @@ async function renderHistory(
 	userId: Id<'users'>,
 ): Promise<Array<CoreMessage>> {
 	//
-	const events = await ctx.runQuery(internal.taskEvents._findAll, { taskId });
+	const events = await ctx.runQuery(internal.events._findAll, { taskId });
 
 	const history = events
 		.map((event) => ({ event, author: event.author === userId ? ('user' as const) : ('assistant' as const) }))

@@ -10,7 +10,7 @@ export function RunTaskActionButton({
 	task: Doc<'tasks'>;
 	kind: string;
 }) {
-	const callTool = useMutation(api.taskEvents.callTool);
+	const callTool = useMutation(api.events.callTool);
 	const onClick = () =>
 		callTool({
 			toolName: kind,

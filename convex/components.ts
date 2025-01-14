@@ -13,7 +13,7 @@ export const findOneBySlug = query({
 		const currentUser = await getCurrentUser(ctx, {});
 
 		const page = await ctx.db
-			.query('pages')
+			.query('components')
 			.withIndex('by_owner_slug', (q) =>
 				q
 					.eq('owner', currentUser._id) //

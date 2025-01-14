@@ -7,7 +7,7 @@ import { ActionCtx } from '../../_generated/server';
 export const invalidRequest = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'taskActions'>,
+	action: Doc<'operations'>,
 ) => {
 	return tool({
 		description: 'You are unable to fulfill the request for any reason.',

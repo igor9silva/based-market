@@ -23,9 +23,9 @@ const metadata = {
 export const moveTask = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action?: Doc<'taskActions'> & { kind: 'run-tool' },
+	operation?: Doc<'operations'> & { kind: 'run-tool' },
 ) => {
-	if (!action) return tool(metadata);
+	if (!operation) return tool(metadata);
 
 	return tool({
 		...metadata,
@@ -34,7 +34,7 @@ export const moveTask = (
 			await ctx.runMutation(internal.tasks._move, {
 				taskId,
 				newParentId: newParentId === 'inbox' ? undefined : newParentId,
-				author: action._id,
+				author: operation._id,
 			});
 
 			return 'Task updated';
