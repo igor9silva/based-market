@@ -13,10 +13,12 @@ export const _findAll = internalQuery({
 	},
 	handler: async (ctx, { userId }) => {
 		//
-		return Promise.all([
+		const [globals, users] = await Promise.all([
 			_findAllByOwner(ctx, { owner: 'built-in' }), // global actions
 			_findAllByOwner(ctx, { owner: userId }), // user-defined actions
-		]).then(([global, users]) => global.concat(users));
+		]);
+
+		return globals.concat(users);
 	},
 });
 
