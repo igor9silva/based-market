@@ -26,7 +26,7 @@ export const coreTools = async (
 	const actions = await ctx.runQuery(internal.actions._findAll, { userId: task.owner });
 
 	return {
-		// built-in tools
+		// built-in actions
 		updateTask: updateTask(ctx, task, operation), // TODO: split into title and body?
 		markAsDone: markAsDone(ctx, task, operation),
 		moveTask: moveTask(ctx, task, operation),

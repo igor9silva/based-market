@@ -21,7 +21,7 @@ export const findOneBySlug = query({
 			)
 			.unique();
 
-		if (!page) throw new Error('Page not found');
+		if (!page) throw new Error('Component not found');
 
 		return page;
 	},

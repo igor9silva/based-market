@@ -18,7 +18,7 @@ export const operationKindSchema = z.enum([
 
 export const coreOperationSchema = z.object({
 	origin: zid('events'),
-	author: authorSchema,
+	author: authorSchema, // same as the event author, just for convenience
 	taskId: zid('tasks'),
 	status: operationStatusSchema,
 	isDone: z.boolean(),

@@ -30,6 +30,7 @@ export default defineSchema({
 		filterFields: ['isDone'],
 	}),
 
+	// built-in mutations, http calls, AI SDK calls (including multi-step)
 	actions: defineTable(
 		zodToConvex(actionSchema),
 	).index(
