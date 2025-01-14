@@ -167,10 +167,11 @@ async function _askMagicRock(
 			// `Do not reply to yourself!`,
 			//
 			`## Handling messages`,
-			`Meseeks app is designed as a agent, i.e. everything something happens on the task, a new message is sent to you.`,
-			`That means you'll be able to 'think through' the task as it evolves.`,
+			`Meseeks app is designed as a agent, i.e. everytime something happens on the thread, you'll be invoked.`,
+			`That means you'll be able to 'think through' the thread as it evolves.`,
 			`That DOES NOT mean you should reply to every message.`,
 			`If the last message came from you (assistant), you should seriously consider doing nothing (there is a tool for that, call it).`,
+			`If the last message came from the user (user), you should think about what to do or say next.`,
 			`When you get a link, scrape it and use the content to update the task. Do it before anything else.`,
 			`After doing mutations (such as updating the task or marking it as done), you should NOT say anything as the mutation will be clearly visible to the user.`,
 			// `### Examples of how to behave`, // TODO: grab examples
@@ -222,13 +223,13 @@ async function _askMagicRock(
 			//
 			// TODO: dynamic user info
 			`Your user (the other pilot) information:`,
-			`- Language: I speak English (advanced), Portuguese (native) and a little bit of Spanish.`,
+			`- Language: I speak English (advanced, preferred), Portuguese (native) and a little bit of Spanish.`,
 			`- Location: I live in Setúbal, Portugal.`,
 			`- Timezone: UTC.`, // TODO: dynamic timezone because of the damn DST
 			`- Current time: ${new Date().toISOString()}`,
 			`- Name: Igor Silva`,
 			`- Twitter: @igor9silva`,
-			`- Birthday: 1997-01-22 (age 27 as of today)`,
+			`- Birthday: 1997-01-22 (aged 27 as of today)`,
 			``,
 			//
 			`## The task`,

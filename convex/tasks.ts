@@ -18,15 +18,24 @@ export const findAllAtInbox = query({
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 
-		return await ctx.db
-			.query('tasks')
-			.withIndex('by_owner_parentId_isDone', (q) =>
-				q
-					.eq('owner', currentUser._id) //
-					.eq('parentId', undefined),
-			)
-			.collect()
-			.then((tasks) => tasks.sort((a, b) => b._creationTime - a._creationTime));
+		const find = ({ isDone }: { isDone: boolean }) =>
+			ctx.db
+				.query('tasks')
+				.withIndex('by_owner_parentId_isDone', (q) =>
+					q
+						.eq('owner', currentUser._id) //
+						.eq('parentId', undefined)
+						.eq('isDone', isDone),
+				)
+				.order('desc')
+				.collect();
+
+		const [notDone, done] = await Promise.all([
+			find({ isDone: false }), //
+			find({ isDone: true }),
+		]);
+
+		return notDone.concat(done);
 	},
 });
 
@@ -40,11 +49,23 @@ export const findAll = query({
 
 		await ensureTaskOwner(ctx, { taskId: parentId });
 
-		return await ctx.db
-			.query('tasks')
-			.withIndex('by_parent_isDone', (q) => q.eq('parentId', parentId))
-			.collect()
-			.then((tasks) => tasks.sort((a, b) => b._creationTime - a._creationTime));
+		const find = ({ isDone }: { isDone: boolean }) =>
+			ctx.db
+				.query('tasks')
+				.withIndex('by_parent_isDone', (q) =>
+					q
+						.eq('parentId', parentId) //
+						.eq('isDone', isDone),
+				)
+				.order('desc')
+				.collect();
+
+		const [notDone, done] = await Promise.all([
+			find({ isDone: false }), //
+			find({ isDone: true }),
+		]);
+
+		return notDone.concat(done);
 	},
 });
 
