@@ -5,5 +5,6 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
 	//
 	console.error(error);
 
+	// TODO: stop showing this error
 	return <ErrorComponent error={error} />;
 }
