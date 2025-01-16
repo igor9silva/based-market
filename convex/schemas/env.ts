@@ -7,8 +7,6 @@ export const env = createEnv({
 
 	server: {
 		//
-		CONVEX_SITE_URL: z.string().min(1).describe('The URL of the Convex site. Managed by Convex.'),
-
 		AUTH_GOOGLE_ID: z.string().min(1).describe('Google OAuth client ID.'),
 		AUTH_GOOGLE_SECRET: z.string().min(1).describe('Google OAuth client secret.'),
 
