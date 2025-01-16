@@ -39,4 +39,4 @@ export const operationSchema = z
 		thinkOperationSchema, //
 		runToolOperationSchema,
 	])
-	.describe('An operation is the execution of an Action. `Think` is just an Action, but a very special one.');
+	.describe('An operation is the execution of an async Action.');

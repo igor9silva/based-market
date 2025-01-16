@@ -19,13 +19,13 @@ export const _think = internalAction({
 	},
 	handler: async (ctx, { taskId, operationId, author }) => {
 		//
-		// grab the task and action
+		// grab the task and operation
 		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
-		const action = await ctx.runQuery(internal.operations._findOne, { operationId });
+		const operation = await ctx.runQuery(internal.operations._findOne, { operationId });
 
 		try {
 			// invoke magic rock
-			const result = await _askMagicRock(ctx, task, action);
+			const result = await _askMagicRock(ctx, task, operation);
 
 			console.debug('magicRock/result/finishReason', result.finishReason);
 
@@ -57,7 +57,7 @@ export const _think = internalAction({
 							} else {
 								await _addMeseeksToolCall(ctx, {
 									taskId: task._id,
-									author: action._id,
+									author: operation._id,
 									toolName: call.toolName,
 									toolCallId: call.toolCallId,
 									args: call.args,

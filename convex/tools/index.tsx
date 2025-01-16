@@ -27,8 +27,8 @@ export const _findAll = internalQuery({
 	handler: async (ctx, { userId }) => {
 		//
 		const [globals, users] = await Promise.all([
-			_findAllByOwner(ctx, { owner: 'built-in' }), // global actions
-			_findAllByOwner(ctx, { owner: userId }), // user-defined actions
+			_findAllByOwner(ctx, { owner: 'built-in' }), // global tools
+			_findAllByOwner(ctx, { owner: userId }), // user-defined tools
 		]);
 
 		return globals.concat(users);

@@ -15,9 +15,9 @@ const metadata = {
 export const updateTask = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action?: Doc<'operations'> & { kind: 'run-tool' },
+	operation?: Doc<'operations'> & { kind: 'run-tool' },
 ) => {
-	if (!action) return tool(metadata);
+	if (!operation) return tool(metadata);
 
 	return tool({
 		...metadata,
@@ -28,7 +28,7 @@ export const updateTask = (
 				taskId: task._id,
 				title,
 				body,
-				author: action._id,
+				author: operation._id,
 			});
 
 			return 'Task updated';

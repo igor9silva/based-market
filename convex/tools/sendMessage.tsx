@@ -13,9 +13,9 @@ const metadata = {
 export const sendMessage = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action?: Doc<'operations'> & { kind: 'run-tool' },
+	operation?: Doc<'operations'> & { kind: 'run-tool' },
 ) => {
-	if (!action) return tool(metadata);
+	if (!operation) return tool(metadata);
 
 	return tool({
 		...metadata,
