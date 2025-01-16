@@ -2,9 +2,10 @@ import { zid } from 'convex-helpers/server/zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { internalAction } from '../lib';
+import { internalAction, internalQuery } from '../lib';
 import { _runNextOperationIfNeeded, _setOperationStatus } from '../operations';
 import { authorSchema } from '../schemas/authorSchema';
+import { toolOwnerSchema } from '../schemas/toolSchema';
 import { createHttpTool } from './createHttpTool';
 import { createSubtask } from './createSubtask';
 import { doNothing } from './doNothing';
@@ -14,6 +15,41 @@ import { searchTasks } from './searchTasks';
 import { sendMessage } from './sendMessage';
 import { updateTask } from './updateTask';
 
+// Exposed -------------------------------------
+
+// Internal (no authorization)------------------------------------
+
+// all global tools + all user-defined tools
+export const _findAll = internalQuery({
+	args: {
+		userId: zid('users'),
+	},
+	handler: async (ctx, { userId }) => {
+		//
+		const [globals, users] = await Promise.all([
+			_findAllByOwner(ctx, { owner: 'built-in' }), // global actions
+			_findAllByOwner(ctx, { owner: userId }), // user-defined actions
+		]);
+
+		return globals.concat(users);
+	},
+});
+
+export const _findAllByOwner = internalQuery({
+	args: {
+		owner: toolOwnerSchema,
+	},
+	handler: async (ctx, { owner }) => {
+		//
+		return await ctx.db
+			.query('tools')
+			.withIndex('by_owner', (q) => q.eq('owner', owner))
+			.collect();
+	},
+});
+
+// Helper functions ------------------------------------
+
 // TODO: move to DB
 export const coreTools = async (
 	ctx: ActionCtx, //
@@ -21,7 +57,7 @@ export const coreTools = async (
 	operation?: Doc<'operations'> & { kind: 'run-tool' },
 ) => {
 	//
-	const actions = await ctx.runQuery(internal.actions._findAll, { userId: task.owner });
+	const tools = await ctx.runQuery(internal.tools.index._findAll, { userId: task.owner });
 
 	return {
 		// built-in actions
@@ -37,7 +73,7 @@ export const coreTools = async (
 		// scrapeLink: scrapeLink(ctx, task, operation),
 		// checkFact: checkFact(ctx, task, operation),
 
-		...actions.reduce(
+		...tools.reduce(
 			(acc, tool) => {
 				acc[tool.name] = createHttpTool(ctx, task, operation, tool);
 				return acc;

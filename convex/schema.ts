@@ -1,11 +1,11 @@
 import { authTables } from '@convex-dev/auth/server';
 import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
-import { actionSchema } from './schemas/actionSchema';
 import { componentSchema } from './schemas/componentSchema';
 import { eventSchema } from './schemas/eventSchema';
 import { operationSchema } from './schemas/operationSchema';
 import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
+import { toolSchema } from './schemas/toolSchema';
 
 // prettier-ignore
 export default defineSchema({
@@ -30,15 +30,24 @@ export default defineSchema({
 		filterFields: ['isDone'],
 	}),
 
-	// built-in mutations, http calls, AI SDK calls (including multi-step)
-	actions: defineTable(
-		zodToConvex(actionSchema),
+	tools: defineTable(
+		zodToConvex(toolSchema),
 	).index(
 		'by_owner', ['owner'],
 	).index(
 		'by_name', ['name'],
 	),
 
+	// TODO: 
+	// instructions: defineTable(
+	// 	zodToConvex(instructionSchema),
+	// ).index(
+	// 	'by_owner', ['owner'],
+	// ).index(
+	// 	'by_name', ['name'],
+	// ),
+
+	// TODO: rename to actions
 	events: defineTable(
 		zodToConvex(eventSchema),
 	).index(

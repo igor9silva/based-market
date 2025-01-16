@@ -3,14 +3,14 @@ import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { actionSchema } from '../schemas/actionSchema';
+import { toolSchema } from '../schemas/toolSchema';
 import { stringToZod } from '../utils/zodToString';
 
 export function createHttpTool(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	operation: (Doc<'operations'> & { kind: 'run-tool' }) | undefined,
-	config: z.infer<typeof actionSchema>,
+	config: z.infer<typeof toolSchema>,
 ) {
 	const metadata = {
 		description: config.description,
@@ -39,13 +39,13 @@ export function createHttpTool(
 				const value = args[source as keyof typeof args];
 
 				switch (type) {
-					case 'queryParam':
+					case 'search':
 						url.searchParams.set(target, String(value));
 						break;
 					case 'header':
 						headers[target] = String(value);
 						break;
-					case 'pathParam':
+					case 'path':
 						url.pathname = url.pathname.replace(`:${target}`, String(value));
 						break;
 					case 'body':
