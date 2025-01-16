@@ -14,9 +14,9 @@ const metadata = {
 export const searchTasks = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	operation?: Doc<'operations'> & { kind: 'run-tool' },
+	action?: Doc<'actions'> & { kind: 'tool' },
 ) => {
-	if (!operation) return tool(metadata);
+	if (!action) return tool(metadata);
 
 	return tool({
 		...metadata,

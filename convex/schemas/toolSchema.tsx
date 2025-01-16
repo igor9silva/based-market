@@ -36,7 +36,7 @@ export const toolOwnerSchema = z.union([
 ]);
 
 export const httpToolSchema = z.object({
-	name: z.string(),
+	key: z.string(),
 	description: z.string(),
 	parametersSchema: z.string(),
 	http: httpConfigSchema,

@@ -14,9 +14,9 @@ const metadata = {
 export const markAsDone = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	operation?: Doc<'operations'> & { kind: 'run-tool' },
+	action?: Doc<'actions'> & { kind: 'tool' },
 ) => {
-	if (!operation) return tool(metadata);
+	if (!action) return tool(metadata);
 
 	return tool({
 		...metadata,
@@ -24,7 +24,7 @@ export const markAsDone = (
 			//
 			await ctx.runMutation(internal.tasks._markAsDone, {
 				taskId: task._id,
-				author: operation._id,
+				author: action._id,
 				isDone,
 			});
 

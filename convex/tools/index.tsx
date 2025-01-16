@@ -2,8 +2,8 @@ import { zid } from 'convex-helpers/server/zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
+import { _runNextActionIfNeeded, _setActionStatus } from '../actions';
 import { internalAction, internalQuery } from '../lib';
-import { _runNextOperationIfNeeded, _setOperationStatus } from '../operations';
 import { authorSchema } from '../schemas/authorSchema';
 import { toolOwnerSchema } from '../schemas/toolSchema';
 import { createHttpTool } from './createHttpTool';
@@ -54,28 +54,28 @@ export const _findAllByOwner = internalQuery({
 export const coreTools = async (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	operation?: Doc<'operations'> & { kind: 'run-tool' },
+	action?: Doc<'actions'> & { kind: 'tool' },
 ) => {
 	//
 	const tools = await ctx.runQuery(internal.tools.index._findAll, { userId: task.owner });
 
 	return {
 		// built-in actions
-		updateTask: updateTask(ctx, task, operation), // TODO: split into title and body?
-		markAsDone: markAsDone(ctx, task, operation),
-		moveTask: moveTask(ctx, task, operation),
-		createSubtask: createSubtask(ctx, task, operation),
-		searchTasks: searchTasks(ctx, task, operation),
-		sendMessage: sendMessage(ctx, task, operation),
-		doNothing: doNothing(ctx, task, operation),
-		// fillTask: fillTask(ctx, task, operation),
-		// minifyDescription: minifyDescription(ctx, task, operation),
-		// scrapeLink: scrapeLink(ctx, task, operation),
-		// checkFact: checkFact(ctx, task, operation),
+		updateTask: updateTask(ctx, task, action), // TODO: split into title and body?
+		markAsDone: markAsDone(ctx, task, action),
+		moveTask: moveTask(ctx, task, action),
+		createSubtask: createSubtask(ctx, task, action),
+		searchTasks: searchTasks(ctx, task, action),
+		sendMessage: sendMessage(ctx, task, action),
+		doNothing: doNothing(ctx, task, action),
+		// fillTask: fillTask(ctx, task, action),
+		// minifyDescription: minifyDescription(ctx, task, action),
+		// scrapeLink: scrapeLink(ctx, task, action),
+		// checkFact: checkFact(ctx, task, action),
 
 		...tools.reduce(
 			(acc, tool) => {
-				acc[tool.name] = createHttpTool(ctx, task, operation, tool);
+				acc[tool.key] = createHttpTool(ctx, task, action, tool);
 				return acc;
 			},
 			{} as Record<string, ReturnType<typeof createHttpTool>>,
@@ -96,47 +96,47 @@ export const _run = internalAction({
 	args: {
 		author: authorSchema,
 		taskId: zid('tasks'),
-		operationId: zid('operations'),
+		actionId: zid('actions'),
 	},
-	handler: async (ctx, { taskId, operationId, author }) => {
+	handler: async (ctx, { taskId, actionId, author }) => {
 		//
-		// make sure the operation is an action
-		const operation = await ctx.runQuery(internal.operations._findOne, { operationId });
-		if (operation.kind !== 'run-tool') throw new Error('Expected an action operation.');
+		// make sure the action is an action
+		const action = await ctx.runQuery(internal.actions._findOne, { actionId });
+		if (action.kind !== 'tool') throw new Error('Expected an action action.');
 
 		// grab the task
 		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
 
-		const availableTools = await coreTools(ctx, task, operation);
-		const tool = availableTools[operation.toolName as keyof typeof availableTools];
+		const availableTools = await coreTools(ctx, task, action);
+		const tool = availableTools[action.toolName as keyof typeof availableTools];
 
 		try {
 			//
-			if (!tool) throw new Error(`Unknown tool: ${operation.toolName}`);
+			if (!tool) throw new Error(`Unknown tool: ${action.toolName}`);
 
-			const parsedArgs = tool.parameters.safeParse(operation.args);
+			const parsedArgs = tool.parameters.safeParse(action.args);
 			if (!parsedArgs.success) throw new Error(`Invalid tool args: ${parsedArgs.error.message}`);
 
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
 			const result = await tool.execute(parsedArgs.data);
 
-			await ctx.runMutation(internal.events._setToolCallResult, {
-				eventId: operation.origin,
+			await ctx.runMutation(internal.actions._setToolCallResult, {
+				actionId,
 				result,
 			});
 
-			await _setOperationStatus(ctx, { status: 'succeeded', operationId });
-			await _runNextOperationIfNeeded(ctx, { taskId, author });
+			await _setActionStatus(ctx, { status: 'succeeded', actionId });
+			await _runNextActionIfNeeded(ctx, { taskId, author });
 			//
 		} catch (error) {
 			//
 			console.error('error in tool', error); // TODO: notify
 
-			await _setOperationStatus(ctx, { status: 'failed', operationId });
+			await _setActionStatus(ctx, { status: 'failed', actionId });
 
-			await ctx.runMutation(internal.events._setToolCallResult, {
-				eventId: operation.origin,
-				result: `${operation.toolName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+			await ctx.runMutation(internal.actions._setToolCallResult, {
+				actionId,
+				result: `${action.toolName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 				isError: true,
 			});
 

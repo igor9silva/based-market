@@ -1,9 +1,8 @@
 import { authTables } from '@convex-dev/auth/server';
 import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
+import { actionSchema } from './schemas/actionSchema';
 import { componentSchema } from './schemas/componentSchema';
-import { eventSchema } from './schemas/eventSchema';
-import { operationSchema } from './schemas/operationSchema';
 import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
 import { toolSchema } from './schemas/toolSchema';
 
@@ -29,13 +28,21 @@ export default defineSchema({
 		vectorField: 'embedding',
 		filterFields: ['isDone'],
 	}),
+	
+	actions: defineTable(
+		zodToConvex(actionSchema),
+	).index(
+		'by_task', ['taskId'],
+	).index(
+		'by_task_status', ['taskId', 'status'],
+	),
 
 	tools: defineTable(
 		zodToConvex(toolSchema),
 	).index(
 		'by_owner', ['owner'],
 	).index(
-		'by_name', ['name'],
+		'by_key', ['key'],
 	),
 
 	// TODO: 
@@ -43,26 +50,7 @@ export default defineSchema({
 	// 	zodToConvex(instructionSchema),
 	// ).index(
 	// 	'by_owner', ['owner'],
-	// ).index(
-	// 	'by_name', ['name'],
-	// ),
-
-	// TODO: rename to actions
-	events: defineTable(
-		zodToConvex(eventSchema),
-	).index(
-		'by_task', ['taskId'],
-	),
-
-	operations: defineTable(
-		zodToConvex(operationSchema),
-	).index(
-		'by_task', ['taskId'],
-	).index(
-		'by_task_status', ['taskId', 'status'],
-	),
-	// .index('by_origin', ['origin'])
-	// .index('by_author', ['author']),
+	// )
 
 	components: defineTable(
 		zodToConvex(componentSchema),
