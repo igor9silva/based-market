@@ -92,6 +92,10 @@ export const promptForTask = (task: Doc<'tasks'>) =>
 		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
 	].join('\n');
 
+function isToolAction(action: Doc<'actions'>): action is Doc<'actions'> & { kind: 'tool' } {
+	return action.kind === 'tool';
+}
+
 export const _run = internalAction({
 	args: {
 		author: authorSchema,
@@ -100,19 +104,19 @@ export const _run = internalAction({
 	},
 	handler: async (ctx, { taskId, actionId, author }) => {
 		//
-		// make sure the action is an action
-		const action = await ctx.runQuery(internal.actions._findOne, { actionId });
-		if (action.kind !== 'tool') throw new Error('Expected an action action.');
+		// make sure the action is a tool
+		const action = await ctx.runQuery(internal.actions.private._findOne, { actionId });
+		if (!isToolAction(action)) throw new Error('Expected a tool action.');
 
 		// grab the task
-		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
+		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 
 		const availableTools = await coreTools(ctx, task, action);
-		const tool = availableTools[action.toolName as keyof typeof availableTools];
+		const tool = availableTools[action.key as keyof typeof availableTools];
 
 		try {
 			//
-			if (!tool) throw new Error(`Unknown tool: ${action.toolName}`);
+			if (!tool) throw new Error(`Unknown tool: ${action.key}`);
 
 			const parsedArgs = tool.parameters.safeParse(action.args);
 			if (!parsedArgs.success) throw new Error(`Invalid tool args: ${parsedArgs.error.message}`);
@@ -120,7 +124,7 @@ export const _run = internalAction({
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
 			const result = await tool.execute(parsedArgs.data);
 
-			await ctx.runMutation(internal.actions._setToolCallResult, {
+			await ctx.runMutation(internal.actions.private._setToolCallResult, {
 				actionId,
 				result,
 			});
@@ -134,9 +138,9 @@ export const _run = internalAction({
 
 			await _setActionStatus(ctx, { status: 'failed', actionId });
 
-			await ctx.runMutation(internal.actions._setToolCallResult, {
+			await ctx.runMutation(internal.actions.private._setToolCallResult, {
 				actionId,
-				result: `${action.toolName} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+				result: `${action.key} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
 				isError: true,
 			});
 

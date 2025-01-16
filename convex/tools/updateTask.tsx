@@ -24,7 +24,7 @@ export const updateTask = (
 		execute: async ({ title, body }) => {
 			//
 			// TODO: review authorization for all mutation tools - Meseeks should inherit it's user's permissions
-			await ctx.runMutation(internal.tasks._update, {
+			await ctx.runMutation(internal.tasks.private._update, {
 				taskId: task._id,
 				title,
 				body,

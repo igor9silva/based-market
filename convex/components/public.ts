@@ -1,8 +1,6 @@
 import { z } from 'zod';
-import { query } from './lib';
-import { current as getCurrentUser } from './users.js';
-
-// Exposed ------------------------------------
+import { query } from '../lib';
+import { current as getCurrentUser } from '../users/public';
 
 export const findOneBySlug = query({
 	args: {
@@ -26,7 +24,3 @@ export const findOneBySlug = query({
 		return page;
 	},
 });
-
-// Internal (no authorization) ------------------------------------
-
-// Helper functions ------------------------------------

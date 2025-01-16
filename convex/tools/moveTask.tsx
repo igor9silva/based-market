@@ -31,7 +31,7 @@ export const moveTask = (
 		...metadata,
 		execute: async ({ taskId, newParentId }) => {
 			//
-			await ctx.runMutation(internal.tasks._move, {
+			await ctx.runMutation(internal.tasks.private._move, {
 				taskId,
 				newParentId: newParentId === 'inbox' ? undefined : newParentId,
 				author: action._id,

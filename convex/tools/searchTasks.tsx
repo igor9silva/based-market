@@ -22,7 +22,7 @@ export const searchTasks = (
 		...metadata,
 		execute: async ({ query }) => {
 			//
-			const results = await ctx.runAction(internal.tasks._semanticSearch, { query });
+			const results = await ctx.runAction(internal.tasks.private._semanticSearch, { query });
 
 			return results.map((r) => `- ${r.title} (score: ${(r._score * 100).toFixed(2)}%) ID: ${r._id}`).join('\n');
 		},

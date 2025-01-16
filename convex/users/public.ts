@@ -1,6 +1,6 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { query } from './lib';
-import { env } from './schemas/env';
+import { query } from '../lib';
+import { env } from '../schemas/envSchema';
 
 const ALLOWED_DOMAINS = env.ALLOWED_DOMAINS || [];
 const ALLOWED_EMAILS = env.ALLOWED_EMAILS || [];
@@ -22,8 +22,6 @@ export const current = query({
 		return user;
 	},
 });
-
-// Helper functions ------------------------------------
 
 function isAllowed(email: string) {
 	const domain = email.split('@')[1];

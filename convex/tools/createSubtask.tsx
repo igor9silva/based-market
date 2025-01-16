@@ -22,7 +22,7 @@ export const createSubtask = (
 		...metadata,
 		execute: async ({ body }) => {
 			//
-			const id = await ctx.runMutation(internal.tasks._add, {
+			const id = await ctx.runMutation(internal.tasks.private._add, {
 				parentId: task._id,
 				userId: task.owner,
 				body,

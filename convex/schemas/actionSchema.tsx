@@ -11,6 +11,7 @@ const coreActionSchema = z.object({
 
 const mutationSchema = coreActionSchema.extend({
 	kind: z.literal('mutation'),
+	status: z.literal('succeeded'),
 	result: z.string(),
 });
 
@@ -24,6 +25,7 @@ const asyncPendingSchema = coreAsyncActionSchema.extend({
 		'enqueued',
 		'running',
 	]),
+	result: z.null(),
 });
 
 const asyncDoneSchema = coreAsyncActionSchema.extend({

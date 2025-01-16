@@ -22,7 +22,7 @@ export const markAsDone = (
 		...metadata,
 		execute: async ({ isDone }) => {
 			//
-			await ctx.runMutation(internal.tasks._markAsDone, {
+			await ctx.runMutation(internal.tasks.private._markAsDone, {
 				taskId: task._id,
 				author: action._id,
 				isDone,
