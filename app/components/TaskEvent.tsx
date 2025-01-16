@@ -43,7 +43,6 @@ export function TaskEvent({
 		switch (event.kind) {
 			case 'tool-call': return event.result ?? event.statusText ?? '';
 			case 'message': return event.message;
-			case 'mutation': return event.changes;
 			default: return '';
 		}
 	}, [event]);
@@ -63,7 +62,6 @@ export function TaskEvent({
 					className={cn({
 						'animate-pulse': event.kind === 'tool-call' && !event.result,
 						'bg-pink-700/30': event.kind === 'tool-call',
-						'bg-green-700/30': event.kind === 'mutation',
 						'bg-blue-700/30': event.kind === 'message',
 					})}
 				>

@@ -34,6 +34,7 @@ export const findOne = query({
 	},
 });
 
+// TODO: move to actions
 export const sendMessage = mutation({
 	args: {
 		taskId: zid('tasks'),
@@ -45,20 +46,6 @@ export const sendMessage = mutation({
 
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 		return await _sendMessage(ctx, { taskId, message, author: currentUser._id });
-	},
-});
-
-export const reportMutation = mutation({
-	args: {
-		taskId: zid('tasks'),
-		changes: z.string(),
-	},
-	handler: async (ctx, { taskId, changes }) => {
-		//
-		console.debug(`report mutation '${changes}' for taskId '${taskId}'`);
-
-		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
-		return await _reportMutation(ctx, { taskId, changes, author: currentUser._id });
 	},
 });
 
@@ -124,27 +111,6 @@ export const _sendMessage = internalMutation({
 			author,
 			kind: 'message',
 			message,
-		});
-
-		await _requestThink(ctx, { eventId, taskId, author });
-
-		return eventId;
-	},
-});
-
-export const _reportMutation = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-		changes: z.string(),
-		author: authorSchema,
-	},
-	handler: async (ctx, { taskId, changes, author }) => {
-		//
-		const eventId = await ctx.db.insert('events', {
-			taskId,
-			author,
-			kind: 'mutation',
-			changes, // TODO: persist a diff
 		});
 
 		await _requestThink(ctx, { eventId, taskId, author });

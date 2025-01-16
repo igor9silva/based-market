@@ -1,5 +1,3 @@
-'use node';
-
 import { zid } from 'convex-helpers/server/zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';

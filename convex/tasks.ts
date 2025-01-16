@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { MutationCtx, QueryCtx } from './_generated/server';
-import { _reportMutation } from './events';
 import { internalAction, internalMutation, internalQuery, mutation, query } from './lib';
 import { authorSchema } from './schemas/authorSchema';
 import { current as getCurrentUser } from './users.js';
@@ -219,7 +218,7 @@ export const _add = internalMutation({
 		//
 		const taskId = await ctx.db.insert('tasks', { body, owner: userId, isDone: false, parentId });
 
-		await _reportMutation(ctx, { taskId, changes: `Added this task with "${body}".`, author: userId });
+		// TODO: update to create an empty task + 1 user message and let it choose the next step
 
 		return taskId;
 	},
@@ -325,16 +324,10 @@ export const _update = internalMutation({
 	},
 	handler: async (ctx, { taskId, title, body, author }) => {
 		//
-		await ctx.db.patch(taskId, {
+		return await ctx.db.patch(taskId, {
 			...(title !== undefined && { title }),
 			...(body !== undefined && { body }),
 		});
-
-		const updatedFields = [title !== undefined && 'title', body !== undefined && 'body'].filter(Boolean);
-
-		const changes = updatedFields.length ? `Updated ${updatedFields.join(' and ')}.` : 'No fields were updated.';
-
-		await _reportMutation(ctx, { taskId, changes, author });
 	},
 });
 
@@ -346,10 +339,7 @@ export const _markAsDone = internalMutation({
 	},
 	handler: async (ctx, { taskId, isDone, author }) => {
 		//
-		await ctx.db.patch(taskId, { isDone });
-
-		const changes = isDone ? 'Marked as done.' : 'Marked as not done.';
-		await _reportMutation(ctx, { taskId, changes, author });
+		return await ctx.db.patch(taskId, { isDone });
 	},
 });
 
@@ -361,10 +351,7 @@ export const _move = internalMutation({
 	},
 	handler: async (ctx, { taskId, newParentId, author }) => {
 		//
-		await ctx.db.patch(taskId, { parentId: newParentId });
-
-		const changes = `Moved ${taskId} to ${newParentId || 'Inbox'}.`;
-		await _reportMutation(ctx, { taskId, changes, author });
+		return await ctx.db.patch(taskId, { parentId: newParentId });
 
 		// TODO: forbid adding to itself
 		// TODO: report to parents as well, old and new

@@ -1,5 +1,3 @@
-'use node';
-
 import { openai } from '@ai-sdk/openai';
 import { CoreMessage, generateObject, generateText, NoSuchToolError } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
@@ -212,12 +210,12 @@ async function _askMagicRock(
 			`You ***see*** (BUT DO NOT WRITE) messages in the following format:`,
 			'```',
 			`<date>ISO8601 date</date>`,
-			`<kind>message|mutation</kind>`,
+			// `<kind>message</kind>`,
 			`<content>message content</content>`,
 			'```',
 			`The date is when the message was sent/action ocurred.`,
-			`Kind 'message' means the user or you sent a text.`,
-			`Kind 'mutation' means a change was made to the task by either you or the user.`,
+			// `Kind 'message' means the user or you sent a text.`,
+			// `Kind 'mutation' means a change was made to the task by either you or the user.`,
 			`The message content is in MDX format.`,
 			`>>>Note that you should NOT use the above format for your messages, as it'll be formated latter by the system. Reply with JUST MDX-compatible text!<<<`,
 			``,
@@ -327,13 +325,12 @@ function eventToCoreMessage({
 			];
 
 		case 'message':
-		case 'mutation':
 			return {
 				role: author,
 				content: [
 					`<date>${new Date(event._creationTime).toISOString()}</date>`,
 					`<kind>${event.kind}</kind>`,
-					`<content>${event.kind === 'message' ? event.message : event.changes}</content>`,
+					`<content>${event.message}</content>`,
 				].join('\n'),
 			};
 	}

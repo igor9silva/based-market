@@ -1,5 +1,3 @@
-'use node';
-
 import { tool } from 'ai';
 import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';

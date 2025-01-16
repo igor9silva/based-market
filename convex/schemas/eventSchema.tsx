@@ -12,11 +12,6 @@ export const messageEventSchema = coreEventSchema.extend({
 	message: z.string().describe('The message content in MDX format.'),
 });
 
-export const mutationEventSchema = coreEventSchema.extend({
-	kind: z.literal('mutation'),
-	changes: z.string().describe('The changes in git diff format.'),
-});
-
 export const toolCallEventSchema = coreEventSchema.extend({
 	kind: z.literal('tool-call'),
 	toolCallId: z.string(), // the one from the provider if comes from LLM, otherwise we generate one
@@ -30,7 +25,6 @@ export const toolCallEventSchema = coreEventSchema.extend({
 export const eventSchema = z
 	.union([
 		messageEventSchema, //
-		mutationEventSchema,
 		toolCallEventSchema,
 	])
 	.describe('An event is anything that happens on a Task. e.g. a message, a mutation, an operation.');
