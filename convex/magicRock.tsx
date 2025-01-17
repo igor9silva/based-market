@@ -4,12 +4,11 @@ import { zid } from 'convex-helpers/server/zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx } from './_generated/server';
-import { _addMeseeksToolCall, _runNextActionIfNeeded, _sendMeseeksMessage, _setActionStatus } from './actions';
 import { internalAction } from './lib';
 import { authorSchema } from './schemas/authorSchema';
-import { env } from './schemas/env';
-import { coreTools, promptForTask } from './tools';
+import { env } from './schemas/envSchema';
 
+// TODO: abstract into `instructions`
 export const _think = internalAction({
 	args: {
 		author: authorSchema,
@@ -19,8 +18,8 @@ export const _think = internalAction({
 	handler: async (ctx, { taskId, actionId, author }) => {
 		//
 		// grab the task and action
-		const task = await ctx.runQuery(internal.tasks._findOne, { taskId });
-		const action = await ctx.runQuery(internal.actions._findOne, { actionId });
+		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
+		const action = await ctx.runQuery(internal.actions.private._findOne, { actionId });
 
 		try {
 			// invoke magic rock
@@ -370,3 +369,12 @@ function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
 
 	return history;
 }
+
+// TODO: a more robust one
+const promptForTask = (task: Doc<'tasks'>) =>
+	[
+		`<id>${task._id}</id>`, //
+		`<title>${task.title}</title>`,
+		`<body>${task.body}</body>`,
+		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
+	].join('\n');

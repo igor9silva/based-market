@@ -25,7 +25,7 @@ const asyncPendingSchema = coreAsyncActionSchema.extend({
 		'enqueued',
 		'running',
 	]),
-	result: z.null(),
+	result: z.null().optional().default(null),
 });
 
 const asyncDoneSchema = coreAsyncActionSchema.extend({

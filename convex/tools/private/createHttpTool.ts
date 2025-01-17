@@ -1,9 +1,9 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { Doc } from '../_generated/dataModel';
-import { ActionCtx } from '../_generated/server';
-import { toolSchema } from '../schemas/toolSchema';
-import { stringToZod } from '../utils/zodToString';
+import { Doc } from '../../_generated/dataModel';
+import { ActionCtx } from '../../_generated/server';
+import { toolSchema } from '../../schemas/toolSchema';
+import { stringToZod } from '../../utils/zodToString';
 
 export function createHttpTool(
 	ctx: ActionCtx,

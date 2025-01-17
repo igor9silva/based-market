@@ -38,7 +38,7 @@ export const toolOwnerSchema = z.union([
 export const httpToolSchema = z.object({
 	key: z.string(),
 	description: z.string(),
-	parametersSchema: z.string(),
+	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
 	http: httpConfigSchema,
 	owner: toolOwnerSchema,
 });
