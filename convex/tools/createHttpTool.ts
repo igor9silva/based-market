@@ -1,14 +1,14 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { Doc } from '../../_generated/dataModel';
-import { ActionCtx } from '../../_generated/server';
-import { toolSchema } from '../../schemas/toolSchema';
-import { stringToZod } from '../../utils/zodToString';
+import { Doc } from '../_generated/dataModel';
+import { ActionCtx } from '../_generated/server';
+import { toolSchema } from '../schemas/toolSchema';
+import { stringToZod } from '../utils/zodToString';
 
 export function createHttpTool(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
-	action: (Doc<'actions'> & { kind: 'tool' }) | undefined,
+	action: Doc<'actions'> | undefined,
 	config: z.infer<typeof toolSchema>,
 ) {
 	const metadata = {
@@ -23,11 +23,6 @@ export function createHttpTool(
 		execute: async (args) => {
 			//
 			console.debug('Running tool', config.key, args);
-
-			// await ctx.runMutation(internal.actions._setToolCallStatusText, {
-			// 	actionId: action.origin,
-			// 	text: `Running ${config.key}`,
-			// });
 
 			const url = new URL(config.http.url);
 			const headers = { ...config.http.headers };

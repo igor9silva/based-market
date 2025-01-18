@@ -1,11 +1,12 @@
 import { tool } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { internal } from '../../_generated/api';
-import { Doc } from '../../_generated/dataModel';
-import { ActionCtx } from '../../_generated/server';
-import { internalQuery } from '../../lib';
-import { toolOwnerSchema } from '../../schemas/toolSchema';
+import { internal } from '../_generated/api';
+import { Doc } from '../_generated/dataModel';
+import { ActionCtx } from '../_generated/server';
+import { internalQuery } from '../lib';
+import { _askMagicRock } from '../magicRock';
+import { toolOwnerSchema } from '../schemas/toolSchema';
 import { createHttpTool } from './createHttpTool';
 
 // all global tools + all user-defined tools
@@ -40,22 +41,22 @@ export const _findAllByOwner = internalQuery({
 export const _allTools = async (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'actions'> & { kind: 'tool' },
+	action: Doc<'actions'>,
 ) => ({
 	..._mutationTools(ctx, task, action),
 	..._httpTools(ctx, task, action),
-	// ...decisionTools(ctx, task, action),
+	..._decisionTools(ctx, task, action),
 });
 
-const _mutationTools = (
+export const _mutationTools = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'actions'> & { kind: 'tool' },
+	action: Doc<'actions'>,
 ) => ({
 	doNothing: tool({
 		description: 'Do nothing.',
 		parameters: z.object({}),
-		execute: () => Promise.resolve(console.log('did nothing')),
+		execute: () => Promise.resolve('nothing done'),
 	}),
 	say: tool({
 		description: 'Send a text message to the user.',
@@ -63,7 +64,11 @@ const _mutationTools = (
 			message: z.string().describe('The message to send to the user in MDX format.'),
 		}),
 		// prettier-ignore
-		execute: (args) => { throw new Error('Idk what to do here yet') },
+		execute: (args) => ctx.runMutation(internal.action.private._say, {
+			taskId: task._id,
+			message: args.message,
+			author: action._id,
+		}),
 	}),
 	updateTask: tool({
 		description: 'Update the task',
@@ -124,24 +129,112 @@ const _mutationTools = (
 	}),
 });
 
-const _httpTools = async (
+export const _httpTools = async (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'actions'> & { kind: 'tool' },
+	action: Doc<'actions'>,
 ) => {
-	const tools = await ctx.runQuery(internal.tools.private.queries._findAll, {
+	const tools = await ctx.runQuery(internal.tools.private._findAll, {
 		userId: task.owner,
 	});
 
 	return toMap(tools, (tool) => createHttpTool(ctx, task, action, tool));
 };
 
-const decisionTools = (
+export const _decisionTools = (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'actions'> & { kind: 'tool' },
+	action: Doc<'actions'>,
 ) => {
-	throw new Error('TODO: implement decision tools');
+	return {
+		react: tool({
+			description: 'React to the actions that happened on the task, and decide the next actions.',
+			parameters: z.object({}),
+			execute: async () => {
+				//
+				const result = await _askMagicRock(ctx, task, action);
+
+				console.debug('magicRock/result/finishReason', result.finishReason);
+
+				switch (result.finishReason) {
+					//
+					case 'tool-calls':
+						//
+						// TODO: think about parallelizing tool calls
+						const toolCalls = await Promise.allSettled(
+							result.toolCalls.map(async (call) => {
+								//
+								// TODO: make _act able to handle `say()`
+								if (call.toolName === 'say') {
+									return ctx.runMutation(internal.action.private._say, {
+										message: call.args.message,
+										taskId: task._id,
+										author: action._id,
+									});
+								}
+
+								return ctx.runMutation(internal.action.private._act, {
+									key: call.toolName,
+									args: call.args,
+									taskId: task._id,
+									author: action._id,
+								});
+							}),
+						);
+
+						// TODO: notify errors
+						toolCalls
+							.filter((call) => call.status === 'rejected')
+							.forEach((call) => {
+								console.error('tool call failed', call.reason);
+							});
+
+						break;
+
+					case 'stop':
+						// if (result.text.length < 1) break;
+						await ctx.runMutation(internal.action.private._say, {
+							taskId: task._id,
+							message: result.text,
+							author: action._id,
+						});
+						break;
+
+					case 'error':
+						await ctx.runMutation(internal.action.private._say, {
+							taskId: task._id,
+							message: result.text,
+							author: action._id,
+							status: 'failed',
+						});
+						break;
+
+					case 'content-filter':
+						await ctx.runMutation(internal.action.private._say, {
+							taskId: task._id,
+							message: `[damn @sama] Content filter hit: ${result.warnings}`,
+							author: action._id,
+							status: 'failed',
+						});
+						break;
+
+					case 'length':
+						// TODO: better handling of max length
+						await ctx.runMutation(internal.action.private._say, {
+							taskId: task._id,
+							message: `Max length hit: ${result.warnings}`,
+							author: action._id,
+						});
+						break;
+
+					default:
+						throw new Error(`Unknown finish reason: ${result.finishReason}`);
+				}
+
+				return result.toolCalls.map((call) => `${call.toolName}()`).join(', ') ?? 'done';
+			},
+		}),
+	};
 };
 
 function toMap<T>(

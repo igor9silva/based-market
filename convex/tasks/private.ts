@@ -4,6 +4,7 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
+import { _say } from '../action/private';
 import { internalAction, internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 
@@ -66,14 +67,14 @@ export const _findAllByEmbeddingIds = internalQuery({
 export const _add = internalMutation({
 	args: {
 		userId: zid('users'),
-		body: z.optional(z.string()),
+		body: z.string(),
 		parentId: zid('tasks').optional(),
 	},
 	handler: async (ctx, { userId, body, parentId }) => {
 		//
-		const taskId = await ctx.db.insert('tasks', { body, owner: userId, isDone: false, parentId });
+		const taskId = await ctx.db.insert('tasks', { owner: userId, isDone: false, parentId });
 
-		// TODO: update to create an empty task + 1 user message and let it choose the next step
+		await _say(ctx, { message: body, taskId, author: userId });
 
 		return taskId;
 	},

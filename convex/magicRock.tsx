@@ -1,132 +1,13 @@
 import { openai } from '@ai-sdk/openai';
-import { CoreMessage, generateObject, generateText, NoSuchToolError } from 'ai';
-import { zid } from 'convex-helpers/server/zod';
+import { CoreMessage, CoreTool, generateObject, generateText, NoSuchToolError } from 'ai';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx } from './_generated/server';
-import { internalAction } from './lib';
-import { authorSchema } from './schemas/authorSchema';
 import { env } from './schemas/envSchema';
+import { _httpTools, _mutationTools } from './tools/private';
 
-// TODO: abstract into `instructions`
-export const _think = internalAction({
-	args: {
-		author: authorSchema,
-		taskId: zid('tasks'),
-		actionId: zid('actions'),
-	},
-	handler: async (ctx, { taskId, actionId, author }) => {
-		//
-		// grab the task and action
-		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
-		const action = await ctx.runQuery(internal.actions.private._findOne, { actionId });
-
-		try {
-			// invoke magic rock
-			const result = await _askMagicRock(ctx, task, action);
-
-			console.debug('magicRock/result/finishReason', result.finishReason);
-
-			switch (result.finishReason) {
-				//
-				case 'tool-calls':
-					//
-					let calls = result.toolCalls;
-					if (calls.length < 1) throw new Error('Expected at least one tool call.');
-
-					if (calls[0].toolName === 'doNothing') {
-						//
-						console.debug('Doing nothing:', task._id);
-						calls = calls.slice(1);
-
-						if (calls.length > 0) throw new Error('Expected no more tool calls.');
-						//
-					}
-
-					// TODO: think about parallelizing tool calls
-					const toolCalls = await Promise.allSettled(
-						calls.map(async (call) => {
-							if (call.toolName === 'sendMessage') {
-								await _sendMeseeksMessage(ctx, {
-									taskId: task._id,
-									actionId,
-									message: call.args.message,
-								});
-							} else {
-								await _addMeseeksToolCall(ctx, {
-									taskId: task._id,
-									author: action._id,
-									toolName: call.toolName,
-									toolCallId: call.toolCallId,
-									args: call.args,
-								});
-							}
-						}),
-					);
-
-					// TODO: notify errors
-					toolCalls
-						.filter((call) => call.status === 'rejected')
-						.forEach((call) => {
-							console.error('tool call failed', call.reason);
-						});
-
-					break;
-
-				case 'stop':
-					// if (result.text.length < 1) break;
-					await _sendMeseeksMessage(ctx, {
-						taskId: task._id,
-						actionId,
-						message: result.text,
-					});
-					break;
-
-				case 'error':
-					await _sendMeseeksMessage(ctx, {
-						taskId: task._id,
-						actionId,
-						message: `Failed: ${result.text}`,
-						isDone: true,
-					});
-					break;
-
-				case 'content-filter':
-					await _sendMeseeksMessage(ctx, {
-						taskId: task._id,
-						actionId,
-						message: `[damn @sama] Content filter hit: ${result.warnings}`,
-						isDone: true,
-					});
-					break;
-
-				case 'length':
-					// TODO: continue
-					break;
-
-				default:
-					throw new Error(`Unknown finish reason: ${result.finishReason}`);
-			}
-
-			await _setActionStatus(ctx, { status: 'succeeded', actionId });
-			await _runNextActionIfNeeded(ctx, { taskId, author });
-			//
-		} catch (error) {
-			//
-			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-			console.error('error in magic', errorMessage); // TODO: alert
-
-			// TODO: update on the action itself (like we do on tools), instead of a plain message
-			await _sendMeseeksMessage(ctx, { taskId: task._id, actionId, message: errorMessage, isDone: true });
-			await _setActionStatus(ctx, { status: 'failed', actionId });
-
-			throw error;
-		}
-	},
-});
-
-async function _askMagicRock(
+// TODO: move to DB
+export async function _askMagicRock(
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
@@ -237,7 +118,7 @@ async function _askMagicRock(
 
 		// assuming task.owner is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task._id, task.owner),
-		tools: await coreTools(ctx, task),
+		tools: await loadTools(ctx, task, action),
 		toolChoice: 'required',
 
 		experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
@@ -277,22 +158,18 @@ async function _askMagicRock(
 	};
 
 	console.debug('askMagicRock', result);
-	console.debug('askMagicRock/responseMessages', JSON.stringify(response.messages, null, 2));
 
 	return result;
 }
 
-function actionToCoreMessage({
-	action,
-	author,
-}: {
-	action: Doc<'actions'>;
-	author: 'user' | 'assistant';
-}): CoreMessage | Array<CoreMessage> | undefined {
+function actionToCoreMessage(
+	action: Doc<'actions'>, //
+	author: 'user' | 'assistant',
+): CoreMessage | Array<CoreMessage> | undefined {
 	//
 	switch (action.kind) {
 		//
-		case 'tool':
+		case 'async':
 			//
 			if (!action.result) return undefined; // TODO: maybe just filter out `skipped` ones
 
@@ -322,7 +199,7 @@ function actionToCoreMessage({
 				},
 			];
 
-		case 'mutation':
+		case 'sync':
 			// TODO: new render
 			return {
 				role: author,
@@ -335,6 +212,36 @@ function actionToCoreMessage({
 	}
 }
 
+async function loadTools(
+	ctx: ActionCtx, //
+	task: Doc<'tasks'>,
+	action: Doc<'actions'>,
+): Promise<Record<string, CoreTool>> {
+	//
+	console.debug('loadTools');
+
+	const [httpTools, mutationTools] = await Promise.all([
+		_httpTools(ctx, task, action), //
+		_mutationTools(ctx, task, action),
+	]);
+
+	// // clear execute functions since they will be handled by the AI
+	for (const tool of Object.values(httpTools)) {
+		(tool as any).execute = undefined;
+	}
+	for (const tool of Object.values(mutationTools)) {
+		(tool as any).execute = undefined;
+	}
+
+	console.debug('loadTools/httpTools', Object.keys(httpTools));
+	console.debug('loadTools/mutationTools', Object.keys(mutationTools));
+
+	return {
+		...httpTools,
+		...mutationTools,
+	};
+}
+
 // TODO: persist a copy of the messages in CoreMessage format? or it gets too big?
 async function renderHistory(
 	ctx: ActionCtx, //
@@ -342,17 +249,19 @@ async function renderHistory(
 	userId: Id<'users'>,
 ): Promise<Array<CoreMessage>> {
 	//
-	const actions = await ctx.runQuery(internal.actions._findAll, { taskId });
+	const actions = await ctx.runQuery(internal.action.private._findAll, { taskId });
 
 	const history = actions
 		.map((action) => ({ action, author: action.author === userId ? ('user' as const) : ('assistant' as const) }))
-		.map(actionToCoreMessage)
+		.map(({ action, author }) => actionToCoreMessage(action, author))
 		.filter((action): action is CoreMessage => action !== undefined)
 		.flatMap((message) => message);
 
 	console.debug('renderHistory', history);
 
 	validateHistory(history);
+
+	console.debug('renderHistory validated');
 
 	return history;
 }

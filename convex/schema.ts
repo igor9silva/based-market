@@ -45,7 +45,7 @@ export default defineSchema({
 		'by_key', ['key'],
 	),
 
-	// TODO: 
+	// TODO: instructions
 	// instructions: defineTable(
 	// 	zodToConvex(instructionSchema),
 	// ).index(

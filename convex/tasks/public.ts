@@ -89,12 +89,13 @@ export const findOneOrNot = query({
 
 export const add = mutation({
 	args: {
-		body: z.optional(z.string()),
+		body: z.string(),
 		parentId: zid('tasks').optional(),
 	},
 	handler: async (ctx, { body, parentId }) => {
 		//
 		const currentUser = await getCurrentUser(ctx, {});
+
 		return await _add(ctx, { userId: currentUser._id, body, parentId });
 	},
 });

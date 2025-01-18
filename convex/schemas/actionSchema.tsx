@@ -7,19 +7,12 @@ const coreActionSchema = z.object({
 	author: authorSchema,
 	key: z.string(),
 	args: z.record(z.any()),
+	// type: z.enum(['mutation', 'tool']),
+	kind: z.enum(['sync', 'async']),
 });
 
-const mutationSchema = coreActionSchema.extend({
-	kind: z.literal('mutation'),
-	status: z.literal('succeeded'),
-	result: z.string(),
-});
-
-const coreAsyncActionSchema = coreActionSchema.extend({
-	kind: z.enum(['decision', 'tool']),
-});
-
-const asyncPendingSchema = coreAsyncActionSchema.extend({
+export const pendingActionSchema = coreActionSchema.extend({
+	kind: z.literal('async'),
 	status: z.enum([
 		'pending authorization', //
 		'enqueued',
@@ -28,7 +21,7 @@ const asyncPendingSchema = coreAsyncActionSchema.extend({
 	result: z.null().optional().default(null),
 });
 
-const asyncDoneSchema = coreAsyncActionSchema.extend({
+export const resolvedActionSchema = coreActionSchema.extend({
 	status: z.enum([
 		'succeeded', //
 		'skipped',
@@ -39,10 +32,9 @@ const asyncDoneSchema = coreAsyncActionSchema.extend({
 
 export const actionSchema = z
 	.union([
-		mutationSchema, //
-		asyncPendingSchema,
-		asyncDoneSchema,
+		pendingActionSchema, //
+		resolvedActionSchema,
 	])
 	.describe(
-		'An Action is any occurrence within a Task. It may be a mutation, a decision or the use of a tool.', //
+		'An Action is any occurrence within a Task.', //
 	);

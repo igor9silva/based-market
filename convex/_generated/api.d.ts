@@ -13,8 +13,9 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as actions_private from "../actions/private.js";
-import type * as actions_public from "../actions/public.js";
+import type * as action_lifecycle_private from "../action/lifecycle/private.js";
+import type * as action_private from "../action/private.js";
+import type * as action_public from "../action/public.js";
 import type * as auth from "../auth.js";
 import type * as components_public from "../components/public.js";
 import type * as http from "../http.js";
@@ -28,9 +29,8 @@ import type * as schemas_taskSchema from "../schemas/taskSchema.js";
 import type * as schemas_toolSchema from "../schemas/toolSchema.js";
 import type * as tasks_private from "../tasks/private.js";
 import type * as tasks_public from "../tasks/public.js";
-import type * as tools_private_createHttpTool from "../tools/private/createHttpTool.js";
-import type * as tools_private_execute from "../tools/private/execute.js";
-import type * as tools_private_queries from "../tools/private/queries.js";
+import type * as tools_createHttpTool from "../tools/createHttpTool.js";
+import type * as tools_private from "../tools/private.js";
 import type * as users_public from "../users/public.js";
 import type * as utils_zodToString from "../utils/zodToString.js";
 
@@ -43,8 +43,9 @@ import type * as utils_zodToString from "../utils/zodToString.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  "actions/private": typeof actions_private;
-  "actions/public": typeof actions_public;
+  "action/lifecycle/private": typeof action_lifecycle_private;
+  "action/private": typeof action_private;
+  "action/public": typeof action_public;
   auth: typeof auth;
   "components/public": typeof components_public;
   http: typeof http;
@@ -58,9 +59,8 @@ declare const fullApi: ApiFromModules<{
   "schemas/toolSchema": typeof schemas_toolSchema;
   "tasks/private": typeof tasks_private;
   "tasks/public": typeof tasks_public;
-  "tools/private/createHttpTool": typeof tools_private_createHttpTool;
-  "tools/private/execute": typeof tools_private_execute;
-  "tools/private/queries": typeof tools_private_queries;
+  "tools/createHttpTool": typeof tools_createHttpTool;
+  "tools/private": typeof tools_private;
   "users/public": typeof users_public;
   "utils/zodToString": typeof utils_zodToString;
 }>;
