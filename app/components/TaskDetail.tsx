@@ -21,11 +21,11 @@ export default function TaskDetail({
 	className?: string;
 	showExpand?: boolean;
 }) {
-	const query = convexQuery(api.tasks.findOne, { taskId });
+	const query = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(query);
 
-	const updateTask = useMutation(api.tasks.update);
-	const markAsDone = useMutation(api.tasks.markAsDone);
+	const updateTask = useMutation(api.tasks.public.update);
+	const markAsDone = useMutation(api.tasks.public.markAsDone);
 
 	return (
 		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto h-full', className)}>

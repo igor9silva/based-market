@@ -13,6 +13,7 @@ export function TaskAction({
 	action: Doc<'operations'>;
 	className?: string;
 }) {
+	// TODO: FIX
 	const skipAction = useMutation(api.operations.skip);
 	const retryAction = useMutation(api.operations.retry);
 

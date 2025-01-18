@@ -14,7 +14,7 @@ export function SubtaskList({
 	taskId: Id<'tasks'>;
 	className?: string;
 }) {
-	const query = convexQuery(api.tasks.findAll, { parentId: taskId });
+	const query = convexQuery(api.tasks.public.findAll, { parentId: taskId });
 	const { data: subtasks } = useSuspenseQuery(query);
 
 	if (subtasks.length === 0) {

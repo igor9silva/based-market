@@ -18,7 +18,7 @@ export function MessageComposer({
 	task: Doc<'tasks'>;
 }) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
-	const sendMessage = useMutation(api.events.sendMessage);
+	const sendMessage = useMutation(api.action.public.say);
 
 	useEffect(() => {
 		textareaRef.current?.focus();

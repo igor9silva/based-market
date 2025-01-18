@@ -18,7 +18,7 @@ function Author({
 	className?: string;
 	author: z.infer<typeof authorSchema>;
 }) {
-	const query = convexQuery(api.users.current, {});
+	const query = convexQuery(api.users.public.current, {});
 	const { data: user } = useSuspenseQuery(query);
 
 	return (
@@ -34,16 +34,23 @@ export function TaskEvent({
 	initialRenderDate,
 }: {
 	className?: string;
-	event: Doc<'events'>;
+	event: Doc<'actions'>;
 	initialRenderDate: Date;
 }) {
 	//
 	const content = useMemo(() => {
-		// prettier-ignore
-		switch (event.kind) {
-			case 'tool-call': return event.result ?? event.statusText ?? '';
-			case 'message': return event.message;
-			default: return '';
+		switch (event.status) {
+			case 'pending authorization':
+				return 'Pending authorization';
+			case 'enqueued':
+				return 'Enqueued';
+			case 'running':
+				return 'Running';
+			case 'skipped':
+				return 'Skipped';
+			case 'succeeded':
+			case 'failed':
+				return event.result;
 		}
 	}, [event]);
 
@@ -60,15 +67,19 @@ export function TaskEvent({
 
 				<div
 					className={cn({
-						'animate-pulse': event.kind === 'tool-call' && !event.result,
-						'bg-pink-700/30': event.kind === 'tool-call',
-						'bg-blue-700/30': event.kind === 'message',
+						'animate-pulse': event.status === 'pending authorization',
+						'bg-pink-700/30': event.status === 'enqueued',
+						'bg-blue-700/30': event.status === 'running',
+						'bg-green-700/30': event.status === 'succeeded',
+						'bg-red-700/30': event.status === 'failed',
+						'bg-gray-700/30': event.status === 'skipped',
 					})}
 				>
-					{event.kind === 'tool-call' ? (
+					{event.kind === 'async' ? (
 						<Collapsible>
 							<CollapsibleTrigger>
-								Runned {event.toolName} ✅ - Args: {JSON.stringify(event.args)}
+								{event.result ? '' : 'Running '} <code>{event.key}</code> - Args:{' '}
+								<code>{JSON.stringify(event.args)}</code>
 							</CollapsibleTrigger>
 							<CollapsibleContent>
 								<Content content={content} />

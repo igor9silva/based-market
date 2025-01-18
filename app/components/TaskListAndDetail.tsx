@@ -17,7 +17,7 @@ export function TaskListAndDetail({
 	className?: string;
 }) {
 	const args = taskId === 'inbox' ? {} : { parentId: taskId };
-	const query = convexQuery(api.tasks.findAll, args);
+	const query = convexQuery(api.tasks.public.findAll, args);
 	const { data: subtasks } = useSuspenseQuery(query);
 
 	const { selectedSubtaskId } = useSearch({ strict: false });

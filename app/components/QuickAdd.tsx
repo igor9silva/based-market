@@ -13,7 +13,7 @@ import { cn } from '~/lib/utils';
 export function QuickAdd({ className }: { className?: string }) {
 	//
 	const navigate = useNavigate();
-	const addTask = useMutation(api.tasks.add);
+	const addTask = useMutation(api.tasks.public.add);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	useEffect(() => {

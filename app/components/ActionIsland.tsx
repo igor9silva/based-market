@@ -22,7 +22,7 @@ export function ActionIsland({
 	const ref = useRef<HTMLDivElement>(null);
 	const [isExpanded, setIsExpanded] = useState(false);
 
-	const query = convexQuery(api.operations.findAll, { taskId });
+	const query = convexQuery(api.action.public.findAll, { taskId });
 	const { data: actions } = useSuspenseQuery(query);
 
 	// if click outside, close

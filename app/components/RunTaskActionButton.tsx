@@ -10,10 +10,10 @@ export function RunTaskActionButton({
 	task: Doc<'tasks'>;
 	kind: string;
 }) {
-	const useTool = useMutation(api.actions.useTool);
+	const useTool = useMutation(api.action.public.act);
 	const onClick = () =>
 		useTool({
-			toolName: kind,
+			key: kind,
 			taskId: task._id,
 			args: {},
 		});

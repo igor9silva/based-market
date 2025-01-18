@@ -17,10 +17,10 @@ export function TaskConversation({
 	taskId: Id<'tasks'>;
 	className?: string;
 }) {
-	const taskQuery = convexQuery(api.tasks.findOne, { taskId });
+	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(taskQuery);
 
-	const eventsQuery = convexQuery(api.events.findAll, { taskId: task._id });
+	const eventsQuery = convexQuery(api.action.public.findAll, { taskId: task._id });
 	const { data: events } = useSuspenseQuery(eventsQuery);
 
 	const initialRenderDate = useMemo(() => new Date(), []);
