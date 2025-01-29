@@ -29,6 +29,9 @@ export const _execute = internalAction({
 			const availableTools = await _allTools(ctx, task, action);
 			const tool = availableTools[action.key as keyof typeof availableTools];
 
+			console.debug('tool key', action.key);
+			console.debug('availableTools', Object.keys(availableTools));
+
 			if (!tool) throw new Error(`Unknown tool: ${action.key}`);
 
 			const parsedArgs = tool.parameters.safeParse(action.args);
@@ -38,6 +41,7 @@ export const _execute = internalAction({
 			const result = await tool.execute(parsedArgs.data);
 
 			console.debug(`${actionId} executed with result: ${result}`);
+			if (!result) console.warn(`${actionId} executed with no result`);
 
 			// TODO: HERE
 			// TODO: only enqueue the tool actions after finishing this one?
@@ -45,7 +49,7 @@ export const _execute = internalAction({
 
 			await _setResolved(ctx, {
 				actionId,
-				result,
+				result: result ?? 'unknown',
 				status: 'succeeded',
 			});
 			//
@@ -84,14 +88,16 @@ export const _react = internalMutation({
 			return;
 		}
 
-		// TODO: check if the last 20 actions are from meseeks (action.author !== task.owner) before reacting
+		// TODO: check if the last 10 actions are from meseeks (action.author !== task.owner) before reacting
 		const allActions = await ctx.runQuery(internal.action.private._findAll, { taskId });
-		const last20Actions = allActions.slice(-20).filter((action) => action.author !== task.owner);
+		const last10Actions = allActions.slice(-10).filter((action) => action.author !== task.owner);
 
-		if (last20Actions.length >= 20) {
-			console.debug(`Skipping reacting for task ${taskId} because the last 20 actions are from meseeks.`);
+		if (last10Actions.length >= 10) {
+			console.debug(`Skipping reacting for task ${taskId} because the last 10 actions are from meseeks.`);
 			return;
 		}
+
+		// TODO: what if this 👆 is done inside the react execute function?
 
 		const pendingReactions = await ctx.db
 			.query('actions')

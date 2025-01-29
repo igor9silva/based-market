@@ -225,7 +225,7 @@ async function loadTools(
 		_mutationTools(ctx, task, action),
 	]);
 
-	// // clear execute functions since they will be handled by the AI
+	// clear execute functions to avoid AI SDK from executing it
 	for (const tool of Object.values(httpTools)) {
 		(tool as any).execute = undefined;
 	}

@@ -51,7 +51,7 @@ export function createHttpTool(
 				//
 			}, config.http.body?.template ?? {});
 
-			console.debug('requesting', config.http.method, url.toString(), headers, bodyData);
+			console.debug('requesting', config.http.method, url.toString());
 
 			// make the request
 			const response = await fetch(url.toString(), {
@@ -62,14 +62,13 @@ export function createHttpTool(
 
 			console.debug('Response', response.status, response.statusText);
 
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-
 			// treat everything as text and let the LLM do its magic
 			const result = await response.text();
-
 			console.debug('Result', result);
+
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}. Body: ${result}`);
+			}
 
 			return result;
 		},
