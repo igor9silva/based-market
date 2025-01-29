@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const taskSchema = z
 	.object({
-		owner: zid('users'),
+		author: zid('users'),
 		title: z.string().optional(),
 		body: z.string().optional(),
 		parentId: zid('tasks').optional(),

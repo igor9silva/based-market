@@ -15,9 +15,9 @@ export const findAllAtInbox = query({
 		const find = ({ isDone }: { isDone: boolean }) =>
 			ctx.db
 				.query('tasks')
-				.withIndex('by_owner_parentId_isDone', (q) =>
+				.withIndex('by_author_parentId_isDone', (q) =>
 					q
-						.eq('owner', currentUser._id) //
+						.eq('author', currentUser._id) //
 						.eq('parentId', undefined)
 						.eq('isDone', isDone),
 				)
@@ -41,7 +41,7 @@ export const findAll = query({
 		//
 		if (!parentId) return await findAllAtInbox(ctx, {});
 
-		await ensureTaskOwner(ctx, { taskId: parentId });
+		await ensureTaskAuthor(ctx, { taskId: parentId });
 
 		const find = ({ isDone }: { isDone: boolean }) =>
 			ctx.db
@@ -68,7 +68,7 @@ export const findOne = query({
 		taskId: zid('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
-		const { task } = await ensureTaskOwner(ctx, { taskId });
+		const { task } = await ensureTaskAuthor(ctx, { taskId });
 		return task;
 	},
 });
@@ -81,7 +81,7 @@ export const findOneOrNot = query({
 		//
 		if (!taskId) return undefined;
 
-		const { task } = await ensureTaskOwner(ctx, { taskId });
+		const { task } = await ensureTaskAuthor(ctx, { taskId });
 
 		return task;
 	},
@@ -107,7 +107,7 @@ export const update = mutation({
 		body: z.optional(z.string()),
 	},
 	handler: async (ctx, { taskId, title, body }) => {
-		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
+		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
 		return _update(ctx, { taskId, title, body, author: currentUser._id });
 	},
 });
@@ -119,7 +119,7 @@ export const markAsDone = mutation({
 	},
 	handler: async (ctx, { taskId, isDone }) => {
 		//
-		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
+		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
 		await _markAsDone(ctx, { taskId, isDone, author: currentUser._id });
 	},
 });
@@ -131,11 +131,11 @@ export const move = mutation({
 	},
 	handler: async (ctx, { taskId, newParentId }) => {
 		//
-		const { task, currentUser } = await ensureTaskOwner(ctx, { taskId });
+		const { task, currentUser } = await ensureTaskAuthor(ctx, { taskId });
 
 		if (newParentId) {
 			// ensure we also have permission on the new parent
-			await ensureTaskOwner(ctx, { taskId: newParentId });
+			await ensureTaskAuthor(ctx, { taskId: newParentId });
 		}
 
 		if (task.parentId === newParentId) {
@@ -146,13 +146,13 @@ export const move = mutation({
 	},
 });
 
-export const ensureTaskOwner = async (ctx: QueryCtx | MutationCtx, args: { taskId: Id<'tasks'> }) => {
+export const ensureTaskAuthor = async (ctx: QueryCtx | MutationCtx, args: { taskId: Id<'tasks'> }) => {
 	//
 	const currentUser = await getCurrentUser(ctx, {});
 	const task = await ctx.db.get(args.taskId);
 
 	if (!task) throw new Error('Task not found');
-	if (task.owner !== currentUser._id) throw new Error('Task not found'); // purposefully do not mention authorization
+	if (task.author !== currentUser._id) throw new Error('Task not found'); // purposefully do not mention authorization
 
 	return { currentUser, task };
 };

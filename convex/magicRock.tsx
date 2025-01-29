@@ -116,8 +116,8 @@ export async function _askMagicRock(
 			//
 		].join('\n'),
 
-		// assuming task.owner is always an user, could also use action.author since we're replying to a user message
-		messages: await renderHistory(ctx, task._id, task.owner),
+		// assuming task.author is always an user, could also use action.author since we're replying to a user message
+		messages: await renderHistory(ctx, task._id, task.author),
 		tools: await loadTools(ctx, task, action),
 		toolChoice: 'required',
 

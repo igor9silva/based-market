@@ -72,7 +72,7 @@ export const _add = internalMutation({
 	},
 	handler: async (ctx, { userId, body, parentId }) => {
 		//
-		const taskId = await ctx.db.insert('tasks', { owner: userId, isDone: false, parentId });
+		const taskId = await ctx.db.insert('tasks', { author: userId, isDone: false, parentId });
 
 		await _say(ctx, { message: body, taskId, author: userId });
 

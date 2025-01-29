@@ -1,7 +1,7 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { mutation, query } from '../lib';
-import { ensureTaskOwner } from '../tasks/public';
+import { ensureTaskAuthor } from '../tasks/public';
 import { _act, _findAll, _findOne, _say } from './private';
 
 export const say = mutation({
@@ -13,7 +13,7 @@ export const say = mutation({
 		//
 		console.debug(`say '${message}' on task '${taskId}'`);
 
-		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
+		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
 
 		return await _say(ctx, {
 			message,
@@ -33,7 +33,7 @@ export const act = mutation({
 		//
 		console.debug(`use tool on task '${taskId}'`);
 
-		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
+		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
 
 		return await _act(ctx, {
 			key,
@@ -52,7 +52,7 @@ export const findAll = query({
 	},
 	handler: async (ctx, { taskId }) => {
 		//
-		await ensureTaskOwner(ctx, { taskId });
+		await ensureTaskAuthor(ctx, { taskId });
 
 		return await _findAll(ctx, { taskId });
 	},
@@ -66,7 +66,7 @@ export const findOne = query({
 		//
 		const action = await _findOne(ctx, { actionId });
 
-		await ensureTaskOwner(ctx, { taskId: action.taskId });
+		await ensureTaskAuthor(ctx, { taskId: action.taskId });
 
 		return action;
 	},

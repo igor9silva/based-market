@@ -84,9 +84,9 @@ export const _react = internalMutation({
 			return;
 		}
 
-		// TODO: check if the last 10 actions are from meseeks (action.author !== task.owner) before reacting
+		// TODO: check if the last 10 actions are from meseeks (action.author !== task.author) before reacting
 		const allActions = await ctx.runQuery(internal.action.private._findAll, { taskId });
-		const last10Actions = allActions.slice(-10).filter((action) => action.author !== task.owner);
+		const last10Actions = allActions.slice(-10).filter((action) => action.author !== task.author);
 
 		if (last10Actions.length >= 10) {
 			console.debug(`Skipping reacting for task ${taskId} because the last 10 actions are from meseeks.`);

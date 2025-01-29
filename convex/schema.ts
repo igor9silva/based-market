@@ -14,7 +14,7 @@ export default defineSchema({
 	tasks: defineTable(
 		zodToConvex(taskSchema),
 	).index(
-		'by_owner_parentId_isDone', ['owner', 'parentId', 'isDone'],
+		'by_author_parentId_isDone', ['author', 'parentId', 'isDone'],
 	).index(
 		'by_parent_isDone', ['parentId', 'isDone'],
 	).index(

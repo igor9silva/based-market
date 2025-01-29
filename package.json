@@ -19,6 +19,7 @@
 		"@ai-sdk/openai": "1.0.*",
 		"@auth/core": "0.36.0",
 		"@convex-dev/auth": "^0.0.74",
+		"@convex-dev/migrations": "^0.2.4",
 		"@convex-dev/react-query": "^0.0.0-alpha.8",
 		"@mdx-js/rollup": "^3.1.0",
 		"@mendable/firecrawl-js": "^1.9.1",

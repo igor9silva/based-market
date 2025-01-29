@@ -128,7 +128,7 @@ export const _mutationTools = (
 		// prettier-ignore
 		execute: (args) => ctx.runMutation(internal.tasks.private._add, {
 			parentId: task._id,
-			userId: task.owner,
+			userId: task.author,
 			body: args.body,
 		}),
 	}),
@@ -141,7 +141,7 @@ export const _httpTools = async (
 ) => {
 	//
 	const tools = await ctx.runQuery(internal.tools.private._findAll, {
-		userId: task.owner,
+		userId: task.author,
 	});
 
 	return toMap(tools, (tool) => createHttpTool(ctx, task, action, tool));

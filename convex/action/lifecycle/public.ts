@@ -1,7 +1,7 @@
 // import { zid } from 'convex-helpers/server/zod';
 // import { z } from 'zod';
 // import { mutation, query } from '../lib';
-// import { ensureTaskOwner } from '../tasks/public';
+// import { ensureTaskAuthor } from '../tasks/public';
 // import { _decide, _findAll, _findOne, _say, _useTool } from './private';
 
 // export const skip = mutation({
@@ -13,7 +13,7 @@
 // 		const action = await ctx.db.get(actionId);
 // 		if (!action) throw new Error('Action not found');
 
-// 		const { currentUser } = await ensureTaskOwner(ctx, { taskId: action.taskId });
+// 		const { currentUser } = await ensureTaskAuthor(ctx, { taskId: action.taskId });
 
 // 		// skip is only allowed for pending or failed actions
 // 		if (action.status !== 'pending' && action.status !== 'failed') {
