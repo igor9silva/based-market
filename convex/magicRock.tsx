@@ -129,7 +129,7 @@ export async function _askMagicRock(
 
 			console.debug('repairToolCall', toolCall);
 
-			// TODO: trace this call, maybe aggregate to the main call usage data
+			// TODO: trace this call, maybe aggregate to the action usage data
 
 			const tool = tools[toolCall.toolName as keyof typeof tools];
 
