@@ -7,6 +7,7 @@ import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { _addResolved, _enqueue } from './lifecycle/private';
 
+// TODO: merge _say into _act
 export const _say = internalMutation({
 	args: {
 		taskId: zid('tasks'),

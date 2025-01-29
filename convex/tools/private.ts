@@ -153,7 +153,7 @@ export const _decisionTools = (
 	action: Doc<'actions'>,
 ) => ({
 	react: tool({
-		description: 'React to the actions that happened on the task, and decide the next actions.',
+		description: 'React to the latest actions on the task, and decide the next actions.',
 		parameters: z.object({}),
 		execute: async () => {
 			//
@@ -169,7 +169,6 @@ export const _decisionTools = (
 					const toolCalls = await Promise.allSettled(
 						result.toolCalls.map(async (call) => {
 							//
-							// TODO: make _act able to handle `say()`
 							if (call.toolName === 'say') {
 								return ctx.runMutation(internal.action.private._say, {
 									message: call.args.message,
