@@ -194,7 +194,7 @@ export const _resolve = internalMutation({
 		await ctx.db.patch(actionId, { result, status });
 
 		// this if avoids silicon-based life forms to take over
-		if (action.key !== 'react') {
+		if (action.key !== 'react' && action.key !== 'doNothing') {
 			await _react(ctx, { taskId: action.taskId, author: action.author });
 		}
 	},

@@ -107,7 +107,9 @@ export const update = mutation({
 		body: z.optional(z.string()),
 	},
 	handler: async (ctx, { taskId, title, body }) => {
+		//
 		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
+
 		return _update(ctx, { taskId, title, body, author: currentUser._id });
 	},
 });
@@ -120,6 +122,7 @@ export const markAsDone = mutation({
 	handler: async (ctx, { taskId, isDone }) => {
 		//
 		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
+
 		await _markAsDone(ctx, { taskId, isDone, author: currentUser._id });
 	},
 });
