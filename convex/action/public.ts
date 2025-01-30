@@ -2,7 +2,7 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { mutation, query } from '../lib';
 import { ensureTaskAuthor } from '../tasks/public';
-import { _act, _findAll, _findOne, _say } from './private';
+import { _act, _findAll, _findAllRunning, _findOne, _say } from './private';
 
 export const say = mutation({
 	args: {
@@ -55,6 +55,18 @@ export const findAll = query({
 		await ensureTaskAuthor(ctx, { taskId });
 
 		return await _findAll(ctx, { taskId });
+	},
+});
+
+export const findAllRunning = query({
+	args: {
+		taskId: zid('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		//
+		await ensureTaskAuthor(ctx, { taskId });
+
+		return await _findAllRunning(ctx, { taskId });
 	},
 });
 

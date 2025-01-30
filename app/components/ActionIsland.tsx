@@ -22,8 +22,8 @@ export function ActionIsland({
 	const ref = useRef<HTMLDivElement>(null);
 	const [isExpanded, setIsExpanded] = useState(false);
 
-	const query = convexQuery(api.action.public.findAll, { taskId });
-	const { data: actions } = useSuspenseQuery(query);
+	const query = convexQuery(api.action.public.findAllRunning, { taskId });
+	const { data: runningActions } = useSuspenseQuery(query);
 
 	// if click outside, close
 	useClickOutside(ref, () => setIsExpanded(false), isExpanded);
@@ -61,13 +61,13 @@ export function ActionIsland({
 			onClick={() => !isExpanded && setIsExpanded(true)}
 		>
 			<AnimatePresence mode="popLayout">
-				{isExpanded ? <Expanded actions={actions} /> : <Collapsed actions={actions} />}
+				{isExpanded ? <Expanded actions={runningActions} /> : <Collapsed actions={runningActions} />}
 			</AnimatePresence>
 		</motion.div>
 	);
 }
 
-const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'operations'>[] }>(({ actions }, ref) => {
+const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'actions'>[] }>(({ actions }, ref) => {
 	//
 	// auto-scroll to bottom when rendered
 	useEffect(() => {
@@ -102,7 +102,7 @@ const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'operations'>[] }>(({
 });
 Expanded.displayName = 'Expanded';
 
-const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'operations'>[] }>(({ actions }, ref) => {
+const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'actions'>[] }>(({ actions }, ref) => {
 	return (
 		<div ref={ref} className="h-full flex items-center justify-center gap-2 text-sm px-3 truncate">
 			<CollapsedContent actions={actions} />
@@ -111,34 +111,34 @@ const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'operations'>[] }>((
 });
 Collapsed.displayName = 'Collapsed';
 
-const CollapsedContent = ({ actions }: { actions: Doc<'operations'>[] }) => {
+const CollapsedContent = ({ actions }: { actions: Doc<'actions'>[] }) => {
 	//
-	const runningActions = actions.filter((action) => action.status === 'running');
+	// const runningActions = actions.filter((action) => action.status === 'running');
 	// const pendingActions = actions.filter((action) => action.status === 'pending');
-	const failedActions = actions.filter((action) => action.status === 'failed');
+	// const failedActions = actions.filter((action) => action.status === 'failed');
 
-	if (runningActions.length > 0) {
+	if (actions.length > 0) {
 		//
-		const runningAction = runningActions[0];
+		// const runningAction = runningActions[0];
 
 		return (
 			<>
 				{/* <Loader2 className="size-4 animate-spin" /> */}
 				<Indicator className="animate-pulse duration-1000 bg-green-500" />
-				<span>{runningAction.kind === 'think' ? 'thinking' : `acting`}</span>
+				<span>acting</span>
 			</>
 		);
 	}
 
-	if (failedActions.length > 0) {
-		return (
-			<>
-				{/* <X className="size-4" /> */}
-				<Indicator className="bg-red-500" />
-				<span>blocked</span>
-			</>
-		);
-	}
+	// if (failedActions.length > 0) {
+	// 	return (
+	// 		<>
+	// 			{/* <X className="size-4" /> */}
+	// 			<Indicator className="bg-red-500" />
+	// 			<span>blocked</span>
+	// 		</>
+	// 	);
+	// }
 
 	return (
 		<>
@@ -155,6 +155,6 @@ const CollapsedContent = ({ actions }: { actions: Doc<'operations'>[] }) => {
 	);
 };
 
-function Indicator({ className }: { className?: string }) {
+export function Indicator({ className }: { className?: string }) {
 	return <span className={cn('size-1.5 rounded-full', className)} />;
 }
