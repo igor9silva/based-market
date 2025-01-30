@@ -123,7 +123,11 @@ export const _mutationTools = (
 	createSubtask: tool({
 		description: 'Create a subtask',
 		parameters: z.object({
-			body: z.string().describe('The first user message content in MDX format.'),
+			body: z
+				.string()
+				.describe(
+					'The first user message content in MDX format. Make sure to add all required details so another Meseeks can handle it properly. Think through your current context carefully and send a complete and structured message.',
+				),
 		}),
 		// prettier-ignore
 		execute: (args) => ctx.runMutation(internal.tasks.private._add, {
