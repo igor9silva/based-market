@@ -67,10 +67,11 @@ export const _mutationTools = (
 			message: z.string().describe('The message to send to the user in MDX format.'),
 		}),
 		// prettier-ignore
-		execute: (args) => ctx.runMutation(internal.action.private._say, {
+		execute: (args) => ctx.runMutation(internal.action.private._add, {
 			taskId: task._id,
-			message: args.message,
 			author: action._id,
+			key: 'say',
+			args: { message: args.message },
 		}),
 	}),
 	updateTask: tool({
@@ -173,15 +174,7 @@ export const _decisionTools = (
 					const toolCalls = await Promise.allSettled(
 						result.toolCalls.map(async (call) => {
 							//
-							if (call.toolName === 'say') {
-								return ctx.runMutation(internal.action.private._say, {
-									message: call.args.message,
-									taskId: task._id,
-									author: action._id,
-								});
-							}
-
-							return ctx.runMutation(internal.action.private._act, {
+							return ctx.runMutation(internal.action.private._add, {
 								key: call.toolName,
 								args: call.args,
 								taskId: task._id,
@@ -201,36 +194,38 @@ export const _decisionTools = (
 
 				case 'stop':
 					// if (result.text.length < 1) break;
-					await ctx.runMutation(internal.action.private._say, {
+					await ctx.runMutation(internal.action.private._add, {
+						key: 'say',
+						args: { message: result.text },
 						taskId: task._id,
-						message: result.text,
 						author: action._id,
 					});
 					break;
 
 				case 'error':
-					await ctx.runMutation(internal.action.private._say, {
+					await ctx.runMutation(internal.action.private._add, {
+						key: 'say',
+						args: { message: result.text },
 						taskId: task._id,
-						message: result.text,
 						author: action._id,
-						status: 'failed',
 					});
 					break;
 
 				case 'content-filter':
-					await ctx.runMutation(internal.action.private._say, {
+					await ctx.runMutation(internal.action.private._add, {
+						key: 'say',
+						args: { message: `[damn @sama] Content filter hit: ${result.warnings}` },
 						taskId: task._id,
-						message: `[damn @sama] Content filter hit: ${result.warnings}`,
 						author: action._id,
-						status: 'failed',
 					});
 					break;
 
 				case 'length':
 					// TODO: better handling of max length
-					await ctx.runMutation(internal.action.private._say, {
+					await ctx.runMutation(internal.action.private._add, {
+						key: 'say',
+						args: { message: `Max length hit: ${result.warnings}` },
 						taskId: task._id,
-						message: `Max length hit: ${result.warnings}`,
 						author: action._id,
 					});
 					break;

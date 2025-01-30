@@ -2,26 +2,7 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { mutation, query } from '../lib';
 import { ensureTaskAuthor } from '../tasks/public';
-import { _act, _findAll, _findAllRunning, _findOne, _say } from './private';
-
-export const say = mutation({
-	args: {
-		taskId: zid('tasks'),
-		message: z.string(),
-	},
-	handler: async (ctx, { taskId, message }) => {
-		//
-		console.debug(`say '${message}' on task '${taskId}'`);
-
-		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
-
-		return await _say(ctx, {
-			message,
-			taskId,
-			author: currentUser._id,
-		});
-	},
-});
+import { _add, _findAll, _findAllRunning, _findOne } from './private';
 
 export const act = mutation({
 	args: {
@@ -35,7 +16,7 @@ export const act = mutation({
 
 		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
 
-		return await _act(ctx, {
+		return await _add(ctx, {
 			key,
 			args,
 			taskId,

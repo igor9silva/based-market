@@ -4,7 +4,7 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
-import { _say } from '../action/private';
+import { _add as _addAction } from '../action/private';
 import { internalAction, internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 
@@ -74,7 +74,12 @@ export const _add = internalMutation({
 		//
 		const taskId = await ctx.db.insert('tasks', { author: userId, isDone: false, parentId });
 
-		await _say(ctx, { message: body, taskId, author: userId });
+		await _addAction(ctx, {
+			taskId,
+			author: userId,
+			key: 'say',
+			args: { message: body },
+		});
 
 		return taskId;
 	},

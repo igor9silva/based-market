@@ -5,35 +5,9 @@ import { QueryCtx } from '../_generated/server';
 import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
-import { _addResolved, _enqueue } from './lifecycle/private';
+import { _react, _runNextActionIfNeeded } from './lifecycle/private';
 
-// TODO: merge _say into _act
-export const _say = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-		message: z.string(),
-		author: authorSchema,
-		status: z.enum(['succeeded', 'failed']).optional().default('succeeded'),
-	},
-	handler: async (ctx, { taskId, message, author }) => {
-		//
-		console.debug(`${author} says: ${message}`);
-
-		return await _addResolved(ctx, {
-			action: {
-				taskId,
-				author,
-				kind: 'sync',
-				status: 'succeeded',
-				key: 'say',
-				result: message,
-				args: {},
-			},
-		});
-	},
-});
-
-export const _act = internalMutation({
+export const _add = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		author: authorSchema,
@@ -44,16 +18,27 @@ export const _act = internalMutation({
 		//
 		console.debug(`${author} acts: ${key}`);
 
-		return await _enqueue(ctx, {
-			action: {
-				taskId,
-				author,
-				kind: 'async',
-				status: 'enqueued',
-				key,
-				args,
-			},
+		// TODO: instead we should run all `sync` tools immediately
+		const result = key === 'say' ? (args.message as string) : null;
+
+		const action = actionSchema.parse({
+			taskId,
+			author,
+			kind: result ? 'sync' : 'async',
+			status: result ? 'succeeded' : 'enqueued',
+			key,
+			result: result ?? null,
+			args,
 		});
+
+		const actionId = await ctx.db.insert('actions', action);
+
+		const id = { taskId: action.taskId, author: action.author };
+
+		if (action.status === 'enqueued') await _runNextActionIfNeeded(ctx, id);
+		if (action.result) await _react(ctx, id);
+
+		return actionId;
 	},
 });
 
@@ -104,6 +89,15 @@ function _findByStatus(
 		)
 		.order('asc');
 }
+
+export const _findAllRunning = internalQuery({
+	args: {
+		taskId: zid('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		return await _findByStatus(ctx, { taskId, status: 'running' }).collect();
+	},
+});
 
 export const _findRunning = internalQuery({
 	args: {

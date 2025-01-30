@@ -18,7 +18,7 @@ export function MessageComposer({
 	task: Doc<'tasks'>;
 }) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
-	const sendMessage = useMutation(api.action.public.say);
+	const act = useMutation(api.action.public.act);
 
 	useEffect(() => {
 		textareaRef.current?.focus();
@@ -29,7 +29,11 @@ export function MessageComposer({
 			message: z.string().min(1, 'Message is required'),
 		}),
 		handler: async (data) => {
-			await sendMessage({ taskId: task._id, message: data.message });
+			await act({
+				taskId: task._id,
+				key: 'say',
+				args: { message: data.message },
+			});
 		},
 	});
 

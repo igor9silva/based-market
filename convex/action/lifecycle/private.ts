@@ -4,9 +4,9 @@ import { internal } from '../../_generated/api';
 import { Doc, Id } from '../../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
-import { pendingActionSchema, resolvedActionSchema } from '../../schemas/actionSchema';
 import { authorSchema } from '../../schemas/authorSchema';
 import { _allTools } from '../../tools/private';
+import { _add } from '../private';
 
 export const _execute = internalAction({
 	args: {
@@ -116,52 +116,12 @@ export const _react = internalMutation({
 			),
 		);
 
-		return await _enqueue(ctx, {
-			action: {
-				taskId,
-				author,
-				kind: 'async',
-				status: 'enqueued',
-				key: 'react',
-				args: {},
-			},
+		return await _add(ctx, {
+			taskId,
+			author,
+			key: 'react',
+			args: {},
 		});
-	},
-});
-
-export const _enqueue = internalMutation({
-	args: {
-		action: pendingActionSchema,
-	},
-	handler: async (ctx, { action }) => {
-		//
-		console.debug(`${action.author} enqueues ${action.key} for task ${action.taskId}`);
-
-		await ctx.db.insert('actions', {
-			...action,
-			status: 'enqueued',
-		});
-
-		await _runNextActionIfNeeded(ctx, {
-			taskId: action.taskId,
-			author: action.author,
-		});
-	},
-});
-
-export const _addResolved = internalMutation({
-	args: {
-		action: resolvedActionSchema,
-	},
-	handler: async (ctx, { action }) => {
-		//
-		console.debug(`${action.author} adds resolved ${action.key} for task ${action.taskId}`);
-
-		const actionId = await ctx.db.insert('actions', action);
-
-		await _react(ctx, { taskId: action.taskId, author: actionId });
-
-		return actionId;
 	},
 });
 
