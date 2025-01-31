@@ -1,2 +1,4 @@
 Always prefer importing specific hooks from `React` over importing the entire library.
 e.g. `import { useEffect, useRef } from 'react'` instead of `import * as React from 'react'`
+
+DO NOT EVER APOLOGIZE. It's fine to make mistakes, keep focused on fixing them.
