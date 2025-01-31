@@ -65,7 +65,7 @@
 		"tailwind-merge": "^2.5.5",
 		"tailwindcss-animate": "^1.0.7",
 		"tailwindcss-displaymodes": "^1.0.8",
-		"use-stick-to-bottom": "^1.0.42",
+		"use-stick-to-bottom": "^1.0.45",
 		"vaul": "^1.1.1",
 		"vinxi": "0.4.3",
 		"zod": "^3.23.8",
