@@ -77,7 +77,7 @@ export const _add = internalMutation({
 		await _addAction(ctx, {
 			taskId,
 			author: userId,
-			key: 'say',
+			toolKey: 'say',
 			args: { message: body },
 		});
 

@@ -78,7 +78,7 @@ export function TaskEvent({
 					{event.kind === 'async' ? (
 						<Collapsible>
 							<CollapsibleTrigger>
-								{event.result ? '' : 'Running '} <code>{event.key}</code>
+								{event.result ? '' : 'Running '} <code>{event.toolKey}</code>
 							</CollapsibleTrigger>
 							<CollapsibleContent>
 								args: <code>{JSON.stringify(event.args)}</code>

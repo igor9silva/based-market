@@ -70,7 +70,7 @@ export const _mutationTools = (
 		execute: (args) => ctx.runMutation(internal.action.private._add, {
 			taskId: task._id,
 			author: action._id,
-			key: 'say',
+			toolKey: 'say',
 			args: { message: args.message },
 		}),
 	}),
@@ -175,7 +175,7 @@ export const _decisionTools = (
 						result.toolCalls.map(async (call) => {
 							//
 							return ctx.runMutation(internal.action.private._add, {
-								key: call.toolName,
+								toolKey: call.toolName,
 								args: call.args,
 								taskId: task._id,
 								author: action._id,
@@ -195,7 +195,7 @@ export const _decisionTools = (
 				case 'stop':
 					// if (result.text.length < 1) break;
 					await ctx.runMutation(internal.action.private._add, {
-						key: 'say',
+						toolKey: 'say',
 						args: { message: result.text },
 						taskId: task._id,
 						author: action._id,
@@ -204,7 +204,7 @@ export const _decisionTools = (
 
 				case 'error':
 					await ctx.runMutation(internal.action.private._add, {
-						key: 'say',
+						toolKey: 'say',
 						args: { message: result.text },
 						taskId: task._id,
 						author: action._id,
@@ -213,7 +213,7 @@ export const _decisionTools = (
 
 				case 'content-filter':
 					await ctx.runMutation(internal.action.private._add, {
-						key: 'say',
+						toolKey: 'say',
 						args: { message: `[damn @sama] Content filter hit: ${result.warnings}` },
 						taskId: task._id,
 						author: action._id,
@@ -223,7 +223,7 @@ export const _decisionTools = (
 				case 'length':
 					// TODO: better handling of max length
 					await ctx.runMutation(internal.action.private._add, {
-						key: 'say',
+						toolKey: 'say',
 						args: { message: `Max length hit: ${result.warnings}` },
 						taskId: task._id,
 						author: action._id,

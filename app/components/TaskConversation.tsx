@@ -1,14 +1,19 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
-import { Id } from 'convex/_generated/dataModel';
+import { Doc, Id } from 'convex/_generated/dataModel';
+import { usePaginatedQuery } from 'convex/react';
 import { MoveDown } from 'lucide-react';
-import { useMemo } from 'react';
+import { RefCallback, useEffect, useMemo } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
+import { Loading } from '~/components/Loading';
 import { MessageComposer } from '~/components/MessageComposer';
 import { TaskEvent } from '~/components/TaskEvent';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
+
+const PAGE_SIZE = 20;
+const NEAR_TOP_THRESHOLD = 200; // px
 
 export function TaskConversation({
 	taskId, //
@@ -20,28 +25,91 @@ export function TaskConversation({
 	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(taskQuery);
 
-	const eventsQuery = convexQuery(api.action.public.findAll, { taskId: task._id });
-	const { data: events } = useSuspenseQuery(eventsQuery);
+	const {
+		results: actions,
+		loadMore,
+		status,
+	} = usePaginatedQuery(
+		api.action.public.findAllPaginated, //
+		{ taskId: task._id },
+		{ initialNumItems: PAGE_SIZE },
+	);
 
+	const reversedActions = useMemo(() => [...actions].reverse(), [actions]);
 	const initialRenderDate = useMemo(() => new Date(), []);
 
+	if (status === 'LoadingFirstPage') return <Loading />;
+
 	return (
-		<StickToBottom mass={1} className={cn('flex flex-col h-full whitespace-pre-wrap overflow-auto', className)}>
-			<StickToBottom.Content className="relative h-full">
-				<h2 className="text-2xl font-bold leading-none break-all sticky top-0 bg-background/75 p-4">
-					Conversation
-				</h2>
-				<div className="p-4 flex flex-col flex-grow justify-end">
-					{events.map((event) => (
-						<TaskEvent key={event._id} event={event} initialRenderDate={initialRenderDate} />
+		<div className={cn('flex flex-col h-full', className)}>
+			<StickToBottom mass={1} initial="instant" resize="instant" className="flex-1 overflow-auto">
+				<StickToBottomContent actions={actions} status={status} loadMore={loadMore}>
+					{reversedActions.map((action) => (
+						<TaskEvent key={action._id} event={action} initialRenderDate={initialRenderDate} />
 					))}
-				</div>
-				<div className="sticky bottom-0 flex flex-col">
+				</StickToBottomContent>
+			</StickToBottom>
+			<MessageComposer task={task} className="flex-none bg-background/75 border-t" />
+		</div>
+	);
+}
+
+function StickToBottomContent({
+	actions,
+	status,
+	loadMore,
+	children,
+}: {
+	actions: Doc<'actions'>[];
+	status: 'CanLoadMore' | 'LoadingMore' | 'Exhausted';
+	loadMore: (n: number) => void;
+	children: React.ReactNode;
+}) {
+	//
+	const { isAtBottom, scrollToBottom, scrollRef } = useStickToBottomContext();
+	const ref = scrollRef as RefCallback<HTMLDivElement> & { current: HTMLDivElement }; // type hack, comes odd from useStickToBottomContext
+
+	// Infinite scroll, loads more when near the top TODO: abstract into a hook
+	useEffect(() => {
+		//
+		const handleScroll = () => {
+			//
+			const isNearTop = ref.current.scrollTop < NEAR_TOP_THRESHOLD;
+
+			// Workaround: force scrollTop to 1 if it's exactly 0.
+			// When it is 0 and we get new events, the browser autoscroll to the new top.
+			if (ref.current.scrollTop === 0) ref.current.scrollTop = 1;
+
+			// Load more when near the top
+			if (isNearTop && status === 'CanLoadMore') loadMore(PAGE_SIZE);
+		};
+
+		ref.current.addEventListener('scroll', handleScroll);
+		return () => ref.current.removeEventListener('scroll', handleScroll);
+		//
+	}, [loadMore, status, scrollRef]);
+
+	// Auto-scroll when new events are added and we're at the bottom
+	useEffect(() => {
+		//
+		if (isAtBottom) scrollToBottom('smooth');
+		//
+	}, [actions.length, isAtBottom, scrollToBottom]);
+
+	return (
+		<StickToBottom.Content className="relative h-full">
+			<div className="h-full">
+				{status === 'LoadingMore' && (
+					<div className="px-4 pt-4">
+						<Loading className="h-6 w-fit" />
+					</div>
+				)}
+				<div className="p-4 flex flex-col flex-grow justify-end">{children}</div>
+				<div className="sticky bottom-2 flex flex-col">
 					<ScrollToBottom />
-					<MessageComposer task={task} className="bg-background/75 p-2" />
 				</div>
-			</StickToBottom.Content>
-		</StickToBottom>
+			</div>
+		</StickToBottom.Content>
 	);
 }
 

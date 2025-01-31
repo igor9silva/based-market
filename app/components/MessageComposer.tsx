@@ -28,11 +28,11 @@ export function MessageComposer({
 		schema: z.object({
 			message: z.string().min(1, 'Message is required'),
 		}),
-		handler: async (data) => {
+		handler: async ({ message }) => {
 			await act({
 				taskId: task._id,
-				key: 'say',
-				args: { message: data.message },
+				toolKey: 'say',
+				args: { message },
 			});
 		},
 	});

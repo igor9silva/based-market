@@ -119,7 +119,7 @@ export const _react = internalMutation({
 		return await _add(ctx, {
 			taskId,
 			author,
-			key: 'react',
+			toolKey: 'react',
 			args: {},
 		});
 	},
@@ -155,7 +155,7 @@ export const _resolve = internalMutation({
 
 		// this if avoids silicon-based life forms to take over
 		if (action.toolKey !== 'react' && action.toolKey !== 'doNothing') {
-			await _react(ctx, { taskId: action.taskId, author: action.author });
+			await _react(ctx, { taskId: action.taskId, author: action._id });
 		}
 	},
 });

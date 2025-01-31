@@ -5,38 +5,37 @@ import { QueryCtx } from '../_generated/server';
 import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
+import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
 import { _react, _runNextActionIfNeeded } from './lifecycle/private';
 
 export const _add = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		author: authorSchema,
-		key: z.string().describe('The key of the tool to use'),
+		toolKey: z.string().describe('The key of the tool to use'),
 		args: z.record(z.any()),
 	},
-	handler: async (ctx, { taskId, author, key, args }) => {
+	handler: async (ctx, { taskId, author, toolKey, args }) => {
 		//
-		console.debug(`${author} acts: ${key}`);
+		console.debug(`${author} acts: ${toolKey}`);
 
 		// TODO: instead we should run all `sync` tools immediately
-		const result = key === 'say' ? (args.message as string) : null;
+		const result = toolKey === 'say' ? (args.message as string) : null;
 
 		const action = actionSchema.parse({
 			taskId,
 			author,
 			kind: result ? 'sync' : 'async',
 			status: result ? 'succeeded' : 'enqueued',
-			key,
+			toolKey,
 			result: result ?? null,
 			args,
 		});
 
 		const actionId = await ctx.db.insert('actions', action);
 
-		const id = { taskId: action.taskId, author: action.author };
-
-		if (action.status === 'enqueued') await _runNextActionIfNeeded(ctx, id);
-		if (action.result) await _react(ctx, id);
+		if (action.status === 'enqueued') await _runNextActionIfNeeded(ctx, { taskId, author });
+		if (action.result) await _react(ctx, { taskId, author: actionId });
 
 		return actionId;
 	},
@@ -54,6 +53,21 @@ export const _findAll = internalQuery({
 			.query('actions')
 			.withIndex('by_task', (q) => q.eq('taskId', taskId))
 			.collect();
+	},
+});
+
+export const _findAllPaginated = internalQuery({
+	args: {
+		taskId: zid('tasks'),
+		paginationOpts: paginationOptionsSchema,
+	},
+	handler: async (ctx, { taskId, paginationOpts }) => {
+		//
+		return await ctx.db
+			.query('actions')
+			.withIndex('by_task', (q) => q.eq('taskId', taskId))
+			.order('desc')
+			.paginate(paginationOpts);
 	},
 });
 

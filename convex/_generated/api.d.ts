@@ -21,6 +21,7 @@ import type * as schemas_actionSchema from "../schemas/actionSchema.js";
 import type * as schemas_authorSchema from "../schemas/authorSchema.js";
 import type * as schemas_componentSchema from "../schemas/componentSchema.js";
 import type * as schemas_envSchema from "../schemas/envSchema.js";
+import type * as schemas_paginationOptionsSchema from "../schemas/paginationOptionsSchema.js";
 import type * as schemas_taskSchema from "../schemas/taskSchema.js";
 import type * as schemas_toolSchema from "../schemas/toolSchema.js";
 import type * as tasks_private from "../tasks/private.js";
@@ -57,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   "schemas/authorSchema": typeof schemas_authorSchema;
   "schemas/componentSchema": typeof schemas_componentSchema;
   "schemas/envSchema": typeof schemas_envSchema;
+  "schemas/paginationOptionsSchema": typeof schemas_paginationOptionsSchema;
   "schemas/taskSchema": typeof schemas_taskSchema;
   "schemas/toolSchema": typeof schemas_toolSchema;
   "tasks/private": typeof tasks_private;

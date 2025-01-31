@@ -1,23 +1,24 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { mutation, query } from '../lib';
+import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
 import { ensureTaskAuthor } from '../tasks/public';
-import { _add, _findAll, _findAllRunning, _findOne } from './private';
+import { _add, _findAll, _findAllPaginated, _findAllRunning, _findOne } from './private';
 
 export const act = mutation({
 	args: {
 		taskId: zid('tasks'),
-		key: z.string(),
+		toolKey: z.string(),
 		args: z.record(z.any()),
 	},
-	handler: async (ctx, { taskId, key, args }) => {
+	handler: async (ctx, { taskId, toolKey, args }) => {
 		//
 		console.debug(`use tool on task '${taskId}'`);
 
 		const { currentUser } = await ensureTaskAuthor(ctx, { taskId });
 
 		return await _add(ctx, {
-			key,
+			toolKey,
 			args,
 			taskId,
 			author: currentUser._id,
@@ -34,6 +35,19 @@ export const findAll = query({
 		await ensureTaskAuthor(ctx, { taskId });
 
 		return await _findAll(ctx, { taskId });
+	},
+});
+
+export const findAllPaginated = query({
+	args: {
+		taskId: zid('tasks'),
+		paginationOpts: paginationOptionsSchema,
+	},
+	handler: async (ctx, { taskId, paginationOpts }) => {
+		//
+		await ensureTaskAuthor(ctx, { taskId });
+
+		return await _findAllPaginated(ctx, { taskId, paginationOpts });
 	},
 });
 
