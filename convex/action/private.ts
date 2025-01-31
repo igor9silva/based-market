@@ -1,3 +1,4 @@
+import { CoreTool } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { Id } from '../_generated/dataModel';
@@ -6,6 +7,7 @@ import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
+import { _mutationTools } from '../tools/private';
 import { _react, _runNextActionIfNeeded } from './lifecycle/private';
 
 export const _add = internalMutation({
@@ -19,8 +21,8 @@ export const _add = internalMutation({
 		//
 		console.debug(`${author} acts: ${toolKey}`);
 
-		// TODO: instead we should run all `sync` tools immediately
-		const result = toolKey === 'say' ? (args.message as string) : null;
+		const syncTools = await _mutationTools(ctx, taskId, author);
+		const result = await _executeToolIfSync(syncTools, toolKey, args);
 
 		const action = actionSchema.parse({
 			taskId,
@@ -129,4 +131,18 @@ function _findByStatus(
 				.eq('status', status),
 		)
 		.order('asc');
+}
+
+function _executeToolIfSync(
+	syncTools: Record<string, CoreTool>,
+	toolKey: string,
+	args: Record<string, any>,
+): Promise<string | null> {
+	//
+	if (!(toolKey in syncTools)) return Promise.resolve(null);
+
+	const tool = syncTools[toolKey as keyof typeof syncTools];
+
+	// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
+	return tool.execute(args);
 }

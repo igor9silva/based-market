@@ -1,8 +1,10 @@
 import { openai } from '@ai-sdk/openai';
 import { CoreMessage, CoreTool, generateObject, generateText, NoSuchToolError } from 'ai';
+import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx } from './_generated/server';
+import { authorSchema } from './schemas/authorSchema';
 import { env } from './schemas/envSchema';
 import { _httpTools, _mutationTools } from './tools/private';
 
@@ -225,7 +227,7 @@ async function loadTools(
 
 	const [httpTools, mutationTools] = await Promise.all([
 		_httpTools(ctx, task, action), //
-		_mutationTools(ctx, task, action),
+		_mutationTools(ctx, task._id, action._id),
 	]);
 
 	// clear execute functions to avoid AI SDK from executing it
@@ -249,13 +251,13 @@ async function loadTools(
 async function renderHistory(
 	ctx: ActionCtx, //
 	taskId: Id<'tasks'>,
-	userId: Id<'users'>,
+	author: z.infer<typeof authorSchema>,
 ): Promise<Array<CoreMessage>> {
 	//
 	const actions = await ctx.runQuery(internal.action.private._findAll, { taskId });
 
 	const history = actions
-		.map((action) => ({ action, author: action.author === userId ? ('user' as const) : ('assistant' as const) }))
+		.map((action) => ({ action, author: author === action.author ? ('user' as const) : ('assistant' as const) }))
 		.map(({ action, author }) => actionToCoreMessage(action, author))
 		.filter((action): action is CoreMessage => action !== undefined)
 		.flatMap((message) => message);

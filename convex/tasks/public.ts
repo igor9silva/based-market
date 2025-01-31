@@ -94,7 +94,7 @@ export const add = mutation({
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 
-		return await _add(ctx, { userId: currentUser._id, body, parentId });
+		return await _add(ctx, { author: currentUser._id, body, parentId });
 	},
 });
 

@@ -2,23 +2,24 @@ import { tool } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internal } from '../_generated/api';
-import { Doc } from '../_generated/dataModel';
-import { ActionCtx } from '../_generated/server';
+import { Doc, Id } from '../_generated/dataModel';
+import { ActionCtx, MutationCtx } from '../_generated/server';
 import { internalQuery } from '../lib';
 import { _askMagicRock } from '../magicRock';
+import { authorSchema } from '../schemas/authorSchema';
 import { toolOwnerSchema } from '../schemas/toolSchema';
 import { createHttpTool } from './createHttpTool';
 
 // all global tools + all user-defined tools
 export const _findAll = internalQuery({
 	args: {
-		userId: zid('users'),
+		author: authorSchema,
 	},
-	handler: async (ctx, { userId }) => {
+	handler: async (ctx, { author }) => {
 		//
 		const [globals, users] = await Promise.all([
 			_findAllByOwner(ctx, { owner: 'built-in' }), // global tools
-			_findAllByOwner(ctx, { owner: userId }), // user-defined tools
+			_findAllByOwner(ctx, { owner: author }), // user-defined tools
 		]);
 
 		console.debug('tools/globals', globals);
@@ -46,20 +47,20 @@ export const _allTools = async (
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 ) => ({
-	..._mutationTools(ctx, task, action),
+	..._mutationTools(ctx, task._id, task.author),
 	..._decisionTools(ctx, task, action),
 	...(await _httpTools(ctx, task, action)),
 });
 
 export const _mutationTools = (
-	ctx: ActionCtx, //
-	task: Doc<'tasks'>,
-	action: Doc<'actions'>,
+	ctx: ActionCtx | MutationCtx, //
+	taskId: Id<'tasks'>,
+	author: z.infer<typeof authorSchema>,
 ) => ({
 	doNothing: tool({
 		description: 'Do nothing.',
 		parameters: z.object({}),
-		execute: () => Promise.resolve('nothing done'),
+		execute: () => Promise.resolve(),
 	}),
 	say: tool({
 		description: 'Send a text message to the user.',
@@ -67,12 +68,7 @@ export const _mutationTools = (
 			message: z.string().describe('The message to send to the user in MDX format.'),
 		}),
 		// prettier-ignore
-		execute: (args) => ctx.runMutation(internal.action.private._add, {
-			taskId: task._id,
-			author: action._id,
-			toolKey: 'say',
-			args: { message: args.message },
-		}),
+		execute: (args) => Promise.resolve(args.message),
 	}),
 	updateTask: tool({
 		description: 'Update the task',
@@ -82,8 +78,8 @@ export const _mutationTools = (
 		}),
 		// prettier-ignore
 		execute: (args) => ctx.runMutation(internal.tasks.private._update, {
-			taskId: task._id,
-			author: action._id,
+			taskId,
+			author,
 			...args,
 		})
 		.then(() => 'task updated'),
@@ -95,11 +91,11 @@ export const _mutationTools = (
 		}),
 		// prettier-ignore
 		execute: (args) => ctx.runMutation(internal.tasks.private._markAsDone, {
-			taskId: task._id,
-			author: action._id,
+			taskId,
+			author,
 			...args,
 		})
-		.then(() => 'task marked as done'),
+		.then(() => `task marked as ${args.isDone ? 'done' : '**not** done'}`),
 	}),
 	moveTask: tool({
 		description: 'Move the task to a new parent',
@@ -117,7 +113,7 @@ export const _mutationTools = (
 		// prettier-ignore
 		execute: (args) => ctx.runMutation(internal.tasks.private._move, {
 			taskId: args.taskId,
-			author: action._id,
+			author,
 			newParentId: args.newParentId === 'inbox' ? undefined : args.newParentId,
 		}),
 	}),
@@ -132,8 +128,8 @@ export const _mutationTools = (
 		}),
 		// prettier-ignore
 		execute: (args) => ctx.runMutation(internal.tasks.private._add, {
-			parentId: task._id,
-			userId: task.author,
+			parentId: taskId,
+			author,
 			body: args.body,
 		}),
 	}),
@@ -146,7 +142,7 @@ export const _httpTools = async (
 ) => {
 	//
 	const tools = await ctx.runQuery(internal.tools.private._findAll, {
-		userId: task.author,
+		author: task.author,
 	});
 
 	return toMap(tools, (tool) => createHttpTool(ctx, task, action, tool));

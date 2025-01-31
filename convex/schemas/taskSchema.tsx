@@ -1,9 +1,10 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
+import { authorSchema } from './authorSchema';
 
 export const taskSchema = z
 	.object({
-		author: zid('users'),
+		author: authorSchema,
 		title: z.string().optional(),
 		body: z.string().optional(),
 		parentId: zid('tasks').optional(),

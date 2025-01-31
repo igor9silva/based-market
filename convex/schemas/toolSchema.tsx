@@ -1,5 +1,5 @@
-import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
+import { authorSchema } from './authorSchema';
 
 export const httpConfigSchema = z.object({
 	url: z.string().url(),
@@ -31,7 +31,7 @@ export const httpConfigSchema = z.object({
 });
 
 export const toolOwnerSchema = z.union([
-	zid('users'), // user-defined tools
+	authorSchema, // user or meseeks-defined tools
 	z.literal('built-in'), // global tools
 ]);
 
