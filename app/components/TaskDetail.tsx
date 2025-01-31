@@ -3,12 +3,12 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
-import { useMutation } from 'convex/react';
 import { Maximize2 } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
 import MDX from '~/components/ui/mdx';
+import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
 import { EditableContent } from './EditableContent';
 
@@ -23,9 +23,7 @@ export default function TaskDetail({
 }) {
 	const query = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(query);
-
-	const updateTask = useMutation(api.tasks.public.update);
-	const markAsDone = useMutation(api.tasks.public.markAsDone);
+	const { updateTask, markAsDone } = useTaskMutations();
 
 	return (
 		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto h-full', className)}>

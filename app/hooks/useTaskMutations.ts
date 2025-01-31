@@ -1,0 +1,43 @@
+import { api } from 'convex/_generated/api';
+import { Id } from 'convex/_generated/dataModel';
+import { useMutation } from 'convex/react';
+
+export function useTaskMutations() {
+	//
+	const act = useMutation(api.action.public.act);
+
+	const updateTask = ({
+		taskId, //
+		title,
+		body,
+	}: {
+		taskId: Id<'tasks'>;
+		title?: string;
+		body?: string;
+	}) => {
+		return act({
+			taskId,
+			toolKey: 'updateTask',
+			args: { title, body },
+		});
+	};
+
+	const markAsDone = ({
+		taskId, //
+		isDone,
+	}: {
+		taskId: Id<'tasks'>;
+		isDone: boolean;
+	}) => {
+		return act({
+			taskId,
+			toolKey: 'markAsDone',
+			args: { isDone },
+		});
+	};
+
+	return {
+		updateTask,
+		markAsDone,
+	};
+}
