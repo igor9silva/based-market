@@ -67,13 +67,15 @@ function StickToBottomContent({
 }) {
 	//
 	const { isAtBottom, scrollToBottom, scrollRef } = useStickToBottomContext();
-	const ref = scrollRef as RefCallback<HTMLDivElement> & { current: HTMLDivElement }; // type hack, comes odd from useStickToBottomContext
+	const ref = scrollRef as RefCallback<HTMLDivElement> & { current: HTMLDivElement | null }; // type hack, comes odd from useStickToBottomContext
 
 	// Infinite scroll, loads more when near the top TODO: abstract into a hook
 	useEffect(() => {
 		//
 		const handleScroll = () => {
 			//
+			if (!ref.current) return;
+
 			const isNearTop = ref.current.scrollTop < NEAR_TOP_THRESHOLD;
 
 			// Workaround: force scrollTop to 1 if it's exactly 0.
@@ -84,8 +86,8 @@ function StickToBottomContent({
 			if (isNearTop && status === 'CanLoadMore') loadMore(PAGE_SIZE);
 		};
 
-		ref.current.addEventListener('scroll', handleScroll);
-		return () => ref.current.removeEventListener('scroll', handleScroll);
+		ref.current?.addEventListener('scroll', handleScroll);
+		return () => ref.current?.removeEventListener('scroll', handleScroll);
 		//
 	}, [loadMore, status, scrollRef]);
 
