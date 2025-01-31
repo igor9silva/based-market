@@ -27,12 +27,12 @@ export const _execute = internalAction({
 
 			// get the tool TODO: optmize
 			const availableTools = await _allTools(ctx, task, action);
-			const tool = availableTools[action.key as keyof typeof availableTools];
+			const tool = availableTools[action.toolKey as keyof typeof availableTools];
 
-			console.debug('tool key', action.key);
+			console.debug('tool key', action.toolKey);
 			console.debug('availableTools', Object.keys(availableTools));
 
-			if (!tool) throw new Error(`Unknown tool: ${action.key}`);
+			if (!tool) throw new Error(`Unknown tool: ${action.toolKey}`);
 
 			const parsedArgs = tool.parameters.safeParse(action.args);
 			if (!parsedArgs.success) throw new Error(`Invalid tool args: ${parsedArgs.error.message}`);
@@ -102,7 +102,7 @@ export const _react = internalMutation({
 					.eq('taskId', taskId) //
 					.eq('status', 'enqueued'),
 			)
-			.filter((q) => q.eq(q.field('key'), 'react'))
+			.filter((q) => q.eq(q.field('toolKey'), 'react'))
 			.collect();
 
 		console.debug('pending reactions', pendingReactions);
@@ -154,7 +154,7 @@ export const _resolve = internalMutation({
 		await ctx.db.patch(actionId, { result, status });
 
 		// this if avoids silicon-based life forms to take over
-		if (action.key !== 'react' && action.key !== 'doNothing') {
+		if (action.toolKey !== 'react' && action.toolKey !== 'doNothing') {
 			await _react(ctx, { taskId: action.taskId, author: action.author });
 		}
 	},
@@ -212,7 +212,7 @@ export async function _runNextActionIfNeeded(
 	const runningAction = await ctx.runQuery(internal.action.private._findRunning, { taskId });
 	if (runningAction)
 		return skip(
-			`Skipping next action for task ${taskId} because there is a running action (${runningAction.key}, ${runningAction._id}).`,
+			`Skipping next action for task ${taskId} because there is a running action (${runningAction.toolKey}, ${runningAction._id}).`,
 		);
 
 	// grab next pending action, skip if there are none

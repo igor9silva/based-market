@@ -4,10 +4,10 @@ import { DataModel } from './_generated/dataModel.js';
 
 export const migrations = new Migrations<DataModel>(components.migrations);
 
-// export const fillAuthorFromOwner = migrations.define({
-// 	table: 'tasks',
+// export const temp2 = migrations.define({
+// 	table: 'actions',
 // 	// customRange: (query) => query.withIndex('by_requiredField', (q) => q.eq('requiredField', '')),
-// 	migrateOne: async (_ctx, doc) => ({ author: doc.owner }),
+// 	migrateOne: async (_ctx, doc) => ({ key: undefined }),
 // });
 
-// export const runFillAuthorFromOwner = migrations.runner(internal.migrations.fillAuthorFromOwner);
+// export const runTemp2 = migrations.runner(internal.migrations.temp2);

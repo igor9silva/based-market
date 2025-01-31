@@ -183,7 +183,7 @@ function actionToCoreMessage(
 						{
 							type: 'tool-call',
 							toolCallId: action._id,
-							toolName: action.key,
+							toolName: action.toolKey,
 							args: action.args,
 						},
 					],
@@ -194,7 +194,7 @@ function actionToCoreMessage(
 						{
 							type: 'tool-result',
 							toolCallId: action._id,
-							toolName: action.key,
+							toolName: action.toolKey,
 							result: action.result,
 							isError: action.status === 'failed',
 						},

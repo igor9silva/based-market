@@ -5,7 +5,7 @@ import { authorSchema } from './authorSchema';
 const coreActionSchema = z.object({
 	taskId: zid('tasks'),
 	author: authorSchema,
-	key: z.string(),
+	toolKey: z.string(),
 	args: z.record(z.any()),
 	// type: z.enum(['mutation', 'tool']),
 	kind: z.enum(['sync', 'async']),
