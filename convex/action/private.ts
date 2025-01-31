@@ -70,26 +70,6 @@ export const _findOne = internalQuery({
 	},
 });
 
-function _findByStatus(
-	ctx: QueryCtx,
-	{
-		taskId,
-		status,
-	}: {
-		taskId: Id<'tasks'>;
-		status: z.infer<typeof actionSchema>['status'];
-	},
-) {
-	return ctx.db
-		.query('actions')
-		.withIndex('by_task_status', (q) =>
-			q
-				.eq('taskId', taskId) //
-				.eq('status', status),
-		)
-		.order('asc');
-}
-
 export const _findAllRunning = internalQuery({
 	args: {
 		taskId: zid('tasks'),
@@ -116,3 +96,23 @@ export const _findNext = internalQuery({
 		return await _findByStatus(ctx, { taskId, status: 'enqueued' }).first();
 	},
 });
+
+function _findByStatus(
+	ctx: QueryCtx,
+	{
+		taskId,
+		status,
+	}: {
+		taskId: Id<'tasks'>;
+		status: z.infer<typeof actionSchema>['status'];
+	},
+) {
+	return ctx.db
+		.query('actions')
+		.withIndex('by_task_status', (q) =>
+			q
+				.eq('taskId', taskId) //
+				.eq('status', status),
+		)
+		.order('asc');
+}

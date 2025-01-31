@@ -25,8 +25,6 @@ export const act = mutation({
 	},
 });
 
-// ------------------------------------
-
 export const findAll = query({
 	args: {
 		taskId: zid('tasks'),

@@ -6,33 +6,6 @@ import { mutation, query } from '../lib';
 import { current as getCurrentUser } from '../users/public';
 import { _add, _markAsDone, _move, _update } from './private';
 
-export const findAllAtInbox = query({
-	args: {},
-	handler: async (ctx) => {
-		//
-		const currentUser = await getCurrentUser(ctx, {});
-
-		const find = ({ isDone }: { isDone: boolean }) =>
-			ctx.db
-				.query('tasks')
-				.withIndex('by_author_parentId_isDone', (q) =>
-					q
-						.eq('author', currentUser._id) //
-						.eq('parentId', undefined)
-						.eq('isDone', isDone),
-				)
-				.order('desc')
-				.collect();
-
-		const [notDone, done] = await Promise.all([
-			find({ isDone: false }), //
-			find({ isDone: true }),
-		]);
-
-		return notDone.concat(done);
-	},
-});
-
 export const findAll = query({
 	args: {
 		parentId: zid('tasks').optional(),
@@ -49,6 +22,33 @@ export const findAll = query({
 				.withIndex('by_parent_isDone', (q) =>
 					q
 						.eq('parentId', parentId) //
+						.eq('isDone', isDone),
+				)
+				.order('desc')
+				.collect();
+
+		const [notDone, done] = await Promise.all([
+			find({ isDone: false }), //
+			find({ isDone: true }),
+		]);
+
+		return notDone.concat(done);
+	},
+});
+
+export const findAllAtInbox = query({
+	args: {},
+	handler: async (ctx) => {
+		//
+		const currentUser = await getCurrentUser(ctx, {});
+
+		const find = ({ isDone }: { isDone: boolean }) =>
+			ctx.db
+				.query('tasks')
+				.withIndex('by_author_parentId_isDone', (q) =>
+					q
+						.eq('author', currentUser._id) //
+						.eq('parentId', undefined)
 						.eq('isDone', isDone),
 				)
 				.order('desc')
@@ -81,9 +81,7 @@ export const findOneOrNot = query({
 		//
 		if (!taskId) return undefined;
 
-		const { task } = await ensureTaskAuthor(ctx, { taskId });
-
-		return task;
+		return await findOne(ctx, { taskId });
 	},
 });
 
@@ -149,7 +147,12 @@ export const move = mutation({
 	},
 });
 
-export const ensureTaskAuthor = async (ctx: QueryCtx | MutationCtx, args: { taskId: Id<'tasks'> }) => {
+export const ensureTaskAuthor = async (
+	ctx: QueryCtx | MutationCtx, //
+	args: {
+		taskId: Id<'tasks'>;
+	},
+) => {
 	//
 	const currentUser = await getCurrentUser(ctx, {});
 	const task = await ctx.db.get(args.taskId);
