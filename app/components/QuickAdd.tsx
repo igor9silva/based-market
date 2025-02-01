@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
 import { useEffect, useRef } from 'react';
@@ -15,6 +15,8 @@ export function QuickAdd({ className }: { className?: string }) {
 	const navigate = useNavigate();
 	const addTask = useMutation(api.tasks.public.add);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+	const { newTaskText } = useSearch({ strict: false });
 
 	useEffect(() => {
 		textareaRef.current?.focus();
@@ -41,12 +43,17 @@ export function QuickAdd({ className }: { className?: string }) {
 						<Textarea
 							ref={textareaRef}
 							name="body"
-							placeholder="What are you seeking to achieve?"
+							placeholder="What are you seeking?"
 							required
+							defaultValue={newTaskText}
+							className="min-h-80"
 						/>
 					</div>
 					<Button variant="default" type="submit">
 						Add
+						<kbd className="hidden md:inline-flex h-4 items-center gap-0.5 rounded border px-1 font-mono text-xs">
+							<span className="text-base">⌘</span>Enter
+						</kbd>
 					</Button>
 				</form>
 			</CardContent>

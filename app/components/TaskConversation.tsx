@@ -25,6 +25,9 @@ export function TaskConversation({
 	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(taskQuery);
 
+	const query = convexQuery(api.users.public.current, {});
+	const { data: user } = useSuspenseQuery(query);
+
 	const {
 		results: actions,
 		loadMore,
@@ -45,7 +48,12 @@ export function TaskConversation({
 			<StickToBottom mass={1} initial="instant" resize="instant" className="flex-1 overflow-auto">
 				<StickToBottomContent actions={actions} status={status} loadMore={loadMore}>
 					{reversedActions.map((action) => (
-						<TaskEvent key={action._id} event={action} initialRenderDate={initialRenderDate} />
+						<TaskEvent
+							key={action._id}
+							event={action}
+							initialRenderDate={initialRenderDate}
+							className={action.author === user._id ? 'ml-auto' : ''}
+						/>
 					))}
 				</StickToBottomContent>
 			</StickToBottom>

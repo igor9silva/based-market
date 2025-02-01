@@ -1,5 +1,5 @@
 import { Doc } from 'convex/_generated/dataModel';
-import { SendIcon } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
@@ -39,7 +39,7 @@ export function MessageComposer({
 			<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-row gap-2 items-end">
 				<Textarea ref={textareaRef} name="message" required />
 				<Button type="submit">
-					<SendIcon className="size-4" />
+					<Send className="size-4" />
 				</Button>
 			</form>
 		</div>

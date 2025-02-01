@@ -168,10 +168,10 @@ function MarkAsDoneCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 	const currentTask = useQuery(api.tasks.public.findOne, { taskId });
 	if (!currentTask) return null;
 
-	const handleSelect = useCallback(() => {
+	const handleSelect = () => {
 		markAsDone({ taskId: currentTask._id, isDone: !currentTask.isDone });
 		close();
-	}, [markAsDone, currentTask._id, close]);
+	};
 
 	return (
 		<CommandItem keywords={['mark', 'as done', 'as not done']} onSelect={handleSelect}>
@@ -194,8 +194,15 @@ function NewTaskCommandItem({ shouldUseSearch }: { shouldUseSearch: boolean }) {
 	}, [shouldUseSearch, typedSearch]);
 
 	const handleSelect = useCallback(() => {
-		navigate({ to: '/$', params: { _splat: '/new' }, search: { newTaskText: search } });
+		//
+		navigate({
+			to: '/$',
+			params: { _splat: '/new' },
+			search: search ? { newTaskText: search } : {},
+		});
+
 		close();
+		//
 	}, [navigate, close, search]);
 
 	return (
