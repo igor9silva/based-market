@@ -171,7 +171,7 @@ async function _setResolved(
 	return await ctx.runMutation(internal.action.lifecycle.private._resolve, args);
 }
 
-async function _scheduleAction(
+async function _runAction(
 	ctx: ActionCtx | MutationCtx,
 	{
 		author,
@@ -219,7 +219,7 @@ export async function _runNextActionIfNeeded(
 	const nextAction = await ctx.runQuery(internal.action.private._findNext, { taskId });
 	if (!nextAction) return skip(`Skipping next action for task ${taskId} because there are no more pending actions.`);
 
-	return await _scheduleAction(ctx, {
+	return await _runAction(ctx, {
 		taskId,
 		author,
 		action: nextAction,
