@@ -6,6 +6,20 @@ export function useTaskMutations() {
 	//
 	const act = useMutation(api.action.public.act);
 
+	const say = ({
+		taskId, //
+		message,
+	}: {
+		taskId: Id<'tasks'>;
+		message: string;
+	}) => {
+		return act({
+			taskId,
+			toolKey: 'say',
+			args: { message },
+		});
+	};
+
 	const updateTask = ({
 		taskId, //
 		title,
@@ -37,6 +51,7 @@ export function useTaskMutations() {
 	};
 
 	return {
+		say,
 		updateTask,
 		markAsDone,
 	};
