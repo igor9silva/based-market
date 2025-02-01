@@ -10,6 +10,7 @@ import { useSplatParams } from '~/hooks/useSplatParams';
 
 const searchSchema = z.object({
 	selectedSubtaskId: zid('tasks').optional(),
+	newTaskText: z.string().optional(),
 });
 
 export const Route = createFileRoute('/$')({

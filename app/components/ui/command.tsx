@@ -22,13 +22,22 @@ const Command = React.forwardRef<
 ));
 Command.displayName = CommandPrimitive.displayName;
 
-const CommandDialog = ({ children, shouldFilter, ...props }: DialogProps & { shouldFilter: boolean }) => {
+const CommandDialog = ({
+	children,
+	shouldFilter,
+	filter,
+	...props
+}: DialogProps & {
+	shouldFilter: boolean;
+	filter?: (value: string, search: string, keywords?: string[]) => number;
+}) => {
 	return (
 		<Dialog {...props}>
 			<DialogContent className="overflow-hidden p-0">
 				<Command
 					loop
 					shouldFilter={shouldFilter}
+					filter={filter}
 					className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
 				>
 					{children}
@@ -69,6 +78,13 @@ const CommandList = React.forwardRef<
 ));
 
 CommandList.displayName = CommandPrimitive.List.displayName;
+
+const CommandLoading = React.forwardRef<
+	React.ElementRef<typeof CommandPrimitive.Loading>,
+	React.ComponentPropsWithoutRef<typeof CommandPrimitive.Loading>
+>(({ className, ...props }, ref) => <CommandPrimitive.Loading ref={ref} className={className} {...props} />);
+
+CommandLoading.displayName = CommandPrimitive.Loading.displayName;
 
 const CommandEmpty = React.forwardRef<
 	React.ElementRef<typeof CommandPrimitive.Empty>,
@@ -130,6 +146,7 @@ export {
 	CommandInput,
 	CommandItem,
 	CommandList,
+	CommandLoading,
 	CommandSeparator,
 	CommandShortcut,
 };

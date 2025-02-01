@@ -1,19 +1,23 @@
-import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { useLocation, useNavigate } from '@tanstack/react-router';
-import { DollarSign, Inbox, Plus } from 'lucide-react';
+import { defaultFilter, useCommandState } from 'cmdk';
+import { api } from 'convex/_generated/api';
+import { Id } from 'convex/_generated/dataModel';
+import { useQuery } from 'convex/react';
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { Circle, CircleCheckBig, CirclePlus, DollarSign, Inbox } from 'lucide-react';
 import {
 	CommandDialog,
-	CommandEmpty,
 	CommandGroup,
 	CommandInput,
 	CommandItem,
 	CommandList,
-	CommandSeparator,
+	CommandLoading,
 } from '~/components/ui/command';
 import { DialogDescription, DialogTitle } from '~/components/ui/dialog';
+import { useSplatParams } from '~/hooks/useSplatParams';
+import { useTaskMutations } from '~/hooks/useTaskMutations';
 
 interface CommandMenuContextType {
 	isOpen: boolean;
@@ -89,24 +93,38 @@ export function CommandMenuDialog() {
 		[navigate, close],
 	);
 
+	const tasks = useQuery(api.tasks.public.findAll, {}); // TODO: server-side search
+	const { taskId: currentTaskId } = useSplatParams();
+
 	return (
-		<CommandDialog shouldFilter={shouldFilter} open={isOpen} onOpenChange={close}>
+		<CommandDialog
+			shouldFilter={shouldFilter}
+			open={isOpen}
+			onOpenChange={close}
+			filter={(value, search, keywords) => {
+				//
+				const result = defaultFilter?.(value, search, keywords) ?? 0;
+
+				if (value === '/new') return result + 0.0000001; // make sure new task is always included
+
+				return result;
+			}}
+		>
 			<DialogTitle className="hidden">Global command menu</DialogTitle>
 			<DialogDescription className="hidden">Search for tasks, notes, files, and more.</DialogDescription>
-			<CommandInput placeholder="Type a command or search..." value={search} onValueChange={setSearch} />
+			<CommandInput placeholder="Act or search..." value={search} onValueChange={setSearch} />
 			<CommandList>
-				<CommandEmpty>No results found.</CommandEmpty>
-				{/* <CommandSeparator /> */}
-				<CommandGroup heading="Sidebar">
-					<CommandItem value="/new" keywords={['new', 'task']} onSelect={onSelect}>
-						<Plus className="mr-2" />
-						New Task
-					</CommandItem>
+				{/* Quick actions */}
+				<CommandGroup heading="Quick actions">
+					<NewTaskCommandItem shouldUseSearch={shouldFilter} />
+					{currentTaskId && <MarkAsDoneCommandItem taskId={currentTaskId} />}
+				</CommandGroup>
+
+				{/* Pinned tasks */}
+				<CommandGroup heading="Pinned tasks">
 					<CommandItem value="/" keywords={['inbox']} onSelect={onSelect}>
-						{/* <Link to="/$" params={{ _splat: '' }}> */}
 						<Inbox className="mr-2" />
 						Inbox
-						{/* </Link> */}
 					</CommandItem>
 					<CommandItem
 						value="/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv"
@@ -117,44 +135,73 @@ export function CommandMenuDialog() {
 						Finances
 					</CommandItem>
 				</CommandGroup>
-				<CommandSeparator />
-				<CommandGroup heading="Pinned Tasks">
-					<CommandItem
-						value="/chat/kh73ekz89d5awan6pejdwdp5v176690k"
-						keywords={['test', 'task', 'pinned', 'task 1']}
-						onSelect={onSelect}
-					>
-						<MagnifyingGlassIcon className="mr-2" />
-						Test Task 1
-					</CommandItem>
-					<CommandItem
-						value="/chat/kh753rpp5dz4pn4zc8x2jdz3cs763kp1"
-						keywords={['test', 'task', 'pinned', 'task 2']}
-						onSelect={onSelect}
-					>
-						<MagnifyingGlassIcon className="mr-2" />
-						Test Task 2
-					</CommandItem>
-					<CommandItem
-						value="/chat/kh78yn9ffq0ph7g5cgqmh482a9763de2"
-						keywords={['test', 'task', 'pinned', 'task 3']}
-						onSelect={onSelect}
-					>
-						<MagnifyingGlassIcon className="mr-2" />
-						Test Task 3
-					</CommandItem>
-				</CommandGroup>
-				{/* {tasks && tasks.length > 0 && (
-					<CommandGroup heading="Tasks">
-						{tasks.map((task) => (
-							<CommandItem key={task._id} value={`/tasks/${task._id}`} onSelect={onSelect}>
-								<MagnifyingGlassIcon className="mr-2" />
-								{task.title}
+
+				{/* All tasks */}
+				<CommandGroup heading="All tasks">
+					{!tasks && <CommandLoading>Fetching tasks</CommandLoading>}
+					{tasks?.map((task) => {
+						return (
+							<CommandItem
+								key={task._id}
+								value={`/chat/${task._id}`}
+								keywords={[task.title ?? 'Untitled task']}
+								onSelect={onSelect}
+							>
+								{task.isDone ? <CircleCheckBig className="mr-2" /> : <Circle className="mr-2" />}
+								<span className={task.isDone ? 'line-through' : ''}>
+									{task.title ?? 'Untitled task'}
+								</span>
 							</CommandItem>
-						))}
-					</CommandGroup>
-				)} */}
+						);
+					})}
+				</CommandGroup>
 			</CommandList>
 		</CommandDialog>
+	);
+}
+
+function MarkAsDoneCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
+	//
+	const { close } = useCommandMenu();
+	const { markAsDone } = useTaskMutations();
+
+	const currentTask = useQuery(api.tasks.public.findOne, { taskId });
+	if (!currentTask) return null;
+
+	const handleSelect = useCallback(() => {
+		markAsDone({ taskId: currentTask._id, isDone: !currentTask.isDone });
+		close();
+	}, [markAsDone, currentTask._id, close]);
+
+	return (
+		<CommandItem keywords={['mark', 'as done', 'as not done']} onSelect={handleSelect}>
+			{currentTask.isDone ? <Circle className="mr-2" /> : <CircleCheckBig className="mr-2" />}
+			{currentTask.isDone ? 'Unmark' : 'Mark'} as done
+		</CommandItem>
+	);
+}
+
+function NewTaskCommandItem({ shouldUseSearch }: { shouldUseSearch: boolean }) {
+	//
+	const { close } = useCommandMenu();
+	const navigate = useNavigate();
+
+	const typedSearch = useCommandState((state) => state.search);
+
+	const search = useMemo(() => {
+		if (!shouldUseSearch) return '';
+		return typedSearch;
+	}, [shouldUseSearch, typedSearch]);
+
+	const handleSelect = useCallback(() => {
+		navigate({ to: '/$', params: { _splat: '/new' }, search: { newTaskText: search } });
+		close();
+	}, [navigate, close, search]);
+
+	return (
+		<CommandItem value="/new" keywords={['new', 'task', search]} onSelect={handleSelect}>
+			<CirclePlus className="mr-2" />
+			{search ? `New task with "${search}"` : 'New task'}
+		</CommandItem>
 	);
 }
