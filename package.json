@@ -43,6 +43,7 @@
 		"@tanstack/router-devtools": "^1.85.5",
 		"@tanstack/start": "^1.85.7",
 		"@types/mdx": "^2.0.13",
+		"@vercel/analytics": "^1.4.1",
 		"@vercel/speed-insights": "^1.1.0",
 		"@vitejs/plugin-react": "^4.3.4",
 		"ai": "^4.0.22",
