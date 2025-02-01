@@ -6,6 +6,7 @@ import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
 import { CommandMenuDialog } from '~/components/CommandMenu';
 
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Loading } from '~/components/Loading';
 import { MainHeader } from '~/components/MainHeader';
 import { MainSidebar } from '~/components/MainSidebar';
@@ -75,6 +76,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<RootLayout>{children}</RootLayout>
 				<ScrollRestoration />
 				<Scripts />
+				<SpeedInsights />
 			</body>
 		</html>
 	);
