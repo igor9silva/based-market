@@ -5,8 +5,9 @@ import { Doc, Id } from '../../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
 import { authorSchema } from '../../schemas/authorSchema';
+import { _findOne as _findOneTask } from '../../tasks/private';
 import { _allTools } from '../../tools/private';
-import { _add } from '../private';
+import { _add, _findAll as _findAllActions } from '../private';
 
 export const _execute = internalAction({
 	args: {
@@ -77,7 +78,7 @@ export const _react = internalMutation({
 		console.debug(`${author} reacts`);
 
 		// TODO: get the task and check if it's done before reacting
-		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
+		const task = await _findOneTask(ctx, { taskId });
 
 		if (task.isDone) {
 			console.debug(`Skipping reacting for task ${taskId} because it's already done.`);
@@ -85,7 +86,7 @@ export const _react = internalMutation({
 		}
 
 		// TODO: check if the last 10 actions are from meseeks (action.author !== task.author) before reacting
-		const allActions = await ctx.runQuery(internal.action.private._findAll, { taskId });
+		const allActions = await _findAllActions(ctx, { taskId });
 		const last10Actions = allActions.slice(-10).filter((action) => action.author !== task.author);
 
 		if (last10Actions.length >= 10) {
@@ -119,6 +120,7 @@ export const _react = internalMutation({
 		return await _add(ctx, {
 			taskId,
 			author,
+			owner: task.owner,
 			toolKey: 'react',
 			args: {},
 		});
@@ -185,6 +187,8 @@ async function _runAction(
 ) {
 	if (action.result) throw new Error('Action is already done.');
 	if (action.kind === 'sync') throw new Error('Will never run, just narrowing types.');
+
+	// TODO: check budget here
 
 	// ideally, status=`running` would be set in the action itself, but that'd lead into a race condition
 	await ctx.runMutation(internal.action.lifecycle.private._start, { actionId: action._id });

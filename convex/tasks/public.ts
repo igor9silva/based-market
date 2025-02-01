@@ -14,7 +14,7 @@ export const findAll = query({
 		//
 		if (!parentId) return await findAllAtInbox(ctx, {});
 
-		await ensureTaskAuthor(ctx, { taskId: parentId });
+		await ensureTaskOwner(ctx, { taskId: parentId });
 
 		const find = ({ isDone }: { isDone: boolean }) =>
 			ctx.db
@@ -68,7 +68,7 @@ export const findOne = query({
 		taskId: zid('tasks'),
 	},
 	handler: async (ctx, { taskId }) => {
-		const { task } = await ensureTaskAuthor(ctx, { taskId });
+		const { task } = await ensureTaskOwner(ctx, { taskId });
 		return task;
 	},
 });
@@ -94,11 +94,16 @@ export const add = mutation({
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 
-		return await _add(ctx, { author: currentUser._id, body, parentId });
+		return await _add(ctx, {
+			author: currentUser._id,
+			owner: currentUser._id,
+			body,
+			parentId,
+		});
 	},
 });
 
-export const ensureTaskAuthor = async (
+export const ensureTaskOwner = async (
 	ctx: QueryCtx | MutationCtx, //
 	args: {
 		taskId: Id<'tasks'>;
@@ -109,7 +114,7 @@ export const ensureTaskAuthor = async (
 	const task = await ctx.db.get(args.taskId);
 
 	if (!task) throw new Error('Task not found');
-	if (task.author !== currentUser._id) throw new Error('Task not found'); // purposefully do not mention authorization
+	if (task.owner !== currentUser._id) throw new Error('Task not found'); // purposefully do not mention authorization
 
 	return { currentUser, task };
 };

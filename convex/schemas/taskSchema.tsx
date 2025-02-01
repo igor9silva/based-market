@@ -4,7 +4,8 @@ import { authorSchema } from './authorSchema';
 
 export const taskSchema = z
 	.object({
-		author: authorSchema,
+		author: authorSchema, // who created
+		owner: zid('users'), // who is responsible
 		title: z.string().optional(),
 		body: z.string().optional(),
 		parentId: zid('tasks').optional(),

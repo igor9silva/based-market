@@ -47,7 +47,7 @@ export const _allTools = async (
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 ) => ({
-	..._mutationTools(ctx, task._id, task.author),
+	..._mutationTools(ctx, task._id, task.author, task.owner),
 	..._decisionTools(ctx, task, action),
 	...(await _httpTools(ctx, task, action)),
 });
@@ -56,6 +56,7 @@ export const _mutationTools = (
 	ctx: ActionCtx | MutationCtx, //
 	taskId: Id<'tasks'>,
 	author: z.infer<typeof authorSchema>,
+	owner: Id<'users'>,
 ) => ({
 	doNothing: tool({
 		description: 'Do nothing.',
@@ -130,6 +131,7 @@ export const _mutationTools = (
 		execute: (args) => ctx.runMutation(internal.tasks.private._add, {
 			parentId: taskId,
 			author,
+			owner,
 			body: args.body,
 		}),
 	}),
@@ -175,6 +177,7 @@ export const _decisionTools = (
 								args: call.args,
 								taskId: task._id,
 								author: action._id,
+								owner: task.owner,
 							});
 						}),
 					);
@@ -195,6 +198,7 @@ export const _decisionTools = (
 						args: { message: result.text },
 						taskId: task._id,
 						author: action._id,
+						owner: task.owner,
 					});
 					break;
 
@@ -204,6 +208,7 @@ export const _decisionTools = (
 						args: { message: result.text },
 						taskId: task._id,
 						author: action._id,
+						owner: task.owner,
 					});
 					break;
 
@@ -213,6 +218,7 @@ export const _decisionTools = (
 						args: { message: `[damn @sama] Content filter hit: ${result.warnings}` },
 						taskId: task._id,
 						author: action._id,
+						owner: task.owner,
 					});
 					break;
 
@@ -223,6 +229,7 @@ export const _decisionTools = (
 						args: { message: `Max length hit: ${result.warnings}` },
 						taskId: task._id,
 						author: action._id,
+						owner: task.owner,
 					});
 					break;
 

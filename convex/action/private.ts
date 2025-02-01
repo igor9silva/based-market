@@ -14,19 +14,21 @@ export const _add = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		author: authorSchema,
+		owner: zid('users'),
 		toolKey: z.string().describe('The key of the tool to use'),
 		args: z.record(z.any()),
 	},
-	handler: async (ctx, { taskId, author, toolKey, args }) => {
+	handler: async (ctx, { taskId, author, owner, toolKey, args }) => {
 		//
 		console.debug(`${author} acts: ${toolKey}`);
 
-		const syncTools = await _mutationTools(ctx, taskId, author);
+		const syncTools = await _mutationTools(ctx, taskId, author, owner);
 		const result = await _executeToolIfSync(syncTools, toolKey, args);
 
 		const action = actionSchema.parse({
 			taskId,
 			author,
+			owner,
 			kind: result ? 'sync' : 'async',
 			status: result ? 'succeeded' : 'enqueued',
 			toolKey,

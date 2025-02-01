@@ -4,10 +4,10 @@ import { authorSchema } from './authorSchema';
 
 const coreActionSchema = z.object({
 	taskId: zid('tasks'),
+	owner: zid('users'),
 	author: authorSchema,
 	toolKey: z.string(),
 	args: z.record(z.any()),
-	// type: z.enum(['mutation', 'tool']),
 	kind: z.enum(['sync', 'async']),
 });
 

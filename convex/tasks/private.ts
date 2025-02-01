@@ -67,16 +67,18 @@ export const _findAllByEmbeddingIds = internalQuery({
 export const _add = internalMutation({
 	args: {
 		author: authorSchema,
+		owner: zid('users'),
 		body: z.string(),
 		parentId: zid('tasks').optional(),
 	},
-	handler: async (ctx, { author, body, parentId }) => {
+	handler: async (ctx, { author, owner, body, parentId }) => {
 		//
-		const taskId = await ctx.db.insert('tasks', { author, isDone: false, parentId });
+		const taskId = await ctx.db.insert('tasks', { author, owner, isDone: false, parentId });
 
 		await _addAction(ctx, {
 			taskId,
 			author,
+			owner,
 			toolKey: 'say',
 			args: { message: body },
 		});

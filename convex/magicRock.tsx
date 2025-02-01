@@ -227,7 +227,7 @@ async function loadTools(
 
 	const [httpTools, mutationTools] = await Promise.all([
 		_httpTools(ctx, task, action), //
-		_mutationTools(ctx, task._id, action._id),
+		_mutationTools(ctx, task._id, action._id, task.owner),
 	]);
 
 	// clear execute functions to avoid AI SDK from executing it

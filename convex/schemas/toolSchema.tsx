@@ -40,7 +40,8 @@ export const httpToolSchema = z.object({
 	description: z.string(),
 	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
 	http: httpConfigSchema,
-	owner: toolOwnerSchema,
+	owner: toolOwnerSchema, // TODO: change to author
+	// owner: zid('users'), // TODO: implement tool owner
 });
 
 export const toolSchema = httpToolSchema.describe(
