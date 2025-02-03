@@ -6,9 +6,9 @@ import { usePaginatedQuery } from 'convex/react';
 import { MoveDown } from 'lucide-react';
 import { RefCallback, useEffect, useMemo } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
+import { Action } from '~/components/Action';
 import { Loading } from '~/components/Loading';
 import { MessageComposer } from '~/components/MessageComposer';
-import { TaskEvent } from '~/components/TaskEvent';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
 
@@ -48,11 +48,11 @@ export function TaskConversation({
 			<StickToBottom mass={1} initial="instant" resize="instant" className="flex-1 overflow-auto">
 				<StickToBottomContent actions={actions} status={status} loadMore={loadMore}>
 					{reversedActions.map((action) => (
-						<TaskEvent
+						<Action
 							key={action._id}
-							event={action}
+							action={action}
 							initialRenderDate={initialRenderDate}
-							className={action.author === user._id ? 'ml-auto' : ''}
+							isAuthorCurrentUser={action.author === user._id}
 						/>
 					))}
 				</StickToBottomContent>
@@ -114,7 +114,7 @@ function StickToBottomContent({
 						<Loading className="h-6 w-fit" />
 					</div>
 				)}
-				<div className="p-4 flex flex-col flex-grow justify-end">{children}</div>
+				<div className="p-4 flex flex-col flex-grow justify-end gap-2">{children}</div>
 				<div className="sticky bottom-2 flex flex-col">
 					<ScrollToBottom />
 				</div>
