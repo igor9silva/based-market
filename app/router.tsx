@@ -35,6 +35,7 @@ export function createRouter() {
 	const router = routerWithQueryClient(
 		createTanStackRouter({
 			routeTree,
+			defaultViewTransition: true,
 			defaultPreload: 'intent',
 			defaultPreloadDelay: 50, // 50ms is the default, just making it explicit here
 			defaultPreloadStaleTime: 0, // 0 so we don't cache at the loader level, leaving it all to TanStack Query

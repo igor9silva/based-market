@@ -28,7 +28,7 @@ export function Action({
 		<div
 			className={cn(className, 'flex flex-row justify-between', {
 				'ml-auto': isAuthorCurrentUser,
-				'animate-in duration-150': isNew,
+				'animate-in duration-100': isNew,
 				'slide-in-from-right': isNew && isAuthorCurrentUser,
 				'slide-in-from-left': isNew && !isAuthorCurrentUser,
 			})}

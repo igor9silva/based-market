@@ -43,7 +43,7 @@ export function TaskListAndDetail({
 					<TaskDetailAndSubstasks
 						taskId={selectedSubtaskId}
 						showExpand={true}
-						className="animate-in slide-in-from-right duration-150"
+						className="animate-in slide-in-from-right duration-100"
 					/>
 				)
 			}
