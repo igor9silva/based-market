@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { BasicError } from '~/components/BasicError';
 import { Loading } from '~/components/Loading';
-import { SubtaskList } from '~/components/SubtaskList';
+import { TaskConversation } from '~/components/TaskConversation';
 import TaskDetail from '~/components/TaskDetail';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 
@@ -21,12 +21,13 @@ export default function TaskDetailAndSubstasks({
 		<Suspense fallback={<Loading />}>
 			<ErrorBoundary fallback={<BasicError text="Not found (or something else went wrong)." />}>
 				<ResizablePanelGroup direction="vertical" className="overflow-hidden">
-					<ResizablePanel id="details" order={0} defaultSize={75}>
+					<ResizablePanel id="details" order={0} defaultSize={50}>
 						{<TaskDetail className={className} taskId={taskId} showExpand={showExpand} />}
 					</ResizablePanel>
 					<ResizableHandle withHandle />
-					<ResizablePanel id="substasks" order={1} defaultSize={25}>
-						{<SubtaskList taskId={taskId} />}
+					<ResizablePanel id="substasks" order={1} defaultSize={50}>
+						{/* {<SubtaskList taskId={taskId} />} */}
+						<TaskConversation taskId={taskId} />
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</ErrorBoundary>

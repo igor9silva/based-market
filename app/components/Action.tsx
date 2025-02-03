@@ -76,7 +76,7 @@ function Result({
 		return (
 			<div
 				className={cn(
-					'rounded-lg border border-border bg-card p-4 text-card-foreground shadow overflow-x-auto',
+					'rounded-lg border border-border bg-card p-2 text-card-foreground shadow overflow-x-auto',
 					className,
 				)}
 			>
