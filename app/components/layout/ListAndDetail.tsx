@@ -6,7 +6,7 @@ export function ListAndDetail({
 	list,
 	detail,
 	className,
-	defaultListSize = 35,
+	defaultListSize = 30,
 }: {
 	list: React.ReactNode;
 	detail?: React.ReactNode;
