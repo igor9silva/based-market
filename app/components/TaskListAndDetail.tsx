@@ -27,11 +27,13 @@ export function TaskListAndDetail({
 			list={
 				<div className="overflow-auto h-full">
 					{subtasks.map((task) => (
-						<Link key={task._id} to="/$" search={{ selectedSubtaskId: task._id }} resetScroll={false}>
-							<TaskItem
-								className={cn(selectedSubtaskId === task._id && 'bg-muted rounded-lg')}
-								task={task}
-							/>
+						<Link
+							key={task._id}
+							to="/$"
+							search={{ selectedSubtaskId: selectedSubtaskId === task._id ? undefined : task._id }}
+							resetScroll={false}
+						>
+							<TaskItem className={cn(selectedSubtaskId === task._id && 'bg-muted')} task={task} />
 						</Link>
 					))}
 				</div>
