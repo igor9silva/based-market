@@ -1,5 +1,5 @@
 import { Doc } from 'convex/_generated/dataModel';
-import { Send } from 'lucide-react';
+import { ArrowUp, Mic } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
@@ -38,8 +38,11 @@ export function MessageComposer({
 		<div className={cn('p-4 max-h-fit', className)}>
 			<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-row gap-2 items-end">
 				<Textarea ref={textareaRef} name="message" required />
-				<Button type="submit">
-					<Send className="size-4" />
+				<Button type="button" size="action" variant="secondary" onClick={() => alert('TODO:')}>
+					<Mic />
+				</Button>
+				<Button type="submit" size="action">
+					<ArrowUp />
 				</Button>
 			</form>
 		</div>
