@@ -38,12 +38,14 @@ export function MessageComposer({
 		<div className={cn('p-4 max-h-fit', className)}>
 			<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-row gap-2 items-end">
 				<Textarea ref={textareaRef} name="message" required />
-				<Button type="button" size="action" variant="secondary" onClick={() => alert('TODO:')}>
-					<Mic />
-				</Button>
-				<Button type="submit" size="action">
-					<ArrowUp />
-				</Button>
+				<div className="flex flex-row gap-1">
+					<Button type="button" size="action" variant="secondary" onClick={() => alert('TODO:')}>
+						<Mic />
+					</Button>
+					<Button type="submit" size="action">
+						<ArrowUp />
+					</Button>
+				</div>
 			</form>
 		</div>
 	);

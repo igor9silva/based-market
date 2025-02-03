@@ -10,7 +10,8 @@ import { TwoColumn } from '~/components/layout/TwoColumn';
 import { Loading } from '~/components/Loading';
 import { QuickAdd } from '~/components/QuickAdd';
 import { TaskConversation } from '~/components/TaskConversation';
-import TaskDetailAndSubstasks from '~/components/TaskDetailAndSubstasks';
+import { TaskDetailAndChat } from '~/components/TaskDetailAndChat';
+import { TaskDetailAndSubstasks } from '~/components/TaskDetailAndSubstasks';
 import { TaskListAndDetail } from '~/components/TaskListAndDetail';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
@@ -30,6 +31,7 @@ const components = {
 	TwoColumn,
 	TaskConversation,
 	TaskDetailAndSubstasks,
+	TaskDetailAndChat,
 	Grid,
 	QuickAdd,
 	TaskListAndDetail,

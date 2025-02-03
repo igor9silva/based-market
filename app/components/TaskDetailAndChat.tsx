@@ -4,11 +4,11 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { BasicError } from '~/components/BasicError';
 import { Loading } from '~/components/Loading';
-import { SubtaskList } from '~/components/SubtaskList';
+import { TaskConversation } from '~/components/TaskConversation';
 import TaskDetail from '~/components/TaskDetail';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 
-export function TaskDetailAndSubstasks({
+export function TaskDetailAndChat({
 	taskId,
 	className, //
 	showExpand = false,
@@ -28,7 +28,8 @@ export function TaskDetailAndSubstasks({
 					</ResizablePanel>
 					<ResizableHandle withHandle />
 					<ResizablePanel id="substasks" order={1} defaultSize={100 - detailInitialSize}>
-						<SubtaskList taskId={taskId} />
+						{/* {<SubtaskList taskId={taskId} />} */}
+						<TaskConversation taskId={taskId} />
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</ErrorBoundary>
