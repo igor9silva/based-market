@@ -38,7 +38,15 @@ export function TaskListAndDetail({
 					))}
 				</div>
 			}
-			detail={selectedSubtaskId && <TaskDetailAndSubstasks taskId={selectedSubtaskId} showExpand={true} />}
+			detail={
+				selectedSubtaskId && (
+					<TaskDetailAndSubstasks
+						taskId={selectedSubtaskId}
+						showExpand={true}
+						className="animate-in slide-in-from-right duration-150"
+					/>
+				)
+			}
 		/>
 	);
 }
