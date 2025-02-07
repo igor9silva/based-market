@@ -20,7 +20,7 @@ export function TransactionItem({ transaction }: { transaction: Doc<'transaction
 			>
 				<div className="flex items-center justify-between gap-4">
 					<div className="flex flex-col">
-						{transaction.reference}
+						{transaction._id}
 						<TimeAgo date={transaction._creationTime} />
 					</div>
 

@@ -25,7 +25,7 @@ export const usePayment = (transaction: Doc<'transactions'>) => {
 			}
 
 			const payload: PayCommandInput = {
-				reference: transaction.reference,
+				reference: transaction._id,
 				to: transaction.to,
 				description: transaction.description,
 				tokens: transaction.payload.map(({ symbol, amount }) => ({

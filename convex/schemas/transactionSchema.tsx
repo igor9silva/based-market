@@ -31,7 +31,6 @@ export const transactionAmountSchema = z
 
 export const transactionSchema = z
 	.object({
-		reference: z.string().describe('A security reference for the transaction. Managed by us.'),
 		to: walletAddressSchema,
 		description: z.string(),
 		payload: z.array(

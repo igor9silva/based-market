@@ -27,7 +27,6 @@ export const _add = internalMutation({
 	handler: async (ctx, { author, owner, to, description, payload, chain }) => {
 		//
 		const transactionId = await ctx.db.insert('transactions', {
-			reference: crypto.randomUUID().replace(/-/g, ''),
 			to,
 			description,
 			payload,
