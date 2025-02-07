@@ -113,15 +113,15 @@ function Main({ children }: { children: React.ReactNode }) {
 	if (!user.isReady) return <RotatingLoadingMessage />;
 
 	return (
-		<>
+		<div className={cn(MiniKit.isInstalled() && 'p-8')}>
 			<MainSidebar />
 			<SidebarInset className="w-full h-svh overflow-hidden flex-col-reverse md:flex-col">
 				<MainHeader className="h-12" />
-				<div className={cn(MiniKit.isInstalled() && 'p-8', 'h-[calc(100%-3rem)]')}>{children}</div>
+				<div className="h-[calc(100%-3rem)]">{children}</div>
 			</SidebarInset>
 			<Toaster />
 			<CommandMenuDialog />
-		</>
+		</div>
 	);
 }
 
