@@ -3,7 +3,7 @@ import { ReactNode, useEffect } from 'react';
 
 export default function MiniKitProvider({ children }: { children: ReactNode }) {
 	//
-	const appId = process.env['VITE_WLD_CLIENT_ID'] as string;
+	const appId = import.meta.env['VITE_WLD_CLIENT_ID'] as string;
 	if (!appId) throw new Error('VITE_WLD_CLIENT_ID is not set');
 
 	useEffect(() => {
