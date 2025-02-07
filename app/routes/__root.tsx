@@ -9,7 +9,7 @@ import { MiniKit } from '@worldcoin/minikit-js';
 import { api } from 'convex/_generated/api';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
-import { cn } from '~/lib/utils';
+import { useMemo } from 'react';
 
 import { CommandMenuDialog } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
@@ -19,6 +19,7 @@ import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
+import { cn } from '~/lib/utils';
 
 import appCss from '~/styles/app.css?url';
 
@@ -90,8 +91,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+	//
+	const isInstalled = useMemo(() => {
+		if (typeof window === 'undefined') return false;
+		return MiniKit.isInstalled();
+	}, [MiniKit]);
+
 	return (
-		<SidebarProvider open={false}>
+		<SidebarProvider open={false} className={cn(isInstalled && 'p-8')}>
 			<AuthLoading>
 				<Loading />
 			</AuthLoading>
@@ -113,7 +120,7 @@ function Main({ children }: { children: React.ReactNode }) {
 	if (!user.isReady) return <RotatingLoadingMessage />;
 
 	return (
-		<div className={cn(MiniKit.isInstalled() && 'p-8')}>
+		<>
 			<MainSidebar />
 			<SidebarInset className="w-full h-svh overflow-hidden flex-col-reverse md:flex-col">
 				<MainHeader className="h-12" />
@@ -121,7 +128,7 @@ function Main({ children }: { children: React.ReactNode }) {
 			</SidebarInset>
 			<Toaster />
 			<CommandMenuDialog />
-		</div>
+		</>
 	);
 }
 
