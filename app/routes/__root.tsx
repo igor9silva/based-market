@@ -17,8 +17,6 @@ import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
-import { useMiniApp } from '~/hooks/useMiniApp';
-import { cn } from '~/lib/utils';
 
 import appCss from '~/styles/app.css?url';
 
@@ -91,10 +89,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	//
-	const { isInstalled } = useMiniApp();
-
 	return (
-		<SidebarProvider open={false} className={cn(isInstalled && 'p-6')}>
+		<SidebarProvider open={false}>
 			<AuthLoading>
 				<Loading />
 			</AuthLoading>
