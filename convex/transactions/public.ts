@@ -4,7 +4,7 @@ import { mutation, query } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/transactionSchema';
 import { current as getCurrentUser } from '../users/public';
-import { _add, _findOne } from './private';
+import { _add, _findAllWaiting, _findOne } from './private';
 
 export const startTopUp = mutation({
 	args: {
@@ -39,6 +39,21 @@ export const startTopUp = mutation({
 	},
 });
 
+export const discard = mutation({
+	args: {
+		transactionId: zid('transactions'),
+	},
+	handler: async (ctx, { transactionId }) => {
+		//
+		const currentUser = await getCurrentUser(ctx, {});
+		const transaction = await _findOne(ctx, { transactionId });
+
+		if (!transaction) throw new Error('Transaction not found');
+		if (transaction.owner !== currentUser._id) throw new Error('Transaction not found');
+
+		return await ctx.db.patch(transactionId, { status: 'discarded by user' });
+	},
+});
 export const findOne = query({
 	args: {
 		transactionId: zid('transactions'),
@@ -52,5 +67,15 @@ export const findOne = query({
 		if (transaction.owner !== currentUser._id) throw new Error('Transaction not found');
 
 		return transaction;
+	},
+});
+
+export const findAllWaiting = query({
+	args: {},
+	handler: async (ctx) => {
+		//
+		const currentUser = await getCurrentUser(ctx, {});
+
+		return await _findAllWaiting(ctx, { owner: currentUser._id });
 	},
 });

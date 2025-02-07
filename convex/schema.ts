@@ -74,5 +74,7 @@ export default defineSchema({
 		zodToConvex(transactionSchema),
 	).index(
 		'by_reference', ['reference'],
+	).index(
+		'by_status_owner', ['status', 'owner'],
 	),
 });

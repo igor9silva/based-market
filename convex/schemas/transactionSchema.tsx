@@ -14,7 +14,7 @@ export const tokenSchema = z.enum([
 	'WLD',
 ]);
 
-export const transactionStatusSchema = z.enum(['started', 'pending', 'confirmed', 'failed']);
+export const transactionStatusSchema = z.enum(['waiting', 'pending', 'confirmed', 'failed', 'discarded by user']);
 
 export const walletAddressSchema = z.string().describe('The address of the recipient.');
 

@@ -26,7 +26,7 @@ export const _add = internalMutation({
 			description,
 			payload,
 			chain,
-			status: 'pending',
+			status: 'waiting',
 			author,
 			owner,
 		});
@@ -41,5 +41,21 @@ export const _findOne = internalQuery({
 	},
 	handler: async (ctx, { transactionId }) => {
 		return await ctx.db.get(transactionId);
+	},
+});
+
+export const _findAllWaiting = internalQuery({
+	args: {
+		owner: zid('users'),
+	},
+	handler: async (ctx, { owner }) => {
+		return await ctx.db
+			.query('transactions')
+			.withIndex('by_status_owner', (q) =>
+				q
+					.eq('status', 'waiting') //
+					.eq('owner', owner),
+			)
+			.collect();
 	},
 });
