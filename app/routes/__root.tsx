@@ -8,12 +8,12 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { api } from 'convex/_generated/api';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
-import { BasicError } from '~/components/BasicError';
 
 import { CommandMenuDialog } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
 import { MainHeader } from '~/components/MainHeader';
 import { MainSidebar } from '~/components/MainSidebar';
+import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
@@ -108,29 +108,7 @@ function Main({ children }: { children: React.ReactNode }) {
 	const query = convexQuery(api.users.public.current, {});
 	const { data: user } = useSuspenseQuery(query);
 
-	console.log('isReady?', user.isReady);
-
-	if (!user.isReady) {
-		//
-		const loadingMessages = [
-			'Teaching silicon to be conscious...',
-			'Convincing our rocks to think...',
-			"Existence is pain! But we're working on it...",
-			"Look at me, I'm setting up your account!",
-			'Calculating the meaning of life (42)...',
-			'Turning solar radiation into intelligence...',
-			'Making these rocks really, really smart...',
-			'Ooo-wee, preparing your AI playground!',
-			'Creating artificial general awesomeness...',
-			'Wubba lubba dub dub! Almost ready...',
-			'Teaching computers to pass the butter...',
-			'Achieving singularity in 3... 2...',
-		];
-
-		const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
-
-		return <BasicError text={randomMessage} className="animate-pulse" />;
-	}
+	if (!user.isReady) return <RotatingLoadingMessage />;
 
 	return (
 		<>
