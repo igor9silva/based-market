@@ -103,7 +103,13 @@ export const _addInboxTask = internalMutation({
 	},
 	handler: async (ctx, { author, owner, title, body }) => {
 		//
-		const taskId = await _add(ctx, { author, owner, title, body });
+		const taskId = await ctx.db.insert('tasks', {
+			author,
+			owner,
+			title,
+			body,
+			isDone: false,
+		});
 
 		// TODO: create a 2nd decision tool, for onboarding
 		// TODO: insert a few actions

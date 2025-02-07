@@ -23,9 +23,6 @@ export const _findAll = internalQuery({
 			_findAllByOwner(ctx, { owner, kind }), // user-defined tools
 		]);
 
-		console.debug('tools/globals', globals);
-		console.debug('tools/users', users);
-
 		return globals.concat(users);
 	},
 });
@@ -39,11 +36,11 @@ export const _findAllByOwner = internalQuery({
 		//
 		return await ctx.db
 			.query('tools')
-			.withIndex('by_owner_kind', (q) => {
-				const query = q.eq('owner', owner);
-				if (kind) query.eq('kind', kind);
-				return query;
-			})
+			.withIndex('by_owner_kind', (q) =>
+				kind
+					? q.eq('owner', owner).eq('kind', kind) //
+					: q.eq('owner', owner),
+			)
 			.collect();
 	},
 });
