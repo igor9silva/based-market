@@ -59,12 +59,6 @@ export const env = createEnv({
 			.default(20),
 	},
 
-	client: {
-		VITE_WLD_CLIENT_ID: z.string().min(1).describe('Worldcoin OAuth client ID.'),
-	},
-
-	clientPrefix: 'VITE_',
-
 	/**
 	 * By default, this library will feed the environment variables directly to
 	 * the Zod validator.
