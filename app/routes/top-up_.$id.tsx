@@ -11,6 +11,7 @@ import { BasicError } from '~/components/BasicError';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardFooter } from '~/components/ui/card';
+import { useWorldApp } from '~/hooks/useWorldApp';
 
 export const Route = createFileRoute('/top-up_/$id')({
 	component: RouteComponent,
@@ -26,6 +27,7 @@ const statusColors = {
 export function RouteComponent({ className }: { className?: string }) {
 	//
 	const { id } = Route.useParams();
+	const { openApp } = useWorldApp(`/top-up/${id}`);
 
 	const query = convexQuery(api.transactions.public.findOne, {
 		transactionId: id as Id<'transactions'>,
@@ -36,7 +38,17 @@ export function RouteComponent({ className }: { className?: string }) {
 
 	const { pay, isPending, error } = usePayment(transaction);
 
-	if (error) return <BasicError text={error.message} />;
+	if (error) {
+		//
+		return (
+			<div className="flex flex-col items-center justify-center h-full w-full gap-4">
+				<BasicError text={error.message} className="h-fit" />
+				<Button variant="default" onClick={openApp}>
+					Open World App
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none', className)}>

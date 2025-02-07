@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { api, internal } from '../_generated/api';
 import { action, mutation, query } from '../lib';
 import { env } from '../schemas/envSchema';
-import { tokenSchema } from '../schemas/transactionSchema';
+import { tokenSchema, transactionAmountSchema } from '../schemas/transactionSchema';
 import { current as getCurrentUser } from '../users/public';
 import { _add, _fetchTransaction, _findAllWaiting, _findOne } from './private';
 
@@ -12,7 +12,7 @@ export const startTopUp = mutation({
 		payload: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: z.number().int(),
+				amount: transactionAmountSchema,
 			}),
 		),
 		description: z.string().optional(),

@@ -24,6 +24,11 @@ export const transactionStatusSchema = z.enum([
 
 export const walletAddressSchema = z.string().describe('The address of the recipient.');
 
+export const transactionAmountSchema = z
+	.number()
+	.min(0.1, 'Minimum amount is $0.1')
+	.max(100000, 'That much? Are you sure?');
+
 export const transactionSchema = z
 	.object({
 		reference: z.string().describe('A security reference for the transaction. Managed by us.'),
@@ -32,7 +37,7 @@ export const transactionSchema = z
 		payload: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: z.number().int('Must be an integer number.'),
+				amount: transactionAmountSchema,
 			}),
 		),
 		chain: blockchainSchema,

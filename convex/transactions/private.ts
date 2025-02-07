@@ -3,7 +3,12 @@ import { z } from 'zod';
 import { internalAction, internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { env } from '../schemas/envSchema';
-import { blockchainSchema, tokenSchema, walletAddressSchema } from '../schemas/transactionSchema';
+import {
+	blockchainSchema,
+	tokenSchema,
+	transactionAmountSchema,
+	walletAddressSchema,
+} from '../schemas/transactionSchema';
 
 export const _add = internalMutation({
 	args: {
@@ -14,7 +19,7 @@ export const _add = internalMutation({
 		payload: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: z.number().int(),
+				amount: transactionAmountSchema,
 			}),
 		),
 		chain: blockchainSchema,

@@ -1,9 +1,10 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { MiniKit } from '@worldcoin/minikit-js';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
+import { transactionAmountSchema } from 'convex/schemas/transactionSchema';
+import { toast } from 'sonner';
 import { z } from 'zod';
 import { TransactionItem } from '~/components/TransactionItem';
 import { Button } from '~/components/ui/button';
@@ -47,17 +48,18 @@ function TopUpCard() {
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
-			amount: z.string().pipe(
-				z.coerce
-					.number()
-					.min(0.1, 'Minimum amount is $0.1') //
-					.max(100000, 'That much? Are you sure?'),
-			),
+			amount: z.string(),
 		}),
 		handler: async ({ amount }) => {
 			//
+			const parsed = transactionAmountSchema.safeParse(Number(amount));
+			if (!parsed.success) {
+				toast.error('Amount must be $0.1 or more');
+				return;
+			}
+
 			const transaction = await startTopUp({
-				payload: [{ symbol: 'WLD', amount: amount }],
+				payload: [{ symbol: 'WLD', amount: parsed.data }],
 			});
 
 			navigate({ to: '/top-up/$id', params: { id: transaction._id } });
@@ -67,29 +69,13 @@ function TopUpCard() {
 	// confirm on CMD+Enter
 	const handleKeyDown = useSubmitHotkey();
 
-	if (!MiniKit.isInstalled()) {
-		//
-		const openWorldApp = () => {
-			location.href = `https://worldcoin.org/mini-app?app_id=${MiniKit.appId}&path=/top-up`;
-		};
-
-		return (
-			<div className="flex flex-col gap-2">
-				<p>Top Up is only available inside the World App.</p>
-				<Button variant="default" onClick={openWorldApp}>
-					Open World App
-				</Button>
-			</div>
-		);
-	}
-
 	return (
 		<Card className="max-h-fit border-none rounded-none">
 			<CardContent className="p-4">
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
 					<div className="flex flex-col gap-0.5">
 						<p className="font-semibold">Amount $USD</p>
-						<Input type="number" name="amount" placeholder="Amount" required defaultValue={0.1} />
+						<Input type="string" name="amount" placeholder="Amount" required defaultValue={0.1} />
 					</div>
 					<Button variant="default" type="submit">
 						Top up
