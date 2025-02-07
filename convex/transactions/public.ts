@@ -115,6 +115,9 @@ export const findAllHistory = query({
 			_findAllByStatus(ctx, { owner: currentUser._id, status: 'pending' }),
 		]);
 
-		return confirmed.concat(failed).concat(pending);
+		return confirmed
+			.concat(failed)
+			.concat(pending)
+			.sort((a, b) => b._creationTime - a._creationTime);
 	},
 });
