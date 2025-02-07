@@ -1,16 +1,5 @@
 import { MiniKit } from '@worldcoin/minikit-js';
-import { createContext, ReactNode, useContext, useEffect } from 'react';
-
-const MiniKitContext = createContext<MiniKit | null>(null);
-
-export function useMiniKit() {
-	//
-	const context = useContext(MiniKitContext);
-
-	if (!context) throw new Error('useMiniKit must be used within a MiniKitProvider');
-
-	return context;
-}
+import { ReactNode, useEffect } from 'react';
 
 export default function MiniKitProvider({ children }: { children: ReactNode }) {
 	//
@@ -18,5 +7,5 @@ export default function MiniKitProvider({ children }: { children: ReactNode }) {
 		MiniKit.install();
 	}, []);
 
-	return <MiniKitContext.Provider value={MiniKit}>{children}</MiniKitContext.Provider>;
+	return <>{children}</>;
 }

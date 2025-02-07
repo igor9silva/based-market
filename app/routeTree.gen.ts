@@ -13,7 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as TopUpImport } from './routes/top-up'
 import { Route as SplatImport } from './routes/$'
-import { Route as TopUpIdImport } from './routes/top-up/$id'
+import { Route as TopUpIdImport } from './routes/top-up.$id'
 
 // Create/Update Routes
 
@@ -137,7 +137,7 @@ export const routeTree = rootRoute
       ]
     },
     "/top-up/$id": {
-      "filePath": "top-up/$id.tsx",
+      "filePath": "top-up.$id.tsx",
       "parent": "/top-up"
     }
   }

@@ -14,7 +14,9 @@ export function RouteComponent({ className }: { className?: string }) {
 	//
 	const { id } = Route.useParams();
 
-	const query = convexQuery(api.transactions.public.findOne, { transactionId: id as Id<'transactions'> });
+	const query = convexQuery(api.transactions.public.findOne, {
+		transactionId: id as Id<'transactions'>,
+	});
 	const { data: transaction } = useSuspenseQuery(query);
 
 	return (

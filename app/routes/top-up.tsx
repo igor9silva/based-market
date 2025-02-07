@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
+import { env } from 'convex/schemas/envSchema';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -37,6 +39,22 @@ export function RouteComponent({ className }: { className?: string }) {
 
 	// confirm on CMD+Enter
 	const handleKeyDown = useSubmitHotkey();
+
+	if (!MiniKit.isInstalled()) {
+		//
+		const openWorldApp = () => {
+			location.href = `https://worldcoin.org/mini-app?app_id=${env.VITE_WLD_CLIENT_ID}&path=/top-up`;
+		};
+
+		return (
+			<div className="flex flex-col gap-2">
+				<p>Top Up is only available inside the World App.</p>
+				<Button variant="default" onClick={openWorldApp}>
+					Open World App
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none', className)}>
