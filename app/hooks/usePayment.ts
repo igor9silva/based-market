@@ -4,6 +4,15 @@ import { api } from 'convex/_generated/api';
 import { Doc } from 'convex/_generated/dataModel';
 import { useAction } from 'convex/react';
 
+export class PaymentError extends Error {
+	constructor(
+		message: string,
+		public code: string,
+	) {
+		super(message);
+	}
+}
+
 export const usePayment = (transaction: Doc<'transactions'>) => {
 	//
 	const confirmPayment = useAction(api.transactions.public.confirmPayment);
@@ -12,7 +21,7 @@ export const usePayment = (transaction: Doc<'transactions'>) => {
 		mutationFn: async () => {
 			//
 			if (!MiniKit.isInstalled()) {
-				throw new Error('Payments are only available inside the World App.');
+				throw new PaymentError('Payments are only available inside the World App.', 'MISSING_MINI_KIT');
 			}
 
 			const payload: PayCommandInput = {

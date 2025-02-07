@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
-import { usePayment } from '~/hooks/usePayment';
+import { PaymentError, usePayment } from '~/hooks/usePayment';
 import { cn } from '~/lib/utils';
 
 import { BasicError } from '~/components/BasicError';
@@ -43,9 +43,11 @@ export function RouteComponent({ className }: { className?: string }) {
 		return (
 			<div className="flex flex-col items-center justify-center h-full w-full gap-4">
 				<BasicError text={error.message} className="h-fit" />
-				<Button variant="default" onClick={openApp}>
-					Open World App
-				</Button>
+				{error instanceof PaymentError && error.code === 'MISSING_MINI_KIT' && (
+					<Button variant="default" onClick={openApp}>
+						Open World App
+					</Button>
+				)}
 			</div>
 		);
 	}
