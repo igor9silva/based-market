@@ -6,7 +6,7 @@ import { useQuery } from 'convex/react';
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Circle, CircleCheckBig, CirclePlus, DollarSign, Inbox } from 'lucide-react';
+import { Circle, CircleCheckBig, CirclePlus, DollarSign, Inbox, RefreshCcw, Wallet } from 'lucide-react';
 import {
 	CommandDialog,
 	CommandGroup,
@@ -117,6 +117,15 @@ export function CommandMenuDialog() {
 				{/* Quick actions */}
 				<CommandGroup heading="Quick actions">
 					<NewTaskCommandItem shouldUseSearch={shouldFilter} />
+					<CommandItem value="/top-up" keywords={['top', 'up']} onSelect={onSelect}>
+						<Wallet className="mr-2" />
+						Top up
+					</CommandItem>
+					<CommandItem value="refresh" keywords={['refresh']} onSelect={() => location.reload()}>
+						<RefreshCcw className="mr-2" />
+						Refresh
+					</CommandItem>
+
 					{currentTaskId && <MarkAsDoneCommandItem taskId={currentTaskId} />}
 				</CommandGroup>
 
