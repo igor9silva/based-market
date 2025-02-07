@@ -50,17 +50,14 @@ function TopUpCard() {
 			amount: z.string().pipe(
 				z.coerce
 					.number()
-					.min(1, 'Minimum amount is $1') //
+					.min(0.1, 'Minimum amount is $0.1') //
 					.max(100000, 'That much? Are you sure?'),
 			),
 		}),
 		handler: async ({ amount }) => {
 			//
 			const transaction = await startTopUp({
-				payload: [
-					{ symbol: 'USDCE', amount: amount },
-					{ symbol: 'WLD', amount: 1 },
-				],
+				payload: [{ symbol: 'USDCE', amount: amount }],
 			});
 
 			navigate({ to: '/top-up/$id', params: { id: transaction._id } });
