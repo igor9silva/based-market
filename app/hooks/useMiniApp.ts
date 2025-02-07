@@ -3,10 +3,12 @@ import { useMemo } from 'react';
 
 export const useMiniApp = () => {
 	//
+	const w = typeof window === 'undefined' ? undefined : window;
+
 	const isInstalled = useMemo(() => {
-		if (typeof window === 'undefined') return false;
+		if (typeof w === 'undefined') return false;
 		return MiniKit.isInstalled();
-	}, [MiniKit]);
+	}, [MiniKit, w]);
 
 	return { isInstalled };
 };
