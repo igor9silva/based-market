@@ -55,7 +55,8 @@ export const confirmPayment = action({
 		console.debug('payload', payload);
 
 		// optimistically confirm the transaction.
-		if (payload.reference === transactionId && payload.status != 'failed') {
+		if (payload.reference === transactionId && payload.transactionStatus != 'failed') {
+			// TODO: set to pending and check until confirmed
 			await ctx.runMutation(internal.transactions.private._finish, { transactionId, status: 'confirmed' });
 		} else {
 			await ctx.runMutation(internal.transactions.private._finish, { transactionId, status: 'failed' });

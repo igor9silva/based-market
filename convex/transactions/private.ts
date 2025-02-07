@@ -92,15 +92,16 @@ export const _fetchTransaction = internalAction({
 
 		return (await response.json()) as {
 			reference: string;
-			transaction_hash: string;
-			status: 'pending' | 'mined' | 'failed';
-			from: string;
-			chain: 'worldchain';
-			timestamp: string; // ISO 8601
-			token_amount: string; // amount in BigInt with 6 decimals
-			token: string;
-			to: string;
-			app_id: string;
+			transactionId: string;
+			transactionHash: string;
+			transactionStatus: 'pending' | 'mined' | 'failed';
+			miniappId: string;
+			updatedAt: string; // ISO 8601
+			network: 'worldchain';
+			fromWalletAddress: string;
+			recipientAddress: string;
+			inputToken: string;
+			inputTokenAmount: string; // amount in BigInt with 6 decimals
 		};
 	},
 });
