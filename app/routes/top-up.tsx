@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { MiniKit } from '@worldcoin/minikit-js';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
-import { env } from 'convex/schemas/envSchema';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -43,7 +42,7 @@ export function RouteComponent({ className }: { className?: string }) {
 	if (!MiniKit.isInstalled()) {
 		//
 		const openWorldApp = () => {
-			location.href = `https://worldcoin.org/mini-app?app_id=${env.VITE_WLD_CLIENT_ID}&path=/top-up`;
+			location.href = `https://worldcoin.org/mini-app?app_id=${MiniKit.appId}&path=/top-up`;
 		};
 
 		return (
