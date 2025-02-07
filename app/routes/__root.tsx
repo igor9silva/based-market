@@ -5,9 +5,11 @@ import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack
 import { Meta, Scripts } from '@tanstack/start';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { api } from 'convex/_generated/api';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
+import { cn } from '~/lib/utils';
 
 import { CommandMenuDialog } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
@@ -89,7 +91,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<SidebarProvider open={false}>
+		<SidebarProvider open={false} className={cn(MiniKit.isInstalled() && 'p-8')}>
 			<AuthLoading>
 				<Loading />
 			</AuthLoading>
