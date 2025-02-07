@@ -47,10 +47,12 @@ function TopUpCard() {
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
-			amount: z
-				.number()
-				.min(1, 'Minimum amount is $1') //
-				.max(100000, 'That much? Are you sure?'),
+			amount: z.string().pipe(
+				z.coerce
+					.number()
+					.min(1, 'Minimum amount is $1') //
+					.max(100000, 'That much? Are you sure?'),
+			),
 		}),
 		handler: async ({ amount }) => {
 			//
