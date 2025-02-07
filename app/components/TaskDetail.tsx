@@ -53,7 +53,7 @@ export default function TaskDetail({
 						<TimeAgo date={task._creationTime} />
 					</span>
 				</div>
-				<div className="flex flex-row justify-between">
+				{/* <div className="flex flex-row justify-between">
 					<div className="flex flex-row flex-wrap items-baseline gap-2">
 						<Button
 							variant="secondary"
@@ -64,9 +64,9 @@ export default function TaskDetail({
 						{/* <RunTaskActionButton task={task} kind="fill" />
 					<RunTaskActionButton task={task} kind="minify" />
 					<RunTaskActionButton task={task} kind="scrape" />
-					<RunTaskActionButton task={task} kind="factCheck" /> */}
+					<RunTaskActionButton task={task} kind="factCheck" /> *
 					</div>
-				</div>
+				</div> */}
 			</CardHeader>
 			<CardContent className="p-4 pt-0">
 				<EditableContent
