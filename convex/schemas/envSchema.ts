@@ -10,6 +10,9 @@ export const env = createEnv({
 		AUTH_GOOGLE_ID: z.string().min(1).describe('Google OAuth client ID.'),
 		AUTH_GOOGLE_SECRET: z.string().min(1).describe('Google OAuth client secret.'),
 
+		WLD_CLIENT_ID: z.string().min(1).describe('Worldcoin OAuth client ID.'),
+		WLD_CLIENT_SECRET: z.string().min(1).describe('Worldcoin OAuth client secret.'),
+
 		ALLOWED_DOMAINS: z
 			.string()
 			.min(1)

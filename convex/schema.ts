@@ -5,12 +5,23 @@ import { actionSchema } from './schemas/actionSchema';
 import { componentSchema } from './schemas/componentSchema';
 import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
 import { toolSchema } from './schemas/toolSchema';
+import { userSchema } from './schemas/userSchema';
 
 // prettier-ignore
 export default defineSchema({
 
 	...authTables,
-	
+
+	users: defineTable(
+		zodToConvex(userSchema),
+	).index(
+		'email', ['email'],
+	).index(
+		'phone', ['phone'],
+	).index(
+		'walletAddress_chain', ['walletAddress', 'walletChain'],
+	),
+
 	tasks: defineTable(
 		zodToConvex(taskSchema),
 	).index(

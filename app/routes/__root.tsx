@@ -2,12 +2,12 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import { QueryClient } from '@tanstack/react-query';
 import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router';
 import { Meta, Scripts } from '@tanstack/start';
-import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
-import * as React from 'react';
-import { CommandMenuDialog } from '~/components/CommandMenu';
-
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
+import * as React from 'react';
+
+import { CommandMenuDialog } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
 import { MainHeader } from '~/components/MainHeader';
 import { MainSidebar } from '~/components/MainSidebar';
@@ -112,7 +112,7 @@ function AccessDenied() {
 
 	return (
 		<div className="h-screen w-full flex flex-col items-center justify-center gap-4">
-			<Button onClick={() => signIn('google', { redirectTo: location.href })}>Sign in</Button>
+			<Button onClick={() => signIn('worldid', { redirectTo: location.href })}>Sign in</Button>
 		</div>
 	);
 }

@@ -16,6 +16,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"oauth4webapi": "file:./third-party/oauth4webapi",
 		"@ai-sdk/openai": "1.0.*",
 		"@auth/core": "0.36.0",
 		"@convex-dev/auth": "^0.0.74",

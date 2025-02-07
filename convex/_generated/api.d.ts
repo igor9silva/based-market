@@ -11,6 +11,8 @@
 import type * as action_lifecycle_private from "../action/lifecycle/private.js";
 import type * as action_private from "../action/private.js";
 import type * as action_public from "../action/public.js";
+import type * as auth_WorldID from "../auth/WorldID.js";
+import type * as auth_WorldWallet from "../auth/WorldWallet.js";
 import type * as auth from "../auth.js";
 import type * as components_public from "../components/public.js";
 import type * as http from "../http.js";
@@ -24,6 +26,7 @@ import type * as schemas_envSchema from "../schemas/envSchema.js";
 import type * as schemas_paginationOptionsSchema from "../schemas/paginationOptionsSchema.js";
 import type * as schemas_taskSchema from "../schemas/taskSchema.js";
 import type * as schemas_toolSchema from "../schemas/toolSchema.js";
+import type * as schemas_userSchema from "../schemas/userSchema.js";
 import type * as tasks_private from "../tasks/private.js";
 import type * as tasks_public from "../tasks/public.js";
 import type * as tools_createHttpTool from "../tools/createHttpTool.js";
@@ -48,6 +51,8 @@ declare const fullApi: ApiFromModules<{
   "action/lifecycle/private": typeof action_lifecycle_private;
   "action/private": typeof action_private;
   "action/public": typeof action_public;
+  "auth/WorldID": typeof auth_WorldID;
+  "auth/WorldWallet": typeof auth_WorldWallet;
   auth: typeof auth;
   "components/public": typeof components_public;
   http: typeof http;
@@ -61,6 +66,7 @@ declare const fullApi: ApiFromModules<{
   "schemas/paginationOptionsSchema": typeof schemas_paginationOptionsSchema;
   "schemas/taskSchema": typeof schemas_taskSchema;
   "schemas/toolSchema": typeof schemas_toolSchema;
+  "schemas/userSchema": typeof schemas_userSchema;
   "tasks/private": typeof tasks_private;
   "tasks/public": typeof tasks_public;
   "tools/createHttpTool": typeof tools_createHttpTool;
