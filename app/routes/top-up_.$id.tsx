@@ -6,7 +6,7 @@ import { Id } from 'convex/_generated/dataModel';
 import { Card, CardContent } from '~/components/ui/card';
 import { cn } from '~/lib/utils';
 
-export const Route = createFileRoute('/top-up/$id')({
+export const Route = createFileRoute('/top-up_/$id')({
 	component: RouteComponent,
 });
 

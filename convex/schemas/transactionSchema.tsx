@@ -14,6 +14,8 @@ export const tokenSchema = z.enum([
 	'WLD',
 ]);
 
+export const transactionStatusSchema = z.enum(['started', 'pending', 'confirmed', 'failed']);
+
 export const walletAddressSchema = z.string().describe('The address of the recipient.');
 
 export const transactionSchema = z
@@ -28,7 +30,7 @@ export const transactionSchema = z
 			}),
 		),
 		chain: blockchainSchema,
-		status: z.enum(['pending', 'confirmed', 'failed']),
+		status: transactionStatusSchema,
 		owner: zid('users'),
 		author: authorSchema,
 	})
