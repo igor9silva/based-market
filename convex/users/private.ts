@@ -1,8 +1,9 @@
 import { zid } from 'convex-helpers/server/zod';
+import { internal } from '../_generated/api';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx } from '../_generated/server';
 import { _add, _findAll } from '../components/private';
-import { internalQuery } from '../lib';
+import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
 
 export const _seedIfNeeded = async (
@@ -27,7 +28,24 @@ export const _seedIfNeeded = async (
 		defaultTaskId: refComponent.defaultTaskId,
 		slug: refComponent.slug,
 	})));
+
+	// adding a fake delay for fun
+	const delay = 10000; // ms
+	ctx.scheduler.runAfter(delay, internal.users.private._markAreReady, { userId });
 };
+
+export const _markAreReady = internalMutation({
+	args: {
+		userId: zid('users'),
+	},
+	handler: async (ctx, { userId }) => {
+		//
+		const user = await _findOne(ctx, { userId });
+		if (!user) throw new Error('User not found');
+
+		await ctx.db.patch(userId, { isReady: true });
+	},
+});
 
 export const _findOne = internalQuery({
 	args: {
