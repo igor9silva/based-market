@@ -68,7 +68,7 @@ export default function TaskDetail({
 					</div>
 				</div> */}
 			</CardHeader>
-			<CardContent className="p-4 pt-0">
+			<CardContent className="p-0 md:p-4 md:pt-0">
 				<EditableContent
 					key={task.body}
 					value={task.body ?? ''}
