@@ -51,7 +51,7 @@ export default defineSchema({
 	tools: defineTable(
 		zodToConvex(toolSchema),
 	).index(
-		'by_owner', ['owner'],
+		'by_owner_kind', ['owner', 'kind'],
 	).index(
 		'by_key', ['key'],
 	),

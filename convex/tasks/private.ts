@@ -68,12 +68,19 @@ export const _add = internalMutation({
 	args: {
 		author: authorSchema,
 		owner: zid('users'),
+		title: z.string().optional(),
 		body: z.string(),
 		parentId: zid('tasks').optional(),
 	},
-	handler: async (ctx, { author, owner, body, parentId }) => {
+	handler: async (ctx, { author, owner, body, parentId, title }) => {
 		//
-		const taskId = await ctx.db.insert('tasks', { author, owner, isDone: false, parentId });
+		const taskId = await ctx.db.insert('tasks', {
+			author,
+			owner,
+			isDone: false,
+			parentId,
+			title,
+		});
 
 		await _addAction(ctx, {
 			taskId,
@@ -82,6 +89,24 @@ export const _add = internalMutation({
 			toolKey: 'say',
 			args: { message: body },
 		});
+
+		return taskId;
+	},
+});
+
+export const _addInboxTask = internalMutation({
+	args: {
+		author: authorSchema,
+		owner: zid('users'),
+		title: z.string(),
+		body: z.string(),
+	},
+	handler: async (ctx, { author, owner, title, body }) => {
+		//
+		const taskId = await _add(ctx, { author, owner, title, body });
+
+		// TODO: create a 2nd decision tool, for onboarding
+		// TODO: insert a few actions
 
 		return taskId;
 	},

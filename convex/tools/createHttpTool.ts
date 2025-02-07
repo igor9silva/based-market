@@ -1,34 +1,35 @@
-import { tool } from 'ai';
+import { tool as AITool } from 'ai';
 import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { toolSchema } from '../schemas/toolSchema';
+import { httpToolSchema } from '../schemas/toolSchema';
 import { stringToZod } from '../utils/zodToString';
 
 export function createHttpTool(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
-	config: z.infer<typeof toolSchema>,
+	tool: z.infer<typeof httpToolSchema>,
 ) {
 	const metadata = {
-		description: config.description,
-		parameters: stringToZod(config.parametersSchema),
+		description: tool.description,
+		parameters: stringToZod(tool.parametersSchema),
 	};
 
-	if (!action) return tool(metadata);
+	if (!action) return AITool(metadata);
 
-	return tool({
+	return AITool({
 		...metadata,
 		execute: async (args) => {
 			//
-			console.debug('Running tool', config.key, args);
+			console.debug('Running tool', tool.key, args);
 
-			const url = new URL(config.http.url);
-			const headers = { ...config.http.headers };
+			const config = tool.config;
+			const url = new URL(config.url);
+			const headers = { ...config.headers };
 
 			// apply parameter mappings and compute the request body
-			const bodyData = config.http.paramMappings.reduce((body, { source, target, type }) => {
+			const bodyData = config.paramMappings.reduce((body, { source, target, type }) => {
 				//
 				const value = args[source as keyof typeof args];
 
@@ -49,13 +50,13 @@ export function createHttpTool(
 
 				return body;
 				//
-			}, config.http.body?.template ?? {});
+			}, config.body?.template ?? {});
 
-			console.debug('requesting', config.http.method, url.toString());
+			console.debug('requesting', config.method, url.toString());
 
 			// make the request
 			const response = await fetch(url.toString(), {
-				method: config.http.method,
+				method: config.method,
 				headers,
 				body: Object.keys(bodyData).length > 0 ? JSON.stringify(bodyData) : undefined,
 			});

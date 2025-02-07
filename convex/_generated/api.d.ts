@@ -30,6 +30,7 @@ import type * as schemas_toolSchema from "../schemas/toolSchema.js";
 import type * as schemas_userSchema from "../schemas/userSchema.js";
 import type * as tasks_private from "../tasks/private.js";
 import type * as tasks_public from "../tasks/public.js";
+import type * as tools_createDecisionTool from "../tools/createDecisionTool.js";
 import type * as tools_createHttpTool from "../tools/createHttpTool.js";
 import type * as tools_private from "../tools/private.js";
 import type * as users_private from "../users/private.js";
@@ -72,6 +73,7 @@ declare const fullApi: ApiFromModules<{
   "schemas/userSchema": typeof schemas_userSchema;
   "tasks/private": typeof tasks_private;
   "tasks/public": typeof tasks_public;
+  "tools/createDecisionTool": typeof tools_createDecisionTool;
   "tools/createHttpTool": typeof tools_createHttpTool;
   "tools/private": typeof tools_private;
   "users/private": typeof users_private;

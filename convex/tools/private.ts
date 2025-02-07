@@ -5,21 +5,22 @@ import { internal } from '../_generated/api';
 import { Doc, Id } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
 import { internalQuery } from '../lib';
-import { _askMagicRock } from '../magicRock';
 import { authorSchema } from '../schemas/authorSchema';
 import { toolOwnerSchema } from '../schemas/toolSchema';
+import { createDecisionTool } from './createDecisionTool';
 import { createHttpTool } from './createHttpTool';
 
 // all global tools + all user-defined tools
 export const _findAll = internalQuery({
 	args: {
-		author: authorSchema,
+		owner: zid('users'),
+		kind: z.enum(['decision', 'http']).optional().describe('Filter by tool kind. Grab all if unspecified.'),
 	},
-	handler: async (ctx, { author }) => {
+	handler: async (ctx, { owner, kind }) => {
 		//
 		const [globals, users] = await Promise.all([
-			_findAllByOwner(ctx, { owner: 'built-in' }), // global tools
-			_findAllByOwner(ctx, { owner: author }), // user-defined tools
+			_findAllByOwner(ctx, { owner: 'built-in', kind }), // global tools
+			_findAllByOwner(ctx, { owner, kind }), // user-defined tools
 		]);
 
 		console.debug('tools/globals', globals);
@@ -32,12 +33,17 @@ export const _findAll = internalQuery({
 export const _findAllByOwner = internalQuery({
 	args: {
 		owner: toolOwnerSchema,
+		kind: z.enum(['decision', 'http']).optional().describe('Filter by tool kind. Grab all if unspecified.'),
 	},
-	handler: async (ctx, { owner }) => {
+	handler: async (ctx, { owner, kind }) => {
 		//
 		return await ctx.db
 			.query('tools')
-			.withIndex('by_owner', (q) => q.eq('owner', owner))
+			.withIndex('by_owner_kind', (q) => {
+				const query = q.eq('owner', owner);
+				if (kind) query.eq('kind', kind);
+				return query;
+			})
 			.collect();
 	},
 });
@@ -45,12 +51,45 @@ export const _findAllByOwner = internalQuery({
 export const _allTools = async (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
-	action: Doc<'actions'>,
-) => ({
-	..._mutationTools(ctx, task._id, task.author, task.owner),
-	..._decisionTools(ctx, task, action),
-	...(await _httpTools(ctx, task, action)),
-});
+	action?: Doc<'actions'>,
+) => {
+	//
+	const tools = await ctx.runQuery(internal.tools.private._findAll, {
+		owner: task.owner,
+	});
+
+	return {
+		...toMap(
+			tools.filter((tool) => tool.kind === 'decision'),
+			(tool) => createDecisionTool(ctx, task, action, tool),
+		),
+		...toMap(
+			tools.filter((tool) => tool.kind === 'http'),
+			(tool) => createHttpTool(ctx, task, action, tool),
+		),
+		..._mutationTools(ctx, task._id, task.author, task.owner),
+	};
+};
+
+export const _toolsForMagicRock = async (
+	ctx: ActionCtx, //
+	task: Doc<'tasks'>,
+	action?: Doc<'actions'>,
+) => {
+	//
+	const tools = await ctx.runQuery(internal.tools.private._findAll, {
+		owner: task.owner,
+		kind: 'http',
+	});
+
+	return {
+		...toMap(
+			tools.filter((tool) => tool.kind === 'http'),
+			(tool) => createHttpTool(ctx, task, action, tool),
+		),
+		..._mutationTools(ctx, task._id, task.author, task.owner),
+	};
+};
 
 export const _mutationTools = (
 	ctx: ActionCtx | MutationCtx, //
@@ -137,120 +176,15 @@ export const _mutationTools = (
 	}),
 });
 
-export const _httpTools = async (
-	ctx: ActionCtx, //
-	task: Doc<'tasks'>,
-	action: Doc<'actions'>,
-) => {
-	//
-	const tools = await ctx.runQuery(internal.tools.private._findAll, {
-		author: task.author,
-	});
-
-	return toMap(tools, (tool) => createHttpTool(ctx, task, action, tool));
-};
-
-export const _decisionTools = (
-	ctx: ActionCtx, //
-	task: Doc<'tasks'>,
-	action: Doc<'actions'>,
-) => ({
-	react: tool({
-		description: 'React to the latest actions on the task, and decide the next actions.',
-		parameters: z.object({}),
-		execute: async () => {
-			//
-			const result = await _askMagicRock(ctx, task, action);
-
-			console.debug('magicRock/result/finishReason', result.finishReason);
-
-			switch (result.finishReason) {
-				//
-				case 'tool-calls':
-					//
-					// TODO: think about parallelizing tool calls
-					const toolCalls = await Promise.allSettled(
-						result.toolCalls.map(async (call) => {
-							//
-							return ctx.runMutation(internal.action.private._add, {
-								toolKey: call.toolName,
-								args: call.args,
-								taskId: task._id,
-								author: action._id,
-								owner: task.owner,
-							});
-						}),
-					);
-
-					// TODO: notify errors
-					toolCalls
-						.filter((call) => call.status === 'rejected')
-						.forEach((call) => {
-							console.error('tool call failed', call.reason);
-						});
-
-					break;
-
-				case 'stop':
-					// if (result.text.length < 1) break;
-					await ctx.runMutation(internal.action.private._add, {
-						toolKey: 'say',
-						args: { message: result.text },
-						taskId: task._id,
-						author: action._id,
-						owner: task.owner,
-					});
-					break;
-
-				case 'error':
-					await ctx.runMutation(internal.action.private._add, {
-						toolKey: 'say',
-						args: { message: result.text },
-						taskId: task._id,
-						author: action._id,
-						owner: task.owner,
-					});
-					break;
-
-				case 'content-filter':
-					await ctx.runMutation(internal.action.private._add, {
-						toolKey: 'say',
-						args: { message: `[damn @sama] Content filter hit: ${result.warnings}` },
-						taskId: task._id,
-						author: action._id,
-						owner: task.owner,
-					});
-					break;
-
-				case 'length':
-					// TODO: better handling of max length
-					await ctx.runMutation(internal.action.private._add, {
-						toolKey: 'say',
-						args: { message: `Max length hit: ${result.warnings}` },
-						taskId: task._id,
-						author: action._id,
-						owner: task.owner,
-					});
-					break;
-
-				default:
-					throw new Error(`Unknown finish reason: ${result.finishReason}`);
-			}
-
-			return result.toolCalls.map((call) => `${call.toolName}()`).join(', ') ?? 'done';
-		},
-	}),
-});
-
-function toMap<T>(
-	tools: Doc<'tools'>[], //
-	mapFn: (tool: Doc<'tools'>) => T,
+function toMap<ToolType extends { key: string }, ReturnType>(
+	tools: Array<ToolType>, //
+	mapFn: (tool: ToolType) => ReturnType,
 ) {
 	return tools.reduce(
-		(acc, tool) => {
+		(acc, tool: ToolType) => {
 			acc[tool.key] = mapFn(tool);
 			return acc;
 		},
-		{} as Record<string, T>,
+		{} as Record<string, ReturnType>,
 	);
 }

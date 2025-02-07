@@ -1,7 +1,18 @@
+import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { authorSchema } from './authorSchema';
 
-export const httpConfigSchema = z.object({
+export const toolOwnerSchema = z.union([
+	zid('users'), // user or meseeks-defined tools
+	z.literal('built-in'), // global tools
+]);
+
+export const toolAuthorSchema = z.union([
+	authorSchema, // user or meseeks-defined tools
+	z.literal('built-in'), // global tools
+]);
+
+const httpConfigSchema = z.object({
 	url: z.string().url(),
 	method: z.enum([
 		'GET', //
@@ -30,20 +41,37 @@ export const httpConfigSchema = z.object({
 		.optional(),
 });
 
-export const toolOwnerSchema = z.union([
-	authorSchema, // user or meseeks-defined tools
-	z.literal('built-in'), // global tools
-]);
-
-export const httpToolSchema = z.object({
-	key: z.string(),
-	description: z.string(),
-	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
-	http: httpConfigSchema,
-	owner: toolOwnerSchema, // TODO: change to author
-	// owner: zid('users'), // TODO: implement tool owner
+const decisionConfigSchema = z.object({
+	// TODO: based on AI SDK types
+	// model: z.string().describe('LLM model to use'),
+	// temperature: z.number().describe('Temperature to use'),
+	// maxSteps: z.number().describe('Maximum number of steps to take'),
+	instructions: z.string().describe('Instructions for the decision-making process'),
 });
 
-export const toolSchema = httpToolSchema.describe(
-	'A Tool is an external API call that can be used by the user or Meseeks.', //
-);
+const coreToolSchema = z.object({
+	key: z.string(),
+	description: z.string(),
+	owner: toolOwnerSchema,
+	author: toolAuthorSchema,
+	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
+});
+
+export const httpToolSchema = coreToolSchema.extend({
+	kind: z.literal('http'),
+	config: httpConfigSchema,
+});
+
+export const decisionToolSchema = coreToolSchema.extend({
+	kind: z.literal('decision'),
+	config: decisionConfigSchema,
+});
+
+export const toolSchema = z
+	.union([
+		httpToolSchema, //
+		decisionToolSchema,
+	])
+	.describe(
+		'A Tool is an external API call (service or LLM) that can be used by the user or Meseeks.', //
+	);

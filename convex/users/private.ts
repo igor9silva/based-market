@@ -5,6 +5,7 @@ import { MutationCtx } from '../_generated/server';
 import { _add, _findAll } from '../components/private';
 import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
+import { _addInboxTask } from '../tasks/private';
 
 export const _seedIfNeeded = async (
 	ctx: MutationCtx, //
@@ -17,21 +18,41 @@ export const _seedIfNeeded = async (
 	const user = await _findOne(ctx, { userId });
 	if (user?.isReady) return;
 
-	// get all reference components
-	const refComponents = await _findAll(ctx, { userId: refUser._id });
-
-	// add each one to the seeded user
-	// prettier-ignore
-	await Promise.all(refComponents.map((refComponent) => _add(ctx, {
+	const inboxTaskId = await _addInboxTask(ctx, {
+		author: userId,
 		owner: userId,
-		body: refComponent.body,
-		defaultTaskId: refComponent.defaultTaskId,
-		slug: refComponent.slug,
-	})));
+		title: 'Inbox',
+		body: 'Inbox',
+	});
+
+	await _seedComponentsFromRef(ctx, refUser._id, userId, inboxTaskId);
 
 	// adding a fake delay for fun
 	const delay = 10000; // ms
 	ctx.scheduler.runAfter(delay, internal.users.private._markAreReady, { userId });
+};
+
+const _seedComponentsFromRef = async (
+	ctx: MutationCtx, //
+	refUserId: Id<'users'>,
+	newUserId: Id<'users'>,
+	inboxTaskId: Id<'tasks'>,
+) => {
+	//
+	// get all reference components
+	const refComponents = await _findAll(ctx, { userId: refUserId });
+
+	// add each one to the seeded user
+	await Promise.all(
+		refComponents.map((refComponent) =>
+			_add(ctx, {
+				owner: newUserId,
+				body: refComponent.body,
+				defaultTaskId: refComponent.defaultTaskId ? inboxTaskId : undefined,
+				slug: refComponent.slug,
+			}),
+		),
+	);
 };
 
 export const _markAreReady = internalMutation({
