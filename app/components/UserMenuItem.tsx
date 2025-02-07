@@ -4,6 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 
 import { CaretSortIcon, ComponentPlaceholderIcon } from '@radix-ui/react-icons';
+import { Link } from '@tanstack/react-router';
 import { BadgeCheck, Bell, LogOut, Sparkles } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import {
@@ -77,8 +78,10 @@ export function UserMenuItem() {
 								Account
 							</DropdownMenuItem>
 							<DropdownMenuItem>
-								<ComponentPlaceholderIcon />
-								Billing
+								<Link to="/top-up">
+									<ComponentPlaceholderIcon />
+									Billing
+								</Link>
 							</DropdownMenuItem>
 							<DropdownMenuItem>
 								<Bell />
