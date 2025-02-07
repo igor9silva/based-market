@@ -75,6 +75,28 @@ export const _findAllWaiting = internalQuery({
 	},
 });
 
+export const _findAllByStatus = internalQuery({
+	args: {
+		owner: zid('users'),
+		status: z.enum([
+			'confirmed', //
+			'failed',
+			'pending',
+			'waiting',
+			'discarded by user',
+		]),
+	},
+	handler: async (ctx, { owner, status }) => {
+		return await ctx.db
+			.query('transactions')
+			.withIndex('by_status_owner', (q) =>
+				q
+					.eq('status', status) //
+					.eq('owner', owner),
+			)
+			.collect();
+	},
+});
 export const _fetchTransaction = internalAction({
 	args: {
 		payload: z.record(z.string(), z.any()),

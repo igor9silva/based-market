@@ -8,6 +8,7 @@ import { PaymentError, usePayment } from '~/hooks/usePayment';
 import { cn } from '~/lib/utils';
 
 import { BasicError } from '~/components/BasicError';
+import { transactionStatusColors } from '~/components/TransactionItem';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardFooter } from '~/components/ui/card';
@@ -16,13 +17,6 @@ import { useWorldApp } from '~/hooks/useWorldApp';
 export const Route = createFileRoute('/top-up_/$id')({
 	component: RouteComponent,
 });
-
-const statusColors = {
-	waiting: 'bg-yellow-100 text-yellow-800',
-	pending: 'bg-yellow-100 text-yellow-800',
-	confirmed: 'bg-green-100 text-green-800',
-	failed: 'bg-red-100 text-red-800',
-} as const;
 
 export function RouteComponent({ className }: { className?: string }) {
 	//
@@ -65,7 +59,7 @@ export function RouteComponent({ className }: { className?: string }) {
 						<Badge
 							className={cn(
 								'w-fit px-3 py-1 text-sm font-medium capitalize',
-								statusColors[transaction.status as keyof typeof statusColors],
+								transactionStatusColors[transaction.status as keyof typeof transactionStatusColors],
 							)}
 						>
 							{transaction.status}

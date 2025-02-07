@@ -5,7 +5,7 @@ import { action, mutation, query } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema, transactionAmountSchema } from '../schemas/transactionSchema';
 import { current as getCurrentUser } from '../users/public';
-import { _add, _fetchTransaction, _findAllWaiting, _findOne } from './private';
+import { _add, _fetchTransaction, _findAllByStatus, _findAllWaiting, _findOne } from './private';
 
 export const startTopUp = mutation({
 	args: {
@@ -100,5 +100,21 @@ export const findAllWaiting = query({
 		const currentUser = await getCurrentUser(ctx, {});
 
 		return await _findAllWaiting(ctx, { owner: currentUser._id });
+	},
+});
+
+export const findAllHistory = query({
+	args: {},
+	handler: async (ctx) => {
+		//
+		const currentUser = await getCurrentUser(ctx, {});
+
+		const [confirmed, failed, pending] = await Promise.all([
+			_findAllByStatus(ctx, { owner: currentUser._id, status: 'confirmed' }),
+			_findAllByStatus(ctx, { owner: currentUser._id, status: 'failed' }),
+			_findAllByStatus(ctx, { owner: currentUser._id, status: 'pending' }),
+		]);
+
+		return confirmed.concat(failed).concat(pending);
 	},
 });

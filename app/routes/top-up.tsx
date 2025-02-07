@@ -38,7 +38,26 @@ export function RouteComponent() {
 		);
 	}
 
-	return <TopUpCard />;
+	return (
+		<div className="flex flex-col gap-2 p-4">
+			<TopUpCard />
+			<History />
+		</div>
+	);
+}
+
+function History() {
+	//
+	const query = convexQuery(api.transactions.public.findAllHistory, {});
+	const { data: history } = useSuspenseQuery(query);
+
+	return (
+		<ul className="flex flex-col gap-2">
+			{history.map((transaction) => (
+				<TransactionItem key={transaction._id} transaction={transaction} />
+			))}
+		</ul>
+	);
 }
 
 function TopUpCard() {
