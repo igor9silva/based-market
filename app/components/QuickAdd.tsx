@@ -36,8 +36,8 @@ export function QuickAdd({ className }: { className?: string }) {
 	const handleKeyDown = useSubmitHotkey();
 
 	return (
-		<Card className={cn('max-h-fit border-none rounded-none', className)}>
-			<CardContent className="p-4">
+		<Card className={cn('max-h-fit border-none rounded-none p-4 md:p-0', className)}>
+			<CardContent className="p-0">
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
 					<div className="flex flex-col gap-0.5">
 						<Textarea

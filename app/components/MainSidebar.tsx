@@ -74,6 +74,7 @@ export function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
 		<Sidebar
 			variant={variant}
 			collapsible="icon"
+			className="hidden md:block"
 			style={{ '--sidebar-width-icon': width } as React.CSSProperties}
 			{...props}
 		>

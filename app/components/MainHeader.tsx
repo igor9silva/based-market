@@ -25,7 +25,7 @@ export function MainHeader({ className }: { className?: string }) {
 	};
 
 	return (
-		<header className={cn('flex h-14 items-center justify-between border-b px-2 gap-1', className)}>
+		<header className={cn('flex h-14 items-center justify-between border-b px-0 md:px-2 gap-1', className)}>
 			<div className="flex items-center gap-1">
 				{/* TODO: dynamically enable/disable
 					https://github.com/TanStack/router/discussions/181#discussioncomment-11726923 */}

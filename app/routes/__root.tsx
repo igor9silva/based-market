@@ -8,14 +8,14 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { api } from 'convex/_generated/api';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
-
 import { CommandMenuDialog } from '~/components/CommandMenu';
+
 import { Loading } from '~/components/Loading';
 import { MainHeader } from '~/components/MainHeader';
 import { MainSidebar } from '~/components/MainSidebar';
 import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
-import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
+import { SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
 
 import appCss from '~/styles/app.css?url';
@@ -112,15 +112,17 @@ function Main({ children }: { children: React.ReactNode }) {
 	if (!user.isReady) return <RotatingLoadingMessage />;
 
 	return (
-		<>
-			<MainSidebar />
-			<SidebarInset className="w-full h-svh overflow-hidden flex-col-reverse md:flex-col">
-				<MainHeader className="h-12" />
-				<div className="h-[calc(100%-3rem)]">{children}</div>
-			</SidebarInset>
+		<div className="flex h-svh w-full">
+			<div className="hidden md:block">
+				<MainSidebar />
+			</div>
+			<main className="flex-1 flex flex-col overflow-hidden p-4 md:p-0">
+				<MainHeader />
+				<div className="flex-1 overflow-auto">{children}</div>
+			</main>
 			<Toaster />
 			<CommandMenuDialog />
-		</>
+		</div>
 	);
 }
 
