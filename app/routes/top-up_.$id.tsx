@@ -41,16 +41,18 @@ export function RouteComponent({ className }: { className?: string }) {
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none', className)}>
 			<CardContent className="p-4">
-				<div className="flex flex-col gap-6">
+				<div className="flex flex-col gap-4">
 					{/* Header with Status */}
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
 						<div className="flex flex-col gap-1">
-							<h2 className="text-2xl font-bold">Transaction Details</h2>
-							<p className="text-sm text-muted-foreground">{transaction.reference}</p>
+							<h2 className="text-xl sm:text-2xl font-bold">Transaction Details</h2>
+							<p className="text-xs sm:text-sm text-muted-foreground break-all">
+								{transaction.reference}
+							</p>
 						</div>
 						<Badge
 							className={cn(
-								'px-3 py-1 text-sm font-medium capitalize',
+								'w-fit px-3 py-1 text-sm font-medium capitalize',
 								statusColors[transaction.status as keyof typeof statusColors],
 							)}
 						>
@@ -62,41 +64,38 @@ export function RouteComponent({ className }: { className?: string }) {
 					<div className="flex flex-col gap-2 p-4 bg-muted rounded-lg">
 						{transaction.payload.map(({ symbol, amount }) => (
 							<div key={symbol} className="flex items-center justify-between">
-								<span className="text-base font-medium text-muted-foreground">{symbol}</span>
-								<span className="text-xl font-bold tabular-nums">{amount}</span>
+								<span className="text-sm sm:text-base font-medium text-muted-foreground">{symbol}</span>
+								<span className="text-lg sm:text-xl font-bold tabular-nums">{amount}</span>
 							</div>
 						))}
 					</div>
 
 					{/* Transaction Details */}
 					<div className="grid gap-4">
-						<div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-							<span className="text-muted-foreground">Chain</span>
-							<span className="font-medium capitalize">{transaction.chain}</span>
+						<div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
+							<span className="text-muted-foreground whitespace-nowrap">Chain</span>
+							<span className="font-medium capitalize break-all">{transaction.chain}</span>
 
-							<span className="text-muted-foreground">Recipient</span>
+							<span className="text-muted-foreground whitespace-nowrap">Recipient</span>
 							<span className="font-medium break-all">{transaction.to}</span>
 
-							<span className="text-muted-foreground">Description</span>
-							<span className="font-medium">{transaction.description}</span>
-
-							{/* <span className="text-muted-foreground">Author</span>
-							<span className="font-medium">{transaction.author}</span> */}
+							<span className="text-muted-foreground whitespace-nowrap">Description</span>
+							<span className="font-medium break-all">{transaction.description}</span>
 						</div>
 					</div>
 				</div>
 			</CardContent>
 			{transaction.status === 'waiting' && (
-				<CardFooter className="flex justify-end gap-2 p-4 border-t">
+				<CardFooter className="flex flex-col sm:flex-row justify-end gap-2 p-4 border-t">
 					<Button
-						className="w-24"
+						className="w-full sm:w-24"
 						variant="destructive"
 						disabled={isPending}
 						onClick={() => discard({ transactionId: id as Id<'transactions'> })}
 					>
 						Discard
 					</Button>
-					<Button className="w-24" variant="default" disabled={isPending} onClick={() => pay()}>
+					<Button className="w-full sm:w-24" variant="default" disabled={isPending} onClick={() => pay()}>
 						{isPending ? 'Paying...' : 'Pay'}
 					</Button>
 				</CardFooter>
