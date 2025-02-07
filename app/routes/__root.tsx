@@ -108,6 +108,8 @@ function Main({ children }: { children: React.ReactNode }) {
 	const query = convexQuery(api.users.public.current, {});
 	const { data: user } = useSuspenseQuery(query);
 
+	console.log('isReady?', user.isReady);
+
 	if (!user.isReady) {
 		//
 		const loadingMessages = [
@@ -127,7 +129,7 @@ function Main({ children }: { children: React.ReactNode }) {
 
 		const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
 
-		return <BasicError text={randomMessage} />;
+		return <BasicError text={randomMessage} className="animate-pulse" />;
 	}
 
 	return (
