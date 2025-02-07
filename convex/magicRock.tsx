@@ -137,7 +137,7 @@ function actionToCoreMessage(
 				role: author,
 				content: [
 					`<date>${new Date(action._creationTime).toISOString()}</date>`,
-					`<kind>${action.kind}</kind>`,
+					// `<kind>${action.kind}</kind>`,
 					`<content>${action.result}</content>`,
 				].join('\n'),
 			};
