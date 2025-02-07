@@ -8,6 +8,7 @@ import { Separator } from '~/components/ui/separator';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { useIsMobile } from '~/hooks/useIsMobile';
+import { useMiniApp } from '~/hooks/useMiniApp';
 import { cn } from '~/lib/utils';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state';
@@ -138,7 +139,9 @@ const Sidebar = React.forwardRef<
 		collapsible?: 'offcanvas' | 'icon' | 'none';
 	}
 >(({ side = 'left', variant = 'sidebar', collapsible = 'offcanvas', className, children, ...props }, ref) => {
+	//
 	const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+	const { isInstalled } = useMiniApp();
 
 	if (collapsible === 'none') {
 		return (
@@ -170,6 +173,7 @@ const Sidebar = React.forwardRef<
 					variant === 'floating' || variant === 'inset'
 						? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]'
 						: 'group-data-[collapsible=icon]:w-[--sidebar-width-icon]',
+					isInstalled && 'h-[calc(100svh-theme(spacing.12))]',
 				)}
 			/>
 			<div
@@ -182,6 +186,7 @@ const Sidebar = React.forwardRef<
 					variant === 'floating' || variant === 'inset'
 						? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]'
 						: 'group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l',
+					isInstalled && 'm-6 h-[calc(100svh-theme(spacing.12))]',
 					className,
 				)}
 				{...props}

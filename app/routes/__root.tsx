@@ -5,11 +5,9 @@ import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack
 import { Meta, Scripts } from '@tanstack/start';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import { MiniKit } from '@worldcoin/minikit-js';
 import { api } from 'convex/_generated/api';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
-import { useMemo } from 'react';
 
 import { CommandMenuDialog } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
@@ -19,6 +17,7 @@ import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
 import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
+import { useMiniApp } from '~/hooks/useMiniApp';
 import { cn } from '~/lib/utils';
 
 import appCss from '~/styles/app.css?url';
@@ -92,13 +91,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	//
-	const isInstalled = useMemo(() => {
-		if (typeof window === 'undefined') return false;
-		return MiniKit.isInstalled();
-	}, [MiniKit]);
+	const { isInstalled } = useMiniApp();
 
 	return (
-		<SidebarProvider open={false} className={cn(isInstalled && 'p-8')}>
+		<SidebarProvider open={false} className={cn(isInstalled && 'p-6')}>
 			<AuthLoading>
 				<Loading />
 			</AuthLoading>
