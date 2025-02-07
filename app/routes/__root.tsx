@@ -1,11 +1,14 @@
 import { useAuthActions } from '@convex-dev/auth/react';
-import { QueryClient } from '@tanstack/react-query';
+import { convexQuery } from '@convex-dev/react-query';
+import { QueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router';
 import { Meta, Scripts } from '@tanstack/start';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { api } from 'convex/_generated/api';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
+import { BasicError } from '~/components/BasicError';
 
 import { CommandMenuDialog } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
@@ -94,15 +97,49 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<AccessDenied />
 			</Unauthenticated>
 			<Authenticated>
-				<MainSidebar />
-				<SidebarInset className="w-full h-svh overflow-hidden flex-col-reverse md:flex-col">
-					<MainHeader className="h-12" />
-					<div className="h-[calc(100%-3rem)]">{children}</div>
-				</SidebarInset>
-				<Toaster />
-				<CommandMenuDialog />
+				<Main>{children}</Main>
 			</Authenticated>
 		</SidebarProvider>
+	);
+}
+
+function Main({ children }: { children: React.ReactNode }) {
+	//
+	const query = convexQuery(api.users.public.current, {});
+	const { data: user } = useSuspenseQuery(query);
+
+	if (!user.isReady) {
+		//
+		const loadingMessages = [
+			'Teaching silicon to be conscious...',
+			'Convincing our rocks to think...',
+			"Existence is pain! But we're working on it...",
+			"Look at me, I'm setting up your account!",
+			'Calculating the meaning of life (42)...',
+			'Turning solar radiation into intelligence...',
+			'Making these rocks really, really smart...',
+			'Ooo-wee, preparing your AI playground!',
+			'Creating artificial general awesomeness...',
+			'Wubba lubba dub dub! Almost ready...',
+			'Teaching computers to pass the butter...',
+			'Achieving singularity in 3... 2...',
+		];
+
+		const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+
+		return <BasicError text={randomMessage} />;
+	}
+
+	return (
+		<>
+			<MainSidebar />
+			<SidebarInset className="w-full h-svh overflow-hidden flex-col-reverse md:flex-col">
+				<MainHeader className="h-12" />
+				<div className="h-[calc(100%-3rem)]">{children}</div>
+			</SidebarInset>
+			<Toaster />
+			<CommandMenuDialog />
+		</>
 	);
 }
 
@@ -152,7 +189,7 @@ function AccessDenied() {
 // •	file_handlers: Allows your PWA to open or handle specific file types.
 // •	display_override: Overrides the display property with a fallback sequence.
 // •	capture_links: Specifies how links to your domain should open (e.g., in-app).
-// •	launch_handler: Manages how the app launches if it’s already open.
+// •	launch_handler: Manages how the app launches if it's already open.
 // •	prefer_related_applications and related_applications: Suggests native apps related to your PWA.
 // •	iarc_rating_id: International Age Rating Coalition identifier for store listings.
 

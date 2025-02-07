@@ -14,6 +14,7 @@ import type * as action_public from "../action/public.js";
 import type * as auth_WorldID from "../auth/WorldID.js";
 import type * as auth_WorldWallet from "../auth/WorldWallet.js";
 import type * as auth from "../auth.js";
+import type * as components_private from "../components/private.js";
 import type * as components_public from "../components/public.js";
 import type * as http from "../http.js";
 import type * as lib from "../lib.js";
@@ -31,6 +32,7 @@ import type * as tasks_private from "../tasks/private.js";
 import type * as tasks_public from "../tasks/public.js";
 import type * as tools_createHttpTool from "../tools/createHttpTool.js";
 import type * as tools_private from "../tools/private.js";
+import type * as users_private from "../users/private.js";
 import type * as users_public from "../users/public.js";
 import type * as utils_zodToString from "../utils/zodToString.js";
 
@@ -54,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "auth/WorldID": typeof auth_WorldID;
   "auth/WorldWallet": typeof auth_WorldWallet;
   auth: typeof auth;
+  "components/private": typeof components_private;
   "components/public": typeof components_public;
   http: typeof http;
   lib: typeof lib;
@@ -71,6 +74,7 @@ declare const fullApi: ApiFromModules<{
   "tasks/public": typeof tasks_public;
   "tools/createHttpTool": typeof tools_createHttpTool;
   "tools/private": typeof tools_private;
+  "users/private": typeof users_private;
   "users/public": typeof users_public;
   "utils/zodToString": typeof utils_zodToString;
 }>;

@@ -13,6 +13,11 @@ export const env = createEnv({
 		WLD_CLIENT_ID: z.string().min(1).describe('Worldcoin OAuth client ID.'),
 		WLD_CLIENT_SECRET: z.string().min(1).describe('Worldcoin OAuth client secret.'),
 
+		REF_USER_ID: z
+			.string()
+			.min(1)
+			.describe('Reference user ID. Will be used to seed new users (their components will be cloned).'),
+
 		ALLOWED_DOMAINS: z
 			.string()
 			.min(1)

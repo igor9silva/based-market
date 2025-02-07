@@ -2,6 +2,7 @@ import Google from '@auth/core/providers/google';
 import { convexAuth } from '@convex-dev/auth/server';
 import { WorldID } from './auth/WorldID';
 import { env } from './schemas/envSchema';
+import { _seedIfNeeded } from './users/private';
 
 export const { auth, signIn, signOut, store } = convexAuth({
 	providers: [
@@ -18,6 +19,7 @@ export const { auth, signIn, signOut, store } = convexAuth({
 	callbacks: {
 		async afterUserCreatedOrUpdated(ctx, args) {
 			console.debug('afterUserCreatedOrUpdated', ctx, args);
+			await _seedIfNeeded(ctx, args.userId);
 		},
 	},
 });

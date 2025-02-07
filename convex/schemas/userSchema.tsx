@@ -11,4 +11,5 @@ export const userSchema = z.object({
 	verificationLevel: z.enum(['orb', 'device']).optional(),
 	walletAddress: z.string().optional(), // TODO: write a validator
 	walletChain: z.enum(['worldchain']).optional(),
+	isReady: z.boolean().default(false),
 });
