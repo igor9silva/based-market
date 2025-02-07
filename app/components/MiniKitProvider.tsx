@@ -1,5 +1,4 @@
 import { MiniKit } from '@worldcoin/minikit-js';
-import { env } from 'convex/schemas/envSchema';
 import { createContext, ReactNode, useContext, useEffect } from 'react';
 
 const MiniKitContext = createContext<MiniKit | null>(null);
@@ -16,7 +15,7 @@ export function useMiniKit() {
 export default function MiniKitProvider({ children }: { children: ReactNode }) {
 	//
 	useEffect(() => {
-		MiniKit.install(env.WLD_CLIENT_ID);
+		MiniKit.install();
 	}, []);
 
 	return <MiniKitContext.Provider value={MiniKit}>{children}</MiniKitContext.Provider>;
