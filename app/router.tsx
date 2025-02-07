@@ -7,12 +7,14 @@ import { ConvexProvider, ConvexReactClient } from 'convex/react';
 
 import { CommandMenuProvider } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
+import MiniKitProvider from '~/components/MiniKitProvider';
 import { ThemeProvider } from '~/components/ThemeProvider';
 import { DefaultCatchBoundary } from './components/DefaultCatchBoundary';
 import { NotFound } from './components/NotFound';
 import { routeTree } from './routeTree.gen';
 
 export function createRouter() {
+	//
 	const CONVEX_URL = (import.meta as any).env.VITE_CONVEX_URL as string;
 	if (!CONVEX_URL) throw new Error('missing VITE_CONVEX_URL envar');
 
@@ -48,7 +50,9 @@ export function createRouter() {
 					<ConvexProvider client={convexQueryClient.convexClient}>
 						<ConvexAuthProvider client={convexQueryClient.convexClient}>
 							<ThemeProvider>
-								<CommandMenuProvider>{children}</CommandMenuProvider>
+								<MiniKitProvider>
+									<CommandMenuProvider>{children}</CommandMenuProvider>
+								</MiniKitProvider>
 							</ThemeProvider>
 						</ConvexAuthProvider>
 					</ConvexProvider>
