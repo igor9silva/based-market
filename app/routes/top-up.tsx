@@ -57,7 +57,7 @@ function TopUpCard() {
 		handler: async ({ amount }) => {
 			//
 			const transaction = await startTopUp({
-				payload: [{ symbol: 'USDCE', amount: amount }],
+				payload: [{ symbol: 'WLD', amount: amount }],
 			});
 
 			navigate({ to: '/top-up/$id', params: { id: transaction._id } });
@@ -89,7 +89,7 @@ function TopUpCard() {
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
 					<div className="flex flex-col gap-0.5">
 						<p className="font-semibold">Amount $USD</p>
-						<Input type="number" name="amount" placeholder="Amount" required defaultValue={10} />
+						<Input type="number" name="amount" placeholder="Amount" required defaultValue={0.1} />
 					</div>
 					<Button variant="default" type="submit">
 						Top up
