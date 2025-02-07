@@ -14,7 +14,13 @@ export const tokenSchema = z.enum([
 	'WLD',
 ]);
 
-export const transactionStatusSchema = z.enum(['waiting', 'pending', 'confirmed', 'failed', 'discarded by user']);
+export const transactionStatusSchema = z.enum([
+	'waiting', //
+	'pending',
+	'confirmed',
+	'failed',
+	'discarded by user',
+]);
 
 export const walletAddressSchema = z.string().describe('The address of the recipient.');
 
@@ -26,7 +32,7 @@ export const transactionSchema = z
 		payload: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: z.string(),
+				amount: z.number().int('Must be an integer number.'),
 			}),
 		),
 		chain: blockchainSchema,

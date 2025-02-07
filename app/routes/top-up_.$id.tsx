@@ -4,14 +4,24 @@ import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
+import { usePayment } from '~/hooks/usePayment';
+import { cn } from '~/lib/utils';
+
+import { BasicError } from '~/components/BasicError';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardFooter } from '~/components/ui/card';
-import { cn } from '~/lib/utils';
 
 export const Route = createFileRoute('/top-up_/$id')({
 	component: RouteComponent,
 });
+
+const statusColors = {
+	waiting: 'bg-yellow-100 text-yellow-800',
+	pending: 'bg-yellow-100 text-yellow-800',
+	confirmed: 'bg-green-100 text-green-800',
+	failed: 'bg-red-100 text-red-800',
+} as const;
 
 export function RouteComponent({ className }: { className?: string }) {
 	//
@@ -24,12 +34,9 @@ export function RouteComponent({ className }: { className?: string }) {
 
 	const discard = useMutation(api.transactions.public.discard);
 
-	const statusColors = {
-		waiting: 'bg-yellow-100 text-yellow-800',
-		pending: 'bg-yellow-100 text-yellow-800',
-		confirmed: 'bg-green-100 text-green-800',
-		failed: 'bg-red-100 text-red-800',
-	} as const;
+	const { pay, isPending, error } = usePayment(transaction);
+
+	if (error) return <BasicError text={error.message} />;
 
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none', className)}>
@@ -84,12 +91,13 @@ export function RouteComponent({ className }: { className?: string }) {
 					<Button
 						className="w-24"
 						variant="destructive"
+						disabled={isPending}
 						onClick={() => discard({ transactionId: id as Id<'transactions'> })}
 					>
 						Discard
 					</Button>
-					<Button className="w-24" variant="default">
-						Pay
+					<Button className="w-24" variant="default" disabled={isPending} onClick={() => pay()}>
+						{isPending ? 'Paying...' : 'Pay'}
 					</Button>
 				</CardFooter>
 			)}

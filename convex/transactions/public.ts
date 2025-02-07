@@ -1,17 +1,18 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { mutation, query } from '../lib';
+import { api, internal } from '../_generated/api';
+import { action, mutation, query } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/transactionSchema';
 import { current as getCurrentUser } from '../users/public';
-import { _add, _findAllWaiting, _findOne } from './private';
+import { _add, _fetchTransaction, _findAllWaiting, _findOne } from './private';
 
 export const startTopUp = mutation({
 	args: {
 		payload: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: z.string(),
+				amount: z.number().int(),
 			}),
 		),
 		description: z.string().optional(),
@@ -39,21 +40,43 @@ export const startTopUp = mutation({
 	},
 });
 
+export const confirmPayment = action({
+	args: {
+		transactionId: zid('transactions'),
+		finalPayload: z.record(z.string(), z.any()),
+	},
+	handler: async (ctx, { transactionId, finalPayload }) => {
+		//
+		const transaction = await ctx.runQuery(api.transactions.public.findOne, { transactionId });
+
+		if (transaction.status !== 'waiting') throw new Error('Transaction not waiting');
+
+		const payload = await _fetchTransaction(ctx, { payload: finalPayload });
+		console.debug('payload', payload);
+
+		// optimistically confirm the transaction.
+		if (payload.reference === transactionId && payload.status != 'failed') {
+			await ctx.runMutation(internal.transactions.private._finish, { transactionId, status: 'confirmed' });
+		} else {
+			await ctx.runMutation(internal.transactions.private._finish, { transactionId, status: 'failed' });
+		}
+	},
+});
+
 export const discard = mutation({
 	args: {
 		transactionId: zid('transactions'),
 	},
 	handler: async (ctx, { transactionId }) => {
 		//
-		const currentUser = await getCurrentUser(ctx, {});
-		const transaction = await _findOne(ctx, { transactionId });
+		const transaction = await findOne(ctx, { transactionId });
 
-		if (!transaction) throw new Error('Transaction not found');
-		if (transaction.owner !== currentUser._id) throw new Error('Transaction not found');
+		if (transaction.status !== 'waiting') throw new Error('Transaction cannot be discarded anymore');
 
 		return await ctx.db.patch(transactionId, { status: 'discarded by user' });
 	},
 });
+
 export const findOne = query({
 	args: {
 		transactionId: zid('transactions'),

@@ -18,6 +18,8 @@ export const env = createEnv({
 		WLD_CLIENT_ID: z.string().min(1).describe('Worldcoin OAuth client ID.'),
 		WLD_CLIENT_SECRET: z.string().min(1).describe('Worldcoin OAuth client secret.'),
 
+		WLD_PORTAL_API_KEY: z.string().min(1).describe('Worldcoin Portal API key.'),
+
 		REF_USER_ID: z
 			.string()
 			.min(1)

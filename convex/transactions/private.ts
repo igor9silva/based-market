@@ -1,7 +1,8 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { internalMutation, internalQuery } from '../lib';
+import { internalAction, internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
+import { env } from '../schemas/envSchema';
 import { blockchainSchema, tokenSchema, walletAddressSchema } from '../schemas/transactionSchema';
 
 export const _add = internalMutation({
@@ -13,7 +14,7 @@ export const _add = internalMutation({
 		payload: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: z.string(),
+				amount: z.number().int(),
 			}),
 		),
 		chain: blockchainSchema,
@@ -32,6 +33,16 @@ export const _add = internalMutation({
 		});
 
 		return transactionId;
+	},
+});
+
+export const _finish = internalMutation({
+	args: {
+		transactionId: zid('transactions'),
+		status: z.enum(['confirmed', 'failed']),
+	},
+	handler: async (ctx, { transactionId, status }) => {
+		return await ctx.db.patch(transactionId, { status });
 	},
 });
 
@@ -57,5 +68,34 @@ export const _findAllWaiting = internalQuery({
 					.eq('owner', owner),
 			)
 			.collect();
+	},
+});
+
+export const _fetchTransaction = internalAction({
+	args: {
+		payload: z.record(z.string(), z.any()),
+	},
+	handler: async (ctx, { payload }) => {
+		//
+		const response = await fetch(
+			`https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transaction_id}?app_id=${env.WLD_CLIENT_ID}`,
+			{
+				method: 'GET',
+				headers: { Authorization: `Bearer ${env.WLD_PORTAL_API_KEY}` },
+			},
+		);
+
+		return (await response.json()) as {
+			reference: string;
+			transaction_hash: string;
+			status: 'pending' | 'mined' | 'failed';
+			from: string;
+			chain: 'worldchain';
+			timestamp: string; // ISO 8601
+			token_amount: string; // amount in BigInt with 6 decimals
+			token: string;
+			to: string;
+			app_id: string;
+		};
 	},
 });

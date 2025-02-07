@@ -56,8 +56,8 @@ function TopUpCard() {
 			//
 			const transaction = await startTopUp({
 				payload: [
-					{ symbol: 'USDCE', amount: amount.toString() },
-					{ symbol: 'WLD', amount: '1' },
+					{ symbol: 'USDCE', amount: amount },
+					{ symbol: 'WLD', amount: 1 },
 				],
 			});
 
