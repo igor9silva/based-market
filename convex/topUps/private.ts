@@ -106,6 +106,11 @@ export const _fetchTopUp = internalAction({
 			},
 		);
 
+		if (!response.ok) {
+			console.error('Failed to fetch top up', await response.text());
+			throw new Error('Failed to fetch top up');
+		}
+
 		return (await response.json()) as {
 			reference: string;
 			topUpId: string;
