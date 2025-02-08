@@ -98,6 +98,8 @@ function TransactionKind({
 	}
 
 	switch (transaction.kind) {
+		case 'free credits':
+			return <span className="font-medium">Free Credits</span>;
 		case 'top up':
 			return <span className="font-medium">Top Up</span>;
 		case 'fund task':

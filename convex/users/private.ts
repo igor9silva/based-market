@@ -8,6 +8,7 @@ import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/topUpSchema';
 import { _addInboxTask } from '../tasks/private';
+import { _addFreeCredits } from '../transactions/private';
 
 export const _seedIfNeeded = async (
 	ctx: MutationCtx, //
@@ -23,8 +24,19 @@ export const _seedIfNeeded = async (
 	const inboxTaskId = await _addInboxTask(ctx, {
 		author: userId,
 		owner: userId,
-		title: 'Inbox',
-		body: 'Inbox',
+		title: 'Look at me!',
+		body: 'Inbox', // TODO:
+	});
+
+	const isVerified = user?.verificationLevel === 'orb';
+
+	await _addFreeCredits(ctx, {
+		owner: userId,
+		value: {
+			symbol: 'WLD',
+			amount: isVerified ? 5 : 1,
+		},
+		description: isVerified ? 'Free 500 actions for verified users!' : 'Free 100 actions for non-verified users',
 	});
 
 	await _seedComponentsFromRef(ctx, refUser._id, userId, inboxTaskId);

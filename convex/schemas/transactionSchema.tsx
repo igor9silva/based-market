@@ -7,6 +7,13 @@ export const valueSchema = z.object({
 	amount: z.number(),
 });
 
+export const freeCreditsTransactionSchema = z.object({
+	kind: z.literal('free credits'),
+	value: valueSchema,
+	owner: zid('users'),
+	description: z.string().optional(),
+});
+
 export const topUpTransactionSchema = z.object({
 	kind: z.literal('top up'),
 	value: valueSchema,
@@ -33,7 +40,8 @@ export const refundTaskTransactionSchema = z.object({
 
 export const transactionSchema = z
 	.union([
-		topUpTransactionSchema, //
+		freeCreditsTransactionSchema, //
+		topUpTransactionSchema,
 		taskCostTransactionSchema,
 		refundTaskTransactionSchema,
 	])

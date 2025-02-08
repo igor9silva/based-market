@@ -66,7 +66,7 @@ export const confirmPayment = action({
 				owner: topUp.owner,
 				value: {
 					symbol: tokenSchema.parse(payload.inputToken),
-					amount: topUpAmountSchema.parse(Number(payload.inputTokenAmount)),
+					amount: topUpAmountSchema.parse(topUp.payload.find((p) => p.symbol === payload.inputToken)?.amount),
 				},
 			});
 			//
