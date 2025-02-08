@@ -118,12 +118,12 @@ export const _react = internalMutation({
 			return;
 		}
 
-		// TODO: check if the last 10 actions are from meseeks (action.author !== task.author) before reacting
+		// TODO: check if the last 50 actions are from meseeks (action.author !== task.author) before reacting
 		const allActions = await _findAllActions(ctx, { taskId });
-		const last10Actions = allActions.slice(-10).filter((action) => action.author !== task.author);
+		const last50Actions = allActions.slice(-50).filter((action) => action.author !== task.author);
 
-		if (last10Actions.length >= 10) {
-			console.debug(`Skipping reacting for task ${taskId} because the last 10 actions are from meseeks.`);
+		if (last50Actions.length >= 50) {
+			console.debug(`Skipping reacting for task ${taskId} because the last 50 actions are from meseeks.`);
 			return;
 		}
 
