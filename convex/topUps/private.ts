@@ -100,7 +100,7 @@ export const _fetchTopUp = internalAction({
 		//
 		{
 		const response = await fetch(
-			`https://developer.worldcoin.org/api/v2/minikit/topUp/${payload.transaction_id}?app_id=${env.WLD_CLIENT_ID}`,
+			`https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transaction_id}?app_id=${env.WLD_CLIENT_ID}`,
 			{
 				method: 'GET',
 				headers: { Authorization: `Bearer ${env.WLD_PORTAL_API_KEY}` },
@@ -114,9 +114,9 @@ export const _fetchTopUp = internalAction({
 
 		return (await response.json()) as {
 			reference: string;
-			topUpId: string;
-			topUpHash: string;
-			topUpStatus: 'pending' | 'mined' | 'failed';
+			transactionId: string;
+			transactionHash: string;
+			transactionStatus: 'pending' | 'mined' | 'failed';
 			miniappId: string;
 			updatedAt: string; // ISO 8601
 			network: 'worldchain';
