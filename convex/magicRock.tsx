@@ -32,16 +32,16 @@ export async function _askMagicRock(
 			instructions,
 			//
 			// TODO: dynamic user info based on Inbox
-			`## User information`,
-			`- Language: I speak English (advanced, preferred), Portuguese (native) and a little bit of Spanish.`,
-			`- Location: I live in Setúbal, Portugal.`,
-			`- Timezone: UTC.`, // TODO: dynamic timezone because of the damn DST
-			`- Current time: ${new Date().toISOString()}`,
-			`- Name: Igor Silva`,
-			`- Twitter: @igor9silva`,
-			`- Birthday: 1997-01-22 (aged 27 as of today)`,
-			`- He is your creator. He's actively working on improving you (Meseeks, the app).`,
-			``,
+			// `## User information`,
+			// `- Language: I speak English (advanced, preferred), Portuguese (native) and a little bit of Spanish.`,
+			// `- Location: I live in Setúbal, Portugal.`,
+			// `- Timezone: UTC.`, // TODO: dynamic timezone because of the damn DST
+			// `- Current time: ${new Date().toISOString()}`,
+			// `- Name: Igor Silva`,
+			// `- Twitter: @igor9silva`,
+			// `- Birthday: 1997-01-22 (aged 27 as of today)`,
+			// `- He is your creator. He's actively working on improving you (Meseeks, the app).`,
+			// ``,
 			//
 			`## The task`,
 			promptForTask(task),
