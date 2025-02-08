@@ -98,8 +98,9 @@ export const _fetchTopUp = internalAction({
 	},
 	handler: async (ctx, { payload }) => {
 		//
+		{
 		const response = await fetch(
-			`https://developer.worldcoin.org/api/v2/minikit/topUp/${payload.topUp_id}?app_id=${env.WLD_CLIENT_ID}`,
+			`https://developer.worldcoin.org/api/v2/minikit/topUp/${payload.transaction_id}?app_id=${env.WLD_CLIENT_ID}`,
 			{
 				method: 'GET',
 				headers: { Authorization: `Bearer ${env.WLD_PORTAL_API_KEY}` },
