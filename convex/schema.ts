@@ -31,6 +31,8 @@ export default defineSchema({
 	).index(
 		'by_parent_isDone', ['parentId', 'isDone'],
 	).index(
+		'by_author_isDone', ['author', 'isDone'],
+	).index(
 		'by_embeddingId', ['embeddingId'],
 	),
 

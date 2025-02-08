@@ -7,7 +7,7 @@ import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
-import { _mutationTools } from '../tools/private';
+import { _syncTools } from '../tools/private';
 import { _react, _runNextActionIfNeeded } from './lifecycle/private';
 
 export const _add = internalMutation({
@@ -22,8 +22,8 @@ export const _add = internalMutation({
 		//
 		console.debug(`${author} acts: ${toolKey}`);
 
-		const syncTools = await _mutationTools(ctx, taskId, author, owner);
-		const result = await _executeToolIfSync(syncTools, toolKey, args);
+		const syncTools = await _syncTools(ctx, taskId, author, owner);
+		const result = await _executeToolIfSync(syncTools, toolKey, args); //
 
 		const action = actionSchema.parse({
 			taskId,
@@ -33,6 +33,7 @@ export const _add = internalMutation({
 			status: result ? 'succeeded' : 'enqueued',
 			toolKey,
 			result: result ?? null,
+			costs: result ? [{ symbol: 'WLD', amount: 0.01, description: 'Action' }] : [], // TODO: standardize costs
 			args,
 		});
 

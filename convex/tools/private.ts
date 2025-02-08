@@ -65,6 +65,7 @@ export const _allTools = async (
 			(tool) => createHttpTool(ctx, task, action, tool),
 		),
 		..._mutationTools(ctx, task._id, task.author, task.owner),
+		..._syncTools(ctx, task._id, task.author, task.owner),
 	};
 };
 
@@ -79,13 +80,22 @@ export const _toolsForMagicRock = async (
 		kind: 'http',
 	});
 
-	return {
+	const map = {
 		...toMap(
 			tools.filter((tool) => tool.kind === 'http'),
 			(tool) => createHttpTool(ctx, task, action, tool),
 		),
 		..._mutationTools(ctx, task._id, task.author, task.owner),
+		..._syncTools(ctx, task._id, task.author, task.owner),
 	};
+
+	// Clear execute property from all tools before returning
+	Object.values(map).forEach((tool) => {
+		// @ts-ignore TODO: workaround because I cannot stop AI SDK from calling execute()
+		tool.execute = undefined;
+	});
+
+	return map;
 };
 
 export const _mutationTools = (
@@ -98,14 +108,6 @@ export const _mutationTools = (
 		description: 'Do nothing.',
 		parameters: z.object({}),
 		execute: () => Promise.resolve(),
-	}),
-	say: tool({
-		description: 'Send a text message to the user.',
-		parameters: z.object({
-			message: z.string().describe('The message to send to the user in MDX format.'),
-		}),
-		// prettier-ignore
-		execute: (args) => Promise.resolve(args.message),
 	}),
 	updateTask: tool({
 		description: 'Update the task',
@@ -133,6 +135,17 @@ export const _mutationTools = (
 			...args,
 		})
 		.then(() => `task marked as ${args.isDone ? 'done' : '**not** done'}`),
+	}),
+	addFunds: tool({
+		description: 'Add funds to the task',
+		parameters: z.object({
+			amount: z.number().describe('The amount of funds to add in WLD.'),
+		}),
+		execute: (args) =>
+			ctx.runMutation(internal.tasks.private._addFunds, {
+				taskId,
+				amount: args.amount,
+			}),
 	}),
 	moveTask: tool({
 		description: 'Move the task to a new parent',
@@ -170,6 +183,22 @@ export const _mutationTools = (
 			owner,
 			body: args.body,
 		}),
+	}),
+});
+
+export const _syncTools = (
+	ctx: ActionCtx | MutationCtx, //
+	taskId: Id<'tasks'>,
+	author: z.infer<typeof authorSchema>,
+	owner: Id<'users'>,
+) => ({
+	say: tool({
+		description: 'Send a text message to the user.',
+		parameters: z.object({
+			message: z.string().describe('The message to send to the user in MDX format.'),
+		}),
+		// prettier-ignore
+		execute: (args) => Promise.resolve(args.message),
 	}),
 });
 

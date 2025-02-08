@@ -1,4 +1,5 @@
 import { zid } from 'convex-helpers/server/zod';
+import { z } from 'zod';
 import { internalMutation } from '../lib';
 import { valueSchema } from '../schemas/transactionSchema';
 import { _adjustBalance } from '../users/private';
@@ -8,6 +9,7 @@ export const _addTopUp = internalMutation({
 		value: valueSchema,
 		topUpId: zid('topUps'),
 		owner: zid('users'),
+		description: z.string().optional(),
 	},
 	handler: async (ctx, args) => {
 		//
@@ -30,16 +32,46 @@ export const _addTopUp = internalMutation({
 	},
 });
 
-export const _addTaskCost = internalMutation({
+export const _addFundTask = internalMutation({
 	args: {
 		value: valueSchema,
 		taskId: zid('tasks'),
 		owner: zid('users'),
+		description: z.string().optional(),
 	},
 	handler: async (ctx, args) => {
 		//
 		const transactionId = await ctx.db.insert('transactions', {
-			kind: 'task cost',
+			kind: 'fund task',
+			...args,
+		});
+
+		if (args.value.symbol !== 'WLD') throw new Error('Only WLD is supported for now');
+
+		console.debug('addFundTask transaction', args.taskId, args.value.amount);
+		await _adjustBalance(ctx, {
+			userId: args.owner,
+			value: {
+				symbol: args.value.symbol,
+				amount: args.value.amount,
+			},
+		});
+
+		return transactionId;
+	},
+});
+
+export const _addRefundTask = internalMutation({
+	args: {
+		value: valueSchema,
+		taskId: zid('tasks'),
+		owner: zid('users'),
+		description: z.string().optional(),
+	},
+	handler: async (ctx, args) => {
+		//
+		const transactionId = await ctx.db.insert('transactions', {
+			kind: 'refund task',
 			...args,
 		});
 
@@ -49,7 +81,7 @@ export const _addTaskCost = internalMutation({
 			userId: args.owner,
 			value: {
 				symbol: args.value.symbol,
-				amount: -args.value.amount,
+				amount: args.value.amount,
 			},
 		});
 

@@ -5,6 +5,7 @@ import { Doc, Id } from '../../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
 import { authorSchema } from '../../schemas/authorSchema';
+import { tokenSchema } from '../../schemas/topUpSchema';
 import { _findOne as _findOneTask } from '../../tasks/private';
 import { _allTools } from '../../tools/private';
 import { _add, _findAll as _findAllActions } from '../private';
@@ -21,6 +22,8 @@ export const _execute = internalAction({
 			//
 			// make sure the action is a tool
 			const action = await ctx.runQuery(internal.action.private._findOne, { actionId });
+			console.debug('execute action', action.toolKey, actionId);
+
 			if (action.kind !== 'async') throw new Error('Expected an async action.');
 
 			// grab the task
@@ -35,11 +38,39 @@ export const _execute = internalAction({
 
 			if (!tool) throw new Error(`Unknown tool: ${action.toolKey}`);
 
+			const MINIMUM_COST_WLD = 0.01; // TODO: get this from the tool
+
+			// TODO: check budget
+			// end with failed and a hardcoded component (that has a button that calls addFunds() as the user)
+			if ((task.balanceWLD ?? 0) < MINIMUM_COST_WLD && action.toolKey !== 'addFunds') {
+				throw new Error(`Not enough funds.\n<AddFundsButton taskId='${taskId}' />`);
+			}
+
 			const parsedArgs = tool.parameters.safeParse(action.args);
 			if (!parsedArgs.success) throw new Error(`Invalid tool args: ${parsedArgs.error.message}`);
 
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
 			const result = await tool.execute(parsedArgs.data);
+
+			const ACTION_COST = 0.01; // WLD TODO: env
+			const TOOL_COST = 0.001; // WLD TODO: get from the tool
+
+			const exempt = ['addFunds', 'markAsDone'];
+			const costs = exempt.includes(action.toolKey)
+				? []
+				: [
+						{
+							symbol: 'WLD' as const,
+							amount: ACTION_COST,
+							description: 'Meseeks action',
+						},
+					];
+
+			const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0);
+
+			if (totalCost > 0) {
+				await ctx.runMutation(internal.tasks.private._useFunds, { taskId: action.taskId, amount: totalCost });
+			}
 
 			console.debug(`${actionId} executed with result: ${result}`);
 			if (!result) console.warn(`${actionId} executed with no result`);
@@ -48,6 +79,7 @@ export const _execute = internalAction({
 				actionId,
 				result: result ?? 'unknown',
 				status: 'succeeded',
+				costs: costs,
 			});
 			//
 		} catch (error) {
@@ -58,6 +90,7 @@ export const _execute = internalAction({
 				actionId,
 				result: `${error instanceof Error ? error.message : 'Unknown error'}`,
 				status: 'failed',
+				costs: [],
 			});
 			//
 		} finally {
@@ -113,6 +146,7 @@ export const _react = internalMutation({
 				ctx.db.patch(action._id, {
 					status: 'skipped',
 					result: 'outdated — new actions happened before this action could run',
+					costs: [],
 				}),
 			),
 		);
@@ -144,8 +178,15 @@ export const _resolve = internalMutation({
 		actionId: zid('actions'),
 		result: z.string(),
 		status: z.enum(['succeeded', 'failed']),
+		costs: z.array(
+			z.object({
+				symbol: tokenSchema,
+				amount: z.number(),
+				description: z.string(),
+			}),
+		),
 	},
-	handler: async (ctx, { actionId, result, status }) => {
+	handler: async (ctx, { actionId, result, status, costs }) => {
 		//
 		console.debug(`${actionId} resolved with ${status} and ${result}`);
 
@@ -153,7 +194,7 @@ export const _resolve = internalMutation({
 		if (!action) throw new Error('Action not found');
 		if (action.result) throw new Error('Action result already set');
 
-		await ctx.db.patch(actionId, { result, status });
+		await ctx.db.patch(actionId, { result, status, costs });
 
 		// this if avoids silicon-based life forms to take over
 		if (action.toolKey !== 'react' && action.toolKey !== 'doNothing') {
@@ -168,6 +209,11 @@ async function _setResolved(
 		actionId: Id<'actions'>;
 		result: string;
 		status: 'succeeded' | 'failed';
+		costs: Array<{
+			symbol: z.infer<typeof tokenSchema>;
+			amount: number;
+			description: string;
+		}>;
 	},
 ) {
 	return await ctx.runMutation(internal.action.lifecycle.private._resolve, args);

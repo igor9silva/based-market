@@ -47,6 +47,7 @@ export function Action({
 						result={action.result}
 						toolKey={action.toolKey}
 						args={action.args}
+						costs={action.costs}
 						className={cn({
 							'bg-primary text-primary-foreground': isAuthorCurrentUser && action.toolKey === 'say',
 						})}
@@ -64,10 +65,16 @@ function Result({
 	toolKey,
 	args,
 	className,
+	costs,
 }: {
 	result: string;
 	toolKey: string;
 	args: Record<string, any>;
+	costs: Array<{
+		symbol: string;
+		amount: number;
+		description: string;
+	}>;
 	className?: string;
 }) {
 	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
@@ -94,6 +101,14 @@ function Result({
 				<p>
 					args: <code>{JSON.stringify(args)}</code>
 				</p>
+				<p>costs:</p>
+				<ul>
+					{costs.map((cost) => (
+						<li key={cost.symbol}>
+							{cost.symbol} {cost.amount} ({cost.description})
+						</li>
+					))}
+				</ul>
 				<p>result: {mdx}</p>
 			</CollapsibleContent>
 		</Collapsible>

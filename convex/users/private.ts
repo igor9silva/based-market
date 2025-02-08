@@ -1,11 +1,12 @@
 import { zid } from 'convex-helpers/server/zod';
+import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx } from '../_generated/server';
 import { _add, _findAll } from '../components/private';
 import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
-import { valueSchema } from '../schemas/transactionSchema';
+import { tokenSchema } from '../schemas/topUpSchema';
 import { _addInboxTask } from '../tasks/private';
 
 export const _seedIfNeeded = async (
@@ -72,12 +73,17 @@ export const _markAreReady = internalMutation({
 export const _adjustBalance = internalMutation({
 	args: {
 		userId: zid('users'),
-		value: valueSchema,
+		value: z.object({
+			symbol: tokenSchema,
+			amount: z.number(),
+		}),
 	},
 	handler: async (ctx, { userId, value }) => {
 		//
 		const user = await _findOne(ctx, { userId });
 		if (!user) throw new Error('User not found');
+
+		console.debug('adjust account balance', userId, value.amount);
 
 		if (value.symbol !== 'WLD') throw new Error('Only WLD is supported for now');
 

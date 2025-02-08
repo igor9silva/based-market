@@ -7,6 +7,7 @@ import { Maximize2 } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
+import { WorldcoinLogo } from '~/components/ui/icons/WorldcoinLogo';
 import MDX from '~/components/ui/mdx';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
@@ -41,6 +42,10 @@ export default function TaskDetail({
 								</h1>
 							)}
 						/>
+						<div className="flex flex-row flex-shrink-0 items-center gap-1">
+							<WorldcoinLogo className="size-4" />
+							{(task.balanceWLD ?? 0).toFixed(2)}
+						</div>
 						{showExpand && (
 							<Link to="/$" params={{ _splat: `/chat/${task._id}` }}>
 								<Button variant="ghost" size="icon">

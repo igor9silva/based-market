@@ -2,6 +2,7 @@ import { toast } from 'sonner';
 import { useMDX } from '~/hooks/useMDX';
 
 import { useState } from 'react';
+import { AddFundsButton } from '~/components/AddFundsButton';
 import { ChatHistory } from '~/components/ChatHistory';
 import { Grid } from '~/components/layout/Grid';
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
@@ -20,6 +21,7 @@ import { ScrollArea } from '~/components/ui/scroll-area';
 import { Separator } from '~/components/ui/separator';
 
 const components = {
+	AddFundsButton,
 	ChatHistory,
 	Separator,
 	Button,

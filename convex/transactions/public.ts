@@ -10,6 +10,7 @@ export const findAll = query({
 		return await ctx.db
 			.query('transactions')
 			.withIndex('by_owner', (q) => q.eq('owner', currentUser._id))
+			.order('desc')
 			.collect();
 	},
 });

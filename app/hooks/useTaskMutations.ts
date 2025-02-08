@@ -50,9 +50,24 @@ export function useTaskMutations() {
 		});
 	};
 
+	const addFunds = ({
+		taskId, //
+		amount,
+	}: {
+		taskId: Id<'tasks'>;
+		amount: number;
+	}) => {
+		return act({
+			taskId,
+			toolKey: 'addFunds',
+			args: { amount },
+		});
+	};
+
 	return {
 		say,
 		updateTask,
 		markAsDone,
+		addFunds,
 	};
 }
