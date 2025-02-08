@@ -3,6 +3,7 @@ import { useMDX } from '~/hooks/useMDX';
 
 import { useState } from 'react';
 import { AddFundsButton } from '~/components/AddFundsButton';
+import { Balance } from '~/components/Balance';
 import { ChatHistory } from '~/components/ChatHistory';
 import { EasterEgg } from '~/components/EasterEgg';
 import { Grid } from '~/components/layout/Grid';
@@ -20,10 +21,10 @@ import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
 import { ScrollArea } from '~/components/ui/scroll-area';
 import { Separator } from '~/components/ui/separator';
-
 const components = {
 	AddFundsButton,
 	ChatHistory,
+	Balance,
 	Separator,
 	Button,
 	Card,

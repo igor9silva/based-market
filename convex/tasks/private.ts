@@ -150,10 +150,18 @@ You can do that in messages as well. **Have fun 👻**.
 ------------------------------------
 Oh, there is one more thing. **Verified humans get 500 actions ⚡ for free!**
 <br />
-🚀
+On the command bar you should see your balance: <Balance />
+<br />
+Each task gets it's own budget until it's done. **The larger the budget, the more autonomous it gets.**
+<br />
+If you need more funds, look for "Top up". Zero fees for verified humans, thanks to [World](https://world.org) 😉
+<br />
+Happy hacking 🚀
 `.trim(),
 			isDone: false,
 		});
+
+		await _addFunds(ctx, { taskId, amount: 1 });
 
 		// await _addAction(ctx, {
 		// 	taskId,
