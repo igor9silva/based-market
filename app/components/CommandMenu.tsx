@@ -6,7 +6,8 @@ import { useQuery } from 'convex/react';
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { BadgeCent, Circle, CircleCheckBig, CirclePlus, Inbox, RefreshCcw, Wallet } from 'lucide-react';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { BadgeCent, Circle, CircleCheckBig, CirclePlus, Inbox, LogOut, RefreshCcw, Wallet } from 'lucide-react';
 import {
 	CommandDialog,
 	CommandGroup,
@@ -96,6 +97,8 @@ export function CommandMenuDialog() {
 	const tasks = useQuery(api.tasks.public.findAll, {}); // TODO: server-side search
 	const { taskId: currentTaskId } = useSplatParams();
 
+	const { signOut } = useAuthActions();
+
 	return (
 		<CommandDialog
 			shouldFilter={shouldFilter}
@@ -128,6 +131,10 @@ export function CommandMenuDialog() {
 					<CommandItem value="/balance" keywords={['balance']} onSelect={onSelect}>
 						<Wallet className="mr-2" />
 						Balance
+					</CommandItem>
+					<CommandItem value="signout" keywords={['sign', 'out']} onSelect={() => signOut()}>
+						<LogOut className="mr-2" />
+						Sign out
 					</CommandItem>
 					{currentTaskId && <MarkAsDoneCommandItem taskId={currentTaskId} />}
 				</CommandGroup>
