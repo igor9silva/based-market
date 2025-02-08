@@ -56,7 +56,7 @@ export function ActionIsland({
 			}}
 			animate={{
 				width: isExpanded ? '24rem' : 'auto',
-				top: '0.5rem',
+				top: '0',
 			}}
 			onClick={() => !isExpanded && setIsExpanded(true)}
 		>
