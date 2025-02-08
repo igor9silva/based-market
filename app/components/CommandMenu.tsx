@@ -6,7 +6,7 @@ import { useQuery } from 'convex/react';
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Circle, CircleCheckBig, CirclePlus, DollarSign, Inbox, RefreshCcw, Wallet } from 'lucide-react';
+import { Circle, CircleCheckBig, CirclePlus, Inbox, RefreshCcw, Wallet } from 'lucide-react';
 import {
 	CommandDialog,
 	CommandGroup,
@@ -135,14 +135,14 @@ export function CommandMenuDialog() {
 						<Inbox className="mr-2" />
 						Inbox
 					</CommandItem>
-					<CommandItem
+					{/* <CommandItem
 						value="/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv"
 						keywords={['finances']}
 						onSelect={onSelect}
 					>
 						<DollarSign className="mr-2" />
 						Finances
-					</CommandItem>
+					</CommandItem> */}
 				</CommandGroup>
 
 				{/* All tasks */}

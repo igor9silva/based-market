@@ -19,10 +19,11 @@ export function MainHeader({ className }: { className?: string }) {
 
 	const goBack = () => history.back();
 	const goUp = () => {
-		toast.error('Not implemented. Should go to parent task, if any.'); // TODO: implement
+		toast.error('Coming soon. Will move to parent task, if any.'); // TODO: implement
 	};
 	const share = () => {
-		toast.error('Not implemented. Should share the current page.'); // TODO: implement
+		navigator.clipboard.writeText(window.location.href);
+		toast.success('Link copied to clipboard.');
 	};
 
 	return (
