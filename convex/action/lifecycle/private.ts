@@ -39,10 +39,11 @@ export const _execute = internalAction({
 			if (!tool) throw new Error(`Unknown tool: ${action.toolKey}`);
 
 			const MINIMUM_COST_WLD = 0.01; // TODO: get this from the tool
+			const EXEMPT_TOOLS = ['addFunds', 'markAsDone', 'updateTask'];
 
 			// TODO: check budget
 			// end with failed and a hardcoded component (that has a button that calls addFunds() as the user)
-			if ((task.balanceWLD ?? 0) < MINIMUM_COST_WLD && action.toolKey !== 'addFunds') {
+			if ((task.balanceWLD ?? 0) < MINIMUM_COST_WLD && !EXEMPT_TOOLS.includes(action.toolKey)) {
 				throw new Error(`Not enough funds.\n<AddFundsButton taskId='${taskId}' />`);
 			}
 
@@ -55,8 +56,7 @@ export const _execute = internalAction({
 			const ACTION_COST = 0.01; // WLD TODO: env
 			const TOOL_COST = 0.001; // WLD TODO: get from the tool
 
-			const exempt = ['addFunds', 'markAsDone'];
-			const costs = exempt.includes(action.toolKey)
+			const costs = EXEMPT_TOOLS.includes(action.toolKey)
 				? []
 				: [
 						{

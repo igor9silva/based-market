@@ -24,8 +24,6 @@ export const _seedIfNeeded = async (
 	const inboxTaskId = await _addInboxTask(ctx, {
 		author: userId,
 		owner: userId,
-		title: 'Look at me!',
-		body: 'Inbox', // TODO:
 	});
 
 	const isVerified = user?.verificationLevel === 'orb';

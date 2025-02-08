@@ -122,18 +122,31 @@ export const _addInboxTask = internalMutation({
 	args: {
 		author: authorSchema,
 		owner: zid('users'),
-		title: z.string(),
-		body: z.string(),
 	},
-	handler: async (ctx, { author, owner, title, body }) => {
+	handler: async (ctx, { author, owner }) => {
 		//
 		const taskId = await ctx.db.insert('tasks', {
 			author,
 			owner,
-			title,
-			body,
+			title: 'Look at me!',
+			body: `
+Here you - **or Meseeks** - can add any details on what you are seeking, constraints, instructions, and anything you find relatable.
+
+#### Everything in Meseeks is dynamic, try tapping with 3 fingers (or middle mouse button) here
+<p className="text-sm text-muted-foreground">Tip: try adding \`<QuickAdd />\` to any task or message!</p>
+
+You can do that in messages as well. **Have fun 👻**
+`.trim(),
 			isDone: false,
 		});
+
+		// await _addAction(ctx, {
+		// 	taskId,
+		// 	author,
+		// 	owner,
+		// 	toolKey: 'say',
+		// 	args: { message: body },
+		// });
 
 		// TODO: create a 2nd decision tool, for onboarding
 		// TODO: insert a few actions

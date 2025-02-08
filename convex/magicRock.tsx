@@ -175,7 +175,7 @@ async function renderHistory(
 
 	console.debug('renderHistory', history);
 
-	validateHistory(history);
+	// validateHistory(history);
 
 	console.debug('renderHistory validated');
 
