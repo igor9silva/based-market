@@ -6,7 +6,7 @@ import { Id } from 'convex/_generated/dataModel';
 import { cn } from '~/lib/utils';
 
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
-import { TaskDetailAndChat } from '~/components/TaskDetailAndChat';
+import TaskDetail from '~/components/TaskDetail';
 import { TaskItem } from '~/components/TaskItem';
 
 export function TaskListAndDetail({
@@ -40,9 +40,9 @@ export function TaskListAndDetail({
 			}
 			detail={
 				selectedSubtaskId && (
-					<TaskDetailAndChat
+					<TaskDetail
 						taskId={selectedSubtaskId}
-						showExpand={true}
+						showExpand={false}
 						className="animate-in slide-in-from-right duration-100"
 					/>
 				)

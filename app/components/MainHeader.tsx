@@ -1,5 +1,5 @@
-import { useLocation, useRouter } from '@tanstack/react-router';
-import { ArrowLeft, ArrowUp, Share } from 'lucide-react';
+import { useLocation, useNavigate, useRouter } from '@tanstack/react-router';
+import { ArrowLeft, ArrowRight, ArrowUp, Share } from 'lucide-react';
 import { Suspense } from 'react';
 import { cn } from '~/lib/utils';
 
@@ -12,9 +12,10 @@ import { useSplatParams } from '~/hooks/useSplatParams';
 export function MainHeader({ className }: { className?: string }) {
 	//
 	const { history } = useRouter();
-	const { pathname, searchStr } = useLocation();
+	const { pathname, searchStr, search } = useLocation();
 	const { open: openCommandDialog } = useCommandMenu();
 	const { taskId } = useSplatParams();
+	const navigate = useNavigate();
 
 	const goBack = () => history.back();
 	const goUp = () => {
@@ -39,19 +40,35 @@ export function MainHeader({ className }: { className?: string }) {
 				</Button>
 			</div>
 
-			<Button
-				variant="outline"
-				onClick={openCommandDialog}
-				className="flex w-1/3 justify-between gap-2 bg-muted/40 hover:bg-accent text-muted-foreground truncate p-2"
-			>
-				<span className="text-xs md:text-sm">
-					{pathname}
-					{searchStr}
-				</span>
-				<kbd className="hidden md:inline-flex h-5 items-center gap-0.5 rounded border bg-muted px-1 font-mono font-medium text-muted-foreground text-xs">
-					<span className="text-base">⌘</span>K
-				</kbd>
-			</Button>
+			<div className="w-5/12 flex gap-1">
+				<Button
+					variant="outline"
+					onClick={openCommandDialog}
+					className="flex w-full justify-between gap-2 bg-muted/40 hover:bg-accent text-muted-foreground truncate p-2"
+				>
+					<span className="text-xs md:text-sm">
+						{pathname}
+						{searchStr}
+					</span>
+					<kbd className="hidden md:inline-flex h-5 items-center gap-0.5 rounded border bg-muted px-1 font-mono font-medium text-muted-foreground text-xs">
+						<span className="text-base">⌘</span>K
+					</kbd>
+				</Button>
+				{search.selectedSubtaskId && (
+					<Button
+						variant="ghost"
+						size="icon"
+						className="justify-end [&_svg]:size-5"
+						onClick={(e) => {
+							e.preventDefault();
+							console.log('double click');
+							navigate({ to: '/$', params: { _splat: `/chat/${search.selectedSubtaskId}` } });
+						}}
+					>
+						<ArrowRight />
+					</Button>
+				)}
+			</div>
 
 			<div className="flex gap-1">
 				<Button className="p-2" variant="ghost" onClick={share}>
