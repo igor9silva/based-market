@@ -98,7 +98,6 @@ export const _fetchTopUp = internalAction({
 	},
 	handler: async (ctx, { payload }) => {
 		//
-		{
 		const response = await fetch(
 			`https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transaction_id}?app_id=${env.WLD_CLIENT_ID}`,
 			{
