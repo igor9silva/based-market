@@ -43,7 +43,11 @@ function RouteComponent() {
 					<TransactionItem
 						key={transaction._id}
 						transaction={transaction}
-						taskId={transaction.kind !== 'top up' ? transaction.taskId : undefined}
+						taskId={
+							transaction.kind === 'fund task' || transaction.kind === 'refund task'
+								? transaction.taskId
+								: undefined
+						}
 					/>
 				))}
 			</div>
