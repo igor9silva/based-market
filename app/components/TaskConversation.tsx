@@ -10,6 +10,7 @@ import { Action } from '~/components/Action';
 import { Loading } from '~/components/Loading';
 import { MessageComposer } from '~/components/MessageComposer';
 import { Button } from '~/components/ui/button';
+import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { cn } from '~/lib/utils';
 
 const PAGE_SIZE = 20;
@@ -25,8 +26,7 @@ export function TaskConversation({
 	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(taskQuery);
 
-	const query = convexQuery(api.users.public.current, {});
-	const { data: user } = useSuspenseQuery(query);
+	const user = useCurrentUser();
 
 	const {
 		results: actions,

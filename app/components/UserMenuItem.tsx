@@ -1,7 +1,4 @@
 import { useAuthActions } from '@convex-dev/auth/react';
-import { convexQuery } from '@convex-dev/react-query';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { api } from 'convex/_generated/api';
 
 import { CaretSortIcon, ComponentPlaceholderIcon } from '@radix-ui/react-icons';
 import { Link } from '@tanstack/react-router';
@@ -17,11 +14,11 @@ import {
 	DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '~/components/ui/sidebar';
+import { useCurrentUser } from '~/hooks/useCurrentUser';
 
 export function UserMenuItem() {
 	//
-	const query = convexQuery(api.users.public.current, {});
-	const { data: user } = useSuspenseQuery(query);
+	const user = useCurrentUser();
 
 	const { isMobile } = useSidebar();
 	const { signOut } = useAuthActions();

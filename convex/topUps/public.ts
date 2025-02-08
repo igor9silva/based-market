@@ -55,8 +55,20 @@ export const confirmPayment = action({
 
 		// optimistically confirm the topUp.
 		if (payload.reference === topUpId && payload.topUpStatus !== 'failed') {
+			//
 			// TODO: set to pending and check until confirmed
 			await ctx.runMutation(internal.topUps.private._finish, { topUpId, status: 'confirmed' });
+
+			// actually increase user's balance
+			await ctx.runMutation(internal.transactions.private._addTopUp, {
+				topUpId,
+				owner: topUp.owner,
+				value: {
+					symbol: tokenSchema.parse(payload.inputToken),
+					amount: topUpAmountSchema.parse(payload.inputTokenAmount),
+				},
+			});
+			//
 		} else {
 			await ctx.runMutation(internal.topUps.private._finish, { topUpId, status: 'failed' });
 		}

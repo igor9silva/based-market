@@ -6,6 +6,7 @@ import { componentSchema } from './schemas/componentSchema';
 import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
 import { toolSchema } from './schemas/toolSchema';
 import { topUpSchema } from './schemas/topUpSchema';
+import { transactionSchema } from './schemas/transactionSchema';
 import { userSchema } from './schemas/userSchema';
 
 // prettier-ignore
@@ -68,6 +69,12 @@ export default defineSchema({
 		zodToConvex(componentSchema),
 	).index(
 		'by_owner_slug', ['owner', 'slug'],
+	),
+
+	transactions: defineTable(
+		zodToConvex(transactionSchema),
+	).index(
+		'by_owner', ['owner'],
 	),
 
 	topUps: defineTable(

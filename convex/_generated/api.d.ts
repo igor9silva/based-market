@@ -28,6 +28,7 @@ import type * as schemas_paginationOptionsSchema from "../schemas/paginationOpti
 import type * as schemas_taskSchema from "../schemas/taskSchema.js";
 import type * as schemas_toolSchema from "../schemas/toolSchema.js";
 import type * as schemas_topUpSchema from "../schemas/topUpSchema.js";
+import type * as schemas_transactionSchema from "../schemas/transactionSchema.js";
 import type * as schemas_userSchema from "../schemas/userSchema.js";
 import type * as tasks_private from "../tasks/private.js";
 import type * as tasks_public from "../tasks/public.js";
@@ -36,6 +37,8 @@ import type * as tools_createHttpTool from "../tools/createHttpTool.js";
 import type * as tools_private from "../tools/private.js";
 import type * as topUps_private from "../topUps/private.js";
 import type * as topUps_public from "../topUps/public.js";
+import type * as transactions_private from "../transactions/private.js";
+import type * as transactions_public from "../transactions/public.js";
 import type * as users_private from "../users/private.js";
 import type * as users_public from "../users/public.js";
 import type * as utils_zodToString from "../utils/zodToString.js";
@@ -74,6 +77,7 @@ declare const fullApi: ApiFromModules<{
   "schemas/taskSchema": typeof schemas_taskSchema;
   "schemas/toolSchema": typeof schemas_toolSchema;
   "schemas/topUpSchema": typeof schemas_topUpSchema;
+  "schemas/transactionSchema": typeof schemas_transactionSchema;
   "schemas/userSchema": typeof schemas_userSchema;
   "tasks/private": typeof tasks_private;
   "tasks/public": typeof tasks_public;
@@ -82,6 +86,8 @@ declare const fullApi: ApiFromModules<{
   "tools/private": typeof tools_private;
   "topUps/private": typeof topUps_private;
   "topUps/public": typeof topUps_public;
+  "transactions/private": typeof transactions_private;
+  "transactions/public": typeof transactions_public;
   "users/private": typeof users_private;
   "users/public": typeof users_public;
   "utils/zodToString": typeof utils_zodToString;

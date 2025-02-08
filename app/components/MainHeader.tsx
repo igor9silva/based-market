@@ -6,6 +6,7 @@ import { cn } from '~/lib/utils';
 import { useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { ActionIsland } from '~/components/ActionIsland';
+import { Balance } from '~/components/Balance';
 import { useCommandMenu } from '~/components/CommandMenu';
 import { Button } from '~/components/ui/button';
 import { useSplatParams } from '~/hooks/useSplatParams';
@@ -43,7 +44,7 @@ export function MainHeader({ className }: { className?: string }) {
 				</Button>
 			</div>
 
-			<div className="w-5/12 flex gap-1">
+			<div className="w-1/2 flex gap-1">
 				<Button
 					variant="outline"
 					onClick={openCommandDialog}
@@ -57,11 +58,14 @@ export function MainHeader({ className }: { className?: string }) {
 						<span className="text-base">⌘</span>K
 					</kbd>
 				</Button>
+				<Button className="p-2" variant="ghost" onClick={share}>
+					<Share />
+				</Button>
 				{search.selectedSubtaskId && (
 					<Button
 						variant="ghost"
 						size="icon"
-						className="justify-end [&_svg]:size-5"
+						className="[&_svg]:size-5"
 						onClick={(e) => {
 							e.preventDefault();
 							console.log('double click');
@@ -74,9 +78,7 @@ export function MainHeader({ className }: { className?: string }) {
 			</div>
 
 			<div className="flex gap-1">
-				<Button className="p-2" variant="ghost" onClick={share}>
-					<Share />
-				</Button>
+				<Balance />
 				{taskId && (
 					<Suspense fallback={null}>
 						<ActionIsland

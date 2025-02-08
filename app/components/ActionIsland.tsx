@@ -8,6 +8,7 @@ import { useClickOutside } from '~/hooks/useClickOutside';
 import { cn } from '~/lib/utils';
 
 import { TaskAction } from '~/components/TaskAction';
+import { Button } from '~/components/ui/button';
 
 const TRANSITION = { duration: 0.25, type: 'spring' };
 
@@ -47,7 +48,7 @@ export function ActionIsland({
 		<motion.div
 			ref={ref}
 			className={cn(
-				'z-100 bg-secondary text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[90%]',
+				'z-100 text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[90%]',
 				className,
 			)}
 			transition={TRANSITION}
@@ -102,11 +103,15 @@ const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'actions'>[] }>(({ ac
 });
 Expanded.displayName = 'Expanded';
 
-const Collapsed = forwardRef<HTMLDivElement, { actions: Doc<'actions'>[] }>(({ actions }, ref) => {
+const Collapsed = forwardRef<HTMLButtonElement, { actions: Doc<'actions'>[] }>(({ actions }, ref) => {
 	return (
-		<div ref={ref} className="h-full flex items-center justify-center gap-2 text-sm px-3 truncate">
+		<Button
+			ref={ref}
+			variant="ghost"
+			className="h-full flex items-center justify-center gap-2 text-sm px-3 truncate"
+		>
 			<CollapsedContent actions={actions} />
-		</div>
+		</Button>
 	);
 });
 Collapsed.displayName = 'Collapsed';
@@ -125,7 +130,7 @@ const CollapsedContent = ({ actions }: { actions: Doc<'actions'>[] }) => {
 			<>
 				{/* <Loader2 className="size-4 animate-spin" /> */}
 				<Indicator className="animate-pulse duration-1000 bg-green-500" />
-				<span>acting</span>
+				{/* <span>acting</span> */}
 			</>
 		);
 	}
@@ -150,7 +155,7 @@ const CollapsedContent = ({ actions }: { actions: Doc<'actions'>[] }) => {
 				<span>No activity</span>
 			)} */}
 			<Indicator className="bg-gray-500" />
-			<span>idle</span>
+			{/* <span>idle</span> */}
 		</>
 	);
 };

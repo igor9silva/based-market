@@ -1,11 +1,9 @@
 import { useAuthActions } from '@convex-dev/auth/react';
-import { convexQuery } from '@convex-dev/react-query';
-import { QueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router';
 import { Meta, Scripts } from '@tanstack/start';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import { api } from 'convex/_generated/api';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
 import { CommandMenuDialog } from '~/components/CommandMenu';
@@ -17,6 +15,7 @@ import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
 import { SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
+import { useCurrentUser } from '~/hooks/useCurrentUser';
 
 import appCss from '~/styles/app.css?url';
 
@@ -106,8 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 function Main({ children }: { children: React.ReactNode }) {
 	//
-	const query = convexQuery(api.users.public.current, {});
-	const { data: user } = useSuspenseQuery(query);
+	const user = useCurrentUser();
 
 	if (!user.isReady) return <RotatingLoadingMessage />;
 

@@ -5,6 +5,7 @@ import { MutationCtx } from '../_generated/server';
 import { _add, _findAll } from '../components/private';
 import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
+import { valueSchema } from '../schemas/transactionSchema';
 import { _addInboxTask } from '../tasks/private';
 
 export const _seedIfNeeded = async (
@@ -65,6 +66,22 @@ export const _markAreReady = internalMutation({
 		if (!user) throw new Error('User not found');
 
 		await ctx.db.patch(userId, { isReady: true });
+	},
+});
+
+export const _adjustBalance = internalMutation({
+	args: {
+		userId: zid('users'),
+		value: valueSchema,
+	},
+	handler: async (ctx, { userId, value }) => {
+		//
+		const user = await _findOne(ctx, { userId });
+		if (!user) throw new Error('User not found');
+
+		if (value.symbol !== 'WLD') throw new Error('Only WLD is supported for now');
+
+		return await ctx.db.patch(userId, { balanceWLD: (user.balanceWLD ?? 0) + value.amount });
 	},
 });
 
