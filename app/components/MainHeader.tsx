@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, ArrowUp, Share } from 'lucide-react';
 import { Suspense } from 'react';
 import { cn } from '~/lib/utils';
 
+import { useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { ActionIsland } from '~/components/ActionIsland';
 import { useCommandMenu } from '~/components/CommandMenu';
@@ -16,6 +17,7 @@ export function MainHeader({ className }: { className?: string }) {
 	const { open: openCommandDialog } = useCommandMenu();
 	const { taskId } = useSplatParams();
 	const navigate = useNavigate();
+	const { selectedSubtaskId } = useSearch({ strict: false });
 
 	const goBack = () => history.back();
 	const goUp = () => {
@@ -77,7 +79,10 @@ export function MainHeader({ className }: { className?: string }) {
 				</Button>
 				{taskId && (
 					<Suspense fallback={null}>
-						<ActionIsland taskId={taskId} />
+						<ActionIsland
+							taskId={taskId}
+							className="md:relative" // Add positioning context for desktop
+						/>
 					</Suspense>
 				)}
 			</div>
