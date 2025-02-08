@@ -50,6 +50,7 @@ export const confirmPayment = action({
 
 		if (topUp.status !== 'waiting') throw new Error('TopUp not waiting');
 
+		console.debug('finalPayload from app', finalPayload);
 		const payload = await _fetchTopUp(ctx, { payload: finalPayload });
 		console.debug('payload', payload);
 

@@ -27,12 +27,12 @@ function RouteComponent() {
 				<h1 className="text-2xl font-bold">Balance</h1>
 				<span className="text-sm">
 					Your current non-locked balance is{' '}
-					<span className="font-bold">{(user.balanceWLD ?? 0).toFixed(8)}</span>{' '}
+					<span className="font-bold">{(user.balanceWLD ?? 0).toFixed(6)}</span>{' '}
 					<WorldcoinLogo className="inline-block size-3 align-[-1px]" />.
 				</span>
 				{lockedBalance > 0 && (
 					<span className="text-sm">
-						Other <span className="font-bold">{lockedBalance.toFixed(8)}</span>{' '}
+						Other <span className="font-bold">{lockedBalance.toFixed(6)}</span>{' '}
 						<WorldcoinLogo className="inline-block size-3 align-[-1px]" /> are locked in active tasks.
 					</span>
 				)}
