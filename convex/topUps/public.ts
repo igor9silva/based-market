@@ -55,7 +55,7 @@ export const confirmPayment = action({
 		console.debug('payload', payload);
 
 		// optimistically confirm the topUp.
-		if (payload.reference === topUpId && payload.topUpStatus !== 'failed') {
+		if (payload.reference === topUpId && payload.transactionStatus !== 'failed') {
 			//
 			// TODO: set to pending and check until confirmed
 			await ctx.runMutation(internal.topUps.private._finish, { topUpId, status: 'confirmed' });
