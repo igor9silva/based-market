@@ -4,6 +4,7 @@ import { useMDX } from '~/hooks/useMDX';
 import { useState } from 'react';
 import { AddFundsButton } from '~/components/AddFundsButton';
 import { ChatHistory } from '~/components/ChatHistory';
+import { EasterEgg } from '~/components/EasterEgg';
 import { Grid } from '~/components/layout/Grid';
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
 import { ReversableListAndDetail } from '~/components/layout/ReversableListAndDetail';
@@ -42,6 +43,7 @@ const components = {
 	ListAndDetail,
 	ReversableListAndDetail,
 	ScrollArea,
+	EasterEgg,
 };
 
 export default function MDX({

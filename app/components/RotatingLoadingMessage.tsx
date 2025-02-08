@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { cn } from '~/lib/utils';
 import { BasicError } from './BasicError';
 
-export function RotatingLoadingMessage() {
+export function RotatingLoadingMessage({ className }: { className?: string }) {
 	//
 	const loadingMessages = [
 		'Teaching silicon to be conscious...',
@@ -33,5 +34,5 @@ export function RotatingLoadingMessage() {
 		return () => clearInterval(interval);
 	}, []);
 
-	return <BasicError text={currentMessage} className="animate-pulse" />;
+	return <BasicError text={currentMessage} className={cn('animate-pulse', className)} />;
 }

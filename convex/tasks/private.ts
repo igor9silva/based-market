@@ -130,12 +130,27 @@ export const _addInboxTask = internalMutation({
 			owner,
 			title: 'Look at me!',
 			body: `
-Here you - **or Meseeks** - can add any details on what you are seeking, constraints, instructions, and anything you find relatable.
+## ooh-wee, welcome to Meseeks! 
+Here, everything is a task.
+<br />
+Every time a task gets **marked as done**, we summarize and learn from it, so other tasks can have amplified context on you and everything you've been doing 😌
+<br />
+#### This box is the task description.
+It's a place were you - **or your Meseeks** - can add details on what you are seeking, constraints, instructions, files, or anything you want.
 
-#### Everything in Meseeks is dynamic, try tapping with 3 fingers (or middle mouse button) here
-<p className="text-sm text-muted-foreground">Tip: try adding \`<QuickAdd />\` to any task or message!</p>
+------------------------------------
+Every piece of text is dynamic, **try tapping with 3 fingers** (or middle mouse button) here. Powered by [Markdown](https://en.wikipedia.org/wiki/Markdown) and *React Components* 🔥
+<br />
+You can do that in messages as well. **Have fun 👻**.
 
-You can do that in messages as well. **Have fun 👻**
+------------------------------------
+
+<p className="text-sm text-muted-foreground">**Tip:** type \`<EasterEgg />\` in the chatbox.</p>
+
+------------------------------------
+Oh, there is one more thing. **Verified humans get 500 actions ⚡ for free!**
+<br />
+🚀
 `.trim(),
 			isDone: false,
 		});
