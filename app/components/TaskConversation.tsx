@@ -4,7 +4,7 @@ import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
 import { usePaginatedQuery } from 'convex/react';
 import { MoveDown } from 'lucide-react';
-import { RefCallback, useEffect, useMemo } from 'react';
+import { RefCallback, useEffect, useMemo, useState } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { Action } from '~/components/Action';
 import { Loading } from '~/components/Loading';
@@ -41,7 +41,7 @@ export function TaskConversation({
 	const reversedActions = useMemo(() => [...actions].reverse(), [actions]);
 	const initialRenderDate = useMemo(() => new Date(), []);
 
-	if (status === 'LoadingFirstPage') return <Loading />;
+	if (status === 'LoadingFirstPage' && actions.length === 0) return <Loading />;
 
 	return (
 		<div className={cn('flex flex-col h-full', className)}>
@@ -69,13 +69,20 @@ function StickToBottomContent({
 	children,
 }: {
 	actions: Doc<'actions'>[];
-	status: 'CanLoadMore' | 'LoadingMore' | 'Exhausted';
+	status: 'CanLoadMore' | 'LoadingMore' | 'Exhausted' | 'LoadingFirstPage';
 	loadMore: (n: number) => void;
 	children: React.ReactNode;
 }) {
 	//
 	const { isAtBottom, scrollToBottom, scrollRef } = useStickToBottomContext();
 	const ref = scrollRef as RefCallback<HTMLDivElement> & { current: HTMLDivElement | null }; // type hack, comes odd from useStickToBottomContext
+
+	const [isLoaded, setIsLoaded] = useState(false);
+
+	useEffect(() => {
+		if (isLoaded) return;
+		if (actions.length > 0) setIsLoaded(true);
+	}, [actions.length, isLoaded]);
 
 	// Infinite scroll, loads more when near the top TODO: abstract into a hook
 	useEffect(() => {
@@ -102,9 +109,9 @@ function StickToBottomContent({
 	// Auto-scroll when new events are added and we're at the bottom
 	useEffect(() => {
 		//
-		if (isAtBottom) scrollToBottom('smooth');
+		if (isAtBottom) scrollToBottom(isLoaded ? 'smooth' : 'instant');
 		//
-	}, [actions.length, isAtBottom, scrollToBottom]);
+	}, [actions.length, isAtBottom, isLoaded, scrollToBottom]);
 
 	return (
 		<StickToBottom.Content className="relative h-full">
