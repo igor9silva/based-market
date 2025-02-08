@@ -3,12 +3,7 @@ import { z } from 'zod';
 import { internalAction, internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { env } from '../schemas/envSchema';
-import {
-	blockchainSchema,
-	tokenSchema,
-	transactionAmountSchema,
-	walletAddressSchema,
-} from '../schemas/transactionSchema';
+import { blockchainSchema, tokenSchema, topUpAmountSchema, walletAddressSchema } from '../schemas/topUpSchema';
 
 export const _add = internalMutation({
 	args: {
@@ -19,14 +14,14 @@ export const _add = internalMutation({
 		payload: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: transactionAmountSchema,
+				amount: topUpAmountSchema,
 			}),
 		),
 		chain: blockchainSchema,
 	},
 	handler: async (ctx, { author, owner, to, description, payload, chain }) => {
 		//
-		const transactionId = await ctx.db.insert('transactions', {
+		const topUpId = await ctx.db.insert('topUps', {
 			to,
 			description,
 			payload,
@@ -36,26 +31,26 @@ export const _add = internalMutation({
 			owner,
 		});
 
-		return transactionId;
+		return topUpId;
 	},
 });
 
 export const _finish = internalMutation({
 	args: {
-		transactionId: zid('transactions'),
+		topUpId: zid('topUps'),
 		status: z.enum(['confirmed', 'failed']),
 	},
-	handler: async (ctx, { transactionId, status }) => {
-		return await ctx.db.patch(transactionId, { status });
+	handler: async (ctx, { topUpId, status }) => {
+		return await ctx.db.patch(topUpId, { status });
 	},
 });
 
 export const _findOne = internalQuery({
 	args: {
-		transactionId: zid('transactions'),
+		topUpId: zid('topUps'),
 	},
-	handler: async (ctx, { transactionId }) => {
-		return await ctx.db.get(transactionId);
+	handler: async (ctx, { topUpId }) => {
+		return await ctx.db.get(topUpId);
 	},
 });
 
@@ -65,7 +60,7 @@ export const _findAllWaiting = internalQuery({
 	},
 	handler: async (ctx, { owner }) => {
 		return await ctx.db
-			.query('transactions')
+			.query('topUps')
 			.withIndex('by_status_owner', (q) =>
 				q
 					.eq('status', 'waiting') //
@@ -88,7 +83,7 @@ export const _findAllByStatus = internalQuery({
 	},
 	handler: async (ctx, { owner, status }) => {
 		return await ctx.db
-			.query('transactions')
+			.query('topUps')
 			.withIndex('by_status_owner', (q) =>
 				q
 					.eq('status', status) //
@@ -97,14 +92,14 @@ export const _findAllByStatus = internalQuery({
 			.collect();
 	},
 });
-export const _fetchTransaction = internalAction({
+export const _fetchTopUp = internalAction({
 	args: {
 		payload: z.record(z.string(), z.any()),
 	},
 	handler: async (ctx, { payload }) => {
 		//
 		const response = await fetch(
-			`https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transaction_id}?app_id=${env.WLD_CLIENT_ID}`,
+			`https://developer.worldcoin.org/api/v2/minikit/topUp/${payload.topUp_id}?app_id=${env.WLD_CLIENT_ID}`,
 			{
 				method: 'GET',
 				headers: { Authorization: `Bearer ${env.WLD_PORTAL_API_KEY}` },
@@ -113,9 +108,9 @@ export const _fetchTransaction = internalAction({
 
 		return (await response.json()) as {
 			reference: string;
-			transactionId: string;
-			transactionHash: string;
-			transactionStatus: 'pending' | 'mined' | 'failed';
+			topUpId: string;
+			topUpHash: string;
+			topUpStatus: 'pending' | 'mined' | 'failed';
 			miniappId: string;
 			updatedAt: string; // ISO 8601
 			network: 'worldchain';

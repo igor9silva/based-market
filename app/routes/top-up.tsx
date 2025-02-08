@@ -3,10 +3,10 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
-import { transactionAmountSchema } from 'convex/schemas/transactionSchema';
+import { topUpAmountSchema } from 'convex/schemas/topUpSchema';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { TransactionItem } from '~/components/TransactionItem';
+import { TopUpItem } from '~/components/TopUpItem';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
@@ -19,19 +19,19 @@ export const Route = createFileRoute('/top-up')({
 
 export function RouteComponent() {
 	//
-	const query = convexQuery(api.transactions.public.findAllWaiting, {});
-	const { data: waitingTransactions } = useSuspenseQuery(query);
+	const query = convexQuery(api.topUps.public.findAllWaiting, {});
+	const { data: waitingTopUps } = useSuspenseQuery(query);
 
-	if (waitingTransactions.length > 0) {
+	if (waitingTopUps.length > 0) {
 		return (
 			<div className="flex flex-col gap-2 p-4">
 				<div className="">
-					<h3 className="text-lg font-semibold">You have started transactions</h3>
+					<h3 className="text-lg font-semibold">You have started topUps</h3>
 					<span className="text-sm text-muted-foreground">Pay or cancel them before starting a new one.</span>
 				</div>
 				<ul className="flex flex-col gap-2">
-					{waitingTransactions.map((transaction) => (
-						<TransactionItem key={transaction._id} transaction={transaction} />
+					{waitingTopUps.map((topUp) => (
+						<TopUpItem key={topUp._id} topUp={topUp} />
 					))}
 				</ul>
 			</div>
@@ -48,13 +48,13 @@ export function RouteComponent() {
 
 function History() {
 	//
-	const query = convexQuery(api.transactions.public.findAllHistory, {});
+	const query = convexQuery(api.topUps.public.findAllHistory, {});
 	const { data: history } = useSuspenseQuery(query);
 
 	return (
 		<ul className="flex flex-col gap-2">
-			{history.map((transaction) => (
-				<TransactionItem key={transaction._id} transaction={transaction} />
+			{history.map((topUp) => (
+				<TopUpItem key={topUp._id} topUp={topUp} />
 			))}
 		</ul>
 	);
@@ -63,7 +63,7 @@ function History() {
 function TopUpCard() {
 	//
 	const navigate = useNavigate();
-	const startTopUp = useMutation(api.transactions.public.startTopUp);
+	const startTopUp = useMutation(api.topUps.public.startTopUp);
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
@@ -71,17 +71,17 @@ function TopUpCard() {
 		}),
 		handler: async ({ amount }) => {
 			//
-			const parsed = transactionAmountSchema.safeParse(Number(amount));
+			const parsed = topUpAmountSchema.safeParse(Number(amount));
 			if (!parsed.success) {
 				toast.error('Amount must be $0.1 or more');
 				return;
 			}
 
-			const transaction = await startTopUp({
+			const topUp = await startTopUp({
 				payload: [{ symbol: 'WLD', amount: parsed.data }],
 			});
 
-			navigate({ to: '/top-up/$id', params: { id: transaction._id } });
+			navigate({ to: '/top-up/$id', params: { id: topUp._id } });
 		},
 	});
 

@@ -5,7 +5,7 @@ import { actionSchema } from './schemas/actionSchema';
 import { componentSchema } from './schemas/componentSchema';
 import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
 import { toolSchema } from './schemas/toolSchema';
-import { transactionSchema } from './schemas/transactionSchema';
+import { topUpSchema } from './schemas/topUpSchema';
 import { userSchema } from './schemas/userSchema';
 
 // prettier-ignore
@@ -70,8 +70,8 @@ export default defineSchema({
 		'by_owner_slug', ['owner', 'slug'],
 	),
 
-	transactions: defineTable(
-		zodToConvex(transactionSchema),
+	topUps: defineTable(
+		zodToConvex(topUpSchema),
 	).index(
 		'by_status_owner', ['status', 'owner'],
 	),

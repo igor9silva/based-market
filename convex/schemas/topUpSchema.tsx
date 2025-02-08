@@ -14,7 +14,7 @@ export const tokenSchema = z.enum([
 	'WLD',
 ]);
 
-export const transactionStatusSchema = z.enum([
+export const topUpStatusSchema = z.enum([
 	'waiting', //
 	'pending',
 	'confirmed',
@@ -24,24 +24,21 @@ export const transactionStatusSchema = z.enum([
 
 export const walletAddressSchema = z.string().describe('The address of the recipient.');
 
-export const transactionAmountSchema = z
-	.number()
-	.min(0.1, 'Minimum amount is $0.1')
-	.max(100000, 'That much? Are you sure?');
+export const topUpAmountSchema = z.number().min(0.1, 'Minimum amount is $0.1').max(100000, 'That much? Are you sure?');
 
-export const transactionSchema = z
+export const topUpSchema = z
 	.object({
 		to: walletAddressSchema,
 		description: z.string(),
 		payload: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: transactionAmountSchema,
+				amount: topUpAmountSchema,
 			}),
 		),
 		chain: blockchainSchema,
-		status: transactionStatusSchema,
+		status: topUpStatusSchema,
 		owner: zid('users'),
 		author: authorSchema,
 	})
-	.describe('A transaction to be executed on the blockchain.');
+	.describe('A topUp to be executed on the blockchain.');

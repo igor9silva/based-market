@@ -13,9 +13,9 @@ export class PaymentError extends Error {
 	}
 }
 
-export const usePayment = (transaction: Doc<'transactions'>) => {
+export const usePayment = (topUp: Doc<'topUps'>) => {
 	//
-	const confirmPayment = useAction(api.transactions.public.confirmPayment);
+	const confirmPayment = useAction(api.topUps.public.confirmPayment);
 
 	const { mutate, isPending, error } = useMutation({
 		mutationFn: async () => {
@@ -25,10 +25,10 @@ export const usePayment = (transaction: Doc<'transactions'>) => {
 			}
 
 			const payload: PayCommandInput = {
-				reference: transaction._id,
-				to: transaction.to,
-				description: transaction.description,
-				tokens: transaction.payload.map(({ symbol, amount }) => ({
+				reference: topUp._id,
+				to: topUp.to,
+				description: topUp.description,
+				tokens: topUp.payload.map(({ symbol, amount }) => ({
 					symbol: symbol as Tokens,
 					token_amount: tokenToDecimals(amount, symbol as Tokens).toString(),
 				})),
@@ -37,7 +37,7 @@ export const usePayment = (transaction: Doc<'transactions'>) => {
 			const { finalPayload } = await MiniKit.commandsAsync.pay(payload);
 			if (finalPayload.status === 'error') throw new Error(finalPayload.error_code);
 
-			await confirmPayment({ transactionId: transaction._id, finalPayload });
+			await confirmPayment({ topUpId: topUp._id, finalPayload });
 		},
 	});
 
