@@ -90,7 +90,7 @@ export const _add = internalMutation({
 		title: z.string().optional(),
 		body: z.string(),
 		parentId: zid('tasks').optional(),
-		initialFunds: z.number().min(0).optional(),
+		initialFunds: z.number().min(0).max(100000).optional(),
 	},
 	handler: async (ctx, { author, owner, body, parentId, title, initialFunds }) => {
 		//

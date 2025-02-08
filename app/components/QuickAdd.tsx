@@ -1,10 +1,11 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
+import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
@@ -25,15 +26,19 @@ export function QuickAdd({ className }: { className?: string }) {
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
 			body: z.string().min(1, 'Body is required'),
+			initialFunds: z.coerce.number().min(0).max(100000).default(0.1),
 		}),
-		handler: async (data) => {
-			const taskId = await addTask({ body: data.body });
+		handler: async ({ body, initialFunds }) => {
+			console.debug('QuickAdd', body, initialFunds);
+			const taskId = await addTask({ body, initialFunds });
 			navigate({ to: '/$', params: { _splat: `/chat/${taskId}` } });
 		},
 	});
 
 	// confirm on CMD+Enter
 	const handleKeyDown = useSubmitHotkey();
+
+	const [budget, setBudget] = useState(0.1);
 
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none p-4', className)}>
@@ -47,6 +52,18 @@ export function QuickAdd({ className }: { className?: string }) {
 							required
 							defaultValue={newTaskText}
 							className="min-h-80"
+						/>
+					</div>
+					<div className="flex flex-col gap-0.5">
+						<p className="text-sm text-muted-foreground">Budget</p>
+						<Input
+							type="number"
+							name="initialFunds"
+							min={0}
+							max={100000}
+							step={0.01}
+							value={budget}
+							onChange={(e) => setBudget(parseFloat(e.target.value))}
 						/>
 					</div>
 					<Button variant="default" type="submit">
