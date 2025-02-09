@@ -21,11 +21,6 @@ export const _seedIfNeeded = async (
 	const user = await _findOne(ctx, { userId });
 	if (user?.isReady) return;
 
-	const inboxTaskId = await _addInboxTask(ctx, {
-		author: userId,
-		owner: userId,
-	});
-
 	const isVerified = user?.verificationLevel === 'orb';
 
 	await _addFreeCredits(ctx, {
@@ -35,6 +30,11 @@ export const _seedIfNeeded = async (
 			amount: isVerified ? 5 : 1,
 		},
 		description: isVerified ? 'Free 500 actions for verified users!' : 'Free 100 actions for non-verified users',
+	});
+
+	const inboxTaskId = await _addInboxTask(ctx, {
+		author: userId,
+		owner: userId,
 	});
 
 	await _seedComponentsFromRef(ctx, refUser._id, userId, inboxTaskId);
