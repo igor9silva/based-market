@@ -56,7 +56,6 @@
 		"date-fns": "^4.1.0",
 		"lucide-react": "^0.456.0",
 		"motion": "^11.13.1",
-		"oauth4webapi": "file:./third-party/oauth4webapi",
 		"prism-react-renderer": "^2.4.0",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
