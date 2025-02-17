@@ -7,7 +7,6 @@ import { ConvexProvider, ConvexReactClient } from 'convex/react';
 
 import { CommandMenuProvider } from '~/components/CommandMenu';
 import { Loading } from '~/components/Loading';
-import MiniKitProvider from '~/components/MiniKitProvider';
 import { ThemeProvider } from '~/components/ThemeProvider';
 import { DefaultCatchBoundary } from './components/DefaultCatchBoundary';
 import { NotFound } from './components/NotFound';
@@ -50,9 +49,7 @@ export function createRouter() {
 					<ConvexProvider client={convexQueryClient.convexClient}>
 						<ConvexAuthProvider client={convexQueryClient.convexClient}>
 							<ThemeProvider>
-								<MiniKitProvider>
-									<CommandMenuProvider>{children}</CommandMenuProvider>
-								</MiniKitProvider>
+								<CommandMenuProvider>{children}</CommandMenuProvider>
 							</ThemeProvider>
 						</ConvexAuthProvider>
 					</ConvexProvider>

@@ -46,7 +46,6 @@
 		"@vercel/analytics": "^1.4.1",
 		"@vercel/speed-insights": "^1.1.0",
 		"@vitejs/plugin-react": "^4.3.4",
-		"@worldcoin/minikit-js": "^1.5.0",
 		"ai": "^4.0.22",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "1.2.1",

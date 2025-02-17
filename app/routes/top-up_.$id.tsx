@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
-import { PaymentError, usePayment } from '~/hooks/usePayment';
+import { usePayment } from '~/hooks/usePayment';
 import { cn } from '~/lib/utils';
 
 import { BasicError } from '~/components/BasicError';
@@ -12,7 +12,6 @@ import { topUpStatusColors } from '~/components/TopUpItem';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardFooter } from '~/components/ui/card';
-import { useWorldApp } from '~/hooks/useWorldApp';
 
 export const Route = createFileRoute('/top-up_/$id')({
 	component: RouteComponent,
@@ -21,7 +20,6 @@ export const Route = createFileRoute('/top-up_/$id')({
 export function RouteComponent({ className }: { className?: string }) {
 	//
 	const { id } = Route.useParams();
-	const { openApp } = useWorldApp(`/top-up/${id}`);
 
 	const query = convexQuery(api.topUps.public.findOne, {
 		topUpId: id as Id<'topUps'>,
@@ -37,11 +35,6 @@ export function RouteComponent({ className }: { className?: string }) {
 		return (
 			<div className="flex flex-col items-center justify-center h-full w-full gap-4">
 				<BasicError text={error.message} className="h-fit" />
-				{error instanceof PaymentError && error.code === 'MISSING_MINI_KIT' && (
-					<Button variant="default" onClick={openApp}>
-						Open World App
-					</Button>
-				)}
 			</div>
 		);
 	}
