@@ -3,8 +3,8 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
+import { CircleDollarSign } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
-import { WorldcoinLogo } from '~/components/ui/icons/WorldcoinLogo';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 
 export const Route = createFileRoute('/balance')({
@@ -28,12 +28,12 @@ function RouteComponent() {
 				<span className="text-sm">
 					Your current non-locked balance is{' '}
 					<span className="font-bold">{(user.balanceUSD ?? 0).toFixed(6)}</span>{' '}
-					<WorldcoinLogo className="inline-block size-3 align-[-1px]" />.
+					<CircleDollarSign className="inline-block size-3 align-[-1px]" />.
 				</span>
 				{lockedBalance > 0 && (
 					<span className="text-sm">
 						Other <span className="font-bold">{lockedBalance.toFixed(6)}</span>{' '}
-						<WorldcoinLogo className="inline-block size-3 align-[-1px]" /> are locked in active tasks.
+						<CircleDollarSign className="inline-block size-3 align-[-1px]" /> are locked in active tasks.
 					</span>
 				)}
 			</div>

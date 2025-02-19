@@ -3,11 +3,10 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
-import { Maximize2 } from 'lucide-react';
+import { CircleDollarSign, Maximize2 } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
-import { WorldcoinLogo } from '~/components/ui/icons/WorldcoinLogo';
 import MDX from '~/components/ui/mdx';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
@@ -43,7 +42,7 @@ export default function TaskDetail({
 							)}
 						/>
 						<div className="flex flex-row flex-shrink-0 items-center gap-1">
-							<WorldcoinLogo className="size-4" />
+							<CircleDollarSign className="size-4" />
 							{(task.balanceUSD ?? 0).toFixed(2)}
 						</div>
 						{showExpand && (
