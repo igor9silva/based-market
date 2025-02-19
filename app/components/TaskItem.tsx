@@ -38,7 +38,6 @@ export function TaskItem({
 					className="justify-end [&_svg]:size-5"
 					onClick={(e) => {
 						e.preventDefault();
-						console.log('double click');
 						navigate({ to: '/$', params: { _splat: `/chat/${task._id}` } });
 					}}
 				>
