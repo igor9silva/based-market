@@ -154,7 +154,7 @@ On the command bar you should see your balance: <Balance />
 <br />
 Each task gets it's own budget until it's done. **The larger the budget, the more autonomous it gets.**
 <br />
-If you need more funds, look for "Top up". Zero fees for verified humans, thanks to [World](https://world.org) 😉
+If you need more funds, look for "Top up".
 <br />
 Happy hacking 🚀
 `.trim(),

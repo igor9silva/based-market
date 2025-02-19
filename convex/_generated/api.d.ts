@@ -11,8 +11,6 @@
 import type * as action_lifecycle_private from "../action/lifecycle/private.js";
 import type * as action_private from "../action/private.js";
 import type * as action_public from "../action/public.js";
-import type * as auth_WorldID from "../auth/WorldID.js";
-import type * as auth_WorldWallet from "../auth/WorldWallet.js";
 import type * as auth from "../auth.js";
 import type * as components_private from "../components/private.js";
 import type * as components_public from "../components/public.js";
@@ -60,8 +58,6 @@ declare const fullApi: ApiFromModules<{
   "action/lifecycle/private": typeof action_lifecycle_private;
   "action/private": typeof action_private;
   "action/public": typeof action_public;
-  "auth/WorldID": typeof auth_WorldID;
-  "auth/WorldWallet": typeof auth_WorldWallet;
   auth: typeof auth;
   "components/private": typeof components_private;
   "components/public": typeof components_public;
