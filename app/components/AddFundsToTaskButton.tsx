@@ -10,7 +10,6 @@ import { useTaskMutations } from '~/hooks/useTaskMutations';
 export function AddFundsToTaskButton({ taskId }: { taskId: Id<'tasks'> }) {
 	//
 	const { addFunds } = useTaskMutations();
-	console.debug('taskId', taskId);
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
@@ -29,7 +28,7 @@ export function AddFundsToTaskButton({ taskId }: { taskId: Id<'tasks'> }) {
 			<CardContent className="p-4">
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
 					<div className="flex flex-col gap-0.5">
-						<p className="font-semibold">Amount WLD</p>
+						<p className="font-semibold">Amount USD</p>
 						<Input
 							type="number"
 							name="amount"
