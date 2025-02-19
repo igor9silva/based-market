@@ -61,12 +61,13 @@ export function RouteComponent({ className }: { className?: string }) {
 
 					{/* Amount Section */}
 					<div className="flex flex-col gap-2 p-4 bg-muted rounded-lg">
-						{topUp.payload.map(({ symbol, amount }) => (
-							<div key={symbol} className="flex items-center justify-between">
-								<span className="text-sm sm:text-base font-medium text-muted-foreground">{symbol}</span>
-								<span className="text-lg sm:text-xl font-bold tabular-nums">{amount}</span>
-							</div>
-						))}
+						<div className="flex items-center justify-between">
+							<span className="text-sm sm:text-base font-medium text-muted-foreground">
+								{topUp.symbol}
+							</span>
+							<span className="text-lg sm:text-xl font-bold tabular-nums">{topUp.amount}</span>
+							<span className="font-medium capitalize break-all">{topUp.chain}</span>
+						</div>
 					</div>
 
 					{/* TopUp Details */}
