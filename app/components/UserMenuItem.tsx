@@ -75,7 +75,7 @@ export function UserMenuItem() {
 								Account
 							</DropdownMenuItem>
 							<DropdownMenuItem>
-								<Link to="/top-up">
+								<Link to="/balance">
 									<ComponentPlaceholderIcon />
 									Billing
 								</Link>
