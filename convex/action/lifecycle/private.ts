@@ -44,7 +44,7 @@ export const _execute = internalAction({
 			// TODO: check budget
 			// end with failed and a hardcoded component (that has a button that calls addFunds() as the user)
 			if ((task.balanceWLD ?? 0) < MINIMUM_COST_WLD && !EXEMPT_TOOLS.includes(action.toolKey)) {
-				throw new Error(`Not enough funds.\n<AddFundsButton taskId='${taskId}' />`);
+				throw new Error(`Not enough funds.\n<AddFundsToTaskButton taskId='${taskId}' />`);
 			}
 
 			const parsedArgs = tool.parameters.safeParse(action.args);

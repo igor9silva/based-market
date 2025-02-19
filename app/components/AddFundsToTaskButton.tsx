@@ -7,7 +7,7 @@ import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 
-export function AddFundsButton({ taskId }: { taskId: Id<'tasks'> }) {
+export function AddFundsToTaskButton({ taskId }: { taskId: Id<'tasks'> }) {
 	//
 	const { addFunds } = useTaskMutations();
 	console.debug('taskId', taskId);

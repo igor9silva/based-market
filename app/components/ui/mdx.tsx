@@ -2,7 +2,7 @@ import { toast } from 'sonner';
 import { useMDX } from '~/hooks/useMDX';
 
 import { useState } from 'react';
-import { AddFundsButton } from '~/components/AddFundsButton';
+import { AddFundsToTaskButton } from '~/components/AddFundsToTaskButton';
 import { Balance } from '~/components/Balance';
 import { ChatHistory } from '~/components/ChatHistory';
 import { EasterEgg } from '~/components/EasterEgg';
@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from '~/components/ui/scroll-area';
 import { Separator } from '~/components/ui/separator';
 const components = {
-	AddFundsButton,
+	AddFundsToTaskButton,
 	ChatHistory,
 	Balance,
 	Separator,
