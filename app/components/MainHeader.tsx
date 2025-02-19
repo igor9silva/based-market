@@ -66,7 +66,6 @@ export function MainHeader({ className }: { className?: string }) {
 						className="[&_svg]:size-5"
 						onClick={(e) => {
 							e.preventDefault();
-							console.log('double click');
 							navigate({ to: '/$', params: { _splat: `/chat/${search.selectedSubtaskId}` } });
 						}}
 					>
