@@ -44,7 +44,7 @@ export function MessageComposer({
 						type="button"
 						size="action"
 						variant="secondary"
-						onClick={() => toast.warning('Voice is not available on the Mini App.')}
+						onClick={() => toast.warning('Voice is coming soon 🔥')}
 					>
 						<Mic />
 					</Button>
