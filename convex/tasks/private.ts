@@ -298,9 +298,9 @@ export const _markAsDone = internalMutation({
 			const task = await _findOne(ctx, { taskId });
 			if (!task) throw new Error('Task not found');
 
-			if (task.balanceWLD && task.balanceWLD > 0) {
-				await _removeFunds(ctx, { taskId, amount: task.balanceWLD });
-				await ctx.db.patch(taskId, { balanceWLD: 0 });
+			if (task.balanceUSD && task.balanceUSD > 0) {
+				await _removeFunds(ctx, { taskId, amount: task.balanceUSD });
+				await ctx.db.patch(taskId, { balanceUSD: 0 });
 			}
 		}
 
@@ -318,12 +318,12 @@ export const _useFunds = internalMutation({
 		const task = await _findOne(ctx, { taskId });
 		if (!task) throw new Error('Task not found');
 
-		const currentBalance = task.balanceWLD ?? 0;
+		const currentBalance = task.balanceUSD ?? 0;
 		console.debug('useFunds', amount, currentBalance, taskId);
 		if (currentBalance < amount) throw new Error('Insufficient funds on task');
 
 		// update the task balance
-		await ctx.db.patch(taskId, { balanceWLD: currentBalance - amount });
+		await ctx.db.patch(taskId, { balanceUSD: currentBalance - amount });
 	},
 });
 
@@ -340,7 +340,7 @@ export const _addFunds = internalMutation({
 		const user = await _findOneUser(ctx, { userId: task.owner });
 		if (!user) throw new Error('User not found');
 
-		const currentBalance = user.balanceWLD ?? 0;
+		const currentBalance = user.balanceUSD ?? 0;
 		if (currentBalance < amount) throw new Error('Insufficient funds');
 
 		// create the transaction
@@ -349,13 +349,13 @@ export const _addFunds = internalMutation({
 			taskId,
 			owner: task.owner,
 			value: {
-				symbol: 'WLD',
+				symbol: 'USDCE',
 				amount: -amount,
 			},
 		});
 
 		// update the task balance
-		await ctx.db.patch(taskId, { balanceWLD: (task.balanceWLD ?? 0) + amount });
+		await ctx.db.patch(taskId, { balanceUSD: (task.balanceUSD ?? 0) + amount });
 	},
 });
 
@@ -373,12 +373,12 @@ export const _removeFunds = internalMutation({
 		await _addRefundTask(ctx, {
 			taskId,
 			owner: task.owner,
-			value: { symbol: 'WLD', amount },
+			value: { symbol: 'USDCE', amount },
 			description: 'Refund of unused funds',
 		});
 
 		// update the task balance
-		await ctx.db.patch(taskId, { balanceWLD: (task.balanceWLD ?? 0) - amount });
+		await ctx.db.patch(taskId, { balanceUSD: (task.balanceUSD ?? 0) - amount });
 	},
 });
 

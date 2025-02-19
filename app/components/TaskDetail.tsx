@@ -44,7 +44,7 @@ export default function TaskDetail({
 						/>
 						<div className="flex flex-row flex-shrink-0 items-center gap-1">
 							<WorldcoinLogo className="size-4" />
-							{(task.balanceWLD ?? 0).toFixed(2)}
+							{(task.balanceUSD ?? 0).toFixed(2)}
 						</div>
 						{showExpand && (
 							<Link to="/$" params={{ _splat: `/chat/${task._id}` }}>

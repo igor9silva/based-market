@@ -12,7 +12,7 @@ export function Balance({ className }: { className?: string }) {
 	return (
 		<Button className={cn('p-2', className)} variant="ghost" onClick={() => navigate({ to: '/balance' })}>
 			<WorldcoinLogo className="size-3" />
-			{(user.balanceWLD ?? 0).toFixed(2)}
+			{(user.balanceUSD ?? 0).toFixed(2)}
 		</Button>
 	);
 }

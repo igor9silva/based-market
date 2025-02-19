@@ -139,7 +139,7 @@ export const _mutationTools = (
 	addFunds: tool({
 		description: 'Add funds to the task',
 		parameters: z.object({
-			amount: z.number().describe('The amount of funds to add in WLD.'),
+			amount: z.number().describe('The amount of funds to add in USD.'),
 		}),
 		execute: (args) =>
 			ctx.runMutation(internal.tasks.private._addFunds, {

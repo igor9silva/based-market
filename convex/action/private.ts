@@ -33,7 +33,7 @@ export const _add = internalMutation({
 			status: result ? 'succeeded' : 'enqueued',
 			toolKey,
 			result: result ?? null,
-			costs: result ? [{ symbol: 'WLD', amount: 0.01, description: 'Action' }] : [], // TODO: standardize costs
+			costs: result ? [{ symbol: 'USDCE', amount: 0.01, description: 'Action' }] : [], // TODO: standardize costs
 			args,
 		});
 

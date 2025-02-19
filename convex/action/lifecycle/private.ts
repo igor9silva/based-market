@@ -43,7 +43,7 @@ export const _execute = internalAction({
 
 			// TODO: check budget
 			// end with failed and a hardcoded component (that has a button that calls addFunds() as the user)
-			if ((task.balanceWLD ?? 0) < MINIMUM_COST_WLD && !EXEMPT_TOOLS.includes(action.toolKey)) {
+			if ((task.balanceUSD ?? 0) < MINIMUM_COST_WLD && !EXEMPT_TOOLS.includes(action.toolKey)) {
 				throw new Error(`Not enough funds.\n<AddFundsToTaskButton taskId='${taskId}' />`);
 			}
 
@@ -60,7 +60,7 @@ export const _execute = internalAction({
 				? []
 				: [
 						{
-							symbol: 'WLD' as const,
+							symbol: 'USDCE' as const,
 							amount: ACTION_COST,
 							description: 'Meseeks action',
 						},

@@ -27,7 +27,7 @@ function RouteComponent() {
 				<h1 className="text-2xl font-bold">Balance</h1>
 				<span className="text-sm">
 					Your current non-locked balance is{' '}
-					<span className="font-bold">{(user.balanceWLD ?? 0).toFixed(6)}</span>{' '}
+					<span className="font-bold">{(user.balanceUSD ?? 0).toFixed(6)}</span>{' '}
 					<WorldcoinLogo className="inline-block size-3 align-[-1px]" />.
 				</span>
 				{lockedBalance > 0 && (
