@@ -2,16 +2,15 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { authorSchema } from './authorSchema';
 
-export const blockchainSchema = z
-	.enum([
-		'worldchain', //
-		'optimism',
-	])
-	.default('worldchain');
+export const blockchainSchema = z.enum([
+	'ethereum', //
+	'base',
+	'worldchain',
+	'optimism',
+]);
 
 export const tokenSchema = z.enum([
 	'USDCE', //
-	'WLD',
 ]);
 
 export const topUpStatusSchema = z.enum([
@@ -28,15 +27,11 @@ export const topUpAmountSchema = z.number().min(0.1, 'Minimum amount is $0.1').m
 
 export const topUpSchema = z
 	.object({
+		chain: blockchainSchema,
+		symbol: tokenSchema,
+		amount: topUpAmountSchema,
 		to: walletAddressSchema,
 		description: z.string(),
-		payload: z.array(
-			z.object({
-				symbol: tokenSchema,
-				amount: topUpAmountSchema,
-			}),
-		),
-		chain: blockchainSchema,
 		status: topUpStatusSchema,
 		owner: zid('users'),
 		author: authorSchema,

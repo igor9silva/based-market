@@ -72,16 +72,19 @@ function TopUpCard() {
 		handler: async ({ amount }) => {
 			//
 			const parsed = topUpAmountSchema.safeParse(Number(amount));
+
 			if (!parsed.success) {
 				toast.error('Amount must be $0.1 or more');
 				return;
 			}
 
-			const topUp = await startTopUp({
-				payload: [{ symbol: 'WLD', amount: parsed.data }],
+			const topUpId = await startTopUp({
+				symbol: 'USDCE',
+				amount: parsed.data,
+				chain: 'base',
 			});
 
-			navigate({ to: '/top-up/$id', params: { id: topUp._id } });
+			navigate({ to: '/top-up/$id', params: { id: topUpId } });
 		},
 	});
 
@@ -93,7 +96,7 @@ function TopUpCard() {
 			<CardContent className="p-4">
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
 					<div className="flex flex-col gap-0.5">
-						<p className="font-semibold">$WLD Amount</p>
+						<p className="font-semibold">USD Amount</p>
 						<Input type="string" name="amount" placeholder="Amount" required defaultValue={0.1} />
 					</div>
 					<Button variant="default" type="submit">

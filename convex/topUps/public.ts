@@ -1,23 +1,19 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { api, internal } from '../_generated/api';
-import { action, mutation, query } from '../lib';
+import { mutation, query } from '../lib';
 import { env } from '../schemas/envSchema';
-import { tokenSchema, topUpAmountSchema } from '../schemas/topUpSchema';
+import { blockchainSchema, tokenSchema, topUpAmountSchema } from '../schemas/topUpSchema';
 import { current as getCurrentUser } from '../users/public';
-import { _add, _fetchTopUp, _findAllByStatus, _findAllWaiting, _findOne } from './private';
+import { _add, _findAllByStatus, _findAllWaiting, _findOne, _finish } from './private';
 
 export const startTopUp = mutation({
 	args: {
-		payload: z.array(
-			z.object({
-				symbol: tokenSchema,
-				amount: topUpAmountSchema,
-			}),
-		),
+		chain: blockchainSchema,
+		symbol: tokenSchema,
+		amount: topUpAmountSchema,
 		description: z.string().optional(),
 	},
-	handler: async (ctx, { description, payload }) => {
+	handler: async (ctx, { chain, symbol, amount, description }) => {
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 
@@ -26,53 +22,15 @@ export const startTopUp = mutation({
 			owner: currentUser._id,
 			to: env.PAYMENT_ETH_ADDRESS_WLD_CHAIN,
 			description: description || 'Top up Meseeks Actions.',
-			payload,
+			chain,
+			symbol,
+			amount,
 		});
 
-		const topUp = await _findOne(ctx, { topUpId });
-		if (!topUp) throw new Error('TopUp not found');
+		// TODO: auto-confirm for mocking purposes
+		await _finish(ctx, { topUpId, status: 'confirmed' });
 
-		return {
-			_id: topUp._id,
-			payload: topUp.payload,
-		};
-	},
-});
-
-export const confirmPayment = action({
-	args: {
-		topUpId: zid('topUps'),
-		finalPayload: z.record(z.string(), z.any()),
-	},
-	handler: async (ctx, { topUpId, finalPayload }) => {
-		//
-		const topUp = await ctx.runQuery(api.topUps.public.findOne, { topUpId });
-
-		if (topUp.status !== 'waiting') throw new Error('TopUp not waiting');
-
-		console.debug('finalPayload from app', finalPayload);
-		const payload = await _fetchTopUp(ctx, { payload: finalPayload });
-		console.debug('payload', payload);
-
-		// optimistically confirm the topUp.
-		if (payload.reference === topUpId && payload.transactionStatus !== 'failed') {
-			//
-			// TODO: set to pending and check until confirmed
-			await ctx.runMutation(internal.topUps.private._finish, { topUpId, status: 'confirmed' });
-
-			// actually increase user's balance
-			await ctx.runMutation(internal.transactions.private._addTopUp, {
-				topUpId,
-				owner: topUp.owner,
-				value: {
-					symbol: tokenSchema.parse(payload.inputToken),
-					amount: topUpAmountSchema.parse(topUp.payload.find((p) => p.symbol === payload.inputToken)?.amount),
-				},
-			});
-			//
-		} else {
-			await ctx.runMutation(internal.topUps.private._finish, { topUpId, status: 'failed' });
-		}
+		return topUpId;
 	},
 });
 

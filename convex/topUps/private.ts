@@ -1,8 +1,7 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { internalAction, internalMutation, internalQuery } from '../lib';
+import { internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
-import { env } from '../schemas/envSchema';
 import { blockchainSchema, tokenSchema, topUpAmountSchema, walletAddressSchema } from '../schemas/topUpSchema';
 
 export const _add = internalMutation({
@@ -11,21 +10,18 @@ export const _add = internalMutation({
 		author: authorSchema,
 		to: walletAddressSchema,
 		description: z.string(),
-		payload: z.array(
-			z.object({
-				symbol: tokenSchema,
-				amount: topUpAmountSchema,
-			}),
-		),
 		chain: blockchainSchema,
+		symbol: tokenSchema,
+		amount: topUpAmountSchema,
 	},
-	handler: async (ctx, { author, owner, to, description, payload, chain }) => {
+	handler: async (ctx, { author, owner, to, description, chain, symbol, amount }) => {
 		//
 		const topUpId = await ctx.db.insert('topUps', {
 			to,
 			description,
-			payload,
 			chain,
+			symbol,
+			amount,
 			status: 'waiting',
 			author,
 			owner,
@@ -90,39 +86,5 @@ export const _findAllByStatus = internalQuery({
 					.eq('owner', owner),
 			)
 			.collect();
-	},
-});
-export const _fetchTopUp = internalAction({
-	args: {
-		payload: z.record(z.string(), z.any()),
-	},
-	handler: async (ctx, { payload }) => {
-		//
-		const response = await fetch(
-			`https://developer.worldcoin.org/api/v2/minikit/transaction/${payload.transaction_id}?app_id=${env.WLD_CLIENT_ID}`,
-			{
-				method: 'GET',
-				headers: { Authorization: `Bearer ${env.WLD_PORTAL_API_KEY}` },
-			},
-		);
-
-		if (!response.ok) {
-			console.error('Failed to fetch top up', await response.text());
-			throw new Error('Failed to fetch top up');
-		}
-
-		return (await response.json()) as {
-			reference: string;
-			transactionId: string;
-			transactionHash: string;
-			transactionStatus: 'pending' | 'mined' | 'failed';
-			miniappId: string;
-			updatedAt: string; // ISO 8601
-			network: 'worldchain';
-			fromWalletAddress: string;
-			recipientAddress: string;
-			inputToken: string;
-			inputTokenAmount: string; // amount in BigInt with 6 decimals
-		};
 	},
 });
