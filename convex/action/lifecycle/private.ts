@@ -39,12 +39,12 @@ export const _execute = internalAction({
 			if (!tool) throw new Error(`Unknown tool: ${action.toolKey}`);
 
 			const MINIMUM_COST_WLD = 0.01; // TODO: get this from the tool
-			const EXEMPT_TOOLS = ['addFunds', 'markAsDone', 'updateTask'];
+			const EXEMPT_TOOLS = ['increaseBudget', 'markAsDone', 'updateTask'];
 
 			// TODO: check budget
-			// end with failed and a hardcoded component (that has a button that calls addFunds() as the user)
+			// end with failed and a hardcoded component (that has a button that calls increaseBudget() as the user)
 			if ((task.balanceUSD ?? 0) < MINIMUM_COST_WLD && !EXEMPT_TOOLS.includes(action.toolKey)) {
-				throw new Error(`Not enough funds.\n<AddFundsToTaskButton taskId='${taskId}' />`);
+				throw new Error(`Not enough budget.\n<IncreaseTaskBudgetCard taskId='${taskId}' />`);
 			}
 
 			const parsedArgs = tool.parameters.safeParse(action.args);
@@ -60,7 +60,7 @@ export const _execute = internalAction({
 				? []
 				: [
 						{
-							symbol: 'USDCE' as const,
+							symbol: 'USD' as const,
 							amount: ACTION_COST,
 							description: 'Meseeks action',
 						},

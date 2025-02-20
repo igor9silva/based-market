@@ -107,9 +107,9 @@ function TransactionKind({
 		case 'top up':
 			return <span className="font-medium">Top Up</span>;
 		case 'fund task':
-			return <span className="font-medium">Add funds to task</span>;
+			return <span className="font-medium">Increase task budget</span>;
 		case 'refund task':
-			return <span className="font-medium">Refund from task</span>;
+			return <span className="font-medium">Refund task budget</span>;
 		default:
 			return <span className="font-medium">Unknown</span>;
 	}

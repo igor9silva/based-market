@@ -4,9 +4,11 @@ import { type z } from 'zod';
 export function useHandleSubmit<T extends z.ZodType>({
 	schema,
 	handler,
+	shouldAlwaysClearForm = true,
 }: {
 	schema: T;
-	handler: (data: z.infer<T>) => Promise<void> | void;
+	shouldAlwaysClearForm?: boolean;
+	handler: (data: z.infer<T>, clearForm: () => void) => Promise<void> | void;
 }) {
 	return async (e: FormEvent<HTMLFormElement>) => {
 		//
@@ -20,8 +22,8 @@ export function useHandleSubmit<T extends z.ZodType>({
 		const data = schema.parse(rawData);
 
 		// Reset the form
-		e.currentTarget.reset();
+		if (shouldAlwaysClearForm) e.currentTarget.reset();
 
-		await handler(data);
+		await handler(data, () => e.currentTarget.reset());
 	};
 }

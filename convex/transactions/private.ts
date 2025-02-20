@@ -17,7 +17,7 @@ export const _addFreeCredits = internalMutation({
 			...args,
 		});
 
-		if (args.value.symbol !== 'USDCE') throw new Error('Only USDCE is supported for now');
+		if (args.value.symbol !== 'USD') throw new Error('Only USD is supported for now');
 
 		await _adjustBalance(ctx, {
 			userId: args.owner,
@@ -45,7 +45,7 @@ export const _addTopUp = internalMutation({
 			...args,
 		});
 
-		if (args.value.symbol !== 'USDCE') throw new Error('Only USDCE is supported for now');
+		if (args.value.symbol !== 'USD') throw new Error('Only USD is supported for now');
 
 		await _adjustBalance(ctx, {
 			userId: args.owner,
@@ -73,7 +73,7 @@ export const _addFundTask = internalMutation({
 			...args,
 		});
 
-		if (args.value.symbol !== 'USDCE') throw new Error('Only USDCE is supported for now');
+		if (args.value.symbol !== 'USD') throw new Error('Only USD is supported for now');
 
 		console.debug('addFundTask transaction', args.taskId, args.value.amount);
 		await _adjustBalance(ctx, {
@@ -102,7 +102,7 @@ export const _addRefundTask = internalMutation({
 			...args,
 		});
 
-		if (args.value.symbol !== 'USDCE') throw new Error('Only USDCE is supported for now');
+		if (args.value.symbol !== 'USD') throw new Error('Only USD is supported for now');
 
 		await _adjustBalance(ctx, {
 			userId: args.owner,

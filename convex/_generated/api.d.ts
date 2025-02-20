@@ -39,6 +39,7 @@ import type * as transactions_private from "../transactions/private.js";
 import type * as transactions_public from "../transactions/public.js";
 import type * as users_private from "../users/private.js";
 import type * as users_public from "../users/public.js";
+import type * as utils_errors from "../utils/errors.js";
 import type * as utils_zodToString from "../utils/zodToString.js";
 
 import type {
@@ -86,6 +87,7 @@ declare const fullApi: ApiFromModules<{
   "transactions/public": typeof transactions_public;
   "users/private": typeof users_private;
   "users/public": typeof users_public;
+  "utils/errors": typeof utils_errors;
   "utils/zodToString": typeof utils_zodToString;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

@@ -10,7 +10,7 @@ export const blockchainSchema = z.enum([
 ]);
 
 export const tokenSchema = z.enum([
-	'USDCE', //
+	'USD', //
 ]);
 
 export const topUpStatusSchema = z.enum([

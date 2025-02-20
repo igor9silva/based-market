@@ -9,6 +9,7 @@ import { internalAction, internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { _addFundTask, _addRefundTask } from '../transactions/private';
 import { _findOne as _findOneUser } from '../users/private';
+import { InsufficientAccountFunds, NotFound } from '../utils/errors';
 
 export const _findOne = internalQuery({
 	args: {
@@ -103,7 +104,7 @@ export const _add = internalMutation({
 		});
 
 		if (initialFunds) {
-			await _addFunds(ctx, { taskId, amount: initialFunds });
+			await _increaseBudget(ctx, { taskId, amount: initialFunds });
 		}
 
 		await _addAction(ctx, {
@@ -161,7 +162,7 @@ Happy hacking 🚀
 			isDone: false,
 		});
 
-		await _addFunds(ctx, { taskId, amount: 1 });
+		await _increaseBudget(ctx, { taskId, amount: 1 });
 
 		// await _addAction(ctx, {
 		// 	taskId,
@@ -327,7 +328,7 @@ export const _useFunds = internalMutation({
 	},
 });
 
-export const _addFunds = internalMutation({
+export const _increaseBudget = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		amount: z.number().min(0),
@@ -335,21 +336,21 @@ export const _addFunds = internalMutation({
 	handler: async (ctx, { taskId, amount }) => {
 		//
 		const task = await _findOne(ctx, { taskId });
-		if (!task) throw new Error('Task not found');
+		if (!task) throw NotFound();
 
 		const user = await _findOneUser(ctx, { userId: task.owner });
-		if (!user) throw new Error('User not found');
+		if (!user) throw NotFound();
 
 		const currentBalance = user.balanceUSD ?? 0;
-		if (currentBalance < amount) throw new Error('Insufficient funds');
+		if (currentBalance < amount) throw InsufficientAccountFunds();
 
 		// create the transaction
-		console.debug('addFunds to task', taskId, amount);
+		console.debug('increaseBudget to task', taskId, amount);
 		await _addFundTask(ctx, {
 			taskId,
 			owner: task.owner,
 			value: {
-				symbol: 'USDCE',
+				symbol: 'USD',
 				amount: -amount,
 			},
 		});
@@ -373,7 +374,7 @@ export const _removeFunds = internalMutation({
 		await _addRefundTask(ctx, {
 			taskId,
 			owner: task.owner,
-			value: { symbol: 'USDCE', amount },
+			value: { symbol: 'USD', amount },
 			description: 'Refund of unused funds',
 		});
 

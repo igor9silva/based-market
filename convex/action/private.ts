@@ -8,6 +8,7 @@ import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
 import { _syncTools } from '../tools/private';
+import { INSUFFICIENT_ACCOUNT_FUNDS_ERROR, isError } from '../utils/errors';
 import { _react, _runNextActionIfNeeded } from './lifecycle/private';
 
 export const _add = internalMutation({
@@ -33,7 +34,7 @@ export const _add = internalMutation({
 			status: result ? 'succeeded' : 'enqueued',
 			toolKey,
 			result: result ?? null,
-			costs: result ? [{ symbol: 'USDCE', amount: 0.01, description: 'Action' }] : [], // TODO: standardize costs
+			costs: result ? [{ symbol: 'USD', amount: 0.01, description: 'Action' }] : [], // TODO: standardize costs
 			args,
 		});
 
@@ -136,7 +137,7 @@ function _findByStatus(
 		.order('asc');
 }
 
-function _executeToolIfSync(
+async function _executeToolIfSync(
 	syncTools: Record<string, CoreTool>,
 	toolKey: string,
 	args: Record<string, any>,
@@ -146,6 +147,14 @@ function _executeToolIfSync(
 
 	const tool = syncTools[toolKey as keyof typeof syncTools];
 
-	// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
-	return tool.execute(args);
+	try {
+		// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
+		return await tool.execute(args);
+	} catch (error) {
+		console.debug('executeToolIfSync', error);
+		if (isError(INSUFFICIENT_ACCOUNT_FUNDS_ERROR, error)) {
+			return Promise.resolve(`Insufficient account funds. Please top up your account to continue. <TopUpCard />`);
+		}
+		throw error;
+	}
 }

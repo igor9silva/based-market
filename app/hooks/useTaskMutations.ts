@@ -50,7 +50,7 @@ export function useTaskMutations() {
 		});
 	};
 
-	const addFunds = ({
+	const increaseBudget = ({
 		taskId, //
 		amount,
 	}: {
@@ -59,7 +59,7 @@ export function useTaskMutations() {
 	}) => {
 		return act({
 			taskId,
-			toolKey: 'addFunds',
+			toolKey: 'increaseBudget',
 			args: { amount },
 		});
 	};
@@ -68,6 +68,6 @@ export function useTaskMutations() {
 		say,
 		updateTask,
 		markAsDone,
-		addFunds,
+		increaseBudget,
 	};
 }

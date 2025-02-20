@@ -136,17 +136,6 @@ export const _mutationTools = (
 		})
 		.then(() => `task marked as ${args.isDone ? 'done' : '**not** done'}`),
 	}),
-	addFunds: tool({
-		description: 'Add funds to the task',
-		parameters: z.object({
-			amount: z.number().describe('The amount of funds to add in USD.'),
-		}),
-		execute: (args) =>
-			ctx.runMutation(internal.tasks.private._addFunds, {
-				taskId,
-				amount: args.amount,
-			}),
-	}),
 	moveTask: tool({
 		description: 'Move the task to a new parent',
 		parameters: z.object({
@@ -199,6 +188,17 @@ export const _syncTools = (
 		}),
 		// prettier-ignore
 		execute: (args) => Promise.resolve(args.message),
+	}),
+	increaseBudget: tool({
+		description: 'Increase the budget of the task',
+		parameters: z.object({
+			amount: z.number().describe('The amount of funds to add in USD.'),
+		}),
+		execute: (args) =>
+			ctx.runMutation(internal.tasks.private._increaseBudget, {
+				taskId,
+				amount: args.amount,
+			}),
 	}),
 });
 

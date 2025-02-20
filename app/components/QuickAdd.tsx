@@ -2,14 +2,17 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { z } from 'zod';
+import { cn } from '~/lib/utils';
+
+import { INSUFFICIENT_ACCOUNT_FUNDS_ERROR, isError } from 'convex/utils/errors';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Textarea } from '~/components/ui/textarea';
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
-import { cn } from '~/lib/utils';
 
 export function QuickAdd({ className }: { className?: string }) {
 	//
@@ -28,10 +31,25 @@ export function QuickAdd({ className }: { className?: string }) {
 			body: z.string().min(1, 'Body is required'),
 			initialFunds: z.coerce.number().min(0).max(100000).default(0.1),
 		}),
+		shouldAlwaysClearForm: false,
 		handler: async ({ body, initialFunds }) => {
 			console.debug('QuickAdd', body, initialFunds);
-			const taskId = await addTask({ body, initialFunds });
-			navigate({ to: '/$', params: { _splat: `/chat/${taskId}` } });
+			try {
+				const taskId = await addTask({ body, initialFunds });
+				navigate({ to: '/$', params: { _splat: `/chat/${taskId}` } });
+			} catch (error: unknown) {
+				if (isError(INSUFFICIENT_ACCOUNT_FUNDS_ERROR, error)) {
+					toast.error('Account funds are insufficient.', {
+						description: 'Top up or decrease the task budget.',
+						action: {
+							label: 'Top up',
+							onClick: () => navigate({ to: '/top-up' }),
+						},
+					});
+				} else {
+					toast.error('An unknown error occurred while starting the task.');
+				}
+			}
 		},
 	});
 

@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { blockchainSchema, tokenSchema, topUpAmountSchema, walletAddressSchema } from '../schemas/topUpSchema';
+import { _addTopUp } from '../transactions/private';
+import { NotFound } from '../utils/errors';
 
 export const _add = internalMutation({
 	args: {
@@ -37,7 +39,20 @@ export const _finish = internalMutation({
 		status: z.enum(['confirmed', 'failed']),
 	},
 	handler: async (ctx, { topUpId, status }) => {
-		return await ctx.db.patch(topUpId, { status });
+		//
+		await ctx.db.patch(topUpId, { status });
+
+		const topUp = await ctx.db.get(topUpId);
+		if (!topUp) throw NotFound();
+
+		await _addTopUp(ctx, {
+			topUpId,
+			owner: topUp.owner,
+			value: {
+				symbol: topUp.symbol,
+				amount: topUp.amount,
+			},
+		});
 	},
 });
 

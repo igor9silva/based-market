@@ -7,9 +7,9 @@ import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 
-export function AddFundsToTaskButton({ taskId }: { taskId: Id<'tasks'> }) {
+export function IncreaseTaskBudgetCard({ taskId }: { taskId: Id<'tasks'> }) {
 	//
-	const { addFunds } = useTaskMutations();
+	const { increaseBudget } = useTaskMutations();
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
@@ -17,7 +17,7 @@ export function AddFundsToTaskButton({ taskId }: { taskId: Id<'tasks'> }) {
 		}),
 		handler: async ({ amount }) => {
 			console.debug('addFunds', taskId, amount, typeof amount, parseFloat(amount));
-			await addFunds({ taskId, amount: parseFloat(amount) });
+			await increaseBudget({ taskId, amount: parseFloat(amount) });
 		},
 	});
 
@@ -40,7 +40,7 @@ export function AddFundsToTaskButton({ taskId }: { taskId: Id<'tasks'> }) {
 						/>
 					</div>
 					<Button variant="default" type="submit">
-						Add Funds
+						Increase task budget
 					</Button>
 				</form>
 			</CardContent>

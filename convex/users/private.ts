@@ -26,7 +26,7 @@ export const _seedIfNeeded = async (
 	await _addFreeCredits(ctx, {
 		owner: userId,
 		value: {
-			symbol: 'USDCE',
+			symbol: 'USD',
 			amount: isVerified ? 5 : 1,
 		},
 		description: isVerified ? 'Free 500 actions for verified users!' : 'Free 100 actions for non-verified users',
@@ -95,7 +95,7 @@ export const _adjustBalance = internalMutation({
 
 		console.debug('adjust account balance', userId, value.amount);
 
-		if (value.symbol !== 'USDCE') throw new Error('Only USDCE is supported for now');
+		if (value.symbol !== 'USD') throw new Error('Only USD is supported for now');
 
 		return await ctx.db.patch(userId, { balanceUSD: (user.balanceUSD ?? 0) + value.amount });
 	},
