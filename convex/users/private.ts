@@ -34,16 +34,23 @@ export const _seedIfNeeded = async (
 		owner: userId,
 	});
 
-	if (!env.REF_USER_ID) return console.error('No ref user ID defined. Skipping seeding components.');
+	const markAreReady = () => {
+		// adding a fake delay for fun
+		const delay = 10000; // ms
+		ctx.scheduler.runAfter(delay, internal.users.private._markAreReady, { userId });
+	};
+
+	if (!env.REF_USER_ID) {
+		console.error('No ref user ID defined. Skipping seeding components.');
+		markAreReady();
+		return;
+	}
 
 	const refUser = await _findOne(ctx, { userId: env.REF_USER_ID as Id<'users'> });
 	if (!refUser) throw new Error('Ref user not found'); // FATAL (will stop seeding user forever), TODO: notify fatal
 
 	await _seedComponentsFromRef(ctx, refUser._id, userId, inboxTaskId);
-
-	// adding a fake delay for fun
-	const delay = 10000; // ms
-	ctx.scheduler.runAfter(delay, internal.users.private._markAreReady, { userId });
+	markAreReady();
 };
 
 const _seedComponentsFromRef = async (
