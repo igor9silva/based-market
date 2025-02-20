@@ -4,13 +4,13 @@ import { DataModel } from './_generated/dataModel.js';
 
 export const migrations = new Migrations<DataModel>(components.migrations);
 
-// export const temp3 = migrations.define({
-// 	table: 'actions',
+// export const temp6 = migrations.define({
+// 	table: 'users',
 // 	// customRange: (query) => query.withIndex('by_requiredField', (q) => q.eq('requiredField', '')),
-// 	migrateOne: async (_ctx, doc) => ({ owner: `` as Id<'users'> }),
+// 	migrateOne: async (_ctx, doc) => ({ balanceUSD: doc.balanceWLD, balanceWLD: undefined }),
 // });
 
-// export const runTemp3 = migrations.runner(internal.migrations.temp3);
+// export const runTemp6 = migrations.runner(internal.migrations.temp6);
 
 // export const temp5 = migrations.define({
 // 	table: 'actions',
