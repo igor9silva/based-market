@@ -20,7 +20,7 @@ export const startTopUp = mutation({
 		const topUpId = await _add(ctx, {
 			author: currentUser._id,
 			owner: currentUser._id,
-			to: env.PAYMENT_ETH_ADDRESS_WLD_CHAIN,
+			to: env.PAYMENT_ETH_ADDRESS_BASE_CHAIN,
 			description: description || 'Top up Meseeks Actions.',
 			chain,
 			symbol,

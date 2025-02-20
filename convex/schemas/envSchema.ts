@@ -7,10 +7,7 @@ export const env = createEnv({
 
 	server: {
 		//
-		PAYMENT_ETH_ADDRESS_WLD_CHAIN: z
-			.string()
-			.min(1)
-			.describe('The World Chain wallet address to receive payments.'),
+		PAYMENT_ETH_ADDRESS_BASE_CHAIN: z.string().min(1).describe('The Base wallet address to receive payments.'),
 
 		AUTH_GOOGLE_ID: z.string().min(1).describe('Google OAuth client ID.'),
 		AUTH_GOOGLE_SECRET: z.string().min(1).describe('Google OAuth client secret.'),
