@@ -38,12 +38,12 @@ export const _execute = internalAction({
 
 			if (!tool) throw new Error(`Unknown tool: ${action.toolKey}`);
 
-			const MINIMUM_COST_WLD = 0.01; // TODO: get this from the tool
-			const EXEMPT_TOOLS = ['increaseBudget', 'markAsDone', 'updateTask'];
+			const MINIMUM_COST_USD = 0.01; // TODO: get this from the tool
+			const EXEMPT_TOOLS = ['increaseBudget', 'markAsDone', 'updateTask']; // TODO: likely all mutation tools
 
 			// TODO: check budget
 			// end with failed and a hardcoded component (that has a button that calls increaseBudget() as the user)
-			if ((task.balanceUSD ?? 0) < MINIMUM_COST_WLD && !EXEMPT_TOOLS.includes(action.toolKey)) {
+			if ((task.balanceUSD ?? 0) < MINIMUM_COST_USD && !EXEMPT_TOOLS.includes(action.toolKey)) {
 				throw new Error(`Not enough budget.\n<IncreaseTaskBudgetCard taskId='${taskId}' />`);
 			}
 
@@ -53,8 +53,7 @@ export const _execute = internalAction({
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
 			const result = await tool.execute(parsedArgs.data);
 
-			const ACTION_COST = 0.01; // WLD TODO: env
-			const TOOL_COST = 0.001; // WLD TODO: get from the tool
+			const ACTION_COST = 0.01; // TODO: env
 
 			const costs = EXEMPT_TOOLS.includes(action.toolKey)
 				? []
