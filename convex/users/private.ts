@@ -1,5 +1,6 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
+import { internal } from '../_generated/api';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx } from '../_generated/server';
 import { _add, _findAll } from '../components/private';
@@ -33,10 +34,16 @@ export const _seedIfNeeded = async (
 		owner: userId,
 	});
 
+	if (!env.REF_USER_ID) return console.error('No ref user ID defined. Skipping seeding components.');
+
 	const refUser = await _findOne(ctx, { userId: env.REF_USER_ID as Id<'users'> });
-	if (!refUser) return console.error('Ref user not found');
+	if (!refUser) throw new Error('Ref user not found'); // FATAL (will stop seeding user forever), TODO: notify fatal
 
 	await _seedComponentsFromRef(ctx, refUser._id, userId, inboxTaskId);
+
+	// adding a fake delay for fun
+	const delay = 10000; // ms
+	ctx.scheduler.runAfter(delay, internal.users.private._markAreReady, { userId });
 };
 
 const _seedComponentsFromRef = async (
