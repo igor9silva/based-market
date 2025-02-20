@@ -89,8 +89,9 @@ export const add = mutation({
 	args: {
 		body: z.string(),
 		parentId: zid('tasks').optional(),
+		initialFunds: z.number().min(0).max(100000).default(0.1),
 	},
-	handler: async (ctx, { body, parentId }) => {
+	handler: async (ctx, { body, parentId, initialFunds }) => {
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 
@@ -99,6 +100,7 @@ export const add = mutation({
 			owner: currentUser._id,
 			body,
 			parentId,
+			initialFunds,
 		});
 	},
 });

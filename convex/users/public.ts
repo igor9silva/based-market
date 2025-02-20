@@ -1,6 +1,8 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { query } from '../lib';
 import { env } from '../schemas/envSchema';
+import { _findActiveTasks } from '../tasks/private';
+import { _findOne } from './private';
 
 const ALLOWED_DOMAINS = env.ALLOWED_DOMAINS || [];
 const ALLOWED_EMAILS = env.ALLOWED_EMAILS || [];
@@ -12,7 +14,7 @@ export const current = query({
 		const userId = await getAuthUserId(ctx);
 		if (!userId) throw new Error('Not authenticated');
 
-		const user = await ctx.db.get(userId);
+		const user = await _findOne(ctx, { userId });
 		if (!user) throw new Error('Not found');
 
 		const email = user.email;
@@ -20,6 +22,19 @@ export const current = query({
 		if (!isAllowed(email)) throw new Error(`Email ${email} not allowed`);
 
 		return user;
+	},
+});
+
+export const findLockedBalance = query({
+	args: {},
+	handler: async (ctx) => {
+		//
+		const currentUser = await current(ctx, {});
+
+		const activeTasks = await _findActiveTasks(ctx, { owner: currentUser._id });
+		const activeTasksBalance = activeTasks.reduce((acc, task) => acc + (task.balanceUSD ?? 0), 0);
+
+		return activeTasksBalance;
 	},
 });
 

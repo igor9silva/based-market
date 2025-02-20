@@ -5,18 +5,33 @@ import { actionSchema } from './schemas/actionSchema';
 import { componentSchema } from './schemas/componentSchema';
 import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
 import { toolSchema } from './schemas/toolSchema';
+import { topUpSchema } from './schemas/topUpSchema';
+import { transactionSchema } from './schemas/transactionSchema';
+import { userSchema } from './schemas/userSchema';
 
 // prettier-ignore
 export default defineSchema({
 
 	...authTables,
-	
+
+	users: defineTable(
+		zodToConvex(userSchema),
+	).index(
+		'email', ['email'],
+	).index(
+		'phone', ['phone'],
+	).index(
+		'walletAddress_chain', ['walletAddress', 'walletChain'],
+	),
+
 	tasks: defineTable(
 		zodToConvex(taskSchema),
 	).index(
 		'by_author_parentId_isDone', ['author', 'parentId', 'isDone'],
 	).index(
 		'by_parent_isDone', ['parentId', 'isDone'],
+	).index(
+		'by_author_isDone', ['author', 'isDone'],
 	).index(
 		'by_embeddingId', ['embeddingId'],
 	),
@@ -40,7 +55,7 @@ export default defineSchema({
 	tools: defineTable(
 		zodToConvex(toolSchema),
 	).index(
-		'by_owner', ['owner'],
+		'by_owner_kind', ['owner', 'kind'],
 	).index(
 		'by_key', ['key'],
 	),
@@ -56,5 +71,17 @@ export default defineSchema({
 		zodToConvex(componentSchema),
 	).index(
 		'by_owner_slug', ['owner', 'slug'],
+	),
+
+	transactions: defineTable(
+		zodToConvex(transactionSchema),
+	).index(
+		'by_owner', ['owner'],
+	),
+
+	topUps: defineTable(
+		zodToConvex(topUpSchema),
+	).index(
+		'by_status_owner', ['status', 'owner'],
 	),
 });

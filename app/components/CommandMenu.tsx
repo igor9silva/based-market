@@ -6,7 +6,8 @@ import { useQuery } from 'convex/react';
 import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Circle, CircleCheckBig, CirclePlus, DollarSign, Inbox } from 'lucide-react';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { BadgeCent, Circle, CircleCheckBig, CirclePlus, Inbox, LogOut, RefreshCcw, Wallet } from 'lucide-react';
 import {
 	CommandDialog,
 	CommandGroup,
@@ -96,6 +97,8 @@ export function CommandMenuDialog() {
 	const tasks = useQuery(api.tasks.public.findAll, {}); // TODO: server-side search
 	const { taskId: currentTaskId } = useSplatParams();
 
+	const { signOut } = useAuthActions();
+
 	return (
 		<CommandDialog
 			shouldFilter={shouldFilter}
@@ -117,6 +120,22 @@ export function CommandMenuDialog() {
 				{/* Quick actions */}
 				<CommandGroup heading="Quick actions">
 					<NewTaskCommandItem shouldUseSearch={shouldFilter} />
+					<CommandItem value="/top-up" keywords={['top', 'up']} onSelect={onSelect}>
+						<BadgeCent className="mr-2" />
+						Top up account
+					</CommandItem>
+					<CommandItem value="refresh" keywords={['refresh']} onSelect={() => location.reload()}>
+						<RefreshCcw className="mr-2" />
+						Refresh
+					</CommandItem>
+					<CommandItem value="/balance" keywords={['balance']} onSelect={onSelect}>
+						<Wallet className="mr-2" />
+						Balance
+					</CommandItem>
+					<CommandItem value="signout" keywords={['sign', 'out']} onSelect={() => signOut()}>
+						<LogOut className="mr-2" />
+						Sign out
+					</CommandItem>
 					{currentTaskId && <MarkAsDoneCommandItem taskId={currentTaskId} />}
 				</CommandGroup>
 
@@ -126,14 +145,14 @@ export function CommandMenuDialog() {
 						<Inbox className="mr-2" />
 						Inbox
 					</CommandItem>
-					<CommandItem
+					{/* <CommandItem
 						value="/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv"
 						keywords={['finances']}
 						onSelect={onSelect}
 					>
 						<DollarSign className="mr-2" />
 						Finances
-					</CommandItem>
+					</CommandItem> */}
 				</CommandGroup>
 
 				{/* All tasks */}

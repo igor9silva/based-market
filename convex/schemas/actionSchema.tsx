@@ -1,6 +1,7 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { authorSchema } from './authorSchema';
+import { tokenSchema } from './topUpSchema';
 
 const coreActionSchema = z.object({
 	taskId: zid('tasks'),
@@ -28,6 +29,13 @@ export const resolvedActionSchema = coreActionSchema.extend({
 		'failed',
 	]),
 	result: z.string(),
+	costs: z.array(
+		z.object({
+			symbol: tokenSchema,
+			amount: z.number().min(0.01).max(100000),
+			description: z.string(),
+		}),
+	),
 });
 
 export const actionSchema = z

@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import * as React from 'react';
 
-import { DollarSign, Inbox, Send } from 'lucide-react';
+import { Inbox } from 'lucide-react';
 import { Suspense } from 'react';
 import { UserMenuItem } from '~/components/UserMenuItem';
 import {
@@ -21,16 +21,6 @@ const menuItems = [
 		title: 'Inbox',
 		url: '/',
 		icon: Inbox,
-	},
-	{
-		title: 'Finances',
-		url: '/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv',
-		icon: DollarSign,
-	},
-	{
-		title: 'Sent',
-		url: '/sent',
-		icon: Send,
 	},
 ];
 
@@ -74,6 +64,7 @@ export function MainSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
 		<Sidebar
 			variant={variant}
 			collapsible="icon"
+			className="hidden md:block"
 			style={{ '--sidebar-width-icon': width } as React.CSSProperties}
 			{...props}
 		>

@@ -2,18 +2,20 @@ import { useAuthActions } from '@convex-dev/auth/react';
 import { QueryClient } from '@tanstack/react-query';
 import { Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router';
 import { Meta, Scripts } from '@tanstack/start';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
 import { CommandMenuDialog } from '~/components/CommandMenu';
 
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Loading } from '~/components/Loading';
 import { MainHeader } from '~/components/MainHeader';
 import { MainSidebar } from '~/components/MainSidebar';
+import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
-import { SidebarInset, SidebarProvider } from '~/components/ui/sidebar';
+import { SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
+import { useCurrentUser } from '~/hooks/useCurrentUser';
 
 import appCss from '~/styles/app.css?url';
 
@@ -85,6 +87,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+	//
 	return (
 		<SidebarProvider open={false}>
 			<AuthLoading>
@@ -94,15 +97,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				<AccessDenied />
 			</Unauthenticated>
 			<Authenticated>
-				<MainSidebar />
-				<SidebarInset className="w-full h-svh overflow-hidden flex-col-reverse md:flex-col">
-					<MainHeader className="h-12" />
-					<div className="h-[calc(100%-3rem)]">{children}</div>
-				</SidebarInset>
-				<Toaster />
-				<CommandMenuDialog />
+				<Main>{children}</Main>
 			</Authenticated>
 		</SidebarProvider>
+	);
+}
+
+function Main({ children }: { children: React.ReactNode }) {
+	//
+	const user = useCurrentUser();
+
+	if (!user.isReady) return <RotatingLoadingMessage />;
+
+	return (
+		<div className="flex h-svh w-full">
+			<div className="hidden md:block">
+				<MainSidebar />
+			</div>
+			<main className="flex-1 flex flex-col-reverse md:flex-col overflow-hidden p-4 md:p-0">
+				<MainHeader className="mt-0" />
+				<div className="flex-1 overflow-auto">{children}</div>
+			</main>
+			<Toaster />
+			<CommandMenuDialog />
+		</div>
 	);
 }
 
@@ -152,7 +170,7 @@ function AccessDenied() {
 // •	file_handlers: Allows your PWA to open or handle specific file types.
 // •	display_override: Overrides the display property with a fallback sequence.
 // •	capture_links: Specifies how links to your domain should open (e.g., in-app).
-// •	launch_handler: Manages how the app launches if it’s already open.
+// •	launch_handler: Manages how the app launches if it's already open.
 // •	prefer_related_applications and related_applications: Suggests native apps related to your PWA.
 // •	iarc_rating_id: International Age Rating Coalition identifier for store listings.
 

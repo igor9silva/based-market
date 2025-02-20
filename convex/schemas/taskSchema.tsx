@@ -11,6 +11,7 @@ export const taskSchema = z
 		parentId: zid('tasks').optional(),
 		isDone: z.boolean(),
 		embeddingId: zid('taskEmbeddings').optional(),
+		balanceUSD: z.number().default(0),
 	})
 	.describe(`It's a goal to be achieved. A Task is the basic and most fundamental entity of Meseeks.`);
 

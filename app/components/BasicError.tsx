@@ -1,3 +1,15 @@
-export function BasicError({ text }: { text?: string }) {
-	return <div className="flex flex-col items-center justify-center h-screen w-full gap-4">{text ?? 'failed'}</div>;
+import { cn } from '~/lib/utils';
+
+export function BasicError({
+	text, //
+	className,
+}: {
+	text?: string;
+	className?: string;
+}) {
+	return (
+		<div className={cn('flex flex-col items-center justify-center h-screen w-full gap-4', className)}>
+			{text ?? 'failed'}
+		</div>
+	);
 }

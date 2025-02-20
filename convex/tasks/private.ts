@@ -7,6 +7,9 @@ import { Doc } from '../_generated/dataModel';
 import { _add as _addAction } from '../action/private';
 import { internalAction, internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
+import { _addFundTask, _addRefundTask } from '../transactions/private';
+import { _findOne as _findOneUser } from '../users/private';
+import { InsufficientAccountFunds, NotFound } from '../utils/errors';
 
 export const _findOne = internalQuery({
 	args: {
@@ -64,16 +67,45 @@ export const _findAllByEmbeddingIds = internalQuery({
 	},
 });
 
+export const _findActiveTasks = internalQuery({
+	args: {
+		owner: zid('users'),
+	},
+	handler: async (ctx, { owner }) => {
+		//
+		return await ctx.db
+			.query('tasks')
+			.withIndex('by_author_isDone', (q) =>
+				q
+					.eq('author', owner) //
+					.eq('isDone', false),
+			)
+			.collect();
+	},
+});
+
 export const _add = internalMutation({
 	args: {
 		author: authorSchema,
 		owner: zid('users'),
+		title: z.string().optional(),
 		body: z.string(),
 		parentId: zid('tasks').optional(),
+		initialFunds: z.number().min(0).max(100000).optional(),
 	},
-	handler: async (ctx, { author, owner, body, parentId }) => {
+	handler: async (ctx, { author, owner, body, parentId, title, initialFunds }) => {
 		//
-		const taskId = await ctx.db.insert('tasks', { author, owner, isDone: false, parentId });
+		const taskId = await ctx.db.insert('tasks', {
+			author,
+			owner,
+			isDone: false,
+			parentId,
+			title,
+		});
+
+		if (initialFunds) {
+			await _increaseBudget(ctx, { taskId, amount: initialFunds });
+		}
 
 		await _addAction(ctx, {
 			taskId,
@@ -82,6 +114,66 @@ export const _add = internalMutation({
 			toolKey: 'say',
 			args: { message: body },
 		});
+
+		return taskId;
+	},
+});
+
+export const _addInboxTask = internalMutation({
+	args: {
+		author: authorSchema,
+		owner: zid('users'),
+	},
+	handler: async (ctx, { author, owner }) => {
+		//
+		const taskId = await ctx.db.insert('tasks', {
+			author,
+			owner,
+			title: 'Look at me!',
+			body: `
+## ooh-wee, welcome to Meseeks! 
+Here, everything is a task.
+<br />
+Every time a task gets **marked as done**, we summarize and learn from it, so other tasks can have amplified context on you and everything you've been doing 😌
+<br />
+#### This box is the task description.
+It's a place were you - **or your Meseeks** - can add details on what you are seeking, constraints, instructions, files, or anything you want.
+
+------------------------------------
+Every piece of text is dynamic, **try tapping with 3 fingers** (or middle mouse button) here. Powered by [Markdown](https://en.wikipedia.org/wiki/Markdown) and *React Components* 🔥
+<br />
+You can do that in messages as well. **Have fun 👻**.
+
+------------------------------------
+
+<p className="text-sm text-muted-foreground">**Tip:** type \`<EasterEgg />\` in the chatbox.</p>
+
+------------------------------------
+Oh, there is one more thing. **Verified humans get 500 actions ⚡ for free!**
+<br />
+On the command bar you should see your balance: <Balance />
+<br />
+Each task gets it's own budget until it's done. **The larger the budget, the more autonomous it gets.**
+<br />
+If you need more funds, look for "Top up".
+<br />
+Happy hacking 🚀
+`.trim(),
+			isDone: false,
+		});
+
+		await _increaseBudget(ctx, { taskId, amount: 1 });
+
+		// await _addAction(ctx, {
+		// 	taskId,
+		// 	author,
+		// 	owner,
+		// 	toolKey: 'say',
+		// 	args: { message: body },
+		// });
+
+		// TODO: create a 2nd decision tool, for onboarding
+		// TODO: insert a few actions
 
 		return taskId;
 	},
@@ -202,7 +294,92 @@ export const _markAsDone = internalMutation({
 	},
 	handler: async (ctx, { taskId, isDone, author }) => {
 		//
+		if (isDone) {
+			//
+			const task = await _findOne(ctx, { taskId });
+			if (!task) throw new Error('Task not found');
+
+			if (task.balanceUSD && task.balanceUSD > 0) {
+				await _removeFunds(ctx, { taskId, amount: task.balanceUSD });
+				await ctx.db.patch(taskId, { balanceUSD: 0 });
+			}
+		}
+
 		return await ctx.db.patch(taskId, { isDone });
+	},
+});
+
+export const _useFunds = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		amount: z.number().min(0),
+	},
+	handler: async (ctx, { taskId, amount }) => {
+		//
+		const task = await _findOne(ctx, { taskId });
+		if (!task) throw new Error('Task not found');
+
+		const currentBalance = task.balanceUSD ?? 0;
+		console.debug('useFunds', amount, currentBalance, taskId);
+		if (currentBalance < amount) throw new Error('Insufficient funds on task');
+
+		// update the task balance
+		await ctx.db.patch(taskId, { balanceUSD: currentBalance - amount });
+	},
+});
+
+export const _increaseBudget = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		amount: z.number().min(0),
+	},
+	handler: async (ctx, { taskId, amount }) => {
+		//
+		const task = await _findOne(ctx, { taskId });
+		if (!task) throw NotFound();
+
+		const user = await _findOneUser(ctx, { userId: task.owner });
+		if (!user) throw NotFound();
+
+		const currentBalance = user.balanceUSD ?? 0;
+		if (currentBalance < amount) throw InsufficientAccountFunds();
+
+		// create the transaction
+		console.debug('increaseBudget to task', taskId, amount);
+		await _addFundTask(ctx, {
+			taskId,
+			owner: task.owner,
+			value: {
+				symbol: 'USD',
+				amount: -amount,
+			},
+		});
+
+		// update the task balance
+		await ctx.db.patch(taskId, { balanceUSD: (task.balanceUSD ?? 0) + amount });
+	},
+});
+
+export const _removeFunds = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		amount: z.number().min(0),
+	},
+	handler: async (ctx, { taskId, amount }) => {
+		//
+		const task = await _findOne(ctx, { taskId });
+		if (!task) throw new Error('Task not found');
+
+		// create the transaction
+		await _addRefundTask(ctx, {
+			taskId,
+			owner: task.owner,
+			value: { symbol: 'USD', amount },
+			description: 'Refund of unused funds',
+		});
+
+		// update the task balance
+		await ctx.db.patch(taskId, { balanceUSD: (task.balanceUSD ?? 0) - amount });
 	},
 });
 

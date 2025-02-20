@@ -3,7 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
-import { Maximize2 } from 'lucide-react';
+import { CircleDollarSign, Maximize2 } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
@@ -26,8 +26,8 @@ export default function TaskDetail({
 	const { updateTask, markAsDone } = useTaskMutations();
 
 	return (
-		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto h-full', className)}>
-			<CardHeader className="p-4 max-w-full sticky top-0 bg-background/75 z-10">
+		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto h-full p-4 md:p-0', className)}>
+			<CardHeader className="p-0 md:p-4 max-w-full sticky top-0 bg-background/75 z-10">
 				<div className="flex flex-col">
 					<div className="flex flex-row justify-between gap-2">
 						<EditableContent
@@ -41,6 +41,10 @@ export default function TaskDetail({
 								</h1>
 							)}
 						/>
+						<div className="flex flex-row flex-shrink-0 items-center gap-1">
+							<CircleDollarSign className="size-4" />
+							{(task.balanceUSD ?? 0).toFixed(2)}
+						</div>
 						{showExpand && (
 							<Link to="/$" params={{ _splat: `/chat/${task._id}` }}>
 								<Button variant="ghost" size="icon">
@@ -53,7 +57,7 @@ export default function TaskDetail({
 						<TimeAgo date={task._creationTime} />
 					</span>
 				</div>
-				<div className="flex flex-row justify-between">
+				{/* <div className="flex flex-row justify-between">
 					<div className="flex flex-row flex-wrap items-baseline gap-2">
 						<Button
 							variant="secondary"
@@ -64,11 +68,11 @@ export default function TaskDetail({
 						{/* <RunTaskActionButton task={task} kind="fill" />
 					<RunTaskActionButton task={task} kind="minify" />
 					<RunTaskActionButton task={task} kind="scrape" />
-					<RunTaskActionButton task={task} kind="factCheck" /> */}
+					<RunTaskActionButton task={task} kind="factCheck" /> *
 					</div>
-				</div>
+				</div> */}
 			</CardHeader>
-			<CardContent className="p-4 pt-0">
+			<CardContent className="p-0 md:p-4 md:pt-0">
 				<EditableContent
 					key={task.body}
 					value={task.body ?? ''}

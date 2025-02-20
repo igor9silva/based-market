@@ -13,11 +13,14 @@ import { NotFound } from './components/NotFound';
 import { routeTree } from './routeTree.gen';
 
 export function createRouter() {
+	//
 	const CONVEX_URL = (import.meta as any).env.VITE_CONVEX_URL as string;
 	if (!CONVEX_URL) throw new Error('missing VITE_CONVEX_URL envar');
 
 	const convex = new ConvexReactClient(CONVEX_URL, {
 		unsavedChangesWarning: false,
+		verbose: true,
+		// authRefreshTokenLeewaySeconds: 60,
 	});
 
 	const convexQueryClient = new ConvexQueryClient(convex);

@@ -1,9 +1,12 @@
 import Google from '@auth/core/providers/google';
 import { convexAuth } from '@convex-dev/auth/server';
 import { env } from './schemas/envSchema';
+import { _seedIfNeeded } from './users/private';
 
 export const { auth, signIn, signOut, store } = convexAuth({
-	providers: [Google],
+	providers: [
+		Google, //
+	],
 	jwt: {
 		durationMs: env.JWT_SESSION_DURATION_MS || 1000 * 60 * 60 * 24 * 7 /* 7 days */,
 	},
@@ -12,7 +15,8 @@ export const { auth, signIn, signOut, store } = convexAuth({
 	},
 	callbacks: {
 		async afterUserCreatedOrUpdated(ctx, args) {
-			console.log('afterUserCreatedOrUpdated', ctx, args);
+			console.debug('afterUserCreatedOrUpdated', ctx, args);
+			await _seedIfNeeded(ctx, args.userId);
 		},
 	},
 });

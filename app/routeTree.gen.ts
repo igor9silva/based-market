@@ -11,13 +11,34 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as TopUpImport } from './routes/top-up'
+import { Route as BalanceImport } from './routes/balance'
 import { Route as SplatImport } from './routes/$'
+import { Route as TopUpIdImport } from './routes/top-up_.$id'
 
 // Create/Update Routes
+
+const TopUpRoute = TopUpImport.update({
+  id: '/top-up',
+  path: '/top-up',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const BalanceRoute = BalanceImport.update({
+  id: '/balance',
+  path: '/balance',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const SplatRoute = SplatImport.update({
   id: '/$',
   path: '/$',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TopUpIdRoute = TopUpIdImport.update({
+  id: '/top-up_/$id',
+  path: '/top-up/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -32,6 +53,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SplatImport
       parentRoute: typeof rootRoute
     }
+    '/balance': {
+      id: '/balance'
+      path: '/balance'
+      fullPath: '/balance'
+      preLoaderRoute: typeof BalanceImport
+      parentRoute: typeof rootRoute
+    }
+    '/top-up': {
+      id: '/top-up'
+      path: '/top-up'
+      fullPath: '/top-up'
+      preLoaderRoute: typeof TopUpImport
+      parentRoute: typeof rootRoute
+    }
+    '/top-up_/$id': {
+      id: '/top-up_/$id'
+      path: '/top-up/$id'
+      fullPath: '/top-up/$id'
+      preLoaderRoute: typeof TopUpIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -39,32 +81,47 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
+  '/balance': typeof BalanceRoute
+  '/top-up': typeof TopUpRoute
+  '/top-up/$id': typeof TopUpIdRoute
 }
 
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
+  '/balance': typeof BalanceRoute
+  '/top-up': typeof TopUpRoute
+  '/top-up/$id': typeof TopUpIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/$': typeof SplatRoute
+  '/balance': typeof BalanceRoute
+  '/top-up': typeof TopUpRoute
+  '/top-up_/$id': typeof TopUpIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/$'
+  fullPaths: '/$' | '/balance' | '/top-up' | '/top-up/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$'
-  id: '__root__' | '/$'
+  to: '/$' | '/balance' | '/top-up' | '/top-up/$id'
+  id: '__root__' | '/$' | '/balance' | '/top-up' | '/top-up_/$id'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
+  BalanceRoute: typeof BalanceRoute
+  TopUpRoute: typeof TopUpRoute
+  TopUpIdRoute: typeof TopUpIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
+  BalanceRoute: BalanceRoute,
+  TopUpRoute: TopUpRoute,
+  TopUpIdRoute: TopUpIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +134,23 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/$"
+        "/$",
+        "/balance",
+        "/top-up",
+        "/top-up_/$id"
       ]
     },
     "/$": {
       "filePath": "$.tsx"
+    },
+    "/balance": {
+      "filePath": "balance.tsx"
+    },
+    "/top-up": {
+      "filePath": "top-up.tsx"
+    },
+    "/top-up_/$id": {
+      "filePath": "top-up_.$id.tsx"
     }
   }
 }

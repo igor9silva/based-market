@@ -2,7 +2,10 @@ import { toast } from 'sonner';
 import { useMDX } from '~/hooks/useMDX';
 
 import { useState } from 'react';
+import { Balance } from '~/components/Balance';
 import { ChatHistory } from '~/components/ChatHistory';
+import { EasterEgg } from '~/components/EasterEgg';
+import { IncreaseTaskBudgetCard } from '~/components/IncreaseTaskBudgetCard';
 import { Grid } from '~/components/layout/Grid';
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
 import { ReversableListAndDetail } from '~/components/layout/ReversableListAndDetail';
@@ -10,16 +13,20 @@ import { TwoColumn } from '~/components/layout/TwoColumn';
 import { Loading } from '~/components/Loading';
 import { QuickAdd } from '~/components/QuickAdd';
 import { TaskConversation } from '~/components/TaskConversation';
+import TaskDetail from '~/components/TaskDetail';
 import { TaskDetailAndChat } from '~/components/TaskDetailAndChat';
 import { TaskDetailAndSubstasks } from '~/components/TaskDetailAndSubstasks';
 import { TaskListAndDetail } from '~/components/TaskListAndDetail';
+import { TopUpCard } from '~/components/TopUpCard';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
 import { ScrollArea } from '~/components/ui/scroll-area';
 import { Separator } from '~/components/ui/separator';
 
 const components = {
+	IncreaseTaskBudgetCard,
 	ChatHistory,
+	Balance,
 	Separator,
 	Button,
 	Card,
@@ -32,12 +39,15 @@ const components = {
 	TaskConversation,
 	TaskDetailAndSubstasks,
 	TaskDetailAndChat,
+	TaskDetail,
 	Grid,
 	QuickAdd,
 	TaskListAndDetail,
 	ListAndDetail,
 	ReversableListAndDetail,
 	ScrollArea,
+	EasterEgg,
+	TopUpCard,
 };
 
 export default function MDX({

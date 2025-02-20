@@ -1,6 +1,9 @@
+import { useNavigate } from '@tanstack/react-router';
 import { Doc } from 'convex/_generated/dataModel';
+import { ArrowRight } from 'lucide-react';
 import { TaskStatus } from '~/components/TaskStatus';
 import { TimeAgo } from '~/components/TimeAgo';
+import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
 
 export function TaskItem({
@@ -10,6 +13,9 @@ export function TaskItem({
 	task: Doc<'tasks'>;
 	className?: string;
 }) {
+	//
+	const navigate = useNavigate();
+
 	return (
 		<div className={cn('flex items-center justify-between gap-2 p-2 align-middle', className)}>
 			<div>
@@ -24,7 +30,20 @@ export function TaskItem({
 				</h3>
 				<TimeAgo date={task._creationTime} className="text-sm text-muted-foreground" />
 			</div>
-			<TaskStatus taskId={task._id} className="flex-shrink-0" />
+			<div className="flex-shrink-0">
+				<TaskStatus taskId={task._id} />
+				<Button
+					variant="ghost"
+					size="icon"
+					className="justify-end [&_svg]:size-5"
+					onClick={(e) => {
+						e.preventDefault();
+						navigate({ to: '/$', params: { _splat: `/chat/${task._id}` } });
+					}}
+				>
+					<ArrowRight />
+				</Button>
+			</div>
 		</div>
 	);
 }
