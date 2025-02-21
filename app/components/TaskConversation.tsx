@@ -7,8 +7,8 @@ import { MoveDown } from 'lucide-react';
 import { RefCallback, useEffect, useMemo, useState } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { Action } from '~/components/Action';
+import { ActionComposer } from '~/components/ActionComposer';
 import { Loading } from '~/components/Loading';
-import { MessageComposer } from '~/components/MessageComposer';
 import { Button } from '~/components/ui/button';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { cn } from '~/lib/utils';
@@ -44,7 +44,7 @@ export function TaskConversation({
 	if (status === 'LoadingFirstPage' && actions.length === 0) return <Loading />;
 
 	return (
-		<div className={cn('flex flex-col h-full', className)}>
+		<div className={cn('flex flex-col h-full p-2 gap-2', className)}>
 			<StickToBottom mass={1} initial="instant" resize="instant" className="flex-1 overflow-auto">
 				<StickToBottomContent actions={actions} status={status} loadMore={loadMore}>
 					{reversedActions.map((action) => (
@@ -57,7 +57,7 @@ export function TaskConversation({
 					))}
 				</StickToBottomContent>
 			</StickToBottom>
-			<MessageComposer task={task} className="flex-none bg-background/75 border-t" />
+			<ActionComposer task={task} />
 		</div>
 	);
 }
@@ -114,14 +114,14 @@ function StickToBottomContent({
 	}, [actions.length, isAtBottom, isLoaded, scrollToBottom]);
 
 	return (
-		<StickToBottom.Content className="relative h-full">
+		<StickToBottom.Content className="relative h-full p-2">
 			<div className="h-full">
 				{status === 'LoadingMore' && (
 					<div className="px-4 pt-4">
 						<Loading className="h-6 w-fit" />
 					</div>
 				)}
-				<div className="p-4 flex flex-col flex-grow justify-end gap-2">{children}</div>
+				<div className="flex flex-col flex-grow justify-end gap-2">{children}</div>
 				<div className="sticky bottom-2 flex flex-col">
 					<ScrollToBottom />
 				</div>
