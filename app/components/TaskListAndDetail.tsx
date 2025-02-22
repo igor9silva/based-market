@@ -6,6 +6,7 @@ import { Id } from 'convex/_generated/dataModel';
 import { cn } from '~/lib/utils';
 
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
+import { QuickAdd } from '~/components/QuickAdd';
 import TaskDetail from '~/components/TaskDetail';
 import { TaskItem } from '~/components/TaskItem';
 
@@ -21,6 +22,8 @@ export function TaskListAndDetail({
 	const { data: subtasks } = useSuspenseQuery(query);
 
 	const { selectedSubtaskId } = useSearch({ strict: false });
+
+	if (subtasks.length === 0) return <QuickAdd />;
 
 	return (
 		<ListAndDetail

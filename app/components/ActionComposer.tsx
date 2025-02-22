@@ -30,8 +30,6 @@ export function ActionComposer({
 		}),
 		handler: async ({ message }, clearForm) => {
 			await say({ message, taskId: task._id });
-			console.debug(typeof files, files);
-			alert(files.length);
 			clearForm();
 		},
 	});
