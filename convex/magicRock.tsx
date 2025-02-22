@@ -199,7 +199,7 @@ function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
 const promptForTask = (task: Doc<'tasks'>) =>
 	[
 		`<id>${task._id}</id>`, //
-		`<title>${task.title}</title>`,
-		`<body>${task.body}</body>`,
+		`<summary>${task.summary}</summary>`,
+		`<description>${task.description}</description>`,
 		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
 	].join('\n');

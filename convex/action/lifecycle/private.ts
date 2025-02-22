@@ -43,7 +43,7 @@ export const _execute = internalAction({
 
 			// TODO: check budget
 			// end with failed and a hardcoded component (that has a button that calls increaseBudget() as the user)
-			if ((task.balanceUSD ?? 0) < MINIMUM_COST_USD && !EXEMPT_TOOLS.includes(action.toolKey)) {
+			if ((task.availableBudgetUSD ?? 0) < MINIMUM_COST_USD && !EXEMPT_TOOLS.includes(action.toolKey)) {
 				throw new Error(`Not enough budget.\n<IncreaseTaskBudgetCard taskId='${taskId}' />`);
 			}
 

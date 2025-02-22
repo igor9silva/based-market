@@ -57,7 +57,7 @@ export const _findAllByEmbeddingIds = internalQuery({
 
 				return {
 					...task,
-					body: undefined, // not sending body to avoid too much data
+					description: undefined, // not sending description to avoid too much data
 					_score,
 				};
 			}),
@@ -88,19 +88,19 @@ export const _add = internalMutation({
 	args: {
 		author: authorSchema,
 		owner: zid('users'),
-		title: z.string().optional(),
-		body: z.string(),
+		summary: z.string().optional(),
+		description: z.string(),
 		parentId: zid('tasks').optional(),
 		initialFunds: z.number().min(0).max(100000).optional(),
 	},
-	handler: async (ctx, { author, owner, body, parentId, title, initialFunds }) => {
+	handler: async (ctx, { author, owner, description, parentId, summary, initialFunds }) => {
 		//
 		const taskId = await ctx.db.insert('tasks', {
 			author,
 			owner,
 			isDone: false,
 			parentId,
-			title,
+			summary,
 		});
 
 		if (initialFunds) {
@@ -112,7 +112,7 @@ export const _add = internalMutation({
 			author,
 			owner,
 			toolKey: 'say',
-			args: { message: body },
+			args: { message: description },
 		});
 
 		return taskId;
@@ -129,8 +129,8 @@ export const _addInboxTask = internalMutation({
 		const taskId = await ctx.db.insert('tasks', {
 			author,
 			owner,
-			title: 'Look at me!',
-			body: `
+			summary: 'Look at me!',
+			description: `
 ## ooh-wee, welcome to Meseeks! 
 Here, everything is a task.
 <br />
@@ -169,7 +169,7 @@ Happy hacking 🚀
 		// 	author,
 		// 	owner,
 		// 	toolKey: 'say',
-		// 	args: { message: body },
+		// 	args: { message: description },
 		// });
 
 		// TODO: create a 2nd decision tool, for onboarding
@@ -241,11 +241,11 @@ export const _embedTask = internalAction({
 		//
 		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 
-		if (!task.body) return;
+		if (!task.description) return;
 
 		const { embedding, usage } = await embed({
 			model: openai.embedding('text-embedding-3-large'),
-			value: task.body,
+			value: task.description,
 		});
 
 		console.log('embedding usage', usage);
@@ -274,14 +274,14 @@ export const _update = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		author: authorSchema,
-		title: z.string().optional(),
-		body: z.string().optional(),
+		summary: z.string().optional(),
+		description: z.string().optional(),
 	},
-	handler: async (ctx, { taskId, title, body, author }) => {
+	handler: async (ctx, { taskId, summary, description, author }) => {
 		//
 		return await ctx.db.patch(taskId, {
-			...(title !== undefined && { title }),
-			...(body !== undefined && { body }),
+			...(summary !== undefined && { summary }),
+			...(description !== undefined && { description }),
 		});
 	},
 });
@@ -299,9 +299,9 @@ export const _markAsDone = internalMutation({
 			const task = await _findOne(ctx, { taskId });
 			if (!task) throw new Error('Task not found');
 
-			if (task.balanceUSD && task.balanceUSD > 0) {
-				await _removeFunds(ctx, { taskId, amount: task.balanceUSD });
-				await ctx.db.patch(taskId, { balanceUSD: 0 });
+			if (task.availableBudgetUSD && task.availableBudgetUSD > 0) {
+				await _removeFunds(ctx, { taskId, amount: task.availableBudgetUSD });
+				await ctx.db.patch(taskId, { availableBudgetUSD: 0 });
 			}
 		}
 
@@ -319,12 +319,12 @@ export const _useFunds = internalMutation({
 		const task = await _findOne(ctx, { taskId });
 		if (!task) throw new Error('Task not found');
 
-		const currentBalance = task.balanceUSD ?? 0;
+		const currentBalance = task.availableBudgetUSD ?? 0;
 		console.debug('useFunds', amount, currentBalance, taskId);
 		if (currentBalance < amount) throw new Error('Insufficient funds on task');
 
 		// update the task balance
-		await ctx.db.patch(taskId, { balanceUSD: currentBalance - amount });
+		await ctx.db.patch(taskId, { availableBudgetUSD: currentBalance - amount });
 	},
 });
 
@@ -356,7 +356,7 @@ export const _increaseBudget = internalMutation({
 		});
 
 		// update the task balance
-		await ctx.db.patch(taskId, { balanceUSD: (task.balanceUSD ?? 0) + amount });
+		await ctx.db.patch(taskId, { availableBudgetUSD: (task.availableBudgetUSD ?? 0) + amount });
 	},
 });
 
@@ -379,7 +379,7 @@ export const _removeFunds = internalMutation({
 		});
 
 		// update the task balance
-		await ctx.db.patch(taskId, { balanceUSD: (task.balanceUSD ?? 0) - amount });
+		await ctx.db.patch(taskId, { availableBudgetUSD: (task.availableBudgetUSD ?? 0) - amount });
 	},
 });
 

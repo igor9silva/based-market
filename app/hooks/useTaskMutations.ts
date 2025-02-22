@@ -22,17 +22,17 @@ export function useTaskMutations() {
 
 	const updateTask = ({
 		taskId, //
-		title,
-		body,
+		summary,
+		description,
 	}: {
 		taskId: Id<'tasks'>;
-		title?: string;
-		body?: string;
+		summary?: string;
+		description?: string;
 	}) => {
 		return act({
 			taskId,
 			toolKey: 'updateTask',
-			args: { title, body },
+			args: { summary, description },
 		});
 	};
 

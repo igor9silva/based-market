@@ -28,14 +28,14 @@ export function QuickAdd({ className }: { className?: string }) {
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
-			body: z.string().min(1, 'Body is required'),
+			description: z.string().min(1, 'Description is required'),
 			initialFunds: z.coerce.number().min(0).max(100000).default(0.1),
 		}),
 		shouldAlwaysClearForm: false,
-		handler: async ({ body, initialFunds }) => {
-			console.debug('QuickAdd', body, initialFunds);
+		handler: async ({ description, initialFunds }) => {
+			console.debug('QuickAdd', description, initialFunds);
 			try {
-				const taskId = await addTask({ body, initialFunds });
+				const taskId = await addTask({ description, initialFunds });
 				navigate({ to: '/$', params: { _splat: `/chat/${taskId}` } });
 			} catch (error: unknown) {
 				if (isError(INSUFFICIENT_ACCOUNT_FUNDS_ERROR, error)) {
@@ -65,7 +65,7 @@ export function QuickAdd({ className }: { className?: string }) {
 					<div className="flex flex-col gap-0.5">
 						<Textarea
 							ref={textareaRef}
-							name="body"
+							name="description"
 							placeholder="What are you seeking?"
 							required
 							defaultValue={newTaskText}

@@ -112,8 +112,8 @@ export const _mutationTools = (
 	updateTask: tool({
 		description: 'Update the task',
 		parameters: z.object({
-			title: z.string().optional().describe('The improved title for the task'),
-			body: z.string().optional().describe('The improved body/description for the task'),
+			summary: z.string().optional().describe('The improved summary for the task'),
+			description: z.string().optional().describe('The improved description for the task'),
 		}),
 		// prettier-ignore
 		execute: (args) => ctx.runMutation(internal.tasks.private._update, {
@@ -159,7 +159,7 @@ export const _mutationTools = (
 	createSubtask: tool({
 		description: 'Create a subtask',
 		parameters: z.object({
-			body: z
+			description: z
 				.string()
 				.describe(
 					'The first user message content in MDX format. Make sure to add all required details so another Meseeks can handle it properly. Think through your current context carefully and send a complete and structured message.',
@@ -170,7 +170,7 @@ export const _mutationTools = (
 			parentId: taskId,
 			author,
 			owner,
-			body: args.body,
+			description: args.description,
 		}),
 	}),
 });

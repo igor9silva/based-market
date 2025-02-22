@@ -31,9 +31,9 @@ export default function TaskDetail({
 				<div className="flex flex-col">
 					<div className="flex flex-row justify-between gap-2">
 						<EditableContent
-							key={task.title}
-							value={task.title ?? ''}
-							onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
+							key={task.summary}
+							value={task.summary ?? ''}
+							onSave={(newSummary) => updateTask({ taskId: task._id, summary: newSummary })}
 							viewClassName="text-2xl font-bold leading-none break-all"
 							asView={({ value, className, isEmpty }) => (
 								<h1 className={cn(task.isDone && 'line-through', className)}>
@@ -43,7 +43,7 @@ export default function TaskDetail({
 						/>
 						<div className="flex flex-row flex-shrink-0 items-center gap-1">
 							<CircleDollarSign className="size-4" />
-							{(task.balanceUSD ?? 0).toFixed(2)}
+							{(task.availableBudgetUSD ?? 0).toFixed(2)}
 						</div>
 						{showExpand && (
 							<Link to="/$" params={{ _splat: `/chat/${task._id}` }}>
@@ -74,9 +74,9 @@ export default function TaskDetail({
 			</CardHeader>
 			<CardContent className="p-0 md:p-4 md:pt-0">
 				<EditableContent
-					key={task.body}
-					value={task.body ?? ''}
-					onSave={(newBody) => updateTask({ taskId: task._id, body: newBody })}
+					key={task.description}
+					value={task.description ?? ''}
+					onSave={(newDescription) => updateTask({ taskId: task._id, description: newDescription })}
 					multiline
 					asView={({ value, enterEditMode, className, isEmpty }) => (
 						<div className={cn('overflow-x-auto', className)}>

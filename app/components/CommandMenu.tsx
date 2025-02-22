@@ -163,12 +163,12 @@ export function CommandMenuDialog() {
 							<CommandItem
 								key={task._id}
 								value={`/chat/${task._id}`}
-								keywords={[task.title ?? 'Untitled task']}
+								keywords={[task.summary ?? 'Untitled task']}
 								onSelect={onSelect}
 							>
 								{task.isDone ? <CircleCheckBig className="mr-2" /> : <Circle className="mr-2" />}
 								<span className={task.isDone ? 'line-through' : ''}>
-									{task.title ?? 'Untitled task'}
+									{task.summary ?? 'Untitled task'}
 								</span>
 							</CommandItem>
 						);
