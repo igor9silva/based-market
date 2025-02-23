@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { authorSchema } from './authorSchema';
 
 export const toolOwnerSchema = z.union([
-	zid('users'), // user or meseeks-defined tools
-	z.literal('built-in'), // global tools
+	z.literal('built-in'), // built-in to Meseeks
+	z.literal('isPro'), // managed by us, offered by third-parties
+	zid('users'), // managed by users
 ]);
 
 export const toolAuthorSchema = z.union([
@@ -75,3 +76,19 @@ export const toolSchema = z
 	.describe(
 		'A Tool is an external API call (service or LLM) that can be used by the user or Meseeks.', //
 	);
+
+// // built-in skills
+// speak()
+// createTask()
+// markAsDone()
+// ...
+
+// // managed by us, offered by third-parties
+// react()
+// learn()
+// searchWeb()
+// scrapeTweet()
+// ...
+
+// // managed by you
+// ...

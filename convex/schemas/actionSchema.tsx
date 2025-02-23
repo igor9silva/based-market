@@ -19,7 +19,7 @@ export const pendingActionSchema = coreActionSchema.extend({
 		'enqueued',
 		'running',
 	]),
-	result: z.null().optional().default(null),
+	result: z.null().optional().default(null), // <------
 });
 
 export const resolvedActionSchema = coreActionSchema.extend({
