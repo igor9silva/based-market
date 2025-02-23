@@ -4,19 +4,19 @@ import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 import { _askMagicRock } from '../magicRock';
-import { decisionToolSchema } from '../schemas/toolSchema';
+import { decisionSkillSchema } from '../schemas/skillSchema';
 import { stringToZod } from '../utils/zodToString';
 
-export function createDecisionTool(
+export function createDecisionSkill(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
-	tool: z.infer<typeof decisionToolSchema>,
+	skill: z.infer<typeof decisionSkillSchema>,
 ) {
 	//
 	const metadata = {
-		description: tool.description,
-		parameters: stringToZod(tool.parametersSchema),
+		description: skill.description,
+		parameters: stringToZod(skill.parametersSchema),
 	};
 
 	if (!action) return AITool(metadata);
@@ -25,9 +25,9 @@ export function createDecisionTool(
 		...metadata,
 		execute: async (args) => {
 			//
-			console.debug('Running decision tool', tool.key, args);
+			console.debug('Running decision skill', skill.key, args);
 
-			const result = await _askMagicRock(ctx, task, action, tool.config.instructions);
+			const result = await _askMagicRock(ctx, task, action, skill.config.instructions);
 
 			switch (result.finishReason) {
 				//
@@ -38,7 +38,7 @@ export function createDecisionTool(
 						result.toolCalls.map(async (call) => {
 							//
 							return ctx.runMutation(internal.action.private._add, {
-								toolKey: call.toolName,
+								skillKey: call.toolName,
 								args: call.args,
 								taskId: task._id,
 								author: action._id,
@@ -51,7 +51,7 @@ export function createDecisionTool(
 					toolCalls
 						.filter((call) => call.status === 'rejected')
 						.forEach((call) => {
-							console.error('tool call failed', call.reason);
+							console.error('skill call failed', call.reason);
 						});
 
 					break;
@@ -59,7 +59,7 @@ export function createDecisionTool(
 				case 'stop':
 					// if (result.text.length < 1) break;
 					await ctx.runMutation(internal.action.private._add, {
-						toolKey: 'say',
+						skillKey: 'say',
 						args: { message: result.text },
 						taskId: task._id,
 						author: action._id,
@@ -69,7 +69,7 @@ export function createDecisionTool(
 
 				case 'error':
 					await ctx.runMutation(internal.action.private._add, {
-						toolKey: 'say',
+						skillKey: 'say',
 						args: { message: result.text },
 						taskId: task._id,
 						author: action._id,
@@ -79,7 +79,7 @@ export function createDecisionTool(
 
 				case 'content-filter':
 					await ctx.runMutation(internal.action.private._add, {
-						toolKey: 'say',
+						skillKey: 'say',
 						args: { message: `[damn @sama] Content filter hit: ${result.warnings}` },
 						taskId: task._id,
 						author: action._id,
@@ -90,7 +90,7 @@ export function createDecisionTool(
 				case 'length':
 					// TODO: better handling of max length
 					await ctx.runMutation(internal.action.private._add, {
-						toolKey: 'say',
+						skillKey: 'say',
 						args: { message: `Max length hit: ${result.warnings}` },
 						taskId: task._id,
 						author: action._id,

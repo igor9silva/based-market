@@ -20,7 +20,7 @@ export function Action({
 		return new Date(action._creationTime) > initialRenderDate;
 	}, [action, initialRenderDate]);
 
-	if (action.toolKey === 'react' && (action.status === 'succeeded' || action.status === 'skipped')) {
+	if (action.skillKey === 'react' && (action.status === 'succeeded' || action.status === 'skipped')) {
 		return null;
 	}
 
@@ -45,15 +45,15 @@ export function Action({
 				{action.result ? (
 					<Result
 						result={action.result}
-						toolKey={action.toolKey}
+						skillKey={action.skillKey}
 						args={action.args}
 						costs={action.costs}
 						className={cn({
-							'bg-primary text-primary-foreground': isAuthorCurrentUser && action.toolKey === 'say',
+							'bg-primary text-primary-foreground': isAuthorCurrentUser && action.skillKey === 'say',
 						})}
 					/>
 				) : (
-					<div className="text-sm text-muted-foreground">Using {action.toolKey}()</div>
+					<div className="text-sm text-muted-foreground">Using {action.skillKey}()</div>
 				)}
 			</div>
 		</div>
@@ -62,13 +62,13 @@ export function Action({
 
 function Result({
 	result, //
-	toolKey,
+	skillKey,
 	args,
 	className,
 	costs,
 }: {
 	result: string;
-	toolKey: string;
+	skillKey: string;
 	args: Record<string, any>;
 	costs: Array<{
 		symbol: string;
@@ -79,7 +79,7 @@ function Result({
 }) {
 	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
 
-	if (toolKey === 'say') {
+	if (skillKey === 'say') {
 		return (
 			<div
 				className={cn(
@@ -95,7 +95,7 @@ function Result({
 	return (
 		<Collapsible className={cn('text-sm', className)}>
 			<CollapsibleTrigger>
-				<div className="text-muted-foreground">{toolKey}()</div>
+				<div className="text-muted-foreground">{skillKey}()</div>
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<p>

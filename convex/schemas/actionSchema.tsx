@@ -7,7 +7,7 @@ const coreActionSchema = z.object({
 	taskId: zid('tasks'),
 	owner: zid('users'),
 	author: authorSchema,
-	toolKey: z.string(),
+	skillKey: z.string(),
 	args: z.record(z.any()),
 	kind: z.enum(['sync', 'async']),
 });

@@ -1,4 +1,4 @@
-import { tool } from 'ai';
+import { tool as AITool } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internal } from '../_generated/api';
@@ -6,21 +6,21 @@ import { Doc, Id } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
 import { internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
-import { toolOwnerSchema } from '../schemas/toolSchema';
-import { createDecisionTool } from './createDecisionTool';
-import { createHttpTool } from './createHttpTool';
+import { skillOwnerSchema } from '../schemas/skillSchema';
+import { createDecisionSkill } from './createDecisionSkill';
+import { createHttpSkill } from './createHttpSkill';
 
-// all global tools + all user-defined tools
+// all global skills + all user-defined skills
 export const _findAll = internalQuery({
 	args: {
 		owner: zid('users'),
-		kind: z.enum(['decision', 'http']).optional().describe('Filter by tool kind. Grab all if unspecified.'),
+		kind: z.enum(['decision', 'http']).optional().describe('Filter by skill kind. Grab all if unspecified.'),
 	},
 	handler: async (ctx, { owner, kind }) => {
 		//
 		const [globals, users] = await Promise.all([
-			_findAllByOwner(ctx, { owner: 'built-in', kind }), // global tools
-			_findAllByOwner(ctx, { owner, kind }), // user-defined tools
+			_findAllByOwner(ctx, { owner: 'built-in', kind }), // global skills
+			_findAllByOwner(ctx, { owner, kind }), // user-defined skills
 		]);
 
 		return globals.concat(users);
@@ -29,13 +29,13 @@ export const _findAll = internalQuery({
 
 export const _findAllByOwner = internalQuery({
 	args: {
-		owner: toolOwnerSchema,
-		kind: z.enum(['decision', 'http']).optional().describe('Filter by tool kind. Grab all if unspecified.'),
+		owner: skillOwnerSchema,
+		kind: z.enum(['decision', 'http']).optional().describe('Filter by skill kind. Grab all if unspecified.'),
 	},
 	handler: async (ctx, { owner, kind }) => {
 		//
 		return await ctx.db
-			.query('tools')
+			.query('skills')
 			.withIndex('by_owner_kind', (q) =>
 				kind
 					? q.eq('owner', owner).eq('kind', kind) //
@@ -45,71 +45,71 @@ export const _findAllByOwner = internalQuery({
 	},
 });
 
-export const _allTools = async (
+export const _allSkills = async (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
 	action?: Doc<'actions'>,
 ) => {
 	//
-	const tools = await ctx.runQuery(internal.tools.private._findAll, {
+	const skills = await ctx.runQuery(internal.skills.private._findAll, {
 		owner: task.owner,
 	});
 
 	return {
 		...toMap(
-			tools.filter((tool) => tool.kind === 'decision'),
-			(tool) => createDecisionTool(ctx, task, action, tool),
+			skills.filter((skill) => skill.kind === 'decision'),
+			(skill) => createDecisionSkill(ctx, task, action, skill),
 		),
 		...toMap(
-			tools.filter((tool) => tool.kind === 'http'),
-			(tool) => createHttpTool(ctx, task, action, tool),
+			skills.filter((skill) => skill.kind === 'http'),
+			(skill) => createHttpSkill(ctx, task, action, skill),
 		),
-		..._mutationTools(ctx, task._id, task.author, task.owner),
-		..._syncTools(ctx, task._id, task.author, task.owner),
+		..._mutationSkills(ctx, task._id, task.author, task.owner),
+		..._syncSkills(ctx, task._id, task.author, task.owner),
 	};
 };
 
-export const _toolsForMagicRock = async (
+export const _skillsForMagicRock = async (
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
 	action?: Doc<'actions'>,
 ) => {
 	//
-	const tools = await ctx.runQuery(internal.tools.private._findAll, {
+	const skills = await ctx.runQuery(internal.skills.private._findAll, {
 		owner: task.owner,
 		kind: 'http',
 	});
 
 	const map = {
 		...toMap(
-			tools.filter((tool) => tool.kind === 'http'),
-			(tool) => createHttpTool(ctx, task, action, tool),
+			skills.filter((skill) => skill.kind === 'http'),
+			(skill) => createHttpSkill(ctx, task, action, skill),
 		),
-		..._mutationTools(ctx, task._id, task.author, task.owner),
-		..._syncTools(ctx, task._id, task.author, task.owner),
+		..._mutationSkills(ctx, task._id, task.author, task.owner),
+		..._syncSkills(ctx, task._id, task.author, task.owner),
 	};
 
-	// Clear execute property from all tools before returning
-	Object.values(map).forEach((tool) => {
+	// Clear execute property from all skills before returning
+	Object.values(map).forEach((skill) => {
 		// @ts-ignore TODO: workaround because I cannot stop AI SDK from calling execute()
-		tool.execute = undefined;
+		skill.execute = undefined;
 	});
 
 	return map;
 };
 
-export const _mutationTools = (
+export const _mutationSkills = (
 	ctx: ActionCtx | MutationCtx, //
 	taskId: Id<'tasks'>,
 	author: z.infer<typeof authorSchema>,
 	owner: Id<'users'>,
 ) => ({
-	doNothing: tool({
+	doNothing: AITool({
 		description: 'Do nothing.',
 		parameters: z.object({}),
 		execute: () => Promise.resolve(),
 	}),
-	updateTask: tool({
+	updateTask: AITool({
 		description: 'Update the task',
 		parameters: z.object({
 			summary: z.string().optional().describe('The improved summary for the task'),
@@ -123,7 +123,7 @@ export const _mutationTools = (
 		})
 		.then(() => 'task updated'),
 	}),
-	markAsDone: tool({
+	markAsDone: AITool({
 		description: 'Mark the task as done or undone.',
 		parameters: z.object({
 			isDone: z.boolean().describe('Whether the task should be marked as done or undone.'),
@@ -136,7 +136,7 @@ export const _mutationTools = (
 		})
 		.then(() => `task marked as ${args.isDone ? 'done' : '**not** done'}`),
 	}),
-	moveTask: tool({
+	moveTask: AITool({
 		description: 'Move the task to a new parent',
 		parameters: z.object({
 			taskId: zid('tasks').describe('The task id to be moved.'),
@@ -156,7 +156,7 @@ export const _mutationTools = (
 			newParentId: args.newParentId === 'inbox' ? undefined : args.newParentId,
 		}),
 	}),
-	createSubtask: tool({
+	createSubtask: AITool({
 		description: 'Create a subtask',
 		parameters: z.object({
 			description: z
@@ -175,13 +175,13 @@ export const _mutationTools = (
 	}),
 });
 
-export const _syncTools = (
+export const _syncSkills = (
 	ctx: ActionCtx | MutationCtx, //
 	taskId: Id<'tasks'>,
 	author: z.infer<typeof authorSchema>,
 	owner: Id<'users'>,
 ) => ({
-	say: tool({
+	say: AITool({
 		description: 'Send a text message to the user.',
 		parameters: z.object({
 			message: z.string().describe('The message to send to the user in MDX format.'),
@@ -189,7 +189,7 @@ export const _syncTools = (
 		// prettier-ignore
 		execute: (args) => Promise.resolve(args.message),
 	}),
-	increaseBudget: tool({
+	increaseBudget: AITool({
 		description: 'Increase the budget of the task',
 		parameters: z.object({
 			amount: z.number().describe('The amount of funds to add in USD.'),
@@ -202,13 +202,13 @@ export const _syncTools = (
 	}),
 });
 
-function toMap<ToolType extends { key: string }, ReturnType>(
-	tools: Array<ToolType>, //
-	mapFn: (tool: ToolType) => ReturnType,
+function toMap<SkillType extends { key: string }, ReturnType>(
+	skills: Array<SkillType>, //
+	mapFn: (skill: SkillType) => ReturnType,
 ) {
-	return tools.reduce(
-		(acc, tool: ToolType) => {
-			acc[tool.key] = mapFn(tool);
+	return skills.reduce(
+		(acc, skill: SkillType) => {
+			acc[skill.key] = mapFn(skill);
 			return acc;
 		},
 		{} as Record<string, ReturnType>,

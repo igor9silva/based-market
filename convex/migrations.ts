@@ -26,3 +26,19 @@ export const migrations = new Migrations<DataModel>(components.migrations);
 // });
 
 // export const runTemp5 = migrations.runner(internal.migrations.temp5);
+
+// export const temp7 = migrations.define({
+// 	table: 'actions',
+// 	// customRange: (query) => query.withIndex('by_requiredField', (q) => q.eq('requiredField', '')),
+// 	migrateOne: async (_ctx, doc) => ({ skillKey: doc.toolKey }),
+// });
+
+// export const runTemp7 = migrations.runner(internal.migrations.temp7);
+
+// export const temp8 = migrations.define({
+// 	table: 'actions',
+// 	// customRange: (query) => query.withIndex('by_requiredField', (q) => q.eq('requiredField', '')),
+// 	migrateOne: async (_ctx, doc) => ({ toolKey: undefined }),
+// });
+
+// export const runTemp8 = migrations.runner(internal.migrations.temp8);

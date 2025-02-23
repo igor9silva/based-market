@@ -6,8 +6,8 @@ import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
 import { authorSchema } from '../../schemas/authorSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
+import { _allSkills } from '../../skills/private';
 import { _findOne as _findOneTask } from '../../tasks/private';
-import { _allTools } from '../../tools/private';
 import { _add, _findAll as _findAllActions } from '../private';
 
 export const _execute = internalAction({
@@ -20,42 +20,42 @@ export const _execute = internalAction({
 		//
 		try {
 			//
-			// make sure the action is a tool
+			// make sure the action is a skill
 			const action = await ctx.runQuery(internal.action.private._findOne, { actionId });
-			console.debug('execute action', action.toolKey, actionId);
+			console.debug('execute action', action.skillKey, actionId);
 
 			if (action.kind !== 'async') throw new Error('Expected an async action.');
 
 			// grab the task
 			const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 
-			// get the tool TODO: optmize
-			const availableTools = await _allTools(ctx, task, action);
-			const tool = availableTools[action.toolKey as keyof typeof availableTools];
+			// get the skill TODO: optmize
+			const availableSkills = await _allSkills(ctx, task, action);
+			const skill = availableSkills[action.skillKey as keyof typeof availableSkills];
 
-			console.debug('tool key', action.toolKey);
-			console.debug('availableTools', Object.keys(availableTools));
+			console.debug('skill key', action.skillKey);
+			console.debug('availableSkills', Object.keys(availableSkills));
 
-			if (!tool) throw new Error(`Unknown tool: ${action.toolKey}`);
+			if (!skill) throw new Error(`Unknown skill: ${action.skillKey}`);
 
-			const MINIMUM_COST_USD = 0.01; // TODO: get this from the tool
-			const EXEMPT_TOOLS = ['increaseBudget', 'markAsDone', 'updateTask']; // TODO: likely all mutation tools
+			const MINIMUM_COST_USD = 0.01; // TODO: get this from the skill
+			const EXEMPT_SKILLS = ['increaseBudget', 'markAsDone', 'updateTask']; // TODO: likely all mutation skills
 
 			// TODO: check budget
 			// end with failed and a hardcoded component (that has a button that calls increaseBudget() as the user)
-			if ((task.availableBudgetUSD ?? 0) < MINIMUM_COST_USD && !EXEMPT_TOOLS.includes(action.toolKey)) {
+			if ((task.availableBudgetUSD ?? 0) < MINIMUM_COST_USD && !EXEMPT_SKILLS.includes(action.skillKey)) {
 				throw new Error(`Not enough budget.\n<IncreaseTaskBudgetCard taskId='${taskId}' />`);
 			}
 
-			const parsedArgs = tool.parameters.safeParse(action.args);
-			if (!parsedArgs.success) throw new Error(`Invalid tool args: ${parsedArgs.error.message}`);
+			const parsedArgs = skill.parameters.safeParse(action.args);
+			if (!parsedArgs.success) throw new Error(`Invalid skill args: ${parsedArgs.error.message}`);
 
-			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool
-			const result = await tool.execute(parsedArgs.data);
+			// @ts-expect-error we intentionally do not support exposing skillCallId or message history to the skill
+			const result = await skill.execute(parsedArgs.data);
 
 			const ACTION_COST = 0.01; // TODO: env
 
-			const costs = EXEMPT_TOOLS.includes(action.toolKey)
+			const costs = EXEMPT_SKILLS.includes(action.skillKey)
 				? []
 				: [
 						{
@@ -83,7 +83,7 @@ export const _execute = internalAction({
 			//
 		} catch (error) {
 			//
-			console.error('error in tool', error); // TODO: notify
+			console.error('error in skill', error); // TODO: notify
 
 			await _setResolved(ctx, {
 				actionId,
@@ -135,7 +135,7 @@ export const _react = internalMutation({
 					.eq('taskId', taskId) //
 					.eq('status', 'enqueued'),
 			)
-			.filter((q) => q.eq(q.field('toolKey'), 'react'))
+			.filter((q) => q.eq(q.field('skillKey'), 'react'))
 			.collect();
 
 		console.debug('pending reactions', pendingReactions);
@@ -154,7 +154,7 @@ export const _react = internalMutation({
 			taskId,
 			author,
 			owner: task.owner,
-			toolKey: 'react',
+			skillKey: 'react',
 			args: {},
 		});
 	},
@@ -196,7 +196,7 @@ export const _resolve = internalMutation({
 		await ctx.db.patch(actionId, { result, status, costs });
 
 		// this if avoids silicon-based life forms to take over
-		if (action.toolKey !== 'react' && action.toolKey !== 'doNothing') {
+		if (action.skillKey !== 'react' && action.skillKey !== 'doNothing') {
 			await _react(ctx, { taskId: action.taskId, author: action._id });
 		}
 	},
@@ -261,7 +261,7 @@ export async function _runNextActionIfNeeded(
 	const runningAction = await ctx.runQuery(internal.action.private._findRunning, { taskId });
 	if (runningAction)
 		return skip(
-			`Skipping next action for task ${taskId} because there is a running action (${runningAction.toolKey}, ${runningAction._id}).`,
+			`Skipping next action for task ${taskId} because there is a running action (${runningAction.skillKey}, ${runningAction._id}).`,
 		);
 
 	// grab next pending action, skip if there are none

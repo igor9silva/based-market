@@ -15,7 +15,7 @@ export function useTaskMutations() {
 	}) => {
 		return act({
 			taskId,
-			toolKey: 'say',
+			skillKey: 'say',
 			args: { message },
 		});
 	};
@@ -31,7 +31,7 @@ export function useTaskMutations() {
 	}) => {
 		return act({
 			taskId,
-			toolKey: 'updateTask',
+			skillKey: 'updateTask',
 			args: { summary, description },
 		});
 	};
@@ -45,7 +45,7 @@ export function useTaskMutations() {
 	}) => {
 		return act({
 			taskId,
-			toolKey: 'markAsDone',
+			skillKey: 'markAsDone',
 			args: { isDone },
 		});
 	};
@@ -59,7 +59,7 @@ export function useTaskMutations() {
 	}) => {
 		return act({
 			taskId,
-			toolKey: 'increaseBudget',
+			skillKey: 'increaseBudget',
 			args: { amount },
 		});
 	};

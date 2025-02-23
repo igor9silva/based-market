@@ -2,18 +2,19 @@ import { tool as AITool } from 'ai';
 import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { httpToolSchema } from '../schemas/toolSchema';
+import { httpSkillSchema } from '../schemas/skillSchema';
 import { stringToZod } from '../utils/zodToString';
 
-export function createHttpTool(
+export function createHttpSkill(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
-	tool: z.infer<typeof httpToolSchema>,
+	skill: z.infer<typeof httpSkillSchema>,
 ) {
+	//
 	const metadata = {
-		description: tool.description,
-		parameters: stringToZod(tool.parametersSchema),
+		description: skill.description,
+		parameters: stringToZod(skill.parametersSchema),
 	};
 
 	if (!action) return AITool(metadata);
@@ -22,9 +23,9 @@ export function createHttpTool(
 		...metadata,
 		execute: async (args) => {
 			//
-			console.debug('Running tool', tool.key, args);
+			console.debug('Running skill', skill.key, args);
 
-			const config = tool.config;
+			const config = skill.config;
 			const url = new URL(config.url);
 			const headers = { ...config.headers };
 

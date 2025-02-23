@@ -3,8 +3,8 @@ import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
 import { actionSchema } from './schemas/actionSchema';
 import { componentSchema } from './schemas/componentSchema';
+import { skillSchema } from './schemas/skillSchema';
 import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
-import { toolSchema } from './schemas/toolSchema';
 import { topUpSchema } from './schemas/topUpSchema';
 import { transactionSchema } from './schemas/transactionSchema';
 import { userSchema } from './schemas/userSchema';
@@ -52,8 +52,8 @@ export default defineSchema({
 		'by_task_status', ['taskId', 'status'],
 	),
 
-	tools: defineTable(
-		zodToConvex(toolSchema),
+	skills: defineTable(
+		zodToConvex(skillSchema),
 	).index(
 		'by_owner_kind', ['owner', 'kind'],
 	).index(

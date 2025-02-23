@@ -111,7 +111,7 @@ export const _add = internalMutation({
 			taskId,
 			author,
 			owner,
-			toolKey: 'say',
+			skillKey: 'say',
 			args: { message: description },
 		});
 
@@ -168,11 +168,11 @@ Happy hacking 🚀
 		// 	taskId,
 		// 	author,
 		// 	owner,
-		// 	toolKey: 'say',
+		// 	skillKey: 'say',
 		// 	args: { message: description },
 		// });
 
-		// TODO: create a 2nd decision tool, for onboarding
+		// TODO: create a 2nd decision skill, for onboarding
 		// TODO: insert a few actions
 
 		return taskId;

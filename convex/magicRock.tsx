@@ -6,7 +6,7 @@ import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx } from './_generated/server';
 import { authorSchema } from './schemas/authorSchema';
 import { env } from './schemas/envSchema';
-import { _toolsForMagicRock } from './tools/private';
+import { _skillsForMagicRock } from './skills/private';
 
 // TODO: move to DB
 export async function _askMagicRock(
@@ -50,7 +50,7 @@ export async function _askMagicRock(
 
 		// assuming task.author is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task._id, task.author),
-		tools: await loadTools(ctx, task),
+		tools: await loadSkills(ctx, task),
 		toolChoice: 'required',
 
 		experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
@@ -112,7 +112,7 @@ function actionToCoreMessage(
 						{
 							type: 'tool-call',
 							toolCallId: action._id,
-							toolName: action.toolKey,
+							toolName: action.skillKey,
 							args: action.args,
 						},
 					],
@@ -123,7 +123,7 @@ function actionToCoreMessage(
 						{
 							type: 'tool-result',
 							toolCallId: action._id,
-							toolName: action.toolKey,
+							toolName: action.skillKey,
 							result: action.result,
 							isError: action.status === 'failed',
 						},
@@ -144,18 +144,18 @@ function actionToCoreMessage(
 	}
 }
 
-async function loadTools(
+async function loadSkills(
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
 ): Promise<Record<string, CoreTool>> {
 	//
-	console.debug('loadTools');
+	console.debug('loadSkills');
 
-	const tools = await _toolsForMagicRock(ctx, task);
+	const skills = await _skillsForMagicRock(ctx, task);
 
-	console.debug('loaded tools', Object.keys(tools));
+	console.debug('loaded skills', Object.keys(skills));
 
-	return tools;
+	return skills;
 }
 
 // TODO: persist a copy of the messages in CoreMessage format? or it gets too big?

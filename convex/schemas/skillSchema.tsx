@@ -2,15 +2,15 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { authorSchema } from './authorSchema';
 
-export const toolOwnerSchema = z.union([
+export const skillOwnerSchema = z.union([
 	z.literal('built-in'), // built-in to Meseeks
 	z.literal('isPro'), // managed by us, offered by third-parties
 	zid('users'), // managed by users
 ]);
 
-export const toolAuthorSchema = z.union([
-	authorSchema, // user or meseeks-defined tools
-	z.literal('built-in'), // global tools
+export const skillAuthorSchema = z.union([
+	authorSchema, // user or meseeks-defined skills
+	z.literal('built-in'), // global skills // TODO: idea: the initial seed is just an action that happens on the onboarding task
 ]);
 
 const httpConfigSchema = z.object({
@@ -50,31 +50,31 @@ const decisionConfigSchema = z.object({
 	instructions: z.string().describe('Instructions for the decision-making process'),
 });
 
-const coreToolSchema = z.object({
+const coreSkillSchema = z.object({
 	key: z.string(),
 	description: z.string(),
-	owner: toolOwnerSchema,
-	author: toolAuthorSchema,
+	owner: skillOwnerSchema,
+	author: skillAuthorSchema,
 	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
 });
 
-export const httpToolSchema = coreToolSchema.extend({
+export const httpSkillSchema = coreSkillSchema.extend({
 	kind: z.literal('http'),
 	config: httpConfigSchema,
 });
 
-export const decisionToolSchema = coreToolSchema.extend({
+export const decisionSkillSchema = coreSkillSchema.extend({
 	kind: z.literal('decision'),
 	config: decisionConfigSchema,
 });
 
-export const toolSchema = z
+export const skillSchema = z
 	.union([
-		httpToolSchema, //
-		decisionToolSchema,
+		httpSkillSchema, //
+		decisionSkillSchema,
 	])
 	.describe(
-		'A Tool is an external API call (service or LLM) that can be used by the user or Meseeks.', //
+		'A Skill is an external API call (service or LLM) that can be used by the user or Meseeks.', //
 	);
 
 // // built-in skills

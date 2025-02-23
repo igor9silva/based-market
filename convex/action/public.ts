@@ -8,17 +8,17 @@ import { _add, _findAll, _findAllPaginated, _findAllRunning, _findOne } from './
 export const act = mutation({
 	args: {
 		taskId: zid('tasks'),
-		toolKey: z.string(),
+		skillKey: z.string(),
 		args: z.record(z.any()),
 	},
-	handler: async (ctx, { taskId, toolKey, args }) => {
+	handler: async (ctx, { taskId, skillKey, args }) => {
 		//
-		console.debug(`use tool on task '${taskId}'`);
+		console.debug(`use skill on task '${taskId}'`);
 
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 
 		return await _add(ctx, {
-			toolKey,
+			skillKey,
 			args,
 			taskId,
 			author: currentUser._id,
