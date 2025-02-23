@@ -2,14 +2,14 @@ import { tool as AITool } from 'ai';
 import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
-import { httpSkillSchema } from '../schemas/skillSchema';
+import { hardSkillSchema } from '../schemas/skillSchema';
 import { stringToZod } from '../utils/zodToString';
 
-export function createHttpSkill(
+export function createHardSkill(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
-	skill: z.infer<typeof httpSkillSchema>,
+	skill: z.infer<typeof hardSkillSchema>,
 ) {
 	//
 	const metadata = {

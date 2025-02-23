@@ -4,14 +4,14 @@ import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 import { _askMagicRock } from '../magicRock';
-import { decisionSkillSchema } from '../schemas/skillSchema';
+import { softSkillSchema } from '../schemas/skillSchema';
 import { stringToZod } from '../utils/zodToString';
 
-export function createDecisionSkill(
+export function createSoftSkill(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
-	skill: z.infer<typeof decisionSkillSchema>,
+	skill: z.infer<typeof softSkillSchema>,
 ) {
 	//
 	const metadata = {

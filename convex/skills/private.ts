@@ -7,14 +7,14 @@ import { ActionCtx, MutationCtx } from '../_generated/server';
 import { internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { skillOwnerSchema } from '../schemas/skillSchema';
-import { createDecisionSkill } from './createDecisionSkill';
-import { createHttpSkill } from './createHttpSkill';
+import { createHardSkill } from './createHardSkill';
+import { createSoftSkill } from './createSoftSkill';
 
 // all global skills + all user-defined skills
 export const _findAll = internalQuery({
 	args: {
 		owner: zid('users'),
-		kind: z.enum(['decision', 'http']).optional().describe('Filter by skill kind. Grab all if unspecified.'),
+		kind: z.enum(['hard', 'soft']).optional().describe('Filter by skill kind. Grab all if unspecified.'),
 	},
 	handler: async (ctx, { owner, kind }) => {
 		//
@@ -30,7 +30,7 @@ export const _findAll = internalQuery({
 export const _findAllByOwner = internalQuery({
 	args: {
 		owner: skillOwnerSchema,
-		kind: z.enum(['decision', 'http']).optional().describe('Filter by skill kind. Grab all if unspecified.'),
+		kind: z.enum(['hard', 'soft']).optional().describe('Filter by skill kind. Grab all if unspecified.'),
 	},
 	handler: async (ctx, { owner, kind }) => {
 		//
@@ -57,12 +57,12 @@ export const _allSkills = async (
 
 	return {
 		...toMap(
-			skills.filter((skill) => skill.kind === 'decision'),
-			(skill) => createDecisionSkill(ctx, task, action, skill),
+			skills.filter((skill) => skill.kind === 'soft'),
+			(skill) => createSoftSkill(ctx, task, action, skill),
 		),
 		...toMap(
-			skills.filter((skill) => skill.kind === 'http'),
-			(skill) => createHttpSkill(ctx, task, action, skill),
+			skills.filter((skill) => skill.kind === 'hard'),
+			(skill) => createHardSkill(ctx, task, action, skill),
 		),
 		..._mutationSkills(ctx, task._id, task.author, task.owner),
 		..._syncSkills(ctx, task._id, task.author, task.owner),
@@ -77,13 +77,13 @@ export const _skillsForMagicRock = async (
 	//
 	const skills = await ctx.runQuery(internal.skills.private._findAll, {
 		owner: task.owner,
-		kind: 'http',
+		kind: 'hard',
 	});
 
 	const map = {
 		...toMap(
-			skills.filter((skill) => skill.kind === 'http'),
-			(skill) => createHttpSkill(ctx, task, action, skill),
+			skills.filter((skill) => skill.kind === 'hard'),
+			(skill) => createHardSkill(ctx, task, action, skill),
 		),
 		..._mutationSkills(ctx, task._id, task.author, task.owner),
 		..._syncSkills(ctx, task._id, task.author, task.owner),

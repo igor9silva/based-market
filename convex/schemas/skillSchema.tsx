@@ -58,20 +58,20 @@ const coreSkillSchema = z.object({
 	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
 });
 
-export const httpSkillSchema = coreSkillSchema.extend({
-	kind: z.literal('http'),
+export const hardSkillSchema = coreSkillSchema.extend({
+	kind: z.literal('hard'),
 	config: httpConfigSchema,
 });
 
-export const decisionSkillSchema = coreSkillSchema.extend({
-	kind: z.literal('decision'),
+export const softSkillSchema = coreSkillSchema.extend({
+	kind: z.literal('soft'),
 	config: decisionConfigSchema,
 });
 
 export const skillSchema = z
 	.union([
-		httpSkillSchema, //
-		decisionSkillSchema,
+		hardSkillSchema, //
+		softSkillSchema,
 	])
 	.describe(
 		'A Skill is an external API call (service or LLM) that can be used by the user or Meseeks.', //
