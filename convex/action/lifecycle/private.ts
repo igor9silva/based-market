@@ -8,6 +8,7 @@ import { authorSchema } from '../../schemas/authorSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
 import { _allSkills } from '../../skills/private';
 import { _findOne as _findOneTask } from '../../tasks/private';
+import { asBigInt } from '../../utils/money';
 import { _add, _findAll as _findAllActions } from '../private';
 
 export const _execute = internalAction({
@@ -18,6 +19,15 @@ export const _execute = internalAction({
 	},
 	handler: async (ctx, { taskId, actionId, author }) => {
 		//
+		// ensureWithinBudget()
+		// checks if `expectedCost() < task.availableBudgetUSD`
+		// otherwise fails with <IncreaseTaskBudgetCard taskId='${taskId}' />
+		// authorize()
+		// try automatic approval: check if skill.preApprovedCost < expectedCost()
+		// otherwise status go `pending authorization`
+
+		// 'built-in' skills are free of charge
+
 		try {
 			//
 			// make sure the action is a skill
@@ -43,7 +53,7 @@ export const _execute = internalAction({
 
 			// TODO: check budget
 			// end with failed and a hardcoded component (that has a button that calls increaseBudget() as the user)
-			if ((task.availableBudgetUSD ?? 0) < MINIMUM_COST_USD && !EXEMPT_SKILLS.includes(action.skillKey)) {
+			if (task.availableBudgetUSD < MINIMUM_COST_USD && !EXEMPT_SKILLS.includes(action.skillKey)) {
 				throw new Error(`Not enough budget.\n<IncreaseTaskBudgetCard taskId='${taskId}' />`);
 			}
 
@@ -53,7 +63,7 @@ export const _execute = internalAction({
 			// @ts-expect-error we intentionally do not support exposing skillCallId or message history to the skill
 			const result = await skill.execute(parsedArgs.data);
 
-			const ACTION_COST = 0.01; // TODO: env
+			const ACTION_COST = asBigInt({ dollars: 0.005 }); // TODO: env
 
 			const costs = EXEMPT_SKILLS.includes(action.skillKey)
 				? []
@@ -65,7 +75,7 @@ export const _execute = internalAction({
 						},
 					];
 
-			const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0);
+			const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0n);
 
 			if (totalCost > 0) {
 				await ctx.runMutation(internal.tasks.private._useFunds, { taskId: action.taskId, amount: totalCost });
@@ -180,7 +190,7 @@ export const _resolve = internalMutation({
 		costs: z.array(
 			z.object({
 				symbol: tokenSchema,
-				amount: z.number(),
+				amount: z.bigint(),
 				description: z.string(),
 			}),
 		),
@@ -210,7 +220,7 @@ async function _setResolved(
 		status: 'succeeded' | 'failed';
 		costs: Array<{
 			symbol: z.infer<typeof tokenSchema>;
-			amount: number;
+			amount: bigint;
 			description: string;
 		}>;
 	},

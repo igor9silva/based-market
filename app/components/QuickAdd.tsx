@@ -1,6 +1,7 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
+import { asBigInt } from 'convex/utils/money';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -33,11 +34,20 @@ export function QuickAdd({ className }: { className?: string }) {
 		}),
 		shouldAlwaysClearForm: false,
 		handler: async ({ description, initialFunds }) => {
+			//
 			console.debug('QuickAdd', description, initialFunds);
+
 			try {
-				const taskId = await addTask({ description, initialFunds });
+				//
+				const taskId = await addTask({
+					description,
+					initialFunds: asBigInt({ dollars: initialFunds }),
+				});
+
 				navigate({ to: '/$', params: { _splat: `/chat/${taskId}` } });
+				//
 			} catch (error: unknown) {
+				//
 				if (isError(INSUFFICIENT_ACCOUNT_FUNDS_ERROR, error)) {
 					toast.error('Account funds are insufficient.', {
 						description: 'Top up or decrease the task budget.',

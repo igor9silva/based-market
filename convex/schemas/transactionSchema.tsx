@@ -4,7 +4,7 @@ import { tokenSchema } from './topUpSchema';
 
 export const valueSchema = z.object({
 	symbol: tokenSchema,
-	amount: z.number(),
+	amount: z.bigint(),
 });
 
 export const freeCreditsTransactionSchema = z.object({

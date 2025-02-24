@@ -4,6 +4,7 @@ import { Id } from '../_generated/dataModel';
 import { MutationCtx, QueryCtx } from '../_generated/server';
 import { mutation, query } from '../lib';
 import { current as getCurrentUser } from '../users/public';
+import { asBigInt } from '../utils/money';
 import { _add } from './private';
 
 export const findAll = query({
@@ -89,7 +90,10 @@ export const add = mutation({
 	args: {
 		description: z.string(),
 		parentId: zid('tasks').optional(),
-		initialFunds: z.number().min(0).max(100000).default(0.1),
+		initialFunds: z
+			.bigint()
+			.min(0n)
+			.max(asBigInt({ dollars: 100000 })),
 	},
 	handler: async (ctx, { description, parentId, initialFunds }) => {
 		//

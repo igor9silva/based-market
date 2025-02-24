@@ -23,10 +23,10 @@ export function TaskItem({
 					className={cn(
 						'font-semibold leading-none tracking-tight whitespace-pre-wrap break-all',
 						task.isDone && 'line-through',
-						!task.title && 'text-muted-foreground',
+						!task.summary && 'text-muted-foreground',
 					)}
 				>
-					{task.title || 'Untitled task'}
+					{task.summary || 'Untitled task'}
 				</h3>
 				<TimeAgo date={task._creationTime} className="text-sm text-muted-foreground" />
 			</div>

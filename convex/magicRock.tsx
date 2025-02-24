@@ -20,6 +20,7 @@ export async function _askMagicRock(
 		text,
 		toolCalls,
 		// toolResults,
+		// steps,
 		usage,
 		warnings,
 		response,
@@ -59,13 +60,20 @@ export async function _askMagicRock(
 				return null; // do not attempt to fix invalid tool names
 			}
 
-			console.debug('repairToolCall', toolCall);
-
+			// TODO: 2025-02-24 not yet sure how to handle broken tool calls
+			// hard to just sum usage, also hard to predict, might go over budget
+			// hard to split into a second action
 			// TODO: trace this call, maybe aggregate to the action usage data
+
+			console.debug('repairToolCall', toolCall);
 
 			const tool = tools[toolCall.toolName as keyof typeof tools];
 
-			const { object: repairedArgs } = await generateObject({
+			const {
+				object: repairedArgs,
+				usage,
+				warnings,
+			} = await generateObject({
 				model: openai('gpt-4o', { structuredOutputs: true }),
 				schema: tool.parameters,
 				prompt: [

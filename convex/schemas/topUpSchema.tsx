@@ -1,5 +1,6 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
+import { asBigInt } from '../utils/money';
 import { authorSchema } from './authorSchema';
 
 export const blockchainSchema = z.enum([
@@ -23,7 +24,10 @@ export const topUpStatusSchema = z.enum([
 
 export const walletAddressSchema = z.string().describe('The address of the recipient.');
 
-export const topUpAmountSchema = z.number().min(0.1, 'Minimum amount is $0.1').max(100000, 'That much? Are you sure?');
+export const topUpAmountSchema = z
+	.bigint()
+	.min(asBigInt({ dollars: 0.1 }), 'Minimum amount is $0.1')
+	.max(asBigInt({ dollars: 100000 }), 'That much? Are you sure?');
 
 export const topUpSchema = z
 	.object({

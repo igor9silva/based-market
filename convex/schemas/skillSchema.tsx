@@ -1,5 +1,6 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
+import { asBigInt } from '../utils/money';
 import { authorSchema } from './authorSchema';
 
 export const skillOwnerSchema = z.union([
@@ -60,11 +61,21 @@ const coreSkillSchema = z.object({
 
 export const hardSkillSchema = coreSkillSchema.extend({
 	kind: z.literal('hard'),
+	cost: z
+		.bigint() //
+		.min(asBigInt({ dollars: 0 }))
+		.max(asBigInt({ dollars: 1000 }))
+		.describe('The cost to use this skill, in USD.'),
 	config: httpConfigSchema,
 });
 
 export const softSkillSchema = coreSkillSchema.extend({
 	kind: z.literal('soft'),
+	cost: z
+		.literal('dynamic')
+		.describe(
+			'The cost to use this skill, in USD. Dynamic cost means it will be known during usage. Budget is still accounted before execution.',
+		),
 	config: decisionConfigSchema,
 });
 
@@ -77,7 +88,7 @@ export const skillSchema = z
 		'A Skill is an external API call (service or LLM) that can be used by the user or Meseeks.', //
 	);
 
-// // built-in skills
+// Instincts/built-in skills
 // speak()
 // createTask()
 // markAsDone()

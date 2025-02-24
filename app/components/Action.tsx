@@ -2,6 +2,7 @@ import { Doc } from 'convex/_generated/dataModel';
 import { useMemo } from 'react';
 import { cn } from '~/lib/utils';
 
+import { asDollars } from 'convex/utils/money';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
 import MDX from '~/components/ui/mdx';
 
@@ -72,7 +73,7 @@ function Result({
 	args: Record<string, any>;
 	costs: Array<{
 		symbol: string;
-		amount: number;
+		amount: bigint;
 		description: string;
 	}>;
 	className?: string;
@@ -105,7 +106,7 @@ function Result({
 				<ul>
 					{costs.map((cost) => (
 						<li key={cost.symbol}>
-							{cost.symbol} {cost.amount} ({cost.description})
+							{cost.symbol} {asDollars({ bigInt: cost.amount })} ({cost.description})
 						</li>
 					))}
 				</ul>

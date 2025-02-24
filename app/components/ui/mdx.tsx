@@ -3,7 +3,6 @@ import { useMDX } from '~/hooks/useMDX';
 
 import { useState } from 'react';
 import { Balance } from '~/components/Balance';
-import { ChatHistory } from '~/components/ChatHistory';
 import { EasterEgg } from '~/components/EasterEgg';
 import { IncreaseTaskBudgetCard } from '~/components/IncreaseTaskBudgetCard';
 import { Grid } from '~/components/layout/Grid';
@@ -25,7 +24,6 @@ import { Separator } from '~/components/ui/separator';
 
 const components = {
 	IncreaseTaskBudgetCard,
-	ChatHistory,
 	Balance,
 	Separator,
 	Button,

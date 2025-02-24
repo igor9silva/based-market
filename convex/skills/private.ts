@@ -192,7 +192,7 @@ export const _syncSkills = (
 	increaseBudget: AITool({
 		description: 'Increase the budget of the task',
 		parameters: z.object({
-			amount: z.number().describe('The amount of funds to add in USD.'),
+			amount: z.bigint().describe('The amount of funds to add in USD.'),
 		}),
 		execute: (args) =>
 			ctx.runMutation(internal.tasks.private._increaseBudget, {

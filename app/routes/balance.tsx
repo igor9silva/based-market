@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
+import { asDollars } from 'convex/utils/money';
 import { CircleDollarSign } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
@@ -27,12 +28,12 @@ function RouteComponent() {
 				<h1 className="text-2xl font-bold">Balance</h1>
 				<span className="text-sm">
 					Your current non-locked balance is{' '}
-					<span className="font-bold">{(user.balanceUSD ?? 0).toFixed(6)}</span>{' '}
+					<span className="font-bold">{asDollars({ bigInt: user.balanceUSD, precision: 6 })}</span>{' '}
 					<CircleDollarSign className="inline-block size-3 align-[-1px]" />.
 				</span>
 				{lockedBalance > 0 && (
 					<span className="text-sm">
-						Other <span className="font-bold">{lockedBalance.toFixed(6)}</span>{' '}
+						Other <span className="font-bold">{asDollars({ bigInt: lockedBalance, precision: 6 })}</span>{' '}
 						<CircleDollarSign className="inline-block size-3 align-[-1px]" /> are locked in active tasks.
 					</span>
 				)}
@@ -44,7 +45,7 @@ function RouteComponent() {
 						key={transaction._id}
 						transaction={transaction}
 						taskId={
-							transaction.kind === 'fund task' || transaction.kind === 'refund task'
+							transaction.kind === 'fund task' || transaction.kind === 'refund from task'
 								? transaction.taskId
 								: undefined
 						}
@@ -83,7 +84,7 @@ function TransactionItem({
 			<span
 				className={`flex-shrink-0 font-medium ${transaction.value.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}
 			>
-				{transaction.value.amount.toFixed(2)}
+				{asDollars({ bigInt: transaction.value.amount })}
 			</span>
 		</div>
 	);
@@ -108,7 +109,7 @@ function TransactionKind({
 			return <span className="font-medium">Top Up</span>;
 		case 'fund task':
 			return <span className="font-medium">Increase task budget</span>;
-		case 'refund task':
+		case 'refund from task':
 			return <span className="font-medium">Refund task budget</span>;
 		default:
 			return <span className="font-medium">Unknown</span>;

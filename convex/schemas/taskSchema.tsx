@@ -14,8 +14,7 @@ export const taskSchema = z
 			.describe('How was the task resolved, in MDX. If filled but task is not yet done, its a draft resolution.'),
 		parentId: zid('tasks').optional().describe('The parent task ID of this task.'),
 		availableBudgetUSD: z
-			.number()
-			.default(0)
+			.bigint()
 			.describe('The remaining/available amount of money available to spend on this task.'),
 		isDone: z
 			.boolean()

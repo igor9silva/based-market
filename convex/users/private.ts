@@ -9,6 +9,7 @@ import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/topUpSchema';
 import { _addInboxTask } from '../tasks/private';
 import { _addFreeCredits } from '../transactions/private';
+import { asBigInt } from '../utils/money';
 
 export const _seedIfNeeded = async (
 	ctx: MutationCtx, //
@@ -24,7 +25,7 @@ export const _seedIfNeeded = async (
 		owner: userId,
 		value: {
 			symbol: 'USD',
-			amount: isVerified ? 5 : 1,
+			amount: isVerified ? asBigInt({ dollars: 5 }) : asBigInt({ dollars: 1 }),
 		},
 		description: isVerified ? 'Free 500 actions for verified users!' : 'Free 100 actions for non-verified users',
 	});
@@ -94,7 +95,7 @@ export const _adjustBalance = internalMutation({
 		userId: zid('users'),
 		value: z.object({
 			symbol: tokenSchema,
-			amount: z.number(),
+			amount: z.bigint(),
 		}),
 	},
 	handler: async (ctx, { userId, value }) => {
@@ -106,7 +107,7 @@ export const _adjustBalance = internalMutation({
 
 		if (value.symbol !== 'USD') throw new Error('Only USD is supported for now');
 
-		return await ctx.db.patch(userId, { balanceUSD: (user.balanceUSD ?? 0) + value.amount });
+		return await ctx.db.patch(userId, { balanceUSD: user.balanceUSD + value.amount });
 	},
 });
 

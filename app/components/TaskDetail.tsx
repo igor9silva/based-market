@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
+import { asDollars } from 'convex/utils/money';
 import { CircleDollarSign, Maximize2 } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
@@ -43,7 +44,7 @@ export default function TaskDetail({
 						/>
 						<div className="flex flex-row flex-shrink-0 items-center gap-1">
 							<CircleDollarSign className="size-4" />
-							{(task.availableBudgetUSD ?? 0).toFixed(2)}
+							{asDollars({ bigInt: task.availableBudgetUSD })}
 						</div>
 						{showExpand && (
 							<Link to="/$" params={{ _splat: `/chat/${task._id}` }}>

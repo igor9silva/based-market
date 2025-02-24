@@ -10,6 +10,7 @@ import { authorSchema } from '../schemas/authorSchema';
 import { _addFundTask, _addRefundTask } from '../transactions/private';
 import { _findOne as _findOneUser } from '../users/private';
 import { InsufficientAccountFunds, NotFound } from '../utils/errors';
+import { asBigInt } from '../utils/money';
 
 export const _findOne = internalQuery({
 	args: {
@@ -91,16 +92,21 @@ export const _add = internalMutation({
 		summary: z.string().optional(),
 		description: z.string(),
 		parentId: zid('tasks').optional(),
-		initialFunds: z.number().min(0).max(100000).optional(),
+		initialFunds: z
+			.bigint()
+			.min(0n)
+			.max(asBigInt({ dollars: 100000 }))
+			.optional(),
 	},
 	handler: async (ctx, { author, owner, description, parentId, summary, initialFunds }) => {
 		//
 		const taskId = await ctx.db.insert('tasks', {
 			author,
 			owner,
-			isDone: false,
 			parentId,
 			summary,
+			isDone: false,
+			availableBudgetUSD: 0n,
 		});
 
 		if (initialFunds) {
@@ -130,6 +136,8 @@ export const _addInboxTask = internalMutation({
 			author,
 			owner,
 			summary: 'Look at me!',
+			isDone: false,
+			availableBudgetUSD: 0n,
 			description: `
 ## ooh-wee, welcome to Meseeks! 
 Here, everything is a task.
@@ -159,10 +167,9 @@ If you need more funds, look for "Top up".
 <br />
 Happy hacking 🚀
 `.trim(),
-			isDone: false,
 		});
 
-		await _increaseBudget(ctx, { taskId, amount: 1 });
+		await _increaseBudget(ctx, { taskId, amount: 1n });
 
 		// await _addAction(ctx, {
 		// 	taskId,
@@ -301,7 +308,7 @@ export const _markAsDone = internalMutation({
 
 			if (task.availableBudgetUSD && task.availableBudgetUSD > 0) {
 				await _removeFunds(ctx, { taskId, amount: task.availableBudgetUSD });
-				await ctx.db.patch(taskId, { availableBudgetUSD: 0 });
+				await ctx.db.patch(taskId, { availableBudgetUSD: 0n });
 			}
 		}
 
@@ -312,26 +319,25 @@ export const _markAsDone = internalMutation({
 export const _useFunds = internalMutation({
 	args: {
 		taskId: zid('tasks'),
-		amount: z.number().min(0),
+		amount: z.bigint().min(0n),
 	},
 	handler: async (ctx, { taskId, amount }) => {
 		//
 		const task = await _findOne(ctx, { taskId });
 		if (!task) throw new Error('Task not found');
 
-		const currentBalance = task.availableBudgetUSD ?? 0;
-		console.debug('useFunds', amount, currentBalance, taskId);
-		if (currentBalance < amount) throw new Error('Insufficient funds on task');
+		console.debug('useFunds', amount, task.availableBudgetUSD, taskId);
+		if (task.availableBudgetUSD < amount) throw new Error('Insufficient funds on task');
 
 		// update the task balance
-		await ctx.db.patch(taskId, { availableBudgetUSD: currentBalance - amount });
+		await ctx.db.patch(taskId, { availableBudgetUSD: task.availableBudgetUSD - amount });
 	},
 });
 
 export const _increaseBudget = internalMutation({
 	args: {
 		taskId: zid('tasks'),
-		amount: z.number().min(0),
+		amount: z.bigint().min(0n),
 	},
 	handler: async (ctx, { taskId, amount }) => {
 		//
@@ -341,7 +347,7 @@ export const _increaseBudget = internalMutation({
 		const user = await _findOneUser(ctx, { userId: task.owner });
 		if (!user) throw NotFound();
 
-		const currentBalance = user.balanceUSD ?? 0;
+		const currentBalance = user.balanceUSD;
 		if (currentBalance < amount) throw InsufficientAccountFunds();
 
 		// create the transaction
@@ -356,14 +362,14 @@ export const _increaseBudget = internalMutation({
 		});
 
 		// update the task balance
-		await ctx.db.patch(taskId, { availableBudgetUSD: (task.availableBudgetUSD ?? 0) + amount });
+		await ctx.db.patch(taskId, { availableBudgetUSD: task.availableBudgetUSD + amount });
 	},
 });
 
 export const _removeFunds = internalMutation({
 	args: {
 		taskId: zid('tasks'),
-		amount: z.number().min(0),
+		amount: z.bigint().min(0n),
 	},
 	handler: async (ctx, { taskId, amount }) => {
 		//
@@ -379,7 +385,7 @@ export const _removeFunds = internalMutation({
 		});
 
 		// update the task balance
-		await ctx.db.patch(taskId, { availableBudgetUSD: (task.availableBudgetUSD ?? 0) - amount });
+		await ctx.db.patch(taskId, { availableBudgetUSD: task.availableBudgetUSD - amount });
 	},
 });
 

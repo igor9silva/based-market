@@ -32,7 +32,7 @@ export const resolvedActionSchema = coreActionSchema.extend({
 	costs: z.array(
 		z.object({
 			symbol: tokenSchema,
-			amount: z.number().min(0.01).max(100000),
+			amount: z.bigint(),
 			description: z.string(),
 		}),
 	),

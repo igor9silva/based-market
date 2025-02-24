@@ -7,6 +7,7 @@ import { useMutation } from 'convex/react';
 import { usePayment } from '~/hooks/usePayment';
 import { cn } from '~/lib/utils';
 
+import { asDollars } from 'convex/utils/money';
 import { BasicError } from '~/components/BasicError';
 import { topUpStatusColors } from '~/components/TopUpItem';
 import { Badge } from '~/components/ui/badge';
@@ -65,7 +66,9 @@ export function RouteComponent({ className }: { className?: string }) {
 							<span className="text-sm sm:text-base font-medium text-muted-foreground">
 								{topUp.symbol}
 							</span>
-							<span className="text-lg sm:text-xl font-bold tabular-nums">{topUp.amount}</span>
+							<span className="text-lg sm:text-xl font-bold tabular-nums">
+								{asDollars({ bigInt: topUp.amount })}
+							</span>
 							<span className="font-medium capitalize break-all">{topUp.chain}</span>
 						</div>
 					</div>

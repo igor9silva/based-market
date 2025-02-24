@@ -32,7 +32,7 @@ export function RotatingLoadingMessage({ className }: { className?: string }) {
 		}, 2000);
 
 		return () => clearInterval(interval);
-	}, []);
+	}, [loadingMessages]);
 
 	return <BasicError text={currentMessage} className={cn('animate-pulse', className)} />;
 }
