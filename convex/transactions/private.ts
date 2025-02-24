@@ -98,7 +98,7 @@ export const _addRefundTask = internalMutation({
 	handler: async (ctx, args) => {
 		//
 		const transactionId = await ctx.db.insert('transactions', {
-			kind: 'refund task',
+			kind: 'refund from task',
 			...args,
 		});
 

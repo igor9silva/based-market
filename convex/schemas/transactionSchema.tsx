@@ -31,7 +31,7 @@ export const taskCostTransactionSchema = z.object({
 });
 
 export const refundTaskTransactionSchema = z.object({
-	kind: z.literal('refund task'),
+	kind: z.literal('refund from task'),
 	value: valueSchema,
 	taskId: zid('tasks'),
 	owner: zid('users'),
