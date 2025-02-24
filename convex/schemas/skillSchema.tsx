@@ -4,8 +4,14 @@ import { asBigInt } from '../utils/money';
 import { authorSchema } from './authorSchema';
 
 export const skillOwnerSchema = z.union([
+	z.literal('built-in'), // built-in to Meseeks
 	z.literal('isPro'), // managed by us, offered by third-parties
 	zid('users'), // managed by users
+]);
+
+export const skillAuthorSchema = z.union([
+	authorSchema, // user or meseeks-defined skills
+	z.literal('built-in'), // global skills
 ]);
 
 export const skillKindSchema = z.enum([
@@ -58,7 +64,7 @@ const coreSkillSchema = z.object({
 	description: z.string(),
 	kind: skillKindSchema,
 	owner: skillOwnerSchema,
-	author: authorSchema,
+	author: skillAuthorSchema,
 	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
 });
 
