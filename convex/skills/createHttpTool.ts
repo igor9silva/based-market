@@ -1,11 +1,11 @@
-import { tool as AITool } from 'ai';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx } from '../_generated/server';
 import { hardSkillSchema } from '../schemas/skillSchema';
 import { stringToZod } from '../utils/zodToString';
 
-export function createHardSkill(
+export function createHTTPTool(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
@@ -17,13 +17,16 @@ export function createHardSkill(
 		parameters: stringToZod(skill.parametersSchema),
 	};
 
-	if (!action) return AITool(metadata);
+	if (!action) return tool(metadata);
 
-	return AITool({
+	return tool({
 		...metadata,
 		execute: async (args) => {
 			//
 			console.debug('Running skill', skill.key, args);
+
+			task.availableBudgetUSD;
+			// const cost = asDollars({ bigInt: skill.cost });
 
 			const config = skill.config;
 			const url = new URL(config.url);

@@ -280,11 +280,10 @@ export const _embedAllMissingTasks = internalAction({
 export const _update = internalMutation({
 	args: {
 		taskId: zid('tasks'),
-		author: authorSchema,
 		summary: z.string().optional(),
 		description: z.string().optional(),
 	},
-	handler: async (ctx, { taskId, summary, description, author }) => {
+	handler: async (ctx, { taskId, summary, description }) => {
 		//
 		return await ctx.db.patch(taskId, {
 			...(summary !== undefined && { summary }),
@@ -297,9 +296,8 @@ export const _markAsDone = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		isDone: z.boolean(),
-		author: authorSchema,
 	},
-	handler: async (ctx, { taskId, isDone, author }) => {
+	handler: async (ctx, { taskId, isDone }) => {
 		//
 		if (isDone) {
 			//
@@ -393,9 +391,8 @@ export const _move = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		newParentId: zid('tasks').optional(),
-		author: authorSchema,
 	},
-	handler: async (ctx, { taskId, newParentId, author }) => {
+	handler: async (ctx, { taskId, newParentId }) => {
 		//
 		return await ctx.db.patch(taskId, { parentId: newParentId });
 

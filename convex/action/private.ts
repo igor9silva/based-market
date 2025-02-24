@@ -7,7 +7,7 @@ import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
-import { _syncSkills } from '../skills/private';
+import { _builtInTools } from '../skills/tools';
 import { INSUFFICIENT_ACCOUNT_FUNDS_ERROR, isError } from '../utils/errors';
 import { _react, _runNextActionIfNeeded } from './lifecycle/private';
 
@@ -23,19 +23,18 @@ export const _add = internalMutation({
 		//
 		console.debug(`${author} acts: ${skillKey}`);
 
-		const syncSkills = await _syncSkills(ctx, taskId, author, owner);
-		const result = await _executeSkillIfSync(syncSkills, skillKey, args); //
+		const builtInTools = await _builtInTools(ctx, taskId, author, owner);
+		const result = await _executeToolIfSync(builtInTools, skillKey, args);
 
 		const action = actionSchema.parse({
 			taskId,
 			author,
 			owner,
-			kind: result ? 'sync' : 'async',
 			status: result ? 'succeeded' : 'enqueued',
-			skillKey,
 			result: result ?? null,
-			costs: result ? [{ symbol: 'USD', amount: 0.01, description: 'Action' }] : [], // TODO: standardize costs
+			skillKey,
 			args,
+			costs: [],
 		});
 
 		const actionId = await ctx.db.insert('actions', action);
@@ -137,24 +136,28 @@ function _findByStatus(
 		.order('asc');
 }
 
-async function _executeSkillIfSync(
-	syncSkills: Record<string, CoreTool>,
+async function _executeToolIfSync(
+	availableTools: Record<string, CoreTool>,
 	skillKey: string,
 	args: Record<string, any>,
 ): Promise<string | null> {
 	//
-	if (!(skillKey in syncSkills)) return Promise.resolve(null);
+	if (!(skillKey in availableTools)) return Promise.resolve(null);
 
-	const skill = syncSkills[skillKey as keyof typeof syncSkills];
+	const tool = availableTools[skillKey as keyof typeof availableTools];
 
 	try {
 		// @ts-expect-error we intentionally do not support exposing skillCallId or message history to the skill
-		return await skill.execute(args);
+		return await tool.execute(args);
+		//
 	} catch (error) {
-		console.debug('executeSkillIfSync', error);
+		//
+		console.error('executeToolIfSync', error);
+
 		if (isError(INSUFFICIENT_ACCOUNT_FUNDS_ERROR, error)) {
 			return Promise.resolve(`Insufficient account funds. Please top up your account to continue. <TopUpCard />`);
 		}
+
 		throw error;
 	}
 }

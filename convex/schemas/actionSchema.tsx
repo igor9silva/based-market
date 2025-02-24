@@ -9,11 +9,9 @@ const coreActionSchema = z.object({
 	author: authorSchema,
 	skillKey: z.string(),
 	args: z.record(z.any()),
-	kind: z.enum(['sync', 'async']),
 });
 
 export const pendingActionSchema = coreActionSchema.extend({
-	kind: z.literal('async'),
 	status: z.enum([
 		'pending authorization', //
 		'enqueued',

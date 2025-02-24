@@ -1,4 +1,4 @@
-import { tool as AITool } from 'ai';
+import { tool } from 'ai';
 import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
@@ -7,7 +7,7 @@ import { _askMagicRock } from '../magicRock';
 import { softSkillSchema } from '../schemas/skillSchema';
 import { stringToZod } from '../utils/zodToString';
 
-export function createSoftSkill(
+export function createAITool(
 	ctx: ActionCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
@@ -19,9 +19,9 @@ export function createSoftSkill(
 		parameters: stringToZod(skill.parametersSchema),
 	};
 
-	if (!action) return AITool(metadata);
+	if (!action) return tool(metadata);
 
-	return AITool({
+	return tool({
 		...metadata,
 		execute: async (args) => {
 			//

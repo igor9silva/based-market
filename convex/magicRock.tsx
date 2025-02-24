@@ -6,7 +6,7 @@ import { Doc, Id } from './_generated/dataModel';
 import { ActionCtx } from './_generated/server';
 import { authorSchema } from './schemas/authorSchema';
 import { env } from './schemas/envSchema';
-import { _skillsForMagicRock } from './skills/private';
+import { _allHardSkillsAsTools } from './skills/tools';
 
 // TODO: move to DB
 export async function _askMagicRock(
@@ -51,7 +51,7 @@ export async function _askMagicRock(
 
 		// assuming task.author is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task._id, task.author),
-		tools: await loadSkills(ctx, task),
+		tools: await loadTools(ctx, task),
 		toolChoice: 'required',
 
 		experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
@@ -102,17 +102,19 @@ export async function _askMagicRock(
 	return result;
 }
 
+// TODO: new render
 function actionToCoreMessage(
 	action: Doc<'actions'>, //
 	author: 'user' | 'assistant',
 ): CoreMessage | Array<CoreMessage> | undefined {
 	//
-	switch (action.kind) {
+	switch (author) {
 		//
-		case 'async':
+		case 'assistant':
 			//
 			if (!action.result) return undefined; // TODO: maybe just filter out `skipped` ones
 
+			action.author;
 			return [
 				{
 					role: 'assistant',
@@ -139,8 +141,7 @@ function actionToCoreMessage(
 				},
 			];
 
-		case 'sync':
-			// TODO: new render
+		case 'user':
 			return {
 				role: author,
 				content: [
@@ -152,18 +153,18 @@ function actionToCoreMessage(
 	}
 }
 
-async function loadSkills(
+async function loadTools(
 	ctx: ActionCtx, //
 	task: Doc<'tasks'>,
 ): Promise<Record<string, CoreTool>> {
 	//
-	console.debug('loadSkills');
+	console.debug('loadTools');
 
-	const skills = await _skillsForMagicRock(ctx, task);
+	const tools = await _allHardSkillsAsTools(ctx, task);
 
-	console.debug('loaded skills', Object.keys(skills));
+	console.debug('loaded tools', Object.keys(tools));
 
-	return skills;
+	return tools;
 }
 
 // TODO: persist a copy of the messages in CoreMessage format? or it gets too big?

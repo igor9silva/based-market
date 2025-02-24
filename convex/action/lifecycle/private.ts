@@ -6,7 +6,7 @@ import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
 import { authorSchema } from '../../schemas/authorSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
-import { _allSkills } from '../../skills/private';
+import { _allSkillsAsTools } from '../../skills/tools';
 import { _findOne as _findOneTask } from '../../tasks/private';
 import { asBigInt } from '../../utils/money';
 import { _add, _findAll as _findAllActions } from '../private';
@@ -20,11 +20,11 @@ export const _execute = internalAction({
 	handler: async (ctx, { taskId, actionId, author }) => {
 		//
 		// ensureWithinBudget()
-		// checks if `expectedCost() < task.availableBudgetUSD`
-		// otherwise fails with <IncreaseTaskBudgetCard taskId='${taskId}' />
+		// 		checks if `expectedCost() < task.availableBudgetUSD`
+		// 		otherwise fails with <IncreaseTaskBudgetCard taskId='${taskId}' />
 		// authorize()
-		// try automatic approval: check if skill.preApprovedCost < expectedCost()
-		// otherwise status go `pending authorization`
+		// 		try automatic approval: check if skill.preApprovedCost < expectedCost()
+		// 		otherwise status go `pending authorization`
 
 		// 'built-in' skills are free of charge
 
@@ -34,13 +34,11 @@ export const _execute = internalAction({
 			const action = await ctx.runQuery(internal.action.private._findOne, { actionId });
 			console.debug('execute action', action.skillKey, actionId);
 
-			if (action.kind !== 'async') throw new Error('Expected an async action.');
-
 			// grab the task
 			const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 
 			// get the skill TODO: optmize
-			const availableSkills = await _allSkills(ctx, task, action);
+			const availableSkills = await _allSkillsAsTools(ctx, task, action);
 			const skill = availableSkills[action.skillKey as keyof typeof availableSkills];
 
 			console.debug('skill key', action.skillKey);
@@ -241,7 +239,6 @@ async function _runAction(
 	},
 ) {
 	if (action.result) throw new Error('Action is already done.');
-	if (action.kind === 'sync') throw new Error('Will never run, just narrowing types.');
 
 	// TODO: check budget here
 

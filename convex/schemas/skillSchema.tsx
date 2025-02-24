@@ -4,15 +4,17 @@ import { asBigInt } from '../utils/money';
 import { authorSchema } from './authorSchema';
 
 export const skillOwnerSchema = z.union([
-	z.literal('built-in'), // built-in to Meseeks
 	z.literal('isPro'), // managed by us, offered by third-parties
 	zid('users'), // managed by users
 ]);
 
-export const skillAuthorSchema = z.union([
-	authorSchema, // user or meseeks-defined skills
-	z.literal('built-in'), // global skills // TODO: idea: the initial seed is just an action that happens on the onboarding task
+export const skillKindSchema = z.enum([
+	'built-in', //
+	'hard',
+	'soft',
 ]);
+
+// TODO: idea: the initial seed is just an action that happens on the onboarding task
 
 const httpConfigSchema = z.object({
 	url: z.string().url(),
@@ -54,9 +56,17 @@ const decisionConfigSchema = z.object({
 const coreSkillSchema = z.object({
 	key: z.string(),
 	description: z.string(),
+	kind: skillKindSchema,
 	owner: skillOwnerSchema,
-	author: skillAuthorSchema,
+	author: authorSchema,
 	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
+});
+
+export const builtInSkillSchema = coreSkillSchema.extend({
+	kind: z.literal('built-in'),
+	owner: z.literal('built-in'),
+	author: z.literal('built-in'),
+	cost: z.literal(0n).describe('Built-in skills are free of charge.'),
 });
 
 export const hardSkillSchema = coreSkillSchema.extend({
@@ -81,7 +91,8 @@ export const softSkillSchema = coreSkillSchema.extend({
 
 export const skillSchema = z
 	.union([
-		hardSkillSchema, //
+		builtInSkillSchema, //
+		hardSkillSchema,
 		softSkillSchema,
 	])
 	.describe(

@@ -57,15 +57,8 @@ export default defineSchema({
 	).index(
 		'by_owner_kind', ['owner', 'kind'],
 	).index(
-		'by_key', ['key'],
+		'by_owner_key', ['owner', 'key'],
 	),
-
-	// TODO: instructions
-	// instructions: defineTable(
-	// 	zodToConvex(instructionSchema),
-	// ).index(
-	// 	'by_owner', ['owner'],
-	// )
 
 	components: defineTable(
 		zodToConvex(componentSchema),
