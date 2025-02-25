@@ -11,32 +11,30 @@ type ToolExecution = {
 	action: Doc<'actions'>;
 };
 
-function defineSkill<T extends z.ZodType>(
-	description: string,
-	parameters: T,
-	execute: (execution: ToolExecution) => (args: z.infer<T>) => Promise<string>,
-) {
-	return {
-		description,
-		parameters,
-		execute,
-	};
-}
+const defineSkill = <T extends z.AnyZodObject>(skill: {
+	preApprovedCost: bigint;
+	description: string;
+	parameters: T;
+	execute: (execution: ToolExecution) => (args: z.infer<T>) => Promise<string>;
+}) => skill;
 
 export const _builtInSkills = {
-	say: defineSkill(
-		'Send a text message to the user.',
-		z.object({
+	say: defineSkill({
+		preApprovedCost: 0n,
+		description: 'Send a text message to the user.',
+		parameters: z.object({
 			message: z.string().describe('The message to send to the user in MDX format.'),
 		}),
-		(execution: ToolExecution) => (args) => Promise.resolve(args.message),
-	),
-	increaseBudget: defineSkill(
-		'Increase the budget of the task',
-		z.object({
+		execute: (execution: ToolExecution) => (args) => Promise.resolve(args.message),
+	}),
+	increaseBudget: defineSkill({
+		preApprovedCost: 0n,
+		description: 'Increase the budget of the task',
+		parameters: z.object({
 			amount: z.bigint().describe('The amount of funds to add in USD.'),
 		}),
-		(execution: ToolExecution) =>
+		execute:
+			(execution: ToolExecution) =>
 			(args): Promise<string> =>
 				execution.ctx
 					.runMutation(internal.tasks.private._increaseBudget, {
@@ -44,15 +42,25 @@ export const _builtInSkills = {
 						amount: args.amount,
 					})
 					.then(() => `budget increased by ${asDollars({ bigInt: args.amount })}`),
-	),
-	doNothing: defineSkill('Do nothing.', z.object({}), () => () => Promise.resolve('')),
-	updateTask: defineSkill(
-		'Update the task',
-		z.object({
+	}),
+	askForClarification: defineSkill({
+		preApprovedCost: 0n,
+		description:
+			'Before executing a task, make sure you are at least 80% sure of the user intention for the task. Use this tool to ask for user clarification. Avoid this since you an autonomous agent, but do not repeat yourself. Its better to interrupt the user than to repeat yourself.',
+		parameters: z.object({
+			message: z.string().describe('The message to send to the user in MDX format.'),
+		}),
+		execute: (execution: ToolExecution) => (args) => Promise.resolve(args.message),
+	}),
+	updateTask: defineSkill({
+		preApprovedCost: 0n,
+		description: 'Update the task',
+		parameters: z.object({
 			summary: z.string().optional().describe('The improved summary for the task'),
 			description: z.string().optional().describe('The improved description for the task'),
 		}),
-		(execution: ToolExecution) =>
+		execute:
+			(execution: ToolExecution) =>
 			(args): Promise<string> =>
 				execution.ctx
 					.runMutation(internal.tasks.private._update, {
@@ -60,13 +68,15 @@ export const _builtInSkills = {
 						...args,
 					})
 					.then(() => `task updated`),
-	),
-	markAsDone: defineSkill(
-		'Mark the task as done or undone.',
-		z.object({
+	}),
+	markAsDone: defineSkill({
+		preApprovedCost: 0n,
+		description: 'Mark the task as done or undone.',
+		parameters: z.object({
 			isDone: z.boolean().describe('Whether the task should be marked as done or undone.'),
 		}),
-		(execution: ToolExecution) =>
+		execute:
+			(execution: ToolExecution) =>
 			(args): Promise<string> =>
 				execution.ctx
 					.runMutation(internal.tasks.private._markAsDone, {
@@ -74,10 +84,11 @@ export const _builtInSkills = {
 						...args,
 					})
 					.then(() => `task marked as ${args.isDone ? 'done' : '**not** done'}`),
-	),
-	moveTask: defineSkill(
-		'Move the task to a new parent',
-		z.object({
+	}),
+	moveTask: defineSkill({
+		preApprovedCost: 0n,
+		description: 'Move the task to a new parent',
+		parameters: z.object({
 			taskId: zid('tasks').describe('The task id to be moved.'),
 			newParentId: z
 				.union([zid('tasks'), z.literal('inbox')])
@@ -85,7 +96,8 @@ export const _builtInSkills = {
 					'The new parent id for the task. Use "inbox" to move the task to the Inbox (aka root, no parent).',
 				),
 		}),
-		(execution: ToolExecution) =>
+		execute:
+			(execution: ToolExecution) =>
 			(args): Promise<string> =>
 				execution.ctx
 					.runMutation(internal.tasks.private._move, {
@@ -93,17 +105,19 @@ export const _builtInSkills = {
 						newParentId: args.newParentId === 'inbox' ? undefined : args.newParentId,
 					})
 					.then(() => `task moved`),
-	),
-	createSubtask: defineSkill(
-		'Create a subtask',
-		z.object({
+	}),
+	createSubtask: defineSkill({
+		preApprovedCost: 0n,
+		description: 'Create a subtask',
+		parameters: z.object({
 			description: z
 				.string()
 				.describe(
 					'The first user message content in MDX format. Make sure to add all required details so another Meseeks can handle it properly. Think through your current context carefully and send a complete and structured message.',
 				),
 		}),
-		(execution: ToolExecution) =>
+		execute:
+			(execution: ToolExecution) =>
 			(args): Promise<string> =>
 				execution.ctx
 					.runMutation(internal.tasks.private._add, {
@@ -113,5 +127,5 @@ export const _builtInSkills = {
 						description: args.description,
 					})
 					.then(() => `subtask created`),
-	),
+	}),
 };

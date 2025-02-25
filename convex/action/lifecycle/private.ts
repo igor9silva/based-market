@@ -5,10 +5,11 @@ import { Doc, Id } from '../../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
 import { authorSchema } from '../../schemas/authorSchema';
+import { skillSchema } from '../../schemas/skillSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
 import { createTool } from '../../skills/tools';
 import { _findOne as _findOneTask } from '../../tasks/private';
-import { asBigInt } from '../../utils/money';
+import { asBigInt, asDollars } from '../../utils/money';
 import { _add, _findAll as _findAllActions } from '../private';
 
 export const _execute = internalAction({
@@ -30,9 +31,8 @@ export const _execute = internalAction({
 
 		try {
 			//
-			// grab the action
-			const action = await ctx.runQuery(internal.action.private._findOne, { actionId });
 			const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
+			const action = await ctx.runQuery(internal.action.private._findOne, { actionId });
 			const skill = await ctx.runQuery(internal.skills.private._findOne, {
 				key: action.skillKey,
 				owner: task.owner,
@@ -40,43 +40,36 @@ export const _execute = internalAction({
 
 			console.debug(`Executing action (${action.skillKey}) ${actionId} for task ${taskId}`);
 
-			const MINIMUM_COST_USD = 0.01; // TODO: get this from the skill
-			const EXEMPT_SKILLS = ['increaseBudget', 'markAsDone', 'updateTask']; // TODO: likely all mutation skills
+			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill);
+			const authorized = await _authorize(ctx, actionId, skill, expectedCost);
 
-			// TODO: check budget
-			// end with failed and a hardcoded component (that has a button that calls increaseBudget() as the user)
-			if (task.availableBudgetUSD < MINIMUM_COST_USD && !EXEMPT_SKILLS.includes(action.skillKey)) {
-				throw new Error(`Not enough budget.\n<IncreaseTaskBudgetCard taskId='${taskId}' />`);
-			}
+			if (!authorized) return;
 
 			const tool = createTool(ctx, task, action, skill);
 
 			const parsedArgs = tool.parameters.safeParse(action.args);
 			if (!parsedArgs.success) throw new Error(`Invalid skill args: ${parsedArgs.error.message}`);
 
-			// @ts-expect-error we intentionally do not support exposing skillCallId or message history to the skill
+			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool execution
 			const result = await tool.execute(parsedArgs.data);
 
-			const ACTION_COST = asBigInt({ dollars: 0.005 }); // TODO: env
+			// TODO: skills should return { result, costs, usage, ... }
 
-			const costs = EXEMPT_SKILLS.includes(action.skillKey)
-				? []
-				: [
-						{
-							symbol: 'USD' as const,
-							amount: ACTION_COST,
-							description: 'Meseeks action',
-						},
-					];
-
+			const costs = [
+				{
+					symbol: 'USD' as const,
+					amount: expectedCost,
+					description: 'Skill usage',
+				},
+			];
 			const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0n);
 
 			if (totalCost > 0) {
 				await ctx.runMutation(internal.tasks.private._useFunds, { taskId: action.taskId, amount: totalCost });
 			}
 
-			console.debug(`${actionId} executed with result: ${result}`);
-			if (!result) console.warn(`${actionId} executed with no result`);
+			console.debug(`${actionId} (${action.skillKey}) executed`);
+			if (!result) console.warn(`${actionId} (${action.skillKey}) executed with no result`);
 
 			await _setResolved(ctx, {
 				actionId,
@@ -176,6 +169,27 @@ export const _start = internalMutation({
 	},
 });
 
+export const _setEstimatedCost = internalMutation({
+	args: {
+		actionId: zid('actions'),
+		estimatedCost: z.bigint(),
+	},
+	handler: async (ctx, { actionId, estimatedCost }) => {
+		return await ctx.db.patch(actionId, { estimatedCost });
+	},
+});
+
+export const _requestAuthorization = internalMutation({
+	args: {
+		actionId: zid('actions'),
+	},
+	handler: async (ctx, { actionId }) => {
+		//
+		console.debug(`requesting authorization for ${actionId}`);
+
+		return await ctx.db.patch(actionId, { status: 'pending authorization' });
+	},
+});
 export const _resolve = internalMutation({
 	args: {
 		actionId: zid('actions'),
@@ -200,11 +214,69 @@ export const _resolve = internalMutation({
 		await ctx.db.patch(actionId, { result, status, costs });
 
 		// this if avoids silicon-based life forms to take over
-		if (action.skillKey !== 'react' && action.skillKey !== 'doNothing') {
+		if (action.skillKey !== 'react' && action.skillKey !== 'askForClarification') {
 			await _react(ctx, { taskId: action.taskId, author: action._id });
 		}
 	},
 });
+
+function estimateCostFor(skill: z.infer<typeof skillSchema>) {
+	//
+	if (skill.cost !== 'dynamic') return skill.cost;
+
+	// TODO: implement dynamic cost
+	return asBigInt({ dollars: 0.01 });
+}
+
+async function _expectedCostFor(
+	ctx: ActionCtx | MutationCtx,
+	action: Doc<'actions'>,
+	skill: z.infer<typeof skillSchema>,
+) {
+	if (action.estimatedCost) return action.estimatedCost;
+
+	const estimatedCost = estimateCostFor(skill);
+
+	await ctx.runMutation(internal.action.lifecycle.private._setEstimatedCost, {
+		actionId: action._id,
+		estimatedCost,
+	});
+
+	return estimatedCost;
+}
+
+async function _ensureWithinBudget(
+	ctx: ActionCtx | MutationCtx,
+	task: Doc<'tasks'>,
+	action: Doc<'actions'>,
+	skill: z.infer<typeof skillSchema>,
+) {
+	//
+	const expectedCost = await _expectedCostFor(ctx, action, skill);
+
+	if (expectedCost > task.availableBudgetUSD) {
+		throw new Error(
+			`Not enough budget. Expected cost: ${asDollars({ bigInt: expectedCost })}.\n<IncreaseTaskBudgetCard taskId='${task._id}' />`,
+		);
+	}
+
+	return expectedCost;
+}
+
+async function _authorize(
+	ctx: ActionCtx | MutationCtx,
+	actionId: Id<'actions'>,
+	skill: z.infer<typeof skillSchema>,
+	expectedCost: bigint,
+) {
+	//
+	if (skill.preApprovedCost === 'none' || skill.preApprovedCost < expectedCost) {
+		await ctx.runMutation(internal.action.lifecycle.private._requestAuthorization, { actionId });
+		return false;
+	}
+
+	return true;
+}
 
 async function _setResolved(
 	ctx: ActionCtx | MutationCtx,

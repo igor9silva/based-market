@@ -63,6 +63,16 @@ const coreSkillSchema = z.object({
 	key: z.string(),
 	description: z.string(),
 	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
+	preApprovedCost: z.union([
+		z.literal('none'),
+		z
+			.bigint()
+			.min(asBigInt({ dollars: 0 }))
+			.max(asBigInt({ dollars: 1000 }))
+			.describe(
+				'If the expected cost is less than or equal to this amount (pre-approved cost), it will be automatically authorized to execute. If can be set to "none" to disable pre-approval at all, forcing a human-approval before execution.',
+			),
+	]),
 	kind: skillKindSchema,
 	owner: skillOwnerSchema,
 	author: skillAuthorSchema,

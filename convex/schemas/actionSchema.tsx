@@ -9,6 +9,7 @@ const coreActionSchema = z.object({
 	author: authorSchema,
 	skillKey: z.string(),
 	args: z.record(z.any()),
+	estimatedCost: z.bigint().optional(),
 });
 
 export const pendingActionSchema = coreActionSchema.extend({

@@ -114,7 +114,6 @@ function actionToCoreMessage(
 			//
 			if (!action.result) return undefined; // TODO: maybe just filter out `skipped` ones
 
-			action.author;
 			return [
 				{
 					role: 'assistant',
