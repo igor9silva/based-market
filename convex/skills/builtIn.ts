@@ -12,7 +12,7 @@ type ToolExecution = {
 };
 
 const defineSkill = <T extends z.AnyZodObject>(skill: {
-	preApprovedCost: bigint;
+	preApprovedCost: bigint | 'none';
 	description: string;
 	parameters: T;
 	execute: (execution: ToolExecution) => (args: z.infer<T>) => Promise<string>;
@@ -70,7 +70,7 @@ export const _builtInSkills = {
 					.then(() => `task updated`),
 	}),
 	markAsDone: defineSkill({
-		preApprovedCost: 0n,
+		preApprovedCost: 'none',
 		description: 'Mark the task as done or undone.',
 		parameters: z.object({
 			isDone: z.boolean().describe('Whether the task should be marked as done or undone.'),

@@ -41,7 +41,7 @@ export const _execute = internalAction({
 			console.debug(`Executing action (${action.skillKey}) ${actionId} for task ${taskId}`);
 
 			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill);
-			const authorized = await _authorize(ctx, actionId, skill, expectedCost);
+			const authorized = await _authorize(ctx, task, action, skill, expectedCost);
 
 			if (!authorized) return;
 
@@ -64,10 +64,12 @@ export const _execute = internalAction({
 			];
 			const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0n);
 
+			// TODO: move to `_setResolved()`
 			if (totalCost > 0) {
 				await ctx.runMutation(internal.tasks.private._useFunds, { taskId: action.taskId, amount: totalCost });
 			}
 
+			// TODO: move to `_setResolved()`
 			console.debug(`${actionId} (${action.skillKey}) executed`);
 			if (!result) console.warn(`${actionId} (${action.skillKey}) executed with no result`);
 
@@ -265,13 +267,16 @@ async function _ensureWithinBudget(
 
 async function _authorize(
 	ctx: ActionCtx | MutationCtx,
-	actionId: Id<'actions'>,
+	task: Doc<'tasks'>,
+	action: Doc<'actions'>,
 	skill: z.infer<typeof skillSchema>,
 	expectedCost: bigint,
 ) {
 	//
+	if (action.author === task.owner) return true;
+
 	if (skill.preApprovedCost === 'none' || skill.preApprovedCost < expectedCost) {
-		await ctx.runMutation(internal.action.lifecycle.private._requestAuthorization, { actionId });
+		await ctx.runMutation(internal.action.lifecycle.private._requestAuthorization, { actionId: action._id });
 		return false;
 	}
 
