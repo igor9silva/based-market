@@ -345,11 +345,12 @@ export const _increaseBudget = internalMutation({
 		const user = await _findOneUser(ctx, { userId: task.owner });
 		if (!user) throw NotFound();
 
+		console.debug('increasing budget to task', taskId, amount, 'current balance', user.balanceUSD);
+
 		const currentBalance = user.balanceUSD;
 		if (currentBalance < amount) throw InsufficientAccountFunds();
 
 		// create the transaction
-		console.debug('increaseBudget to task', taskId, amount);
 		await _addFundTask(ctx, {
 			taskId,
 			owner: task.owner,

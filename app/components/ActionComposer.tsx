@@ -28,9 +28,8 @@ export function ActionComposer({
 		schema: z.object({
 			message: z.string().min(1, 'Message is required'),
 		}),
-		handler: async ({ message }, clearForm) => {
+		handler: async ({ message }) => {
 			await say({ message, taskId: task._id });
-			clearForm();
 		},
 	});
 

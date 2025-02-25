@@ -3,14 +3,14 @@ import { CoreMessage, CoreTool, generateObject, generateText, NoSuchToolError } 
 import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc, Id } from './_generated/dataModel';
-import { ActionCtx } from './_generated/server';
+import { ActionCtx, MutationCtx } from './_generated/server';
 import { authorSchema } from './schemas/authorSchema';
 import { env } from './schemas/envSchema';
-import { _allHardSkillsAsTools } from './skills/tools';
+import { _toolsForMagicRock } from './skills/tools';
 
 // TODO: move to DB
 export async function _askMagicRock(
-	ctx: ActionCtx, //
+	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 	instructions: string,
@@ -51,7 +51,7 @@ export async function _askMagicRock(
 
 		// assuming task.author is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task._id, task.author),
-		tools: await loadTools(ctx, task),
+		tools: await loadTools(ctx, task, action),
 		toolChoice: 'required',
 
 		experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
@@ -154,13 +154,14 @@ function actionToCoreMessage(
 }
 
 async function loadTools(
-	ctx: ActionCtx, //
+	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
+	action: Doc<'actions'>,
 ): Promise<Record<string, CoreTool>> {
 	//
 	console.debug('loadTools');
 
-	const tools = await _allHardSkillsAsTools(ctx, task);
+	const tools = await _toolsForMagicRock(ctx, task, action);
 
 	console.debug('loaded tools', Object.keys(tools));
 
@@ -169,7 +170,7 @@ async function loadTools(
 
 // TODO: persist a copy of the messages in CoreMessage format? or it gets too big?
 async function renderHistory(
-	ctx: ActionCtx, //
+	ctx: ActionCtx | MutationCtx, //
 	taskId: Id<'tasks'>,
 	author: z.infer<typeof authorSchema>,
 ): Promise<Array<CoreMessage>> {

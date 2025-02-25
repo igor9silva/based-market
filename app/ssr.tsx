@@ -1,5 +1,6 @@
-import { createStartHandler, defaultStreamHandler } from '@tanstack/start/server';
 import { getRouterManifest } from '@tanstack/start/router-manifest';
+import { createStartHandler, defaultStreamHandler } from '@tanstack/start/server';
+import './lib/bigint-serialization';
 
 import { createRouter } from './router';
 

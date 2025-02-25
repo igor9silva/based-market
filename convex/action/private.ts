@@ -1,4 +1,3 @@
-import { CoreTool } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { Id } from '../_generated/dataModel';
@@ -7,9 +6,7 @@ import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
-import { _builtInTools } from '../skills/tools';
-import { INSUFFICIENT_ACCOUNT_FUNDS_ERROR, isError } from '../utils/errors';
-import { _react, _runNextActionIfNeeded } from './lifecycle/private';
+import { _runNextActionIfNeeded } from './lifecycle/private';
 
 export const _add = internalMutation({
 	args: {
@@ -23,24 +20,17 @@ export const _add = internalMutation({
 		//
 		console.debug(`${author} acts: ${skillKey}`);
 
-		const builtInTools = await _builtInTools(ctx, taskId, author, owner);
-		const result = await _executeToolIfSync(builtInTools, skillKey, args);
-
-		const action = actionSchema.parse({
+		const actionId = await ctx.db.insert('actions', {
 			taskId,
 			author,
 			owner,
-			status: result ? 'succeeded' : 'enqueued',
-			result: result ?? null,
+			status: 'enqueued',
+			result: null,
 			skillKey,
 			args,
-			costs: [],
 		});
 
-		const actionId = await ctx.db.insert('actions', action);
-
-		if (action.status === 'enqueued') await _runNextActionIfNeeded(ctx, { taskId, author });
-		if (action.result) await _react(ctx, { taskId, author: actionId });
+		await _runNextActionIfNeeded(ctx, taskId);
 
 		return actionId;
 	},
@@ -134,30 +124,4 @@ function _findByStatus(
 				.eq('status', status),
 		)
 		.order('asc');
-}
-
-async function _executeToolIfSync(
-	availableTools: Record<string, CoreTool>,
-	skillKey: string,
-	args: Record<string, any>,
-): Promise<string | null> {
-	//
-	if (!(skillKey in availableTools)) return Promise.resolve(null);
-
-	const tool = availableTools[skillKey as keyof typeof availableTools];
-
-	try {
-		// @ts-expect-error we intentionally do not support exposing skillCallId or message history to the skill
-		return await tool.execute(args);
-		//
-	} catch (error) {
-		//
-		console.error('executeToolIfSync', error);
-
-		if (isError(INSUFFICIENT_ACCOUNT_FUNDS_ERROR, error)) {
-			return Promise.resolve(`Insufficient account funds. Please top up your account to continue. <TopUpCard />`);
-		}
-
-		throw error;
-	}
 }

@@ -1,7 +1,9 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internalQuery } from '../lib';
-import { skillOwnerSchema } from '../schemas/skillSchema';
+import { builtInSkillSchema, skillOwnerSchema } from '../schemas/skillSchema';
+import { zodToString } from '../utils/zodToString';
+import { _builtInSkills } from './builtIn';
 
 // all global skills + all user-defined skills
 export const _findAll = internalQuery({
@@ -57,10 +59,28 @@ export const _findOne = internalQuery({
 	},
 	handler: async (ctx, { key, owner }) => {
 		//
-		const skill = await _findOneByOwner(ctx, { key, owner: 'isPro' });
-		if (skill) return skill;
+		const globalSkill = await _findOneByOwner(ctx, { key, owner: 'isPro' });
+		if (globalSkill) return globalSkill;
 
-		return await _findOneByOwner(ctx, { key, owner });
+		const userSkill = await _findOneByOwner(ctx, { key, owner });
+		if (userSkill) return userSkill;
+
+		if (key in _builtInSkills) {
+			//
+			const builtInTool = _builtInSkills[key as keyof typeof _builtInSkills];
+
+			return builtInSkillSchema.parse({
+				key,
+				description: builtInTool.description,
+				parametersSchema: zodToString(builtInTool.parameters),
+				kind: 'built-in',
+				owner: 'built-in',
+				author: 'built-in',
+				cost: 0n,
+			});
+		}
+
+		throw new Error(`Unknown skill: ${key}`);
 	},
 });
 

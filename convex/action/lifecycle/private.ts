@@ -6,18 +6,17 @@ import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
 import { authorSchema } from '../../schemas/authorSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
-import { _allSkillsAsTools } from '../../skills/tools';
+import { createTool } from '../../skills/tools';
 import { _findOne as _findOneTask } from '../../tasks/private';
 import { asBigInt } from '../../utils/money';
 import { _add, _findAll as _findAllActions } from '../private';
 
 export const _execute = internalAction({
 	args: {
-		author: authorSchema,
 		taskId: zid('tasks'),
 		actionId: zid('actions'),
 	},
-	handler: async (ctx, { taskId, actionId, author }) => {
+	handler: async (ctx, { taskId, actionId }) => {
 		//
 		// ensureWithinBudget()
 		// 		checks if `expectedCost() < task.availableBudgetUSD`
@@ -27,24 +26,19 @@ export const _execute = internalAction({
 		// 		otherwise status go `pending authorization`
 
 		// 'built-in' skills are free of charge
+		// also bring the "max consecutive" logic to here, from react()
 
 		try {
 			//
-			// make sure the action is a skill
+			// grab the action
 			const action = await ctx.runQuery(internal.action.private._findOne, { actionId });
-			console.debug('execute action', action.skillKey, actionId);
-
-			// grab the task
 			const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
+			const skill = await ctx.runQuery(internal.skills.private._findOne, {
+				key: action.skillKey,
+				owner: task.owner,
+			});
 
-			// get the skill TODO: optmize
-			const availableSkills = await _allSkillsAsTools(ctx, task, action);
-			const skill = availableSkills[action.skillKey as keyof typeof availableSkills];
-
-			console.debug('skill key', action.skillKey);
-			console.debug('availableSkills', Object.keys(availableSkills));
-
-			if (!skill) throw new Error(`Unknown skill: ${action.skillKey}`);
+			console.debug(`Executing action (${action.skillKey}) ${actionId} for task ${taskId}`);
 
 			const MINIMUM_COST_USD = 0.01; // TODO: get this from the skill
 			const EXEMPT_SKILLS = ['increaseBudget', 'markAsDone', 'updateTask']; // TODO: likely all mutation skills
@@ -55,11 +49,13 @@ export const _execute = internalAction({
 				throw new Error(`Not enough budget.\n<IncreaseTaskBudgetCard taskId='${taskId}' />`);
 			}
 
-			const parsedArgs = skill.parameters.safeParse(action.args);
+			const tool = createTool(ctx, task, action, skill);
+
+			const parsedArgs = tool.parameters.safeParse(action.args);
 			if (!parsedArgs.success) throw new Error(`Invalid skill args: ${parsedArgs.error.message}`);
 
 			// @ts-expect-error we intentionally do not support exposing skillCallId or message history to the skill
-			const result = await skill.execute(parsedArgs.data);
+			const result = await tool.execute(parsedArgs.data);
 
 			const ACTION_COST = asBigInt({ dollars: 0.005 }); // TODO: env
 
@@ -102,7 +98,7 @@ export const _execute = internalAction({
 			//
 		} finally {
 			//
-			await _runNextActionIfNeeded(ctx, { taskId, author });
+			await _runNextActionIfNeeded(ctx, taskId);
 		}
 	},
 });
@@ -229,11 +225,9 @@ async function _setResolved(
 async function _runAction(
 	ctx: ActionCtx | MutationCtx,
 	{
-		author,
 		taskId,
 		action,
 	}: {
-		author: z.infer<typeof authorSchema>;
 		taskId: Id<'tasks'>;
 		action: Doc<'actions'>;
 	},
@@ -248,19 +242,12 @@ async function _runAction(
 	return await ctx.scheduler.runAfter(0, internal.action.lifecycle.private._execute, {
 		taskId,
 		actionId: action._id,
-		author,
 	});
 }
 
 export async function _runNextActionIfNeeded(
-	ctx: ActionCtx | MutationCtx,
-	{
-		taskId,
-		author,
-	}: {
-		taskId: Id<'tasks'>;
-		author: z.infer<typeof authorSchema>;
-	},
+	ctx: ActionCtx | MutationCtx, //
+	taskId: Id<'tasks'>,
 ) {
 	const skip = (message: string) => console.info(message);
 
@@ -277,7 +264,6 @@ export async function _runNextActionIfNeeded(
 
 	return await _runAction(ctx, {
 		taskId,
-		author,
 		action: nextAction,
 	});
 }

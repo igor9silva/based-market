@@ -1,20 +1,21 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';
-import { ActionCtx } from '../_generated/server';
+import { ActionCtx, MutationCtx } from '../_generated/server';
 import { hardSkillSchema } from '../schemas/skillSchema';
 import { stringToZod } from '../utils/zodToString';
 
 export function createHTTPTool(
-	ctx: ActionCtx,
+	ctx: ActionCtx | MutationCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
 	skill: z.infer<typeof hardSkillSchema>,
 ) {
 	//
+	const schema = stringToZod(skill.parametersSchema);
 	const metadata = {
 		description: skill.description,
-		parameters: stringToZod(skill.parametersSchema),
+		parameters: schema,
 	};
 
 	if (!action) return tool(metadata);
@@ -24,9 +25,6 @@ export function createHTTPTool(
 		execute: async (args) => {
 			//
 			console.debug('Running skill', skill.key, args);
-
-			task.availableBudgetUSD;
-			// const cost = asDollars({ bigInt: skill.cost });
 
 			const config = skill.config;
 			const url = new URL(config.url);

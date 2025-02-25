@@ -2,21 +2,22 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
-import { ActionCtx } from '../_generated/server';
+import { ActionCtx, MutationCtx } from '../_generated/server';
 import { _askMagicRock } from '../magicRock';
 import { softSkillSchema } from '../schemas/skillSchema';
 import { stringToZod } from '../utils/zodToString';
 
 export function createAITool(
-	ctx: ActionCtx,
+	ctx: ActionCtx | MutationCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'> | undefined,
 	skill: z.infer<typeof softSkillSchema>,
 ) {
 	//
+	const schema = stringToZod(skill.parametersSchema);
 	const metadata = {
 		description: skill.description,
-		parameters: stringToZod(skill.parametersSchema),
+		parameters: schema,
 	};
 
 	if (!action) return tool(metadata);

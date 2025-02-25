@@ -62,10 +62,10 @@ const decisionConfigSchema = z.object({
 const coreSkillSchema = z.object({
 	key: z.string(),
 	description: z.string(),
+	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
 	kind: skillKindSchema,
 	owner: skillOwnerSchema,
 	author: skillAuthorSchema,
-	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
 });
 
 export const builtInSkillSchema = coreSkillSchema.extend({
