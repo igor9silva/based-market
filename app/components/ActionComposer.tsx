@@ -30,6 +30,7 @@ export function ActionComposer({
 		}),
 		handler: async ({ message }) => {
 			await say({ message, taskId: task._id });
+			setFiles([]); // Clear files after submission
 		},
 	});
 
