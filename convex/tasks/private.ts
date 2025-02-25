@@ -350,6 +350,7 @@ export const _increaseBudget = internalMutation({
 		const currentBalance = user.balanceUSD;
 		if (currentBalance < amount) throw InsufficientAccountFunds();
 
+		// TODO: shouldn't this be an action?
 		// create the transaction
 		await _addFundTask(ctx, {
 			taskId,

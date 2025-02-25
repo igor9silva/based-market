@@ -37,20 +37,21 @@ export function Action({
 			<div
 				className={cn('max-w-full', {
 					'animate-pulse': action.status === 'pending authorization',
-					'bg-pink-700/30': action.status === 'enqueued',
 					'bg-blue-700/30': action.status === 'running',
 					'bg-red-700/30': action.status === 'failed',
 					'bg-gray-700/30': action.status === 'skipped',
 				})}
 			>
-				{action.result ? (
+				{typeof action.result === 'string' ? (
 					<Result
 						result={action.result}
 						skillKey={action.skillKey}
 						args={action.args}
 						costs={action.costs}
 						className={cn({
-							'bg-primary text-primary-foreground': isAuthorCurrentUser && action.skillKey === 'say',
+							'bg-primary text-primary-foreground rounded-lg border border-border p-2 ':
+								isAuthorCurrentUser && action.skillKey === 'say',
+							'bg-muted rounded-lg p-2': isAuthorCurrentUser && action.skillKey !== 'say',
 						})}
 					/>
 				) : (
@@ -81,16 +82,7 @@ function Result({
 	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
 
 	if (skillKey === 'say') {
-		return (
-			<div
-				className={cn(
-					'rounded-lg border border-border bg-card p-2 text-card-foreground shadow overflow-x-auto',
-					className,
-				)}
-			>
-				{mdx}
-			</div>
-		);
+		return <div className={cn('text-card-foreground shadow overflow-x-auto', className)}>{mdx}</div>;
 	}
 
 	return (
