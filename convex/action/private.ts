@@ -106,6 +106,59 @@ export const _findNext = internalQuery({
 	},
 });
 
+export const _findAllEnqueuedReactions = internalQuery({
+	args: {
+		taskId: zid('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		//
+		return await ctx.db
+			.query('actions')
+			.withIndex('by_task_status', (q) =>
+				q
+					.eq('taskId', taskId) //
+					.eq('status', 'enqueued'),
+			)
+			.filter((q) => q.eq(q.field('skillKey'), 'react'))
+			.collect();
+	},
+});
+
+export const _findLastActions = internalQuery({
+	args: {
+		taskId: zid('tasks'),
+		amount: z.number().min(1),
+	},
+	handler: async (ctx, { taskId, amount }) => {
+		//
+		return await ctx.db
+			.query('actions')
+			.withIndex('by_task', (q) => q.eq('taskId', taskId))
+			.order('desc')
+			.take(amount);
+	},
+});
+
+export const _skipAllEnqueuedReactions = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		//
+		const enqueuedReactions = await _findAllEnqueuedReactions(ctx, { taskId });
+
+		return await Promise.all(
+			enqueuedReactions.map((action) =>
+				ctx.db.patch(action._id, {
+					status: 'skipped',
+					result: 'outdated — new actions happened before this action could run',
+					costs: [],
+				}),
+			),
+		);
+	},
+});
+
 function _findByStatus(
 	ctx: QueryCtx,
 	{

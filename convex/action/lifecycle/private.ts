@@ -12,7 +12,7 @@ import { calculateProviderCost } from '../../skills/createAITool';
 import { createTool } from '../../skills/tools';
 import { _findOne as _findOneTask, _useFunds } from '../../tasks/private';
 import { asBigInt, asDollars, asInt } from '../../utils/money';
-import { _add, _findAll as _findAllActions } from '../private';
+import { _add, _skipAllEnqueuedReactions } from '../private';
 
 export const _execute = internalAction({
 	args: {
@@ -43,7 +43,7 @@ export const _execute = internalAction({
 
 			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost })} USD. Auto-approved? ${authorized}`);
 
-			if (!authorized) return;
+			if (!authorized) return await _requestHumanApproval(ctx, actionId);
 
 			const tool = createTool(ctx, task, action, skill);
 			const args = parseArgs(tool, action.args);
@@ -83,10 +83,6 @@ export const _react = internalMutation({
 	},
 	handler: async (ctx, { taskId, author }) => {
 		//
-		// TODO: skip other previously scheduled reactions
-		console.debug(`${author} reacts`);
-
-		// TODO: get the task and check if it's done before reacting
 		const task = await _findOneTask(ctx, { taskId });
 
 		if (task.isDone) {
@@ -94,38 +90,7 @@ export const _react = internalMutation({
 			return;
 		}
 
-		// TODO: check if the last 50 actions are from meseeks (action.author !== task.author) before reacting
-		const allActions = await _findAllActions(ctx, { taskId });
-		const last50Actions = allActions.slice(-50).filter((action) => action.author !== task.author);
-
-		if (last50Actions.length >= 50) {
-			console.debug(`Skipping reacting for task ${taskId} because the last 50 actions are from meseeks.`);
-			return;
-		}
-
-		// TODO: what if this 👆 is done inside the react execute function?
-
-		const pendingReactions = await ctx.db
-			.query('actions')
-			.withIndex('by_task_status', (q) =>
-				q
-					.eq('taskId', taskId) //
-					.eq('status', 'enqueued'),
-			)
-			.filter((q) => q.eq(q.field('skillKey'), 'react'))
-			.collect();
-
-		console.debug('pending reactions', pendingReactions);
-
-		await Promise.all(
-			pendingReactions.map((action) =>
-				ctx.db.patch(action._id, {
-					status: 'skipped',
-					result: 'outdated — new actions happened before this action could run',
-					costs: [],
-				}),
-			),
-		);
+		await _skipAllEnqueuedReactions(ctx, { taskId });
 
 		return await _add(ctx, {
 			taskId,
@@ -285,11 +250,32 @@ async function _authorize(
 	if (action.author === task.owner) return true;
 
 	if (skill.preApprovedCost === 'none' || skill.preApprovedCost < expectedCost) {
+		//
 		await ctx.runMutation(internal.action.lifecycle.private._requestAuthorization, { actionId: action._id });
+
+		return false;
+	}
+
+	const lastActions = await ctx.runQuery(internal.action.private._findLastActions, {
+		taskId: task._id,
+		amount: env.MAX_CONSECUTIVE_COMPANION_ACTIONS,
+	});
+
+	if (lastActions.every((action) => action.author !== task.owner)) {
+		//
+		console.debug(
+			`Skipping reacting for task ${task._id} because the last ${env.MAX_CONSECUTIVE_COMPANION_ACTIONS} actions are from Meseeks.`,
+		);
+
 		return false;
 	}
 
 	return true;
+}
+
+async function _requestHumanApproval(ctx: ActionCtx | MutationCtx, actionId: Id<'actions'>) {
+	//
+	await ctx.runMutation(internal.action.lifecycle.private._requestAuthorization, { actionId });
 }
 
 async function _setResolved(
@@ -319,8 +305,6 @@ async function _runAction(
 	},
 ) {
 	if (action.result) throw new Error('Action is already done.');
-
-	// TODO: check budget here
 
 	// ideally, status=`running` would be set in the action itself, but that'd lead into a race condition
 	await ctx.runMutation(internal.action.lifecycle.private._start, { actionId: action._id });
