@@ -31,6 +31,8 @@ export const _execute = internalAction({
 
 		try {
 			//
+			console.debug(`Executing action ${actionId} for task ${taskId}`);
+
 			const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 			const action = await ctx.runQuery(internal.action.private._findOne, { actionId });
 			const skill = await ctx.runQuery(internal.skills.private._findOne, {
@@ -38,20 +40,22 @@ export const _execute = internalAction({
 				owner: task.owner,
 			});
 
-			console.debug(`Executing action (${action.skillKey}) ${actionId} for task ${taskId}`);
+			console.debug(`Using skill ${skill.key} with args ${JSON.stringify(action.args)}`);
 
 			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill);
 			const authorized = await _authorize(ctx, task, action, skill, expectedCost);
 
+			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost })} USD. Auto-approved? ${authorized}`);
+
 			if (!authorized) return;
 
 			const tool = createTool(ctx, task, action, skill);
-
-			const parsedArgs = tool.parameters.safeParse(action.args);
-			if (!parsedArgs.success) throw new Error(`Invalid skill args: ${parsedArgs.error.message}`);
+			const args = parseArgs(tool, action.args);
 
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool execution
-			const result = await tool.execute(parsedArgs.data);
+			const result = await tool.execute(args);
+
+			console.debug(`Executed with result length of ${result.length} characters`);
 
 			// TODO: skills should return { result, costs, usage, ... }
 
@@ -221,6 +225,15 @@ export const _resolve = internalMutation({
 		}
 	},
 });
+
+function parseArgs(tool: ReturnType<typeof createTool>, args: unknown) {
+	//
+	const parsedArgs = tool.parameters.safeParse(args);
+
+	if (!parsedArgs.success) throw new Error(`Invalid skill args: ${parsedArgs.error.message}`);
+
+	return parsedArgs.data;
+}
 
 function estimateCostFor(skill: z.infer<typeof skillSchema>) {
 	//
