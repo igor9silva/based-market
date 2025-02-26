@@ -54,10 +54,10 @@ export const _builtInSkills = {
 	}),
 	updateTask: defineSkill({
 		preApprovedCost: 0n,
-		description: 'Update the task',
+		description: 'Update the task description and/or summary',
 		parameters: z.object({
-			summary: z.string().optional().describe('The improved summary for the task'),
-			description: z.string().optional().describe('The improved description for the task'),
+			summary: z.string().max(140).optional().describe('The improved summary for the task'),
+			description: z.string().optional().describe('The improved long description of the task'),
 		}),
 		execute:
 			(execution: ToolExecution) =>
