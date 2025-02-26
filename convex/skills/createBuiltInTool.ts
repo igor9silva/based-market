@@ -1,32 +1,34 @@
 import { tool } from 'ai';
-import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
+import { AITool } from '../schemas/toolSchema';
 import { _builtInSkills } from './builtIn';
 
 export function createBuiltInTool(
 	ctx: ActionCtx | MutationCtx,
 	task: Doc<'tasks'>,
-	action: Doc<'actions'> | undefined,
+	action: Doc<'actions'>,
 	skill: (typeof _builtInSkills)[keyof typeof _builtInSkills],
-) {
+): AITool {
 	//
-	const metadata = {
+	return tool({
 		description: skill.description,
 		parameters: skill.parameters,
-	};
-
-	if (!action) return tool(metadata);
-
-	return tool({
-		...metadata,
 		execute: async (args) => {
+			//
 			// @ts-expect-error no time to fight this shit
-			return skill.execute({ ctx, task, action })(parseArgs(skill, args));
+			const result = await skill.execute({ ctx, task, action })(args);
+
+			return {
+				result: result,
+				costs: [
+					{
+						symbol: 'USD',
+						amount: 0n,
+						description: 'Built-in skills are free of charge.',
+					},
+				],
+			};
 		},
 	});
-}
-
-function parseArgs<T extends z.ZodType>(skill: { parameters: T }, args: z.infer<T>) {
-	return skill.parameters.parse(args);
 }

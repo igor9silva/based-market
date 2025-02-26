@@ -53,20 +53,12 @@ export const _execute = internalAction({
 			const args = parseArgs(tool, action.args);
 
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool execution
-			const result = await tool.execute(args);
-
-			console.debug(`Executed with result length of ${result.length} characters`);
-
-			// TODO: skills should return { result, costs, usage, ... }
-
-			const costs = [
-				{
-					symbol: 'USD' as const,
-					amount: expectedCost,
-					description: 'Skill usage',
-				},
-			];
+			const { result, costs } = await tool.execute(args);
 			const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0n);
+
+			console.debug(
+				`Executed with result length of ${result.length} characters. Total cost: ${asDollars({ bigInt: totalCost, precision: 6 })}`,
+			);
 
 			// TODO: move to `_setResolved()`
 			if (totalCost > 0) {

@@ -51,8 +51,9 @@ export const _toolsForMagicRock = async (
 export const _builtInTools = (
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
-	action?: Doc<'actions'>,
+	action: Doc<'actions'>,
 ) => {
+	//
 	return Object.keys(_builtInSkills).reduce(
 		(acc, key) => {
 			acc[key] = createBuiltInTool(ctx, task, action, _builtInSkills[key as keyof typeof _builtInSkills]);
@@ -68,6 +69,7 @@ export function createTool(
 	action: Doc<'actions'>,
 	skill: z.infer<typeof skillSchema>,
 ) {
+	//
 	// prettier-ignore
 	switch (skill.kind) {
 		case 'hard': return createHTTPTool(ctx, task, action, skill);

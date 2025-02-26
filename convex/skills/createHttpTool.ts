@@ -2,26 +2,21 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
+import { env } from '../schemas/envSchema';
 import { hardSkillSchema } from '../schemas/skillSchema';
+import { AITool } from '../schemas/toolSchema';
 import { stringToZod } from '../utils/zodToString';
 
 export function createHTTPTool(
 	ctx: ActionCtx | MutationCtx,
 	task: Doc<'tasks'>,
-	action: Doc<'actions'> | undefined,
+	action: Doc<'actions'>,
 	skill: z.infer<typeof hardSkillSchema>,
-) {
+): AITool {
 	//
-	const schema = stringToZod(skill.parametersSchema);
-	const metadata = {
-		description: skill.description,
-		parameters: schema,
-	};
-
-	if (!action) return tool(metadata);
-
 	return tool({
-		...metadata,
+		description: skill.description,
+		parameters: stringToZod(skill.parametersSchema),
 		execute: async (args) => {
 			//
 			console.debug('Running skill', skill.key, args);
@@ -73,7 +68,21 @@ export function createHTTPTool(
 				throw new Error(`HTTP ${response.status}: ${response.statusText}. Body: ${result}`);
 			}
 
-			return result;
+			return {
+				result: result,
+				costs: [
+					{
+						symbol: 'USD',
+						amount: skill.cost,
+						description: 'Skill cost (to provider)',
+					},
+					{
+						symbol: 'USD',
+						amount: env.ACTION_COST_USD,
+						description: '1 Meseeks Action',
+					},
+				],
+			};
 		},
 	});
 }

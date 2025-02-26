@@ -1,5 +1,6 @@
 import { createEnv } from '@t3-oss/env-core';
 import { z } from 'zod';
+import { asBigInt } from '../utils/money';
 
 export const env = createEnv({
 	//
@@ -8,6 +9,12 @@ export const env = createEnv({
 	server: {
 		//
 		PAYMENT_ETH_ADDRESS_BASE_CHAIN: z.string().min(1).describe('The Base wallet address to receive payments.'),
+
+		ACTION_COST_USD: z
+			.string()
+			.min(1)
+			.transform((s) => asBigInt({ dollars: parseInt(s, 10) }))
+			.describe('The cost of one action in USD.'),
 
 		AUTH_GOOGLE_ID: z.string().min(1).describe('Google OAuth client ID.'),
 		AUTH_GOOGLE_SECRET: z.string().min(1).describe('Google OAuth client secret.'),

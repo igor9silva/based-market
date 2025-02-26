@@ -23,7 +23,7 @@ export async function _askMagicRock(
 		// steps,
 		usage,
 		warnings,
-		response,
+		// response,
 	} = await generateText({
 		model: openai('gpt-4o'),
 		maxSteps: 1,
