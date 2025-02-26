@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx } from '../_generated/server';
-import { _add, _findAll } from '../components/private';
+import { _add as _addComponent, _findAll } from '../components/private';
 import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/topUpSchema';
@@ -67,7 +67,7 @@ const _seedComponentsFromRef = async (
 	// add each one to the seeded user
 	await Promise.all(
 		refComponents.map((refComponent) =>
-			_add(ctx, {
+			_addComponent(ctx, {
 				owner: newUserId,
 				body: refComponent.body,
 				defaultTaskId: refComponent.defaultTaskId ? inboxTaskId : undefined,
@@ -107,7 +107,7 @@ export const _adjustBalance = internalMutation({
 
 		if (value.symbol !== 'USD') throw new Error('Only USD is supported for now');
 
-		return await ctx.db.patch(userId, { balanceUSD: user.balanceUSD + value.amount });
+		return await ctx.db.patch(userId, { balanceUSD: (user.balanceUSD ?? 0n) + value.amount });
 	},
 });
 

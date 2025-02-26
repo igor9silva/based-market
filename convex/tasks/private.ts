@@ -361,15 +361,16 @@ export const _increaseBudget = internalMutation({
 		const user = await _findOneUser(ctx, { userId: task.owner });
 		if (!user) throw NotFound();
 
+		const currentBalance = user.balanceUSD ?? 0n;
+
 		console.debug(
 			'increasing budget to task',
 			taskId,
 			asDollars({ bigInt: amount }),
 			'current balance',
-			asDollars({ bigInt: user.balanceUSD }),
+			asDollars({ bigInt: currentBalance }),
 		);
 
-		const currentBalance = user.balanceUSD;
 		if (currentBalance < amount) throw InsufficientAccountFunds();
 
 		// TODO: shouldn't this be an action?

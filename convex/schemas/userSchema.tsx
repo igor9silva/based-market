@@ -12,5 +12,5 @@ export const userSchema = z.object({
 	walletAddress: z.string().optional(), // TODO: write a validator
 	walletChain: z.enum(['worldchain']).optional(),
 	isReady: z.boolean(),
-	balanceUSD: z.bigint(),
+	balanceUSD: z.bigint().default(0n),
 });
