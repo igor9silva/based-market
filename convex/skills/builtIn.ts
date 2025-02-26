@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
-import { asDollars } from '../utils/money';
+import { asBigInt } from '../utils/money';
 
 type ToolExecution = {
 	ctx: ActionCtx | MutationCtx; //
@@ -28,10 +28,10 @@ export const _builtInSkills = {
 		execute: (execution: ToolExecution) => (args) => Promise.resolve(args.message),
 	}),
 	increaseBudget: defineSkill({
-		preApprovedCost: 0n,
+		preApprovedCost: 'none',
 		description: 'Increase the budget of the task',
 		parameters: z.object({
-			amount: z.bigint().describe('The amount of funds to add in USD.'),
+			amount: z.number().min(0).max(10).describe('The amount of funds to add in USD.'),
 		}),
 		execute:
 			(execution: ToolExecution) =>
@@ -39,9 +39,9 @@ export const _builtInSkills = {
 				execution.ctx
 					.runMutation(internal.tasks.private._increaseBudget, {
 						taskId: execution.task._id,
-						amount: args.amount,
+						amount: asBigInt({ dollars: args.amount }),
 					})
-					.then(() => `budget increased by ${asDollars({ bigInt: args.amount })}`),
+					.then(() => `budget increased by ${args.amount} USD`),
 	}),
 	askForClarification: defineSkill({
 		preApprovedCost: 0n,
@@ -86,7 +86,7 @@ export const _builtInSkills = {
 					.then(() => `task marked as ${args.isDone ? 'done' : '**not** done'}`),
 	}),
 	moveTask: defineSkill({
-		preApprovedCost: 0n,
+		preApprovedCost: 'none',
 		description: 'Move the task to a new parent',
 		parameters: z.object({
 			taskId: zid('tasks').describe('The task id to be moved.'),
@@ -107,7 +107,7 @@ export const _builtInSkills = {
 					.then(() => `task moved`),
 	}),
 	createSubtask: defineSkill({
-		preApprovedCost: 0n,
+		preApprovedCost: 'none',
 		description: 'Create a subtask',
 		parameters: z.object({
 			description: z

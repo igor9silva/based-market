@@ -114,6 +114,7 @@ export function createAITool(
 			const totalProviderCost = inputCost + outputCost;
 
 			console.debug('Decision provider cost', asDollars({ bigInt: totalProviderCost, precision: 6 }));
+			console.debug('Action cost', asDollars({ bigInt: env.ACTION_COST_USD, precision: 6 }));
 
 			if (warnings?.length) {
 				console.warn('Decision skill warnings', warnings);

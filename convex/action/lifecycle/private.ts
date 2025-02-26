@@ -203,7 +203,7 @@ export const _resolve = internalMutation({
 	},
 	handler: async (ctx, { actionId, result, status, costs }) => {
 		//
-		console.debug(`${actionId} resolved with ${status} and ${result}`);
+		console.debug(`${actionId} resolved with ${status}`);
 
 		const action = await ctx.db.get(actionId);
 		if (!action) throw new Error('Action not found');

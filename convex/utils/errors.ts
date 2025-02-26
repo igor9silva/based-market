@@ -1,7 +1,7 @@
 import { ConvexError } from 'convex/values';
 
 export const NOT_FOUND_ERROR = 'Not Found';
-export const INSUFFICIENT_ACCOUNT_FUNDS_ERROR = 'Insufficient Account Funds';
+export const INSUFFICIENT_ACCOUNT_FUNDS_ERROR = 'Insufficient Account Balance';
 
 const createError = (code: string) => (message?: string) =>
 	new ConvexError({
