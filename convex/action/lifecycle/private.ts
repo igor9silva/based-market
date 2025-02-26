@@ -40,7 +40,9 @@ export const _execute = internalAction({
 				owner: task.owner,
 			});
 
-			console.debug(`Using skill ${skill.key} with args ${JSON.stringify(action.args)}`);
+			console.debug(
+				`Using skill ${skill.key} with ${Object.keys(action.args).length} args: ${Object.keys(action.args).join(', ')}`,
+			);
 
 			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill);
 			const authorized = await _authorize(ctx, task, action, skill, expectedCost);

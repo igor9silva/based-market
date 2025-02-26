@@ -55,7 +55,7 @@ export function useTaskMutations() {
 		amount,
 	}: {
 		taskId: Id<'tasks'>;
-		amount: bigint;
+		amount: number;
 	}) => {
 		return act({
 			taskId,

@@ -30,7 +30,15 @@ export function createAITool(
 				finishReason,
 				usage,
 				warnings,
+				reasoning,
+				reasoningDetails,
+				providerMetadata,
+				//
 			} = await _askMagicRock(ctx, task, action, skill.config.instructions);
+
+			console.debug('Reasoning', reasoning);
+			console.debug('Reasoning details', reasoningDetails);
+			console.debug('Provider metadata', providerMetadata);
 
 			switch (finishReason) {
 				//
@@ -105,27 +113,14 @@ export function createAITool(
 					throw new Error(`Unknown finish reason: ${finishReason}`);
 			}
 
-			// TODO: make it dynamic, per model
-			const INPUT_TOKEN_COST = asBigInt({ dollars: 2.5 }) / 1_000_000n;
-			const OUTPUT_TOKEN_COST = asBigInt({ dollars: 10 }) / 1_000_000n;
-
-			const inputCost = BigInt(usage.promptTokens) * INPUT_TOKEN_COST;
-			const outputCost = BigInt(usage.completionTokens) * OUTPUT_TOKEN_COST;
-			const totalProviderCost = inputCost + outputCost;
-
-			console.debug('Decision provider cost', asDollars({ bigInt: totalProviderCost, precision: 6 }));
-			console.debug('Action cost', asDollars({ bigInt: env.ACTION_COST_USD, precision: 6 }));
-
-			if (warnings?.length) {
-				console.warn('Decision skill warnings', warnings);
-			}
+			if (warnings?.length) console.warn('Decision skill warnings', warnings);
 
 			return {
 				result: toolCalls.map((call) => `${call.toolName}()`).join(', ') ?? 'nothing',
 				costs: [
 					{
 						symbol: 'USD',
-						amount: totalProviderCost,
+						amount: calculateProviderCost(usage, providerMetadata),
 						description: 'Provider cost',
 					},
 					{
@@ -137,4 +132,28 @@ export function createAITool(
 			};
 		},
 	});
+}
+
+function calculateProviderCost(usage: { promptTokens: number; completionTokens: number }, providerMetadata?: any) {
+	//
+	// TODO: make it dynamic, per model
+	const INPUT_TOKEN_COST = asBigInt({ dollars: 1.1 }) / 1_000_000n;
+	const OUTPUT_TOKEN_COST = asBigInt({ dollars: 4.4 }) / 1_000_000n;
+
+	console.debug('Input tokens', usage.promptTokens);
+	console.debug('Output tokens', usage.completionTokens);
+
+	if (providerMetadata?.openai?.reasoningTokens && typeof providerMetadata.openai.reasoningTokens === 'number') {
+		console.debug('Reasoning tokens', providerMetadata.openai.reasoningTokens);
+		usage.completionTokens += providerMetadata.openai.reasoningTokens;
+	}
+
+	const inputCost = BigInt(usage.promptTokens) * INPUT_TOKEN_COST;
+	const outputCost = BigInt(usage.completionTokens) * OUTPUT_TOKEN_COST;
+	const totalProviderCost = inputCost + outputCost;
+
+	console.debug('Decision provider cost', asDollars({ bigInt: totalProviderCost, precision: 6 }));
+	console.debug('Action cost', asDollars({ bigInt: env.ACTION_COST_USD, precision: 6 }));
+
+	return totalProviderCost;
 }

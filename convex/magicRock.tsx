@@ -24,8 +24,15 @@ export async function _askMagicRock(
 		usage,
 		warnings,
 		// response,
+		reasoning,
+		reasoningDetails,
+		providerMetadata,
+		//
 	} = await generateText({
-		model: openai('gpt-4o'),
+		model: openai('o3-mini', {
+			reasoningEffort: 'low',
+			structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
+		}),
 		maxSteps: 1,
 		temperature: 0.7,
 		system: [
@@ -95,6 +102,9 @@ export async function _askMagicRock(
 		toolCalls,
 		usage,
 		warnings,
+		reasoning,
+		reasoningDetails,
+		providerMetadata,
 	};
 
 	console.debug('askMagicRock', result);
