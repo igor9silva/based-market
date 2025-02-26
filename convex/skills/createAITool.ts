@@ -120,7 +120,11 @@ export function createAITool(
 				costs: [
 					{
 						symbol: 'USD',
-						amount: calculateProviderCost(usage, providerMetadata),
+						amount: calculateProviderCost(
+							usage.promptTokens,
+							usage.completionTokens,
+							reasoningTokensFrom(providerMetadata),
+						),
 						description: 'Provider cost',
 					},
 					{
@@ -134,22 +138,25 @@ export function createAITool(
 	});
 }
 
-function calculateProviderCost(usage: { promptTokens: number; completionTokens: number }, providerMetadata?: any) {
-	//
+function reasoningTokensFrom(providerMetadata: any) {
+	const reasoningTokens = providerMetadata?.openai?.reasoningTokens ?? 0;
+	return typeof reasoningTokens === 'number' ? reasoningTokens : 0;
+}
+
+export function calculateProviderCost(
+	inputTokens: number, //
+	outputTokens: number,
+	reasoningTokens: number,
+) {
 	// TODO: make it dynamic, per model
 	const INPUT_TOKEN_COST = asBigInt({ dollars: 1.1 }) / 1_000_000n;
 	const OUTPUT_TOKEN_COST = asBigInt({ dollars: 4.4 }) / 1_000_000n;
 
-	console.debug('Input tokens', usage.promptTokens);
-	console.debug('Output tokens', usage.completionTokens);
+	console.debug('Input tokens', inputTokens);
+	console.debug('Output tokens', outputTokens);
 
-	if (providerMetadata?.openai?.reasoningTokens && typeof providerMetadata.openai.reasoningTokens === 'number') {
-		console.debug('Reasoning tokens', providerMetadata.openai.reasoningTokens);
-		usage.completionTokens += providerMetadata.openai.reasoningTokens;
-	}
-
-	const inputCost = BigInt(usage.promptTokens) * INPUT_TOKEN_COST;
-	const outputCost = BigInt(usage.completionTokens) * OUTPUT_TOKEN_COST;
+	const inputCost = BigInt(inputTokens) * INPUT_TOKEN_COST;
+	const outputCost = BigInt(outputTokens + reasoningTokens) * OUTPUT_TOKEN_COST;
 	const totalProviderCost = inputCost + outputCost;
 
 	console.debug('Decision provider cost', asDollars({ bigInt: totalProviderCost, precision: 6 }));

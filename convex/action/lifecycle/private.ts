@@ -5,11 +5,13 @@ import { Doc, Id } from '../../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
 import { authorSchema } from '../../schemas/authorSchema';
+import { env } from '../../schemas/envSchema';
 import { skillSchema } from '../../schemas/skillSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
+import { calculateProviderCost } from '../../skills/createAITool';
 import { createTool } from '../../skills/tools';
 import { _findOne as _findOneTask } from '../../tasks/private';
-import { asBigInt, asDollars } from '../../utils/money';
+import { asDollars } from '../../utils/money';
 import { _add, _findAll as _findAllActions } from '../private';
 
 export const _execute = internalAction({
@@ -233,8 +235,12 @@ function estimateCostFor(skill: z.infer<typeof skillSchema>) {
 	//
 	if (skill.cost !== 'dynamic') return skill.cost;
 
-	// TODO: implement dynamic cost
-	return asBigInt({ dollars: 0.01 });
+	const instructionsLength = skill.config.instructions.length;
+
+	const inputTokens = Math.ceil(instructionsLength / env.CHAR_PER_TOKEN); // TODO: properly account for tools
+	const outputTokens = Math.ceil(Math.min(375, inputTokens / 2)); // half of input tokens, but min. 375
+
+	return calculateProviderCost(inputTokens, outputTokens, 0) * BigInt(1 + env.COST_PREDICTION_MARGIN / 100);
 }
 
 async function _expectedCostFor(

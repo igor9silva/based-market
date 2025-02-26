@@ -13,7 +13,22 @@ export const env = createEnv({
 			.string()
 			.min(1)
 			.transform((s) => BigInt(s))
+			.pipe(z.bigint())
 			.describe('The cost of one action in USD.'),
+
+		CHAR_PER_TOKEN: z
+			.string()
+			.min(1)
+			.transform((s) => parseInt(s, 10))
+			.pipe(z.number())
+			.describe('The number of characters per token to account for in cost prediction.'),
+
+		COST_PREDICTION_MARGIN: z
+			.string()
+			.min(1)
+			.transform((s) => parseInt(s, 10))
+			.pipe(z.number())
+			.describe('The cost prediction margin, in percentage (e.g. "50" for 50%).'),
 
 		AUTH_GOOGLE_ID: z.string().min(1).describe('Google OAuth client ID.'),
 		AUTH_GOOGLE_SECRET: z.string().min(1).describe('Google OAuth client secret.'),
