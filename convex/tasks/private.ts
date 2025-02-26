@@ -10,7 +10,7 @@ import { authorSchema } from '../schemas/authorSchema';
 import { _addFundTask, _addRefundTask } from '../transactions/private';
 import { _findOne as _findOneUser } from '../users/private';
 import { InsufficientAccountFunds, NotFound } from '../utils/errors';
-import { asBigInt } from '../utils/money';
+import { asBigInt, asDollars } from '../utils/money';
 
 export const _findOne = internalQuery({
 	args: {
@@ -324,8 +324,24 @@ export const _useFunds = internalMutation({
 		const task = await _findOne(ctx, { taskId });
 		if (!task) throw new Error('Task not found');
 
-		console.debug('useFunds', amount, task.availableBudgetUSD, taskId);
-		if (task.availableBudgetUSD < amount) throw new Error('Insufficient funds on task');
+		console.debug(`using ${asDollars({ bigInt: amount })} from task ${taskId}`);
+
+		if (task.availableBudgetUSD < amount) {
+			//
+			console.warn(
+				'Insufficient funds on task',
+				taskId,
+				'cost',
+				asDollars({ bigInt: amount }),
+				'available',
+				asDollars({ bigInt: task.availableBudgetUSD }),
+				'missing',
+				asDollars({ bigInt: amount - task.availableBudgetUSD }),
+				'Will use all available funds',
+			);
+
+			amount = task.availableBudgetUSD;
+		}
 
 		// update the task balance
 		await ctx.db.patch(taskId, { availableBudgetUSD: task.availableBudgetUSD - amount });
@@ -345,7 +361,13 @@ export const _increaseBudget = internalMutation({
 		const user = await _findOneUser(ctx, { userId: task.owner });
 		if (!user) throw NotFound();
 
-		console.debug('increasing budget to task', taskId, amount, 'current balance', user.balanceUSD);
+		console.debug(
+			'increasing budget to task',
+			taskId,
+			asDollars({ bigInt: amount }),
+			'current balance',
+			asDollars({ bigInt: user.balanceUSD }),
+		);
 
 		const currentBalance = user.balanceUSD;
 		if (currentBalance < amount) throw InsufficientAccountFunds();
