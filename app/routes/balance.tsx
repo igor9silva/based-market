@@ -28,7 +28,7 @@ function RouteComponent() {
 				<h1 className="text-2xl font-bold">Balance</h1>
 				<span className="text-sm">
 					Your current non-locked balance is{' '}
-					<span className="font-bold">{asDollars({ bigInt: user.balanceUSD, precision: 6 })}</span>{' '}
+					<span className="font-bold">{asDollars({ bigInt: user.balanceUSD ?? 0n, precision: 6 })}</span>{' '}
 					<CircleDollarSign className="inline-block size-3 align-[-1px]" />.
 				</span>
 				{lockedBalance > 0 && (

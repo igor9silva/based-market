@@ -13,7 +13,7 @@ export function Balance({ className }: { className?: string }) {
 	return (
 		<Button className={cn('p-2', className)} variant="ghost" onClick={() => navigate({ to: '/balance' })}>
 			<CircleDollarSign className="size-3" />
-			{asDollars({ bigInt: user.balanceUSD })}
+			{asDollars({ bigInt: user.balanceUSD ?? 0n })}
 		</Button>
 	);
 }
