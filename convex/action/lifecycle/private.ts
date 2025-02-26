@@ -11,7 +11,7 @@ import { tokenSchema } from '../../schemas/topUpSchema';
 import { calculateProviderCost } from '../../skills/createAITool';
 import { createTool } from '../../skills/tools';
 import { _findOne as _findOneTask } from '../../tasks/private';
-import { asDollars } from '../../utils/money';
+import { asBigInt, asDollars, asInt } from '../../utils/money';
 import { _add, _findAll as _findAllActions } from '../private';
 
 export const _execute = internalAction({
@@ -240,7 +240,12 @@ function estimateCostFor(skill: z.infer<typeof skillSchema>) {
 	const inputTokens = Math.ceil(instructionsLength / env.CHAR_PER_TOKEN); // TODO: properly account for tools
 	const outputTokens = Math.ceil(Math.min(375, inputTokens / 2)); // half of input tokens, but min. 375
 
-	return calculateProviderCost(inputTokens, outputTokens, 0) * BigInt(1 + env.COST_PREDICTION_MARGIN / 100);
+	const totalCost = asInt({ bigInt: calculateProviderCost(inputTokens, outputTokens, 0) });
+
+	return asBigInt({
+		// add COST_PREDICTION_MARGIN% to the total cost
+		dollars: Math.floor(totalCost * (1 + env.COST_PREDICTION_MARGIN / 100)),
+	});
 }
 
 async function _expectedCostFor(
