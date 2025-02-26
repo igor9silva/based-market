@@ -10,7 +10,7 @@ import { skillSchema } from '../../schemas/skillSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
 import { calculateProviderCost } from '../../skills/createAITool';
 import { createTool } from '../../skills/tools';
-import { _findOne as _findOneTask } from '../../tasks/private';
+import { _findOne as _findOneTask, _useFunds } from '../../tasks/private';
 import { asBigInt, asDollars, asInt } from '../../utils/money';
 import { _add, _findAll as _findAllActions } from '../private';
 
@@ -21,15 +21,7 @@ export const _execute = internalAction({
 	},
 	handler: async (ctx, { taskId, actionId }) => {
 		//
-		// ensureWithinBudget()
-		// 		checks if `expectedCost() < task.availableBudgetUSD`
-		// 		otherwise fails with <IncreaseTaskBudgetCard taskId='${taskId}' />
-		// authorize()
-		// 		try automatic approval: check if skill.preApprovedCost < expectedCost()
-		// 		otherwise status go `pending authorization`
-
-		// 'built-in' skills are free of charge
-		// also bring the "max consecutive" logic to here, from react()
+		// TODO: also bring the "max consecutive" logic to here, from react()
 
 		try {
 			//
@@ -58,20 +50,6 @@ export const _execute = internalAction({
 
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool execution
 			const { result, costs } = await tool.execute(args);
-			const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0n);
-
-			console.debug(
-				`Executed with result length of ${result.length} characters. Total cost: ${asDollars({ bigInt: totalCost, precision: 6 })}`,
-			);
-
-			// TODO: move to `_setResolved()`
-			if (totalCost > 0) {
-				await ctx.runMutation(internal.tasks.private._useFunds, { taskId: action.taskId, amount: totalCost });
-			}
-
-			// TODO: move to `_setResolved()`
-			console.debug(`${actionId} (${action.skillKey}) executed`);
-			if (!result) console.warn(`${actionId} (${action.skillKey}) executed with no result`);
 
 			await _setResolved(ctx, {
 				actionId,
@@ -82,7 +60,7 @@ export const _execute = internalAction({
 			//
 		} catch (error) {
 			//
-			console.error('error in skill', error); // TODO: notify
+			console.error(`action ${actionId} execution failed: ${error}`); // TODO: notify
 
 			await _setResolved(ctx, {
 				actionId,
@@ -192,6 +170,7 @@ export const _requestAuthorization = internalMutation({
 		return await ctx.db.patch(actionId, { status: 'pending authorization' });
 	},
 });
+
 export const _resolve = internalMutation({
 	args: {
 		actionId: zid('actions'),
@@ -212,6 +191,18 @@ export const _resolve = internalMutation({
 		const action = await ctx.db.get(actionId);
 		if (!action) throw new Error('Action not found');
 		if (action.result) throw new Error('Action result already set');
+
+		if (!result) console.warn(`${action.skillKey} (${actionId}) ended with no result`);
+
+		const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0n);
+
+		console.debug(
+			`Resolved as ${status} with ${result.length} characters. Total cost: ${asDollars({ bigInt: totalCost, precision: 6 })}`,
+		);
+
+		if (status === 'succeeded' && totalCost > 0) {
+			await _useFunds(ctx, { taskId: action.taskId, amount: totalCost });
+		}
 
 		await ctx.db.patch(actionId, { result, status, costs });
 
@@ -344,6 +335,7 @@ export async function _runNextActionIfNeeded(
 	ctx: ActionCtx | MutationCtx, //
 	taskId: Id<'tasks'>,
 ) {
+	//
 	const skip = (message: string) => console.info(message);
 
 	// skip if there are running actions
