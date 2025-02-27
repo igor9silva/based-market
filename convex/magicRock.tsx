@@ -40,18 +40,19 @@ export async function _askMagicRock(
 			instructions,
 			//
 			// TODO: dynamic user info based on Inbox
-			`## User information`,
-			`- Language: I speak English (advanced, preferred), Portuguese (native) and a little bit of Spanish.`,
-			`- Location: I live in Setúbal, Portugal.`,
+			`## Context`,
+			`### User information`,
+			`- Language: I speak English (advanced, preferred), BR Portuguese (native) and a little bit of Spanish.`,
+			`- Location: I live in Setúbal, Portugal. I was born in São Paulo, Brazil.`,
 			`- Timezone: UTC.`, // TODO: dynamic timezone because of the damn DST
 			`- Current time: ${new Date().toISOString()}`,
 			`- Name: Igor Silva`,
 			`- Twitter: @igor9silva`,
-			`- Birthday: 1997-01-22 (aged 27 as of today)`,
-			`- He is your creator. He's actively working on improving you (Meseeks, the app).`,
-			``,
+			`- Birthday: 1997-01-22 (aged 28 as of today)`,
+			`- Igor is your creator. He's actively working on improving you (Meseeks, the companion app).`,
+			`- Igor is a software developer, entrepreneur and investor.`,
 			//
-			`## The task`,
+			`### Current task`,
 			promptForTask(task),
 			//
 		].join('\n'),
@@ -220,5 +221,8 @@ const promptForTask = (task: Doc<'tasks'>) =>
 		`<id>${task._id}</id>`, //
 		`<summary>${task.summary}</summary>`,
 		`<description>${task.description}</description>`,
+		`<resolution>${task.resolution}</resolution>`,
 		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
+		// `<availableBudget>${task.availableBudgetUSD}</availableBudget>`,
+		// `<parentId>${task.parentId}</parentId>`,
 	].join('\n');
