@@ -3,5 +3,5 @@ e.g. `import { useEffect, useRef } from 'react'` instead of `import * as React f
 
 DO NOT EVER APOLOGIZE. It's fine to make mistakes, keep focused on fixing them.
 
-Do not remove comments, specially containg "TODO:" or "FIXME:".
+Do not EVER remove comments. I'll do that manually when review the commit.
 DO NOT MESS UP WITH MY INDENTATION.
