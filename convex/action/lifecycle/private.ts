@@ -38,12 +38,18 @@ export const _execute = internalAction({
 				`Using skill ${skill.key} with ${Object.keys(action.args).length} args: ${Object.keys(action.args).join(', ')}`,
 			);
 
+			// check budget
 			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill);
-			const authorized = await _authorize(ctx, task, action, skill, expectedCost);
+			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost, precision: 6 })} USD.`);
 
-			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost })} USD. Auto-approved? ${authorized}`);
+			// if the action is not yet authorized, try auto-approving it
+			if (!action.approvedAt) {
+				//
+				const wasAutoApproved = await _tryAutoApprove(ctx, task, action, skill, expectedCost);
 
-			if (!authorized) return await _requestHumanApproval(ctx, actionId);
+				// if failed, request human approval
+				if (!wasAutoApproved) return await _requestHumanApproval(ctx, actionId);
+			}
 
 			const tool = createTool(ctx, task, action, skill);
 			const args = parseArgs(tool, action.args);
@@ -239,29 +245,37 @@ async function _ensureWithinBudget(
 	return expectedCost;
 }
 
-async function _authorize(
+async function _autoApprove(
+	ctx: ActionCtx | MutationCtx, //
+	task: Doc<'tasks'>,
+	action: Doc<'actions'>,
+) {
+	await ctx.runMutation(internal.action.private._authorize, {
+		taskId: task._id,
+		actionId: action._id,
+		approver: 'auto',
+		approved: true,
+	});
+
+	return true;
+}
+
+async function _tryAutoApprove(
 	ctx: ActionCtx | MutationCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 	skill: z.infer<typeof skillSchema>,
 	expectedCost: bigint,
 ) {
-	//
-	if (action.author === task.owner) return true;
+	// auto approve if the author is the task owner
+	if (action.author === task.owner) return _autoApprove(ctx, task, action);
 
-	if (skill.preApprovedCost === 'none' || skill.preApprovedCost < expectedCost) {
-		//
-		await ctx.runMutation(internal.action.lifecycle.private._requestAuthorization, { actionId: action._id });
+	// reject if requires more budget
+	if (skill.preApprovedCost === 'none') return false;
+	if (skill.preApprovedCost < expectedCost) return false;
 
-		return false;
-	}
-
-	const lastActions = await ctx.runQuery(internal.action.private._findLastActions, {
-		taskId: task._id,
-		amount: env.MAX_CONSECUTIVE_COMPANION_ACTIONS,
-	});
-
-	if (lastActions.every((action) => action.author !== task.owner)) {
+	// reject if too many consecutive actions are from Meseeks
+	if (await _hasReachedMaxConsecutiveCompanionActions(ctx, task)) {
 		//
 		console.debug(
 			`Skipping reacting for task ${task._id} because the last ${env.MAX_CONSECUTIVE_COMPANION_ACTIONS} actions are from Meseeks.`,
@@ -270,7 +284,20 @@ async function _authorize(
 		return false;
 	}
 
-	return true;
+	return _autoApprove(ctx, task, action);
+}
+
+async function _hasReachedMaxConsecutiveCompanionActions(
+	ctx: ActionCtx | MutationCtx, //
+	task: Doc<'tasks'>,
+) {
+	//
+	const lastActions = await ctx.runQuery(internal.action.private._findLastActions, {
+		taskId: task._id,
+		amount: env.MAX_CONSECUTIVE_COMPANION_ACTIONS,
+	});
+
+	return lastActions.every((action) => action.author !== task.owner);
 }
 
 async function _requestHumanApproval(ctx: ActionCtx | MutationCtx, actionId: Id<'actions'>) {
@@ -294,7 +321,7 @@ async function _setResolved(
 	return await ctx.runMutation(internal.action.lifecycle.private._resolve, args);
 }
 
-async function _runAction(
+export async function _runAction(
 	ctx: ActionCtx | MutationCtx,
 	{
 		taskId,

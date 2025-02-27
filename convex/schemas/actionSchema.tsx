@@ -10,6 +10,13 @@ const coreActionSchema = z.object({
 	skillKey: z.string(),
 	args: z.record(z.any()),
 	estimatedCost: z.bigint().optional(),
+	approvedAt: z.number().optional(),
+	approvedBy: z
+		.union([
+			zid('users'), //
+			z.literal('auto'),
+		])
+		.optional(),
 });
 
 export const pendingActionSchema = coreActionSchema.extend({

@@ -1,0 +1,215 @@
+import { Doc, Id } from 'convex/_generated/dataModel';
+import { asDollars } from 'convex/utils/money';
+import { useEffect, useState } from 'react';
+import { TimeAgo } from '~/components/TimeAgo';
+import { Badge } from '~/components/ui/badge';
+import { Card, CardContent, CardTitle } from '~/components/ui/card';
+import { ScrollArea } from '~/components/ui/scroll-area';
+import { cn } from '~/lib/utils';
+
+// Recursive component to display structured data
+function StructuredValue({ value, depth = 0 }: { value: any; depth?: number }) {
+	//
+	if (value === null) return <span className="text-muted-foreground">null</span>;
+	if (value === undefined) return <span className="text-muted-foreground">undefined</span>;
+
+	if (typeof value === 'string') return <span className="text-green-400">"{value}"</span>;
+	if (typeof value === 'number') return <span className="text-amber-400">{value}</span>;
+	if (typeof value === 'boolean') return <span className="text-purple-400">{value ? 'true' : 'false'}</span>;
+
+	if (Array.isArray(value)) {
+		if (value.length === 0) return <span className="text-muted-foreground">[]</span>;
+
+		return (
+			<div className="ml-2">
+				<span>[</span>
+				<div className="ml-4">
+					{value.map((item, index) => (
+						<div key={index} className="flex gap-1">
+							<StructuredValue value={item} depth={depth + 1} />
+							{index < value.length - 1 && <span>,</span>}
+						</div>
+					))}
+				</div>
+				<span>]</span>
+			</div>
+		);
+	}
+
+	if (typeof value === 'object') {
+		const entries = Object.entries(value);
+		if (entries.length === 0) return <span className="text-muted-foreground">{'{}'}</span>;
+
+		return (
+			<div className="ml-2">
+				<span>{'{'}</span>
+				<div className="ml-4">
+					{entries.map(([key, val], index) => (
+						<div key={key} className="flex gap-1">
+							<span className="font-semibold text-blue-400">{key}:</span>{' '}
+							<StructuredValue value={val} depth={depth + 1} />
+							{index < entries.length - 1 && <span>,</span>}
+						</div>
+					))}
+				</div>
+				<span>{'}'}</span>
+			</div>
+		);
+	}
+
+	return <span className="text-muted-foreground">{String(value)}</span>;
+}
+
+export function DebugAction({
+	className, //
+	action,
+	initialRenderDate,
+	isAuthorCurrentUser,
+	taskId,
+}: {
+	className?: string;
+	action: Doc<'actions'>;
+	initialRenderDate: Date;
+	isAuthorCurrentUser: boolean;
+	taskId: Id<'tasks'>;
+}) {
+	//
+	// Track if this action is currently highlighted by URL
+	const [isHighlighted, setIsHighlighted] = useState(false);
+
+	// Check if this action is the one in the URL hash
+	useEffect(() => {
+		//
+		const checkIfHighlighted = () => {
+			const hash = window.location.hash;
+			setIsHighlighted(hash === `#action-${action._id}`);
+		};
+
+		// Check on mount and whenever the hash changes
+		checkIfHighlighted();
+		window.addEventListener('hashchange', checkIfHighlighted);
+
+		return () => {
+			window.removeEventListener('hashchange', checkIfHighlighted);
+		};
+	}, [action._id]);
+
+	// Format creation time as a readable string
+	const creationTime = new Date(action._creationTime).toLocaleString();
+
+	// Get status color
+	const getStatusColor = () => {
+		switch (action.status) {
+			case 'running':
+				return 'bg-blue-500';
+			case 'succeeded':
+				return 'bg-green-500';
+			case 'failed':
+				return 'bg-red-500';
+			case 'skipped':
+				return 'bg-gray-500';
+			case 'pending authorization':
+				return 'bg-yellow-500';
+			default:
+				return 'bg-slate-500';
+		}
+	};
+
+	return (
+		<Card className={cn('overflow-hidden', isHighlighted && 'ring-2 ring-primary ring-offset-2', className)}>
+			{/* <CardHeader className="">
+			</CardHeader> */}
+			<CardContent className="space-y-2">
+				<div className="flex items-center justify-between">
+					<CardTitle id={`action-${action._id}`} className="text-lg">
+						{action.skillKey} <span className="font-mono text-xs text-muted-foreground">{action._id}</span>
+					</CardTitle>
+					<Badge className={cn('ml-2', getStatusColor())}>{action.status}</Badge>
+				</div>
+				<div className="text-sm text-muted-foreground flex justify-between items-center">
+					<TimeAgo date={action._creationTime} />
+
+					{action.author &&
+						(isAuthorCurrentUser ? (
+							<span>You</span>
+						) : (
+							<a href={`#action-${action.author}`} className="text-blue-400 hover:underline">
+								{`Author: ${action.author}`}
+							</a>
+						))}
+				</div>
+				{/* <div>
+					<h3 className="font-medium mb-1">{action.skillKey}</h3>
+					{/* <div className="p-2 bg-muted rounded-md font-mono">{action.skillKey}</div> *
+				</div> */}
+
+				{typeof action.estimatedCost === 'bigint' && (
+					<div>
+						<h3 className="font-medium mb-1">Estimated Cost</h3>
+						<div className="p-2 bg-muted rounded-md">${asDollars({ bigInt: action.estimatedCost })}</div>
+					</div>
+				)}
+
+				{action.args && Object.keys(action.args).length > 0 && (
+					<div>
+						<h3 className="font-medium mb-1">Arguments</h3>
+						<ScrollArea className="p-2 bg-muted rounded-md max-h-48">
+							<div className="font-mono">
+								<StructuredValue value={action.args} />
+							</div>
+						</ScrollArea>
+					</div>
+				)}
+
+				{action.result && (
+					<div>
+						<h3 className="font-medium mb-1">Result</h3>
+						<ScrollArea className="p-2 bg-muted rounded-md max-h-80">
+							<div className="font-mono">
+								{typeof action.result === 'string' ? (
+									<StructuredValue value={action.result} />
+								) : (
+									<StructuredValue value={null} />
+								)}
+							</div>
+						</ScrollArea>
+					</div>
+				)}
+
+				{(action.status === 'succeeded' || action.status === 'skipped' || action.status === 'failed') &&
+					action.costs &&
+					action.costs.length > 0 && (
+						<div>
+							<h3 className="font-medium mb-1">Costs</h3>
+							<div className="p-2 bg-muted rounded-md">
+								<ul className="space-y-1">
+									{action.costs.map((cost, index) => (
+										<li key={index} className="flex justify-between">
+											<span>
+												{cost.description} ({cost.symbol})
+											</span>
+											<span className="font-mono">
+												${asDollars({ bigInt: cost.amount, precision: 6 })}
+											</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						</div>
+					)}
+
+				{/* <div>
+					<h3 className="font-medium mb-1">Task ID</h3>
+					<div className="p-2 bg-muted rounded-md font-mono">{taskId}</div>
+				</div> */}
+
+				{/* <div>
+					<h3 className="font-medium mb-1">Raw Action Data</h3>
+					<div className="p-2 bg-muted rounded-md overflow-auto max-h-96 font-mono">
+						<StructuredValue value={action} />
+					</div>
+				</div> */}
+			</CardContent>
+		</Card>
+	);
+}

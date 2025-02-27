@@ -3,13 +3,15 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
 import { usePaginatedQuery } from 'convex/react';
-import { MoveDown } from 'lucide-react';
+import { Bug, MoveDown } from 'lucide-react';
 import { RefCallback, useEffect, useMemo, useState } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { Action } from '~/components/Action';
 import { ActionComposer } from '~/components/ActionComposer';
+import { DebugAction } from '~/components/DebugAction';
 import { Loading } from '~/components/Loading';
 import { Button } from '~/components/ui/button';
+import { Toggle } from '~/components/ui/toggle';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { cn } from '~/lib/utils';
 
@@ -27,6 +29,7 @@ export function TaskConversation({
 	const { data: task } = useSuspenseQuery(taskQuery);
 
 	const user = useCurrentUser();
+	const [debugMode, setDebugMode] = useState(false);
 
 	const {
 		results: actions,
@@ -45,16 +48,38 @@ export function TaskConversation({
 
 	return (
 		<div className={cn('flex flex-col h-full p-2 gap-2', className)}>
+			<div className="flex justify-end mb-1">
+				<Toggle
+					aria-label="Toggle debug mode"
+					pressed={debugMode}
+					onPressedChange={() => setDebugMode((prev) => !prev)}
+					className="h-8 px-2 data-[state=on]:bg-amber-500/20"
+				>
+					<Bug className="h-4 w-4 mr-1" />
+					Debug
+				</Toggle>
+			</div>
 			<StickToBottom mass={1} initial="instant" resize="instant" className="flex-1 overflow-auto">
 				<StickToBottomContent actions={actions} status={status} loadMore={loadMore}>
-					{reversedActions.map((action) => (
-						<Action
-							key={action._id}
-							action={action}
-							initialRenderDate={initialRenderDate}
-							isAuthorCurrentUser={action.author === user._id}
-						/>
-					))}
+					{reversedActions.map((action) =>
+						debugMode ? (
+							<DebugAction
+								key={action._id}
+								action={action}
+								initialRenderDate={initialRenderDate}
+								isAuthorCurrentUser={action.author === user._id}
+								taskId={taskId}
+							/>
+						) : (
+							<Action
+								key={action._id}
+								action={action}
+								initialRenderDate={initialRenderDate}
+								isAuthorCurrentUser={action.author === user._id}
+								taskId={taskId}
+							/>
+						),
+					)}
 				</StickToBottomContent>
 			</StickToBottom>
 			<ActionComposer task={task} />

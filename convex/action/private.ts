@@ -36,6 +36,36 @@ export const _add = internalMutation({
 	},
 });
 
+export const _authorize = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		actionId: zid('actions'),
+		approver: z.union([
+			zid('users'), //
+			z.literal('auto'),
+		]),
+		approved: z.boolean(),
+	},
+	handler: async (ctx, { taskId, actionId, approver, approved }) => {
+		//
+		const action = await _findOne(ctx, { actionId });
+		if (action.approvedAt) return;
+
+		// if already running, keep running - else enqueue
+		const approvedStatus = action.status === 'running' ? 'running' : 'enqueued';
+
+		await ctx.db.patch(actionId, {
+			status: approved ? approvedStatus : 'skipped',
+			approvedBy: approver,
+			approvedAt: Date.now(),
+		});
+
+		if (approved && approvedStatus === 'enqueued') {
+			await _runNextActionIfNeeded(ctx, taskId);
+		}
+	},
+});
+
 // ------------------------------------
 
 export const _findAll = internalQuery({

@@ -37,7 +37,7 @@ export const _toolsForMagicRock = async (
 
 	const map = {
 		...toMap(skills, (skill) => createTool(ctx, task, action, skill)),
-		..._builtInTools(ctx, task, action),
+		..._builtInTools(ctx, task, action, true),
 	};
 
 	Object.values(map).forEach((skill) => {
@@ -52,11 +52,19 @@ export const _builtInTools = (
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
+	isForMagicRock: boolean = false, // TODO: this is a temporary solution. Skill selection should be done on the action.
 ) => {
 	//
+
 	return Object.keys(_builtInSkills).reduce(
 		(acc, key) => {
-			acc[key] = createBuiltInTool(ctx, task, action, _builtInSkills[key as keyof typeof _builtInSkills]);
+			//
+			const skill = _builtInSkills[key as keyof typeof _builtInSkills];
+
+			if (isForMagicRock && !skill.isVisibleToMagicRock) return acc;
+
+			acc[key] = createBuiltInTool(ctx, task, action, skill);
+
 			return acc;
 		},
 		{} as Record<string, ReturnType<typeof createBuiltInTool>>,

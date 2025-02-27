@@ -1,8 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
-import { topUpAmountSchema } from 'convex/schemas/topUpSchema';
-import { toast } from 'sonner';
+import { asBigInt } from 'convex/utils/money';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -21,16 +20,9 @@ export function TopUpCard() {
 		}),
 		handler: async ({ amount }) => {
 			//
-			const parsed = topUpAmountSchema.safeParse(Number(amount));
-
-			if (!parsed.success) {
-				toast.error('Amount must be $0.1 or more');
-				return;
-			}
-
 			const topUpId = await startTopUp({
 				symbol: 'USD',
-				amount: parsed.data,
+				amount: asBigInt({ dollars: Number(amount) }),
 				chain: 'base',
 			});
 

@@ -5,6 +5,7 @@ import { useMutation } from 'convex/react';
 export function useTaskMutations() {
 	//
 	const act = useMutation(api.action.public.act);
+	const authorize = useMutation(api.action.public.authorize);
 
 	const say = ({
 		taskId, //
@@ -64,10 +65,40 @@ export function useTaskMutations() {
 		});
 	};
 
+	const approveAction = ({
+		taskId, //
+		actionId,
+	}: {
+		taskId: Id<'tasks'>;
+		actionId: Id<'actions'>;
+	}) => {
+		return authorize({
+			taskId,
+			actionId,
+			approved: true,
+		});
+	};
+
+	const rejectAction = ({
+		taskId, //
+		actionId,
+	}: {
+		taskId: Id<'tasks'>;
+		actionId: Id<'actions'>;
+	}) => {
+		return authorize({
+			taskId,
+			actionId,
+			approved: false,
+		});
+	};
+
 	return {
 		say,
 		updateTask,
 		markAsDone,
 		increaseBudget,
+		approveAction,
+		rejectAction,
 	};
 }

@@ -12,14 +12,20 @@ type ToolExecution = {
 };
 
 const defineSkill = <T extends z.AnyZodObject>(skill: {
+	isVisibleToMagicRock?: boolean;
 	preApprovedCost: bigint | 'none';
 	description: string;
 	parameters: T;
 	execute: (execution: ToolExecution) => (args: z.infer<T>) => Promise<string>;
-}) => skill;
+}) => ({
+	// TODO: this is a temporary solution. Skill selection should be done on the action.
+	isVisibleToMagicRock: skill.isVisibleToMagicRock === undefined ? true : skill.isVisibleToMagicRock,
+	...skill,
+});
 
 export const _builtInSkills = {
 	say: defineSkill({
+		isVisibleToMagicRock: false,
 		preApprovedCost: 0n,
 		description: 'Send a text message to the user.',
 		parameters: z.object({
@@ -28,6 +34,7 @@ export const _builtInSkills = {
 		execute: (execution: ToolExecution) => (args) => Promise.resolve(args.message),
 	}),
 	increaseBudget: defineSkill({
+		isVisibleToMagicRock: false,
 		preApprovedCost: 'none',
 		description: 'Increase the budget of the task',
 		parameters: z.object({
@@ -71,22 +78,30 @@ export const _builtInSkills = {
 	}),
 	resolve: defineSkill({
 		preApprovedCost: 'none',
-		description: 'Mark the task as done, generate a resolution if empty, and learn from it.',
+		// description: 'Mark the task as done, generate a resolution if empty, and learn from it.',
+		description: 'Mark the task as done. MUST have set a resolution first or will be auto-rejected.',
 		parameters: z.object({
-			resolution: z
-				.string()
-				.optional()
-				.describe(
-					'The resolution text in MDX format. If not provided and no existing resolution, one will be generated.',
-				),
+			// resolution: z
+			// 	.string()
+			// 	.optional()
+			// 	.describe(
+			// 		'The resolution text in MDX format. If not provided and no existing resolution, one will be generated.',
+			// 	),
 		}),
 		execute:
 			(execution: ToolExecution) =>
 			async (args): Promise<string> => {
 				//
-				await execution.ctx.runMutation(internal.tasks.private._resolve, {
+				// if (args.resolution) {
+				// 	await execution.ctx.runMutation(internal.tasks.private._setResolution, {
+				// 		taskId: execution.task._id,
+				// 		resolution: args.resolution,
+				// 	});
+				// }
+
+				await execution.ctx.runMutation(internal.tasks.private._markAsDone, {
 					taskId: execution.task._id,
-					resolution: args.resolution,
+					isDone: true,
 				});
 
 				return `resolved`;
@@ -132,6 +147,7 @@ export const _builtInSkills = {
 					.then(() => `Resolution set.`),
 	}),
 	moveTask: defineSkill({
+		isVisibleToMagicRock: false,
 		preApprovedCost: 'none',
 		description: 'Move the task to a new parent',
 		parameters: z.object({
@@ -153,6 +169,7 @@ export const _builtInSkills = {
 					.then(() => `task moved`),
 	}),
 	createSubtask: defineSkill({
+		isVisibleToMagicRock: false,
 		preApprovedCost: 'none',
 		description: 'Create a subtask',
 		parameters: z.object({
