@@ -11,7 +11,7 @@ import { tokenSchema } from '../../schemas/topUpSchema';
 import { calculateProviderCost } from '../../skills/createAITool';
 import { createTool } from '../../skills/tools';
 import { _findOne as _findOneTask, _useFunds } from '../../tasks/private';
-import { asBigInt, asDollars, asInt } from '../../utils/money';
+import { asDollars } from '../../utils/money';
 import { _add, _skipAllEnqueuedReactions } from '../private';
 
 export const _execute = internalAction({
@@ -193,7 +193,10 @@ function parseArgs(tool: ReturnType<typeof createTool>, args: unknown) {
 	return parsedArgs.data;
 }
 
-function estimateCostFor(skill: z.infer<typeof skillSchema>) {
+function estimateCostFor(
+	skill: z.infer<typeof skillSchema>, //
+	actionId: Id<'actions'>,
+) {
 	//
 	if (skill.cost !== 'dynamic') return skill.cost;
 
@@ -202,12 +205,22 @@ function estimateCostFor(skill: z.infer<typeof skillSchema>) {
 	const inputTokens = Math.ceil(instructionsLength / env.CHAR_PER_TOKEN); // TODO: properly account for tools
 	const outputTokens = Math.ceil(Math.min(375, inputTokens / 2)); // half of input tokens, but min. 375
 
-	const totalCost = asInt({ bigInt: calculateProviderCost(inputTokens, outputTokens, 0) });
+	const providerCost = calculateProviderCost(inputTokens, outputTokens, 0);
+	const actionCost = env.ACTION_COST_USD;
+	const totalCost = providerCost + actionCost;
 
-	return asBigInt({
-		// add COST_PREDICTION_MARGIN% to the total cost
-		dollars: Math.floor(totalCost * (1 + env.COST_PREDICTION_MARGIN / 100)),
-	});
+	// Add a fixed margin to account for unpredictable costs, like repairing tools and output size
+	const marginPercent = env.COST_PREDICTION_MARGIN / 100;
+	const marginFactor = 100n + BigInt(Math.round(marginPercent * 100));
+	const totalCostWithMargin = (totalCost * marginFactor) / 100n;
+
+	console.debug(
+		`Estimated cost for ${skill.key} (${actionId}): ${asDollars({ bigInt: totalCostWithMargin, precision: 6 })} USD`,
+	);
+	console.debug(`Input tokens: ${inputTokens}, instruction length: ${instructionsLength}`);
+	console.debug(`Output tokens: ${outputTokens}`);
+
+	return totalCostWithMargin;
 }
 
 async function _expectedCostFor(
@@ -217,7 +230,11 @@ async function _expectedCostFor(
 ) {
 	if (action.estimatedCost) return action.estimatedCost;
 
-	const estimatedCost = estimateCostFor(skill);
+	const estimatedCost = estimateCostFor(skill, action._id);
+
+	console.debug(
+		`Setting estimated cost for ${action._id}: ${asDollars({ bigInt: estimatedCost, precision: 6 })} USD`,
+	);
 
 	await ctx.runMutation(internal.action.lifecycle.private._setEstimatedCost, {
 		actionId: action._id,

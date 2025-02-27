@@ -143,13 +143,6 @@ export function DebugAction({
 					{/* <div className="p-2 bg-muted rounded-md font-mono">{action.skillKey}</div> *
 				</div> */}
 
-				{typeof action.estimatedCost === 'bigint' && (
-					<div>
-						<h3 className="font-medium mb-1">Estimated Cost</h3>
-						<div className="p-2 bg-muted rounded-md">${asDollars({ bigInt: action.estimatedCost })}</div>
-					</div>
-				)}
-
 				{action.args && Object.keys(action.args).length > 0 && (
 					<div>
 						<h3 className="font-medium mb-1">Arguments</h3>
@@ -173,6 +166,15 @@ export function DebugAction({
 								)}
 							</div>
 						</ScrollArea>
+					</div>
+				)}
+
+				{typeof action.estimatedCost === 'bigint' && (
+					<div>
+						<h3 className="font-medium mb-1">Estimated Cost</h3>
+						<div className="p-2 bg-muted rounded-md">
+							${asDollars({ bigInt: action.estimatedCost, precision: 6 })}
+						</div>
 					</div>
 				)}
 

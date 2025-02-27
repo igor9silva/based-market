@@ -6,6 +6,7 @@ import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
+import { _findOne as _findOneTask } from '../tasks/private';
 import { _runNextActionIfNeeded } from './lifecycle/private';
 
 export const _add = internalMutation({
@@ -19,6 +20,23 @@ export const _add = internalMutation({
 	handler: async (ctx, { taskId, author, owner, skillKey, args }) => {
 		//
 		console.debug(`${author} acts: ${skillKey}`);
+
+		const task = await _findOneTask(ctx, { taskId });
+
+		// if task is already done, prepend with a reopen action
+		// TODO: this should only happen for user actions. Should we check here?
+		// We're not checking here but meseeks should not be able to _add() actions if task is done
+		if (task.isDone) {
+			await ctx.db.insert('actions', {
+				taskId,
+				author,
+				owner,
+				status: 'enqueued',
+				result: null,
+				skillKey: 'reopen',
+				args: {},
+			});
+		}
 
 		const actionId = await ctx.db.insert('actions', {
 			taskId,

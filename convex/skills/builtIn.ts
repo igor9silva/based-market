@@ -76,6 +76,23 @@ export const _builtInSkills = {
 					})
 					.then(() => `task updated`),
 	}),
+	reopen: defineSkill({
+		preApprovedCost: 'none',
+		description: 'Re-open a task that was previously marked as done.',
+		isVisibleToMagicRock: false,
+		parameters: z.object({}),
+		execute:
+			(execution: ToolExecution) =>
+			async (args): Promise<string> => {
+				//
+				await execution.ctx.runMutation(internal.tasks.private._markAsDone, {
+					taskId: execution.task._id,
+					isDone: false,
+				});
+
+				return `re-opened`;
+			},
+	}),
 	resolve: defineSkill({
 		preApprovedCost: 'none',
 		// description: 'Mark the task as done, generate a resolution if empty, and learn from it.',
