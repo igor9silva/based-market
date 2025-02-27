@@ -16,5 +16,10 @@ export default defineConfig({
 	},
 	server: {
 		preset: 'vercel',
+		esbuild: {
+			options: {
+				target: 'es2022',
+			},
+		},
 	},
 });
