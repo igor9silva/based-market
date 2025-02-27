@@ -314,6 +314,85 @@ export const _markAsDone = internalMutation({
 	},
 });
 
+export const _setResolution = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		resolution: z.string().optional(),
+	},
+	handler: async (ctx, { taskId, resolution }) => {
+		//
+		return await ctx.db.patch(taskId, { resolution });
+	},
+});
+
+export const _resolve = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		resolution: z.string().optional(),
+	},
+	handler: async (ctx, { taskId, resolution }) => {
+		//
+		// const task = await execution.ctx.runQuery(internal.tasks.private._findOne, {
+		// 	taskId: execution.task._id,
+		// });
+
+		// 1. Set resolution if provided
+		if (resolution) {
+			//
+			// const finalResolution = args.resolution || 'Task completed successfully.';
+			// TODO: generate resolution if needed
+
+			await ctx.runMutation(internal.tasks.private._setResolution, {
+				taskId,
+				resolution,
+			});
+			//
+		}
+
+		// 2. Mark task as done (which will refund any unused funds)
+		await ctx.runMutation(internal.tasks.private._markAsDone, {
+			taskId,
+			isDone: true,
+		});
+
+		// await execution.ctx.runMutation(internal.action.private._add, {
+		// 	taskId: execution.task._id,
+		// 	author: execution.action.author,
+		// 	owner: execution.task.owner,
+		// 	skillKey: '_learnFromTask',
+		// 	args: {},
+		// });
+	},
+});
+// export const _learn = internalAction({
+// 	args: {
+// 		taskId: zid('tasks'),
+// 	},
+// 	handler: async (ctx, { taskId }) => {
+// 		//
+// 		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
+// 		if (!task) throw new Error('Task not found');
+
+// 		if (!task.resolution) {
+// 			console.warn('Cannot learn from task without resolution', taskId);
+// 			return false;
+// 		}
+
+// 		// TODO: Implement learning logic here
+// 		// This would typically involve:
+// 		// 1. Extracting knowledge from the task and its resolution
+// 		// 2. Storing this knowledge in a knowledge base
+// 		// 3. Updating embeddings or other data structures for future reference
+
+// 		console.log('Learning from task', taskId);
+
+// 		// Re-embed the task with its resolution for better semantic search
+// 		// await ctx.runAction(internal.tasks.private._embedTask, { taskId });
+
+// 		return true;
+// 	},
+// });
+
 export const _useFunds = internalMutation({
 	args: {
 		taskId: zid('tasks'),

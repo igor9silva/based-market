@@ -69,21 +69,67 @@ export const _builtInSkills = {
 					})
 					.then(() => `task updated`),
 	}),
-	markAsDone: defineSkill({
+	resolve: defineSkill({
 		preApprovedCost: 'none',
-		description: 'Mark the task as done or undone.',
+		description: 'Mark the task as done, generate a resolution if empty, and learn from it.',
 		parameters: z.object({
-			isDone: z.boolean().describe('Whether the task should be marked as done or undone.'),
+			resolution: z
+				.string()
+				.optional()
+				.describe(
+					'The resolution text in MDX format. If not provided and no existing resolution, one will be generated.',
+				),
+		}),
+		execute:
+			(execution: ToolExecution) =>
+			async (args): Promise<string> => {
+				//
+				await execution.ctx.runMutation(internal.tasks.private._resolve, {
+					taskId: execution.task._id,
+					resolution: args.resolution,
+				});
+
+				return `resolved`;
+			},
+	}),
+	archive: defineSkill({
+		preApprovedCost: 'none',
+		description:
+			"Mark the task as done without learning from it (for tasks that were abandoned or not relevant). Use this when you need to close a task that isn't relevant anymore/abandoned.",
+		parameters: z.object({}),
+		execute: (execution: ToolExecution) => async (): Promise<string> => {
+			//
+			// Make sure task has no resolution
+			await execution.ctx.runMutation(internal.tasks.private._setResolution, {
+				taskId: execution.task._id,
+				resolution: undefined,
+			});
+
+			// Mark it as done
+			await execution.ctx.runMutation(internal.tasks.private._markAsDone, {
+				taskId: execution.task._id,
+				isDone: true,
+			});
+
+			return `archived`;
+		},
+	}),
+	setResolution: defineSkill({
+		preApprovedCost: 0n,
+		description:
+			'Set the resolution text for a task without marking it as done. Use this to draft a resolution while still working on the task.',
+		parameters: z.object({
+			resolution: z.string().describe('The resolution text in MDX format.'),
 		}),
 		execute:
 			(execution: ToolExecution) =>
 			(args): Promise<string> =>
 				execution.ctx
-					.runMutation(internal.tasks.private._markAsDone, {
+					.runMutation(internal.tasks.private._setResolution, {
 						taskId: execution.task._id,
-						...args,
+						resolution: args.resolution,
 					})
-					.then(() => `task marked as ${args.isDone ? 'done' : '**not** done'}`),
+					.then(() => `Resolution set.`),
 	}),
 	moveTask: defineSkill({
 		preApprovedCost: 'none',
