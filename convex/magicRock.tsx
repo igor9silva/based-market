@@ -29,7 +29,8 @@ export async function _askMagicRock(
 		providerMetadata,
 		//
 	} = await generateText({
-		model: openai('gpt-4o-mini'),
+		// model: google('gemini-2.0-flash-001'),
+		model: openai('gpt-4o'),
 		// model: openai('o3-mini', {
 		// 	reasoningEffort: 'low',
 		// 	structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
@@ -124,8 +125,6 @@ function actionToCoreMessage(
 		//
 		case 'assistant':
 			//
-			if (!action.result) return undefined; // TODO: maybe just filter out `skipped` ones
-
 			return [
 				{
 					role: 'assistant',
@@ -190,6 +189,8 @@ async function renderHistory(
 	const actions = await ctx.runQuery(internal.action.private._findAll, { taskId });
 
 	const history = actions
+		.filter((action) => action.skillKey !== 'react')
+		.filter((action) => action.status !== 'skipped')
 		.map((action) => ({ action, author: author === action.author ? ('user' as const) : ('assistant' as const) }))
 		.map(({ action, author }) => actionToCoreMessage(action, author))
 		.filter((action): action is CoreMessage => action !== undefined)

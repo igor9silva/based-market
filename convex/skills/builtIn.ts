@@ -63,8 +63,13 @@ export const _builtInSkills = {
 		preApprovedCost: 0n,
 		description: 'Update the task description and/or summary',
 		parameters: z.object({
-			summary: z.string().max(140).optional().describe('The improved summary for the task'),
-			description: z.string().optional().describe('The improved long description of the task'),
+			summary: z.string().max(100).optional().describe('The improved summary for the task. Be succint.'),
+			description: z
+				.string()
+				.optional()
+				.describe(
+					'The improved long description of the task. You can add infinite details here, BUT ONLY if they add value. Usually the less tokens you use, the better.',
+				),
 		}),
 		execute:
 			(execution: ToolExecution) =>

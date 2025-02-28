@@ -110,7 +110,7 @@ export function Action({
 				{action.status === 'pending authorization' ? (
 					<div className="flex flex-col gap-2 p-2 rounded-lg bg-muted">
 						<div className="flex flex-col">
-							<div className="text-md font-medium">Using {action.skillKey}()</div>
+							<div className="text-md font-medium">{action.skillKey}()</div>
 							{typeof action.estimatedCost === 'bigint' && (
 								<div className="text-sm text-muted-foreground">
 									Expected cost: ${asDollars({ bigInt: action.estimatedCost })}
