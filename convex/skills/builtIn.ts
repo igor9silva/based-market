@@ -96,7 +96,8 @@ export const _builtInSkills = {
 	resolve: defineSkill({
 		preApprovedCost: 'none',
 		// description: 'Mark the task as done, generate a resolution if empty, and learn from it.',
-		description: 'Mark the task as done. MUST have set a resolution first or will be auto-rejected.',
+		description:
+			'Mark the task as done. MUST have set a resolution first or will be auto-rejected. Before calling this, reflect on the current resolution set (should be on the system prompt) and make sure you are at LEAST 80% if solves the task.',
 		parameters: z.object({
 			// resolution: z
 			// 	.string()
@@ -148,8 +149,7 @@ export const _builtInSkills = {
 	}),
 	setResolution: defineSkill({
 		preApprovedCost: 0n,
-		description:
-			'Set the resolution text for a task without marking it as done. Use this to draft a resolution while still working on the task.',
+		description: 'Set the resolution text. Use this to draft a resolution while still working on the task.',
 		parameters: z.object({
 			resolution: z.string().describe('The resolution text in MDX format.'),
 		}),

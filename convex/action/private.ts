@@ -70,13 +70,23 @@ export const _authorize = internalMutation({
 		if (action.approvedAt) return;
 
 		// if already running, keep running - else enqueue
-		const approvedStatus = action.status === 'running' ? 'running' : 'enqueued';
+		const approvedStatus = action.status === 'running' ? ('running' as const) : ('enqueued' as const);
 
-		await ctx.db.patch(actionId, {
-			status: approved ? approvedStatus : 'skipped',
-			approvedBy: approver,
-			approvedAt: Date.now(),
-		});
+		console.debug(`${approver} ${approved ? 'approved' : 'rejected'} ${action.skillKey} (${action._id})`);
+
+		const patch = approved
+			? {
+					status: action.status === 'running' ? ('running' as const) : ('enqueued' as const),
+					approvedBy: approver,
+					approvedAt: Date.now(),
+				}
+			: {
+					status: 'skipped' as const,
+					result: 'rejected by ' + approver,
+					costs: [],
+				};
+
+		await ctx.db.patch(actionId, patch);
 
 		if (approved && approvedStatus === 'enqueued') {
 			await _runNextActionIfNeeded(ctx, taskId);

@@ -103,9 +103,8 @@ export function Action({
 		>
 			<div
 				className={cn('max-w-full', {
-					'bg-blue-700/30': action.status === 'running',
-					'bg-red-700/30': action.status === 'failed',
-					'bg-gray-700/30': action.status === 'skipped',
+					'bg-green-700/30 animate-pulse rounded-lg p-2': action.status === 'running',
+					'bg-red-700/30 rounded-lg p-2': action.status === 'failed',
 				})}
 			>
 				{action.status === 'pending authorization' ? (
@@ -145,11 +144,12 @@ export function Action({
 						{typeof action.result === 'string' ? (
 							<Result
 								result={action.result}
+								status={action.status}
 								skillKey={action.skillKey}
 								args={action.args}
 								costs={action.costs}
 								className={cn({
-									'bg-primary text-primary-foreground rounded-lg border border-border p-2 ':
+									'bg-primary text-primary-foreground rounded-lg border border-border p-2':
 										isAuthorCurrentUser && action.skillKey === 'say',
 									'bg-muted rounded-lg p-2': isAuthorCurrentUser && action.skillKey !== 'say',
 								})}
@@ -170,6 +170,7 @@ function Result({
 	args,
 	className,
 	costs,
+	status,
 }: {
 	result: string;
 	skillKey: string;
@@ -180,6 +181,7 @@ function Result({
 		description: string;
 	}>;
 	className?: string;
+	status: 'failed' | 'succeeded' | 'skipped';
 }) {
 	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
 
@@ -190,7 +192,9 @@ function Result({
 	return (
 		<Collapsible className={cn('text-sm', className)}>
 			<CollapsibleTrigger>
-				<div className="text-muted-foreground">{skillKey}()</div>
+				<div className={cn('text-muted-foreground', { 'line-through': status === 'skipped' })}>
+					{skillKey}()
+				</div>
 			</CollapsibleTrigger>
 			<CollapsibleContent>
 				<p>

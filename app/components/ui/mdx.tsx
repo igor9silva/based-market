@@ -107,7 +107,7 @@ export default function MDX({
 					h4: ({ children }) => <h4 className="text-base font-bold mt-3 mb-2">{children}</h4>,
 					h5: ({ children }) => <h5 className="text-sm font-bold mt-2 mb-1">{children}</h5>,
 					h6: ({ children }) => <h6 className="text-xs font-bold mt-2 mb-1">{children}</h6>,
-					p: ({ children }) => <p className="my-2 leading-relaxed">{children}</p>,
+					p: ({ children }) => <p className="my-1 leading-relaxed">{children}</p>,
 					strong: ({ children }) => <strong className="font-bold">{children}</strong>,
 					em: ({ children }) => <em className="italic">{children}</em>,
 					del: ({ children }) => <del className="line-through">{children}</del>,
