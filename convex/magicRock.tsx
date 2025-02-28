@@ -29,10 +29,11 @@ export async function _askMagicRock(
 		providerMetadata,
 		//
 	} = await generateText({
-		model: openai('o3-mini', {
-			reasoningEffort: 'low',
-			structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
-		}),
+		model: openai('gpt-4o'),
+		// model: openai('o3-mini', {
+		// 	reasoningEffort: 'low',
+		// 	structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
+		// }),
 		maxSteps: 1,
 		temperature: 0.7,
 		system: [
@@ -156,7 +157,8 @@ function actionToCoreMessage(
 				role: author,
 				content: [
 					`<date>${new Date(action._creationTime).toISOString()}</date>`,
-					// `<kind>${action.kind}</kind>`,
+					`<skill>${action.skillKey}</skill>`,
+					`<status>${action.status}</status>`,
 					`<content>${action.result}</content>`,
 				].join('\n'),
 			};

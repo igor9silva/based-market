@@ -149,8 +149,8 @@ export function calculateProviderCost(
 	reasoningTokens: number,
 ) {
 	// TODO: make it dynamic, per model
-	const INPUT_TOKEN_COST = asBigInt({ dollars: 1.1 }) / 1_000_000n;
-	const OUTPUT_TOKEN_COST = asBigInt({ dollars: 4.4 }) / 1_000_000n;
+	const INPUT_TOKEN_COST = asBigInt({ dollars: 2.5 }) / 1_000_000n;
+	const OUTPUT_TOKEN_COST = asBigInt({ dollars: 10 }) / 1_000_000n;
 
 	console.debug('Input tokens', inputTokens);
 	console.debug('Output tokens', outputTokens);
