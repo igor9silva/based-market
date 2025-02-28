@@ -29,7 +29,7 @@ export async function _askMagicRock(
 		providerMetadata,
 		//
 	} = await generateText({
-		model: openai('gpt-4o'),
+		model: openai('gpt-4o-mini'),
 		// model: openai('o3-mini', {
 		// 	reasoningEffort: 'low',
 		// 	structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
