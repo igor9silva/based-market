@@ -2,15 +2,15 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
 import { asBigInt } from 'convex/utils/money';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { cn } from '~/lib/utils';
 
 import { INSUFFICIENT_ACCOUNT_FUNDS_ERROR, isError } from 'convex/utils/errors';
+import { BudgetSelector } from '~/components/ui/budget-selector';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
-import { Slider } from '~/components/ui/slider';
 import { Textarea } from '~/components/ui/textarea';
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
@@ -30,7 +30,7 @@ export function QuickAdd({ className }: { className?: string }) {
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
 			description: z.string().min(1, 'Description is required'),
-			initialFunds: z.coerce.number().min(0).max(100000).default(0.1),
+			initialFunds: z.coerce.number().min(0).max(100).default(0.1),
 		}),
 		shouldAlwaysClearForm: false,
 		handler: async ({ description, initialFunds }) => {
@@ -66,10 +66,6 @@ export function QuickAdd({ className }: { className?: string }) {
 	// confirm on CMD+Enter
 	const handleKeyDown = useSubmitHotkey();
 
-	// all possible selections
-	const steps = [0, 0.1, 1, 10, 100];
-	const [budget, setBudget] = useState(0.1);
-
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none p-4', className)}>
 			<CardContent className="p-0">
@@ -84,21 +80,7 @@ export function QuickAdd({ className }: { className?: string }) {
 							className="min-h-[240px] resize-none text-base"
 						/>
 					</div>
-					<div className="flex flex-row gap-2">
-						<div className="flex flex-col flex-shrink-0">
-							<p className="text-sm text-muted-foreground">Spend up to</p>
-							<p className="text-sm font-medium tabular-nums">USD {budget.toFixed(2)}</p>
-						</div>
-						<Slider
-							name="initialFunds"
-							min={0}
-							max={4}
-							step={1}
-							value={[steps.indexOf(budget)]}
-							onValueChange={(value: number[]) => setBudget(steps[value[0]])}
-							className="py-2"
-						/>
-					</div>
+					<BudgetSelector name="initialFunds" defaultValue={0.1} />
 					<Button variant="default" type="submit" size="lg">
 						Seek it
 						<kbd className="hidden md:inline-flex h-5 items-center gap-1 rounded border px-2 font-mono text-xs ml-2">
