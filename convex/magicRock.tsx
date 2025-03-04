@@ -1,3 +1,4 @@
+import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { CoreMessage, CoreTool, generateObject, generateText, NoSuchToolError } from 'ai';
 import { z } from 'zod';
@@ -29,14 +30,17 @@ export async function _askMagicRock(
 		providerMetadata,
 		//
 	} = await generateText({
-		// model: google('gemini-2.0-flash-001'),
-		model: openai('gpt-4o'),
-		// model: openai('o3-mini', {
+		model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
+		// model: openai('gpt-4o'), // 2nd best
+		// model: anthropic('claude-3-5-haiku-20241022'), // ok, but very far from Sonnet
+		// model: deepseek('deepseek-chat'), // complete failure, reasoner can't call tools
+		// model: google('gemini-2.0-flash-001'), // useful for some tools, can search using Google
+		// model: openai('o3-mini', { // suprisingly bad, worse than GPT-4o on every test
 		// 	reasoningEffort: 'low',
 		// 	structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
 		// }),
 		maxSteps: 1,
-		temperature: 0.7,
+		temperature: 0,
 		system: [
 			//
 			instructions,

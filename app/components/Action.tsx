@@ -113,7 +113,7 @@ export function Action({
 							<div className="text-md font-medium">{action.skillKey}()</div>
 							{typeof action.estimatedCost === 'bigint' && (
 								<div className="text-sm text-muted-foreground">
-									Expected cost: ${asDollars({ bigInt: action.estimatedCost })}
+									Expected cost: ${asDollars({ bigInt: action.estimatedCost, precision: 6 })} USD
 								</div>
 							)}
 						</div>
@@ -185,8 +185,16 @@ function Result({
 }) {
 	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
 
-	if (skillKey === 'say') {
-		return <div className={cn('text-card-foreground shadow overflow-x-auto', className)}>{mdx}</div>;
+	if (skillKey === 'say' || status === 'failed') {
+		return <div className={cn('text-card-foreground overflow-x-auto', className)}>{mdx}</div>;
+	}
+
+	if (skillKey === 'reason') {
+		return (
+			<div className={cn('text-muted-foreground overflow-x-auto text-xs', className)}>
+				<pre className="whitespace-pre-wrap">{result}</pre>
+			</div>
+		);
 	}
 
 	return (

@@ -19,9 +19,7 @@ export function MainHeader({ className }: { className?: string }) {
 	const navigate = useNavigate();
 
 	const goBack = () => history.back();
-	const goUp = () => {
-		toast.error('Coming soon. Will move to parent task, if any.'); // TODO: implement
-	};
+	const goUp = () => navigate({ to: '/$', params: { _splat: `` } });
 	const share = () => {
 		navigator.clipboard.writeText(window.location.href);
 		toast.success('Link copied to clipboard.');

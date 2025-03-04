@@ -112,7 +112,7 @@ export const _builtInSkills = {
 		preApprovedCost: 'none',
 		// description: 'Mark the task as done, generate a resolution if empty, and learn from it.',
 		description:
-			'Mark the task as done. MUST have set a resolution first or will be auto-rejected. Before calling this, reflect on the current resolution set (should be on the system prompt) and make sure you are at LEAST 80% if solves the task.',
+			'Mark the task as done. MUST have set a resolution first or will be auto-rejected. Before calling this, a best practice is to reason() on the current resolution (should be on your system prompt) and make sure you are at LEAST 80% sure it solves the task. If not, keep working with the tools you have until you are sure.',
 		parameters: z.object({
 			// resolution: z
 			// 	.string()
@@ -164,7 +164,8 @@ export const _builtInSkills = {
 	}),
 	setResolution: defineSkill({
 		preApprovedCost: 0n,
-		description: 'Set the resolution text. Use this to draft a resolution while still working on the task.',
+		description:
+			'Set the resolution text. Use this to draft a resolution while still working on the task. Resolution should be as straight forward as possible. Use the least amount of tokens possible that meets the task requirements. If you need to add more details or links, start with the answer (and highlight it) and then add the details.',
 		parameters: z.object({
 			resolution: z.string().describe('The resolution text in MDX format.'),
 		}),
@@ -222,5 +223,45 @@ export const _builtInSkills = {
 						description: args.description,
 					})
 					.then(() => `subtask created`),
+	}),
+	sum: defineSkill({
+		isVisibleToMagicRock: true,
+		preApprovedCost: 0n,
+		description: 'Sum N numbers',
+		parameters: z.object({
+			numbers: z.array(z.number()).describe('The numbers to sum.'),
+		}),
+		execute: (execution: ToolExecution) => (args) =>
+			Promise.resolve(args.numbers.reduce((acc, curr) => acc + curr, 0).toString()),
+	}),
+	multiply: defineSkill({
+		isVisibleToMagicRock: true,
+		preApprovedCost: 0n,
+		description: 'Multiply N numbers',
+		parameters: z.object({
+			numbers: z.array(z.number()).describe('The numbers to multiply.'),
+		}),
+		execute: (execution: ToolExecution) => (args) =>
+			Promise.resolve(args.numbers.reduce((acc, curr) => acc * curr, 1).toString()),
+	}),
+	divide: defineSkill({
+		isVisibleToMagicRock: true,
+		preApprovedCost: 0n,
+		description: 'Divide N numbers',
+		parameters: z.object({
+			A: z.number().describe('The dividend.'),
+			B: z.number().describe('The divisor.'),
+		}),
+		execute: (execution: ToolExecution) => (args) => Promise.resolve((args.A / args.B).toString()),
+	}),
+	subtract: defineSkill({
+		isVisibleToMagicRock: true,
+		preApprovedCost: 0n,
+		description: 'Subtract N numbers',
+		parameters: z.object({
+			numbers: z.array(z.number()).describe('The numbers to subtract.'),
+		}),
+		execute: (execution: ToolExecution) => (args) =>
+			Promise.resolve(args.numbers.reduce((acc, curr) => acc - curr, 0).toString()),
 	}),
 };
