@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { mutation, query } from '../lib';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
 import { ensureTaskOwner } from '../tasks/public';
-import { _add, _authorize, _findAll, _findAllPaginated, _findAllRunning, _findOne } from './private';
+import { _add, _authorize, _findAllPaginated, _findAllRunning, _findOne } from './private';
 
 export const act = mutation({
 	args: {
@@ -43,18 +43,6 @@ export const authorize = mutation({
 			approver: currentUser._id,
 			approved,
 		});
-	},
-});
-
-export const findAll = query({
-	args: {
-		taskId: zid('tasks'),
-	},
-	handler: async (ctx, { taskId }) => {
-		//
-		await ensureTaskOwner(ctx, { taskId });
-
-		return await _findAll(ctx, { taskId });
 	},
 });
 

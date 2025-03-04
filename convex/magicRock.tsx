@@ -64,7 +64,7 @@ export async function _askMagicRock(
 		].join('\n'),
 
 		// assuming task.author is always an user, could also use action.author since we're replying to a user message
-		messages: await renderHistory(ctx, task._id, task.author),
+		messages: await renderHistory(ctx, task._id, task.author, task.lastSummarizedAt ?? 0),
 		tools: await loadTools(ctx, task, action),
 		toolChoice: 'required',
 
@@ -188,9 +188,10 @@ async function renderHistory(
 	ctx: ActionCtx | MutationCtx, //
 	taskId: Id<'tasks'>,
 	author: z.infer<typeof authorSchema>,
+	since: number,
 ): Promise<Array<CoreMessage>> {
 	//
-	const actions = await ctx.runQuery(internal.action.private._findAll, { taskId });
+	const actions = await ctx.runQuery(internal.action.private._findAllSince, { taskId, since });
 
 	const history = actions
 		.filter((action) => action.skillKey !== 'react')
@@ -200,7 +201,15 @@ async function renderHistory(
 		.filter((action): action is CoreMessage => action !== undefined)
 		.flatMap((message) => message);
 
-	console.debug('renderHistory', history);
+	// history will be empty right after an updateTask(), so we artificially add a temporary user message to keep going
+	if (history.length === 0) {
+		history.push({
+			role: 'user',
+			content: 'keep going',
+		});
+	}
+
+	console.debug(`renderHistory since ${new Date(since).toISOString()}`, history);
 
 	// validateHistory(history); we're now validating before add react() action, TODO: revist this
 

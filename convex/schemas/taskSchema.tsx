@@ -8,6 +8,7 @@ export const taskSchema = z
 		owner: zid('users').describe('The user who is responsible for the task.'),
 		summary: z.string().max(140).optional().describe('A short summary of the task. Tweet-sized (OG).'),
 		description: z.string().optional().describe('An MDX detailed description of the task.'),
+		lastSummarizedAt: z.number().optional().describe('The last time the task was summarized.'),
 		resolution: z
 			.string()
 			.optional()

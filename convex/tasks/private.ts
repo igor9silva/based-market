@@ -285,9 +285,12 @@ export const _update = internalMutation({
 	},
 	handler: async (ctx, { taskId, summary, description }) => {
 		//
+		if (summary === undefined && description === undefined) throw new Error('No changes to update');
+
 		return await ctx.db.patch(taskId, {
 			...(summary !== undefined && { summary }),
 			...(description !== undefined && { description }),
+			lastSummarizedAt: Date.now(),
 		});
 	},
 });

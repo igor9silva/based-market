@@ -96,15 +96,20 @@ export const _authorize = internalMutation({
 
 // ------------------------------------
 
-export const _findAll = internalQuery({
+export const _findAllSince = internalQuery({
 	args: {
 		taskId: zid('tasks'),
+		since: z.number(),
 	},
-	handler: async (ctx, { taskId }) => {
+	handler: async (ctx, { taskId, since }) => {
 		//
 		return await ctx.db
 			.query('actions')
-			.withIndex('by_task', (q) => q.eq('taskId', taskId))
+			.withIndex('by_task', (q) =>
+				q
+					.eq('taskId', taskId) //
+					.gte('_creationTime', since),
+			)
 			.collect();
 	},
 });

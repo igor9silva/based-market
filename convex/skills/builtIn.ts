@@ -78,7 +78,7 @@ export const _builtInSkills = {
 				.string()
 				.optional()
 				.describe(
-					'The improved long description of the task. You can add infinite details here, BUT ONLY if they add value. Usually the less tokens you use, the better.',
+					'The improved long description of the task. Only fill this if summary isn\'t enough. You can add infinite details here, BUT ONLY if they add value. Usually the less tokens you use, the better. Use MDX. Text should be an imperative description for either you or the user to handle, so instead of "the user wants to do XYZ", write "Do XYZ".',
 				),
 		}),
 		execute:
