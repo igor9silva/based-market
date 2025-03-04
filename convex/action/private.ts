@@ -155,6 +155,15 @@ export const _findRunning = internalQuery({
 	},
 });
 
+export const _findPendingAuthorization = internalQuery({
+	args: {
+		taskId: zid('tasks'),
+	},
+	handler: async (ctx, { taskId }) => {
+		return await _findByStatus(ctx, { taskId, status: 'pending authorization' }).first();
+	},
+});
+
 export const _findNext = internalQuery({
 	args: {
 		taskId: zid('tasks'),

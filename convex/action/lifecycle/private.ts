@@ -220,6 +220,8 @@ function estimateCostFor(
 	console.debug(`Input tokens: ${inputTokens}, instruction length: ${instructionsLength}`);
 	console.debug(`Output tokens: ${outputTokens}`);
 
+	// TODO: what about history? 💀
+
 	return totalCostWithMargin;
 }
 
@@ -371,6 +373,13 @@ export async function _runNextActionIfNeeded(
 	if (runningAction)
 		return skip(
 			`Skipping next action for task ${taskId} because there is a running action (${runningAction.skillKey}, ${runningAction._id}).`,
+		);
+
+	// skip if there is a pending authorization
+	const pendingAuthorization = await ctx.runQuery(internal.action.private._findPendingAuthorization, { taskId });
+	if (pendingAuthorization)
+		return skip(
+			`Skipping next action for task ${taskId} because there is a pending authorization action (${pendingAuthorization.skillKey}, ${pendingAuthorization._id}).`,
 		);
 
 	// grab next pending action, skip if there are none
