@@ -7,6 +7,7 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { useClickOutside } from '~/hooks/useClickOutside';
 import { cn } from '~/lib/utils';
 
+import { StatusIndicator } from '~/components/StatusIndicator';
 import { TaskAction } from '~/components/TaskAction';
 import { Button } from '~/components/ui/button';
 
@@ -129,7 +130,7 @@ const CollapsedContent = ({ actions }: { actions: Doc<'actions'>[] }) => {
 		return (
 			<>
 				{/* <Loader2 className="size-4 animate-spin" /> */}
-				<Indicator className="animate-pulse duration-1000 bg-green-500" />
+				<StatusIndicator className="bg-green-500" />
 				{/* <span>acting</span> */}
 			</>
 		);
@@ -154,12 +155,8 @@ const CollapsedContent = ({ actions }: { actions: Doc<'actions'>[] }) => {
 			) : (
 				<span>No activity</span>
 			)} */}
-			<Indicator className="bg-gray-500" />
+			<StatusIndicator className="bg-gray-500" pulse={false} />
 			{/* <span>idle</span> */}
 		</>
 	);
 };
-
-export function Indicator({ className }: { className?: string }) {
-	return <span className={cn('size-1.5 rounded-full', className)} />;
-}

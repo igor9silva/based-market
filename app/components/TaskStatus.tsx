@@ -2,7 +2,7 @@ import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
-import { Indicator } from '~/components/ActionIsland';
+import { StatusIndicator } from '~/components/StatusIndicator';
 import { cn } from '~/lib/utils';
 
 export const TaskStatus = ({
@@ -29,7 +29,10 @@ const CollapsedContent = ({
 	//
 	return (
 		<div className={cn('flex items-center gap-1', className)}>
-			<Indicator className={actions.length > 0 ? 'animate-pulse duration-1000 bg-green-500' : 'bg-gray-500'} />
+			<StatusIndicator
+				pulse={actions.length > 0}
+				className={actions.length > 0 ? 'bg-green-500' : 'bg-gray-500'}
+			/>
 			<span>{actions.length > 0 ? 'acting' : 'idle'}</span>
 		</div>
 	);

@@ -48,12 +48,12 @@ export function TaskConversation({
 
 	return (
 		<div className={cn('flex flex-col h-full p-2 gap-2', className)}>
-			<div className="flex justify-end mb-1">
+			<div className="flex justify-end mb-1 bg-background/75">
 				<Toggle
 					aria-label="Toggle debug mode"
 					pressed={debugMode}
 					onPressedChange={() => setDebugMode((prev) => !prev)}
-					className="h-8 px-2 data-[state=on]:bg-amber-500/20"
+					className="h-8 px-2 data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
 				>
 					<Bug className="h-4 w-4 mr-1" />
 					Debug

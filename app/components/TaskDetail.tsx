@@ -9,6 +9,7 @@ import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '~/components/ui/card';
 import MDX from '~/components/ui/mdx';
+import { Separator } from '~/components/ui/separator';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
 import { EditableContent } from './EditableContent';
@@ -92,9 +93,12 @@ export default function TaskDetail({
 				/>
 			</CardContent>
 			{task.resolution && (
-				<CardFooter>
-					<MDX text={task.resolution} />
-				</CardFooter>
+				<>
+					<Separator />
+					<CardFooter className="p-0 md:p-4 ">
+						<MDX text={task.resolution} />
+					</CardFooter>
+				</>
 			)}
 		</Card>
 	);

@@ -83,7 +83,9 @@ export default function MDX({
 						<pre className="p-4 bg-muted rounded-md overflow-x-auto my-2">{children}</pre>
 					),
 					code: ({ children }) => (
-						<code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
+						<code className="bg-muted dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 px-1.5 py-0.5 rounded text-sm font-mono">
+							{children}
+						</code>
 					),
 					blockquote: ({ children }) => (
 						<blockquote className="pl-4 border-l-4 border-muted-foreground/20 italic my-4 text-muted-foreground">
@@ -107,7 +109,7 @@ export default function MDX({
 					h4: ({ children }) => <h4 className="text-base font-bold mt-3 mb-2">{children}</h4>,
 					h5: ({ children }) => <h5 className="text-sm font-bold mt-2 mb-1">{children}</h5>,
 					h6: ({ children }) => <h6 className="text-xs font-bold mt-2 mb-1">{children}</h6>,
-					p: ({ children }) => <p className="my-1 leading-relaxed">{children}</p>,
+					p: ({ children }) => <p className="my-2 md:my-1 leading-relaxed">{children}</p>,
 					strong: ({ children }) => <strong className="font-bold">{children}</strong>,
 					em: ({ children }) => <em className="italic">{children}</em>,
 					del: ({ children }) => <del className="line-through">{children}</del>,

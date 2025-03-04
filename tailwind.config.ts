@@ -73,10 +73,21 @@ export default {
 					from: { height: 'var(--radix-accordion-content-height)' },
 					to: { height: '0' },
 				},
+				'pulse-blur': {
+					'0%, 100%': {
+						transform: 'scale(1)',
+						filter: 'blur(2px)',
+					},
+					'50%': {
+						transform: 'scale(1.2)',
+						filter: 'blur(0.5px)',
+					},
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-blur': 'pulse-blur 1s ease-in-out infinite',
 			},
 			transitionTimingFunction: {
 				'out-quart': 'cubic-bezier(0.25, 1, 0.5, 1)',
