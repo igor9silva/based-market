@@ -5,3 +5,5 @@ DO NOT EVER APOLOGIZE. It's fine to make mistakes, keep focused on fixing them.
 
 Do not EVER remove comments. I'll do that manually when review the commit.
 DO NOT MESS UP WITH MY INDENTATION.
+
+Prefer `Boolean()` over `!!` as it's more readable.
