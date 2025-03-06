@@ -1,5 +1,6 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { Link, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
 import { usePaginatedQuery } from 'convex/react';
@@ -27,9 +28,9 @@ export function TaskConversation({
 }) {
 	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(taskQuery);
+	const { debug } = useSearch({ strict: false });
 
 	const user = useCurrentUser();
-	const [debugMode, setDebugMode] = useState(false);
 
 	const {
 		results: actions,
@@ -49,20 +50,21 @@ export function TaskConversation({
 	return (
 		<div className={cn('flex flex-col h-full p-2 gap-2', className)}>
 			<div className="flex justify-end mb-1 bg-background/75">
-				<Toggle
-					aria-label="Toggle debug mode"
-					pressed={debugMode}
-					onPressedChange={() => setDebugMode((prev) => !prev)}
-					className="h-8 px-2 data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
-				>
-					<Bug className="h-4 w-4 mr-1" />
-					Debug
-				</Toggle>
+				<Link to="/$" search={{ debug: debug ? undefined : true }} replace>
+					<Toggle
+						aria-label="Toggle debug mode"
+						pressed={Boolean(debug)}
+						className="h-8 px-2 data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
+					>
+						<Bug className="h-4 w-4 mr-1" />
+						Debug
+					</Toggle>
+				</Link>
 			</div>
 			<StickToBottom mass={1} initial="instant" resize="instant" className="flex-1 overflow-auto">
 				<StickToBottomContent actions={actions} status={status} loadMore={loadMore}>
 					{reversedActions.map((action) =>
-						debugMode ? (
+						debug ? (
 							<DebugAction
 								key={action._id}
 								action={action}
