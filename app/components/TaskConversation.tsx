@@ -49,7 +49,7 @@ export function TaskConversation({
 
 	return (
 		<div className={cn('flex flex-col h-full p-2 gap-2', className)}>
-			<div className="flex justify-end mb-1 bg-background/75">
+			<div className="flex justify-end bg-background/75">
 				<Link to="/$" search={{ debug: debug ? undefined : true }} replace>
 					<Toggle
 						aria-label="Toggle debug mode"
@@ -84,7 +84,7 @@ export function TaskConversation({
 					)}
 				</StickToBottomContent>
 			</StickToBottom>
-			<ActionComposer task={task} />
+			<ActionComposer className="mr-2 mb-2" task={task} />
 		</div>
 	);
 }

@@ -48,7 +48,7 @@ export function ActionComposer({
 	const isLoading = false;
 
 	return (
-		<PromptInput onSubmit={handleSubmit} className={cn('w-full bg-sidebar max-w-(--breakpoint-md)', className)}>
+		<PromptInput onSubmit={handleSubmit} className={cn('bg-sidebar max-w-(--breakpoint-md)', className)}>
 			{files.length > 0 && (
 				<div className="flex flex-wrap gap-2 pb-2">
 					{files.map((file, index) => (
