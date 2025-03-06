@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Badge } from '~/components/ui/badge';
 import { Card, CardContent, CardTitle } from '~/components/ui/card';
-import { ScrollArea } from '~/components/ui/scroll-area';
 import { cn } from '~/lib/utils';
 
 // Recursive component to display structured data
@@ -46,7 +45,7 @@ function StructuredValue({ value, depth = 0 }: { value: any; depth?: number }) {
 				<div className="ml-4">
 					{entries.map(([key, val], index) => (
 						<div key={key} className="flex gap-1">
-							<span className="font-semibold text-blue-400">{key}:</span>{' '}
+							<span className="font-semibold flex-shrink-0 text-blue-400">{key}:</span>{' '}
 							<StructuredValue value={val} depth={depth + 1} />
 							{index < entries.length - 1 && <span>,</span>}
 						</div>
@@ -146,18 +145,18 @@ export function DebugAction({
 				{action.args && Object.keys(action.args).length > 0 && (
 					<div>
 						<h3 className="font-medium mb-1">Arguments</h3>
-						<ScrollArea className="p-2 bg-muted rounded-md max-h-48">
+						<div className="bg-muted rounded-md border p-2 overflow-auto min-h-[32px] max-h-64">
 							<div className="font-mono">
 								<StructuredValue value={action.args} />
 							</div>
-						</ScrollArea>
+						</div>
 					</div>
 				)}
 
 				{action.result && (
 					<div>
 						<h3 className="font-medium mb-1">Result</h3>
-						<ScrollArea className="p-2 bg-muted rounded-md max-h-80">
+						<div className="bg-muted rounded-md border p-2 overflow-auto min-h-[32px] max-h-64">
 							<div className="font-mono">
 								{typeof action.result === 'string' ? (
 									<StructuredValue value={action.result} />
@@ -165,7 +164,7 @@ export function DebugAction({
 									<StructuredValue value={null} />
 								)}
 							</div>
-						</ScrollArea>
+						</div>
 					</div>
 				)}
 
