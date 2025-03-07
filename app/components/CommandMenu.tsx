@@ -227,7 +227,7 @@ function NewTaskCommandItem({ shouldUseSearch }: { shouldUseSearch: boolean }) {
 	return (
 		<CommandItem value="/new" keywords={['new', 'task', search]} onSelect={handleSelect}>
 			<CirclePlus className="mr-2" />
-			{search ? `New task with "${search}"` : 'New task'}
+			{search ? `Seek for "${search}"` : 'New seek'}
 		</CommandItem>
 	);
 }

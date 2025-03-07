@@ -148,6 +148,7 @@ export function Action({
 								skillKey={action.skillKey}
 								args={action.args}
 								costs={action.costs}
+								// reactions={action.reactions ?? []}
 								className={cn({
 									'bg-primary text-primary-foreground rounded-lg border border-border p-2':
 										isAuthorCurrentUser && action.skillKey === 'say',
@@ -185,8 +186,19 @@ function Result({
 }) {
 	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
 
-	if (skillKey === 'say' || status === 'failed') {
+	if (status === 'failed') {
 		return <div className={cn('text-card-foreground overflow-x-auto', className)}>{mdx}</div>;
+	}
+
+	if (skillKey === 'say') {
+		return (
+			<div className={cn('text-card-foreground overflow-x-auto', className)}>
+				<MDX
+					text={args['message']}
+					errorFallback={<pre className="whitespace-pre-wrap">{args['message']}</pre>}
+				/>
+			</div>
+		);
 	}
 
 	if (skillKey === 'reason') {
