@@ -3,6 +3,7 @@ import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
 import { AITool } from '../schemas/toolSchema';
 import { _builtInSkills } from './builtIn';
+import { createReactions } from './createReactions';
 
 export function createBuiltInTool(
 	ctx: ActionCtx | MutationCtx,
@@ -17,10 +18,11 @@ export function createBuiltInTool(
 		execute: async (args) => {
 			//
 			// @ts-expect-error no time to fight this shit
-			const result = await skill.execute({ ctx, task, action })(args);
+			const { result, reactions } = await skill.execute({ ctx, task, action, skill })(args);
 
 			return {
 				result: result,
+				reactions: createReactions(action, reactions),
 				costs: [
 					{
 						symbol: 'USD',

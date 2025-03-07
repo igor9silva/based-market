@@ -33,6 +33,7 @@ import type * as skills_builtIn from "../skills/builtIn.js";
 import type * as skills_createAITool from "../skills/createAITool.js";
 import type * as skills_createBuiltInTool from "../skills/createBuiltInTool.js";
 import type * as skills_createHttpTool from "../skills/createHttpTool.js";
+import type * as skills_createReactions from "../skills/createReactions.js";
 import type * as skills_private from "../skills/private.js";
 import type * as skills_tools from "../skills/tools.js";
 import type * as tasks_private from "../tasks/private.js";
@@ -86,6 +87,7 @@ declare const fullApi: ApiFromModules<{
   "skills/createAITool": typeof skills_createAITool;
   "skills/createBuiltInTool": typeof skills_createBuiltInTool;
   "skills/createHttpTool": typeof skills_createHttpTool;
+  "skills/createReactions": typeof skills_createReactions;
   "skills/private": typeof skills_private;
   "skills/tools": typeof skills_tools;
   "tasks/private": typeof tasks_private;

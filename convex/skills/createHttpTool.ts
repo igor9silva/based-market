@@ -6,6 +6,7 @@ import { env } from '../schemas/envSchema';
 import { hardSkillSchema } from '../schemas/skillSchema';
 import { AITool } from '../schemas/toolSchema';
 import { stringToZod } from '../utils/zodToString';
+import { createReactions } from './createReactions';
 
 export function createHTTPTool(
 	ctx: ActionCtx | MutationCtx,
@@ -70,6 +71,7 @@ export function createHTTPTool(
 
 			return {
 				result: result,
+				reactions: createReactions(action, skill.reactions),
 				costs: [
 					{
 						symbol: 'USD',

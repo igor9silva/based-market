@@ -1,8 +1,8 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
+import { newActionSchema } from '../action/private';
 import { _askMagicRock } from '../magicRock';
 import { env } from '../schemas/envSchema';
 import { softSkillSchema } from '../schemas/skillSchema';
@@ -34,79 +34,54 @@ export function createAITool(
 				reasoningDetails,
 				providerMetadata,
 				//
-			} = await _askMagicRock(ctx, task, action, skill.config.instructions);
+			} = await _askMagicRock(ctx, task, action, skill);
 
 			console.debug('Reasoning', reasoning);
 			console.debug('Reasoning details', reasoningDetails);
 			console.debug('Provider metadata', providerMetadata);
 
+			const reactions = [] as Array<z.infer<typeof newActionSchema>>;
+
+			// prettier-ignore
+			const say = (text: string) => reactions.push({
+				skillKey: 'say',
+				args: { message: text },
+				taskId: task._id,
+				author: action._id,
+				owner: task.owner,
+			});
+
 			switch (finishReason) {
 				//
 				case 'tool-calls':
 					//
-					// TODO: think about parallelizing tool calls
-					const calls = await Promise.allSettled(
-						toolCalls.map(async (call) => {
-							//
-							return ctx.runMutation(internal.action.private._add, {
-								skillKey: call.toolName,
-								args: call.args,
-								taskId: task._id,
-								author: action._id,
-								owner: task.owner,
-							});
-						}),
+					reactions.push(
+						...toolCalls.map((call) => ({
+							skillKey: call.toolName,
+							args: call.args,
+							taskId: task._id,
+							author: action._id,
+							owner: task.owner,
+						})),
 					);
-
-					// TODO: notify errors
-					calls
-						.filter((call) => call.status === 'rejected')
-						.forEach((call) => {
-							console.error('skill call failed', call.reason);
-						});
-
 					break;
 
 				case 'stop':
 					// if (result.text.length < 1) break;
-					await ctx.runMutation(internal.action.private._add, {
-						skillKey: 'say',
-						args: { message: text },
-						taskId: task._id,
-						author: action._id,
-						owner: task.owner,
-					});
+					say(text);
 					break;
 
 				case 'error':
-					await ctx.runMutation(internal.action.private._add, {
-						skillKey: 'say',
-						args: { message: text },
-						taskId: task._id,
-						author: action._id,
-						owner: task.owner,
-					});
+					say(text);
 					break;
 
 				case 'content-filter':
-					await ctx.runMutation(internal.action.private._add, {
-						skillKey: 'say',
-						args: { message: `[damn @sama] Content filter hit: ${warnings}` },
-						taskId: task._id,
-						author: action._id,
-						owner: task.owner,
-					});
+					say(`[damn @sama] Content filter hit: ${warnings}`);
 					break;
 
 				case 'length':
 					// TODO: better handling of max length
-					await ctx.runMutation(internal.action.private._add, {
-						skillKey: 'say',
-						args: { message: `Max length hit: ${warnings}` },
-						taskId: task._id,
-						author: action._id,
-						owner: task.owner,
-					});
+					say(`Max length hit: ${warnings}`);
 					break;
 
 				default:
@@ -117,6 +92,7 @@ export function createAITool(
 
 			return {
 				result: toolCalls.map((call) => `${call.toolName}()`).join(', ') ?? 'nothing',
+				reactions,
 				costs: [
 					{
 						symbol: 'USD',
@@ -139,7 +115,9 @@ export function createAITool(
 }
 
 function reasoningTokensFrom(providerMetadata: any) {
+	//
 	const reasoningTokens = providerMetadata?.openai?.reasoningTokens ?? 0;
+	//
 	return typeof reasoningTokens === 'number' ? reasoningTokens : 0;
 }
 

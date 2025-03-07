@@ -56,7 +56,12 @@ const decisionConfigSchema = z.object({
 	// model: z.string().describe('LLM model to use'),
 	// temperature: z.number().describe('Temperature to use'),
 	// maxSteps: z.number().describe('Maximum number of steps to take'),
+	maxTokens: z.number().optional().describe('Maximum number of tokens to use'),
 	instructions: z.string().describe('Instructions for the decision-making process'),
+	availableTools: z.union([
+		z.literal('auto'),
+		z.array(z.string()).describe('Tools that can be used to make the decision'),
+	]),
 });
 
 const coreSkillSchema = z.object({
@@ -73,6 +78,20 @@ const coreSkillSchema = z.object({
 				'If the expected cost is less than or equal to this amount (pre-approved cost), it will be automatically authorized to execute. If can be set to "none" to disable pre-approval at all, forcing a human-approval before execution.',
 			),
 	]),
+	reactions: z
+		.array(
+			z.object({
+				skillKey: z.string().describe('The key of the skill to use'),
+				args: z.record(z.any()),
+				condition: z.enum([
+					'owner', // only react if the author is the owner
+					'companion', // only react if the author is a an action (i.e. companion did it)
+					'any', // always react
+				]),
+			}),
+		)
+		.optional()
+		.describe('Pre-configured actions that will happen as a re-action to the use of this skill.'),
 	kind: skillKindSchema,
 	owner: skillOwnerSchema,
 	author: skillAuthorSchema,

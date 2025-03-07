@@ -1,13 +1,14 @@
+import { Tool } from 'ai';
 import { z } from 'zod';
+import { newActionSchema } from '../action/private';
 import { tokenSchema } from './topUpSchema';
 
-import { CoreTool } from 'ai';
-
 // standardizing tool result
-export type AITool = CoreTool<
+export type AITool = Tool<
 	any,
 	{
 		result: string;
+		reactions: Array<z.infer<typeof newActionSchema>>;
 		costs: Array<{
 			symbol: z.infer<typeof tokenSchema>;
 			amount: bigint;
