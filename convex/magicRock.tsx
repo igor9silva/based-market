@@ -5,7 +5,7 @@ import { internal } from './_generated/api';
 import { Doc } from './_generated/dataModel';
 import { ActionCtx, MutationCtx } from './_generated/server';
 import { softSkillSchema } from './schemas/skillSchema';
-import { _builtInSkills } from './skills/builtIn';
+import { _builtInSkills } from './skills/builtIn/index';
 import { createBuiltInTool } from './skills/createBuiltInTool';
 import { _toolsForMagicRock } from './skills/tools';
 

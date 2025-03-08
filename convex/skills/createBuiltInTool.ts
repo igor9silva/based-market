@@ -2,7 +2,7 @@ import { tool } from 'ai';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
 import { AITool } from '../schemas/toolSchema';
-import { _builtInSkills } from './builtIn';
+import { _builtInSkills } from './builtIn/index';
 import { createReactions } from './createReactions';
 
 export function createBuiltInTool(

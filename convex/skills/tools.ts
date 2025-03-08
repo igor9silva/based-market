@@ -3,7 +3,7 @@ import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
 import { skillSchema } from '../schemas/skillSchema';
-import { _builtInSkills } from './builtIn';
+import { _builtInSkills } from './builtIn/index';
 import { createAITool } from './createAITool';
 import { createBuiltInTool } from './createBuiltInTool';
 import { createHTTPTool } from './createHttpTool';

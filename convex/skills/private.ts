@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { internalQuery } from '../lib';
 import { builtInSkillSchema, skillOwnerSchema } from '../schemas/skillSchema';
 import { zodToString } from '../utils/zodToString';
-import { _builtInSkills } from './builtIn';
+import { _builtInSkills } from './builtIn/index';
 
 // all global skills + all user-defined skills
 export const _findAll = internalQuery({
