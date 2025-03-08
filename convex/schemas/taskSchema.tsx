@@ -6,8 +6,8 @@ export const taskSchema = z
 	.object({
 		author: authorSchema.describe('Who created the task.'),
 		owner: zid('users').describe('The user who is responsible for the task.'),
-		summary: z.string().max(140).optional().describe('A short summary of the task. Tweet-sized (OG).'),
-		description: z.string().optional().describe('An MDX detailed description of the task.'),
+		title: z.string().max(100).optional().describe('A short title for the task. Max 100 characters.'),
+		details: z.string().optional().describe('An MDX detailed description of the task.'),
 		lastSummarizedAt: z.number().optional().describe('The last time the task was summarized.'),
 		resolution: z
 			.string()

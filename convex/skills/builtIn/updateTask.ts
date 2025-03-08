@@ -4,19 +4,17 @@ import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const updateTask = defineSkill({
 	preApprovedCost: 0n,
-	description: 'Update the task description and/or summary',
+	description: 'Update the task title and/or details.',
 	parameters: z.object({
-		summary: z.string().max(100).optional().describe('The improved summary for the task. Be succinct.'),
-		description: z
+		title: z.string().max(100).optional().describe('A short title for the task. Max 100 characters.'),
+		details: z
 			.string()
 			.optional()
-			.describe(
-				'The improved long description of the task. Only fill this if summary isn\'t enough. You can add infinite details here, BUT ONLY if they add value. Usually the less tokens you use, the better. Use MDX. Text should be an imperative description for either you or the user to handle, so instead of "the user wants to do XYZ", write "Do XYZ".',
-			),
+			.describe(`MDX. Add any details on how to handle the task, what should be done, how, references, etc.`),
 	}),
 	reactions: [
 		{
-			skillKey: 'evaluateResolution',
+			skillKey: 'seek',
 			args: {},
 			condition: 'any',
 		},

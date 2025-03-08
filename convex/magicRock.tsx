@@ -5,8 +5,6 @@ import { internal } from './_generated/api';
 import { Doc } from './_generated/dataModel';
 import { ActionCtx, MutationCtx } from './_generated/server';
 import { softSkillSchema } from './schemas/skillSchema';
-import { _builtInSkills } from './skills/builtIn/index';
-import { createBuiltInTool } from './skills/createBuiltInTool';
 import { _toolsForMagicRock } from './skills/tools';
 
 // TODO: move to DB
@@ -128,47 +126,15 @@ function actionToCoreMessage(
 	author: 'user' | 'assistant',
 ): CoreMessage | Array<CoreMessage> | undefined {
 	//
-	switch (author) {
-		//
-		case 'assistant':
-			//
-			return [
-				{
-					role: 'assistant',
-					content: [
-						{
-							type: 'tool-call',
-							toolCallId: action._id,
-							toolName: action.skillKey,
-							args: action.args,
-						},
-					],
-				},
-				{
-					role: 'tool',
-					content: [
-						{
-							type: 'tool-result',
-							toolCallId: action._id,
-							toolName: action.skillKey,
-							result: action.result,
-							isError: action.status === 'failed',
-						},
-					],
-				},
-			];
-
-		case 'user':
-			return {
-				role: author,
-				content: [
-					`<date>${new Date(action._creationTime).toISOString()}</date>`,
-					`<skill>${action.skillKey}</skill>`,
-					`<status>${action.status}</status>`,
-					`<content>${action.result}</content>`,
-				].join(''),
-			};
-	}
+	return {
+		role: author,
+		content: [
+			`<date>${new Date(action._creationTime).toISOString()}</date>`,
+			`<skill>${action.skillKey}</skill>`,
+			`<status>${action.status}</status>`,
+			`<content>${action.result}</content>`,
+		].join(''),
+	};
 }
 
 async function loadTools(
@@ -180,20 +146,17 @@ async function loadTools(
 	//
 	console.debug('loading tools, config:', skill.config.availableSkills);
 
+	const allTools = await _toolsForMagicRock(ctx, task, action);
+
 	if (skill.config.availableSkills === 'auto') {
-		const tools = await _toolsForMagicRock(ctx, task, action);
-		console.debug('loaded tools', Object.keys(tools));
-		return tools;
+		console.debug('loaded all tools');
+		return allTools;
 	}
 
-	const tools = skill.config.availableSkills.reduce((acc, toolKey) => {
-		//
-		const tool = createBuiltInTool(ctx, task, action, _builtInSkills[toolKey as keyof typeof _builtInSkills]);
-		tool.execute = undefined;
-
-		return { ...acc, [toolKey]: tool };
-		//
-	}, {});
+	// TODO: optimize
+	const tools = Object.fromEntries(
+		Object.entries(allTools).filter(([key]) => skill.config.availableSkills.includes(key)),
+	);
 
 	console.debug('loaded tools', Object.keys(tools));
 
@@ -213,8 +176,8 @@ async function renderHistory(
 	});
 
 	const history = actions
-		.filter((action) => action.skillKey !== 'react')
-		.filter((action) => action.status !== 'skipped')
+		// .filter((action) => action.skillKey !== 'react')
+		.filter((action) => ['succeeded', 'failed'].includes(action.status))
 		.filter((a) => a._id !== action._id) // doesn't include the current action
 		.map((action) => ({
 			action,
@@ -285,8 +248,8 @@ async function renderHistory(
 const promptForTask = (task: Doc<'tasks'>) =>
 	[
 		`<id>${task._id}</id>`, //
-		`<summary>${task.summary}</summary>`,
-		`<description>${task.description}</description>`,
+		`<title>${task.title}</title>`,
+		`<details>${task.details}</details>`,
 		`<resolution>${task.resolution}</resolution>`,
 		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
 		// `<availableBudget>${task.availableBudgetUSD}</availableBudget>`,

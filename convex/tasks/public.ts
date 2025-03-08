@@ -88,21 +88,23 @@ export const findOneOrNot = query({
 
 export const add = mutation({
 	args: {
-		description: z.string(),
+		title: z.string().max(100).optional(),
+		details: z.string().optional(),
 		parentId: zid('tasks').optional(),
 		initialFunds: z
 			.bigint()
 			.min(0n)
 			.max(asBigInt({ dollars: 100000 })),
 	},
-	handler: async (ctx, { description, parentId, initialFunds }) => {
+	handler: async (ctx, { title, details, parentId, initialFunds }) => {
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 
 		return await _add(ctx, {
 			author: currentUser._id,
 			owner: currentUser._id,
-			description,
+			title,
+			details,
 			parentId,
 			initialFunds,
 		});

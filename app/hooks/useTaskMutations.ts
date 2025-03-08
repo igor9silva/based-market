@@ -23,17 +23,17 @@ export function useTaskMutations() {
 
 	const updateTask = ({
 		taskId, //
-		summary,
-		description,
+		title,
+		details,
 	}: {
 		taskId: Id<'tasks'>;
-		summary?: string;
-		description?: string;
+		title?: string;
+		details?: string;
 	}) => {
 		return act({
 			taskId,
 			skillKey: 'updateTask',
-			args: { summary, description },
+			args: { title, details },
 		});
 	};
 
@@ -56,7 +56,7 @@ export function useTaskMutations() {
 		amount,
 	}: {
 		taskId: Id<'tasks'>;
-		amount: number;
+		amount: bigint;
 	}) => {
 		return act({
 			taskId,

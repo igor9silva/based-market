@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { internal } from '../../_generated/api';
-import { asBigInt } from '../../utils/money';
+import { asDollars } from '../../utils/money';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const increaseBudget = defineSkill({
@@ -8,14 +8,14 @@ export const increaseBudget = defineSkill({
 	preApprovedCost: 'none',
 	description: 'Increase the budget of the task',
 	parameters: z.object({
-		amount: z.number().min(0).max(10).describe('The amount of funds to add in USD.'),
+		amount: z.bigint().min(0n).describe('The amount of funds to add, in USD.'),
 	}),
 	reactions: [
-		{
-			skillKey: 'iterate',
-			args: {},
-			condition: 'any',
-		},
+		// {
+		// 	skillKey: 'iterate',
+		// 	args: {},
+		// 	condition: 'owner',
+		// },
 	],
 	execute:
 		(execution: ToolExecution) =>
@@ -23,11 +23,11 @@ export const increaseBudget = defineSkill({
 			//
 			await execution.ctx.runMutation(internal.tasks.private._increaseBudget, {
 				taskId: execution.task._id,
-				amount: asBigInt({ dollars: args.amount }),
+				amount: args.amount,
 			});
 
 			return {
-				result: `budget increased by ${args.amount} USD`,
+				result: `budget increased by ${asDollars({ bigInt: args.amount })}`,
 				reactions: execution.skill.reactions,
 			};
 		},

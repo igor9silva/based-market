@@ -89,8 +89,8 @@ export const _add = internalMutation({
 	args: {
 		author: authorSchema,
 		owner: zid('users'),
-		summary: z.string().optional(),
-		description: z.string(),
+		title: z.string().optional(),
+		details: z.string().optional(),
 		parentId: zid('tasks').optional(),
 		initialFunds: z
 			.bigint()
@@ -98,13 +98,13 @@ export const _add = internalMutation({
 			.max(asBigInt({ dollars: 100000 }))
 			.optional(),
 	},
-	handler: async (ctx, { author, owner, description, parentId, summary, initialFunds }) => {
+	handler: async (ctx, { author, owner, title, details, parentId, initialFunds }) => {
 		//
 		const taskId = await ctx.db.insert('tasks', {
 			author,
 			owner,
 			parentId,
-			summary,
+			title,
 			isDone: false,
 			availableBudgetUSD: 0n,
 		});
@@ -118,8 +118,9 @@ export const _add = internalMutation({
 				owner,
 			}),
 			_addAction(ctx, {
+				// TODO: receive an action instead of using hardcoded `say`
 				skillKey: 'say',
-				args: { message: description },
+				args: { message: details },
 				taskId,
 				author,
 				owner,
@@ -140,10 +141,10 @@ export const _addInboxTask = internalMutation({
 		const taskId = await ctx.db.insert('tasks', {
 			author,
 			owner,
-			summary: 'Look at me!',
+			title: 'Look at me!',
 			isDone: false,
 			availableBudgetUSD: 0n,
-			description: `
+			details: `
 ## ooh-wee, welcome to Meseeks! 
 Here, everything is a task.
 <br />
@@ -253,11 +254,11 @@ export const _embedTask = internalAction({
 		//
 		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 
-		if (!task.description) return;
+		if (!task.details) return;
 
 		const { embedding, usage } = await embed({
 			model: openai.embedding('text-embedding-3-large'),
-			value: task.description,
+			value: task.details,
 		});
 
 		console.log('embedding usage', usage);
@@ -285,16 +286,16 @@ export const _embedAllMissingTasks = internalAction({
 export const _update = internalMutation({
 	args: {
 		taskId: zid('tasks'),
-		summary: z.string().optional(),
-		description: z.string().optional(),
+		title: z.string().optional(),
+		details: z.string().optional(),
 	},
-	handler: async (ctx, { taskId, summary, description }) => {
+	handler: async (ctx, { taskId, title, details }) => {
 		//
-		if (summary === undefined && description === undefined) throw new Error('No changes to update');
+		if (title === undefined && details === undefined) throw new Error('No changes to update');
 
 		return await ctx.db.patch(taskId, {
-			...(summary !== undefined && { summary }),
-			...(description !== undefined && { description }),
+			...(title !== undefined && { title }),
+			...(details !== undefined && { details }),
 			lastSummarizedAt: Date.now(),
 		});
 	},

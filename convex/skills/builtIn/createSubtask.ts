@@ -7,7 +7,8 @@ export const createSubtask = defineSkill({
 	preApprovedCost: 'none',
 	description: 'Create a subtask',
 	parameters: z.object({
-		description: z
+		title: z.string().describe('The title of the subtask.'),
+		details: z
 			.string()
 			.describe(
 				'The first user message content in MDX format. Make sure to add all required details so another Meseeks can handle it properly. Think through your current context carefully and send a complete and structured message.',
@@ -22,7 +23,8 @@ export const createSubtask = defineSkill({
 				parentId: execution.task._id,
 				author: execution.action?._id,
 				owner: execution.task.owner,
-				description: args.description,
+				title: args.title,
+				details: args.details,
 			});
 
 			return {

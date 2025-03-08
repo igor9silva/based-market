@@ -6,13 +6,13 @@ export const say = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Send a text message',
 	parameters: z.object({
-		message: z.string().describe('The message to send to the user in MDX format.'),
+		message: z.string().describe('The message in MDX format.'),
 	}),
 	reactions: [
 		{
-			skillKey: 'evaluateUnderstanding',
+			skillKey: 'inferUserIntent',
 			args: {},
-			condition: 'any',
+			condition: 'owner',
 		},
 	],
 	execute:

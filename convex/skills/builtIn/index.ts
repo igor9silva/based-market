@@ -1,33 +1,33 @@
-import { archive } from './archive';
 import { askForClarification } from './askForClarification';
-import { createSubtask } from './createSubtask';
+import { discard } from './discard';
 import { divide } from './divide';
-import { evaluateUnderstanding } from './evaluateUnderstanding';
 import { increaseBudget } from './increaseBudget';
-import { moveTask } from './moveTask';
 import { multiply } from './multiply';
-import { reason } from './reason';
 import { reopen } from './reopen';
 import { resolve } from './resolve';
 import { say } from './say';
-import { setResolution } from './setResolution';
 import { subtract } from './subtract';
 import { sum } from './sum';
 import { updateTask } from './updateTask';
 
 export const _builtInSkills = {
-	say,
+	// 1st step
 	askForClarification,
-	evaluateUnderstanding,
-	reason,
-	increaseBudget,
 	updateTask,
+	discard,
+	//
+	// evaluateUnderstanding,
+	// reason,
+	// setResolution,
+	// moveTask,
+	// createSubtask,
+	say,
 	reopen,
+	increaseBudget,
+	//
+	// seek
 	resolve,
-	archive,
-	setResolution,
-	moveTask,
-	createSubtask,
+	// math
 	sum,
 	multiply,
 	divide,

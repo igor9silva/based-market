@@ -11,7 +11,7 @@ type StatusIndicatorProps = {
 	pulse?: boolean;
 };
 
-export function StatusIndicator({ size = 'xs', className = '', pulse = true }: StatusIndicatorProps) {
+export function StatusIndicator({ size = 'sm', className = '', pulse = true }: StatusIndicatorProps) {
 	return (
 		<div
 			className={`rounded-full ${sizeClasses[size]} ${pulse ? 'animate-pulse-blur' : ''} ${className}`}

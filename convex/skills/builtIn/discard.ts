@@ -2,11 +2,12 @@ import { z } from 'zod';
 import { internal } from '../../_generated/api';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
-export const archive = defineSkill({
+export const discard = defineSkill({
 	preApprovedCost: 'none',
-	description:
-		"Mark the task as done without learning from it (for tasks that were abandoned or not relevant). Use this when you need to close a task that isn't relevant anymore/abandoned.",
-	parameters: z.object({}),
+	description: 'Discard the current task by marking it as done without learning.',
+	parameters: z.object({
+		reasoning: z.string().optional().describe('A short explanation for discarding the task.'),
+	}),
 	reactions: [],
 	execute:
 		(execution: ToolExecution) =>
@@ -25,7 +26,7 @@ export const archive = defineSkill({
 			});
 
 			return {
-				result: 'ok',
+				result: args.reasoning ?? 'ok',
 				reactions: execution.skill.reactions,
 			};
 		},

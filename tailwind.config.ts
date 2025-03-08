@@ -76,11 +76,11 @@ export default {
 				'pulse-blur': {
 					'0%, 100%': {
 						transform: 'scale(1)',
-						filter: 'blur(2px)',
+						filter: 'blur(3px)',
 					},
 					'50%': {
 						transform: 'scale(1.2)',
-						filter: 'blur(0.5px)',
+						filter: 'blur(1.5px)',
 					},
 				},
 			},

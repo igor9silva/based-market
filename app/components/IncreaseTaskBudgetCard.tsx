@@ -1,4 +1,5 @@
 import { Id } from 'convex/_generated/dataModel';
+import { asBigInt } from 'convex/utils/money';
 import { z } from 'zod';
 import { BudgetSelector } from '~/components/ui/budget-selector';
 import { Button } from '~/components/ui/button';
@@ -17,8 +18,9 @@ export function IncreaseTaskBudgetCard({ taskId }: { taskId: Id<'tasks'> }) {
 		}),
 		handler: async ({ amount }) => {
 			//
+			const bigIntAmount = asBigInt({ dollars: amount });
 			console.debug('addFunds', taskId, amount);
-			await increaseBudget({ taskId, amount });
+			await increaseBudget({ taskId, amount: bigIntAmount });
 		},
 	});
 

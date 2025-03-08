@@ -90,10 +90,7 @@ export const _authorize = internalMutation({
 				};
 
 		await ctx.db.patch(actionId, patch);
-
-		if (approved && approvedStatus === 'enqueued') {
-			await _runNextActionIfNeeded(ctx, taskId);
-		}
+		await _runNextActionIfNeeded(ctx, taskId);
 	},
 });
 

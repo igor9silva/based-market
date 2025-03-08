@@ -33,9 +33,9 @@ export default function TaskDetail({
 				<div className="flex flex-col">
 					<div className="flex flex-row justify-between gap-2">
 						<EditableContent
-							key={task.summary}
-							value={task.summary ?? ''}
-							onSave={(newSummary) => updateTask({ taskId: task._id, summary: newSummary })}
+							key={task.title}
+							value={task.title ?? ''}
+							onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
 							viewClassName="text-2xl font-bold leading-none break-all"
 							asView={({ value, className, isEmpty }) => (
 								<h1 className={cn(task.isDone && 'line-through', className)}>
@@ -76,14 +76,14 @@ export default function TaskDetail({
 			</CardHeader>
 			<CardContent className="p-0 md:p-4 md:pt-0">
 				<EditableContent
-					key={task.description}
-					value={task.description ?? ''}
-					onSave={(newDescription) => updateTask({ taskId: task._id, description: newDescription })}
+					key={task.details}
+					value={task.details ?? ''}
+					onSave={(newDetails) => updateTask({ taskId: task._id, details: newDetails })}
 					multiline
 					asView={({ value, enterEditMode, className, isEmpty }) => (
 						<div className={cn('overflow-x-auto', className)}>
 							{isEmpty ? (
-								<div className="text-muted-foreground">No description</div>
+								<div className="text-muted-foreground">No details</div>
 							) : (
 								<MDX text={value} onClickFix={enterEditMode} />
 							)}
