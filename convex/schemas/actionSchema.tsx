@@ -9,6 +9,7 @@ const coreActionSchema = z.object({
 	author: authorSchema,
 	skillKey: z.string(),
 	args: z.record(z.any()),
+	// TODO: idea: inherit the argsSchema from the skill, so we can drill types
 	estimatedCost: z.bigint().optional(),
 	approvedAt: z.number().optional(),
 	approvedBy: z

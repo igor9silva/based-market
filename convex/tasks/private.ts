@@ -109,17 +109,22 @@ export const _add = internalMutation({
 			availableBudgetUSD: 0n,
 		});
 
-		if (initialFunds) {
-			await _increaseBudget(ctx, { taskId, amount: initialFunds });
-		}
-
-		await _addAction(ctx, {
-			taskId,
-			author,
-			owner,
-			skillKey: 'say',
-			args: { message: description },
-		});
+		await Promise.all([
+			_addAction(ctx, {
+				skillKey: 'increaseBudget',
+				args: { amount: initialFunds },
+				taskId,
+				author,
+				owner,
+			}),
+			_addAction(ctx, {
+				skillKey: 'say',
+				args: { message: description },
+				taskId,
+				author,
+				owner,
+			}),
+		]);
 
 		return taskId;
 	},

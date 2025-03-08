@@ -1,12 +1,12 @@
-import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
-import { CoreMessage, CoreTool, generateObject, generateText, NoSuchToolError } from 'ai';
+import { CoreMessage, generateText, Tool } from 'ai';
 import { z } from 'zod';
 import { internal } from './_generated/api';
-import { Doc, Id } from './_generated/dataModel';
+import { Doc } from './_generated/dataModel';
 import { ActionCtx, MutationCtx } from './_generated/server';
-import { authorSchema } from './schemas/authorSchema';
-import { env } from './schemas/envSchema';
+import { softSkillSchema } from './schemas/skillSchema';
+import { _builtInSkills } from './skills/builtIn';
+import { createBuiltInTool } from './skills/createBuiltInTool';
 import { _toolsForMagicRock } from './skills/tools';
 
 // TODO: move to DB
@@ -14,7 +14,7 @@ export async function _askMagicRock(
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
-	instructions: string,
+	skill: z.infer<typeof softSkillSchema>,
 ) {
 	const {
 		finishReason, //
@@ -30,8 +30,10 @@ export async function _askMagicRock(
 		providerMetadata,
 		//
 	} = await generateText({
-		model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
-		// model: openai('gpt-4o'), // 2nd best
+		// model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
+		model: openai('gpt-4o', {
+			parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
+		}), // 2nd best
 		// model: anthropic('claude-3-5-haiku-20241022'), // ok, but very far from Sonnet
 		// model: deepseek('deepseek-chat'), // complete failure, reasoner can't call tools
 		// model: google('gemini-2.0-flash-001'), // useful for some tools, can search using Google
@@ -39,11 +41,12 @@ export async function _askMagicRock(
 		// 	reasoningEffort: 'low',
 		// 	structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
 		// }),
+		maxTokens: skill.config.maxTokens ?? undefined,
 		maxSteps: 1,
-		temperature: 0,
+		temperature: skill.config.temperature ?? 0,
 		system: [
 			//
-			instructions,
+			skill.config.instructions,
 			//
 			// TODO: dynamic user info based on Inbox
 			`## Context`,
@@ -64,43 +67,43 @@ export async function _askMagicRock(
 		].join('\n'),
 
 		// assuming task.author is always an user, could also use action.author since we're replying to a user message
-		messages: await renderHistory(ctx, task._id, task.author, task.lastSummarizedAt ?? 0),
-		tools: await loadTools(ctx, task, action),
+		messages: await renderHistory(ctx, task, action),
+		tools: await loadTools(ctx, task, action, skill),
 		toolChoice: 'required',
 
-		experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
-			//
-			if (NoSuchToolError.isInstance(error)) {
-				return null; // do not attempt to fix invalid tool names
-			}
+		// experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
+		// 	//
+		// 	if (NoSuchToolError.isInstance(error)) {
+		// 		return null; // do not attempt to fix invalid tool names
+		// 	}
 
-			// TODO: 2025-02-24 not yet sure how to handle broken tool calls
-			// hard to just sum usage, also hard to predict, might go over budget
-			// hard to split into a second action
-			// TODO: trace this call, maybe aggregate to the action usage data
+		// 	// TODO: 2025-02-24 not yet sure how to handle broken tool calls
+		// 	// hard to just sum usage, also hard to predict, might go over budget
+		// 	// hard to split into a second action
+		// 	// TODO: trace this call, maybe aggregate to the action usage data
 
-			console.debug('repairToolCall', toolCall);
+		// 	console.debug('repairToolCall', toolCall);
 
-			const tool = tools[toolCall.toolName as keyof typeof tools];
+		// 	const tool = tools[toolCall.toolName as keyof typeof tools];
 
-			const {
-				object: repairedArgs,
-				usage,
-				warnings,
-			} = await generateObject({
-				model: openai('gpt-4o', { structuredOutputs: true }),
-				schema: tool.parameters,
-				prompt: [
-					`The model tried to call the tool "${toolCall.toolName}"` + ` with the following arguments:`,
-					JSON.stringify(toolCall.args),
-					`The tool accepts the following schema:`,
-					JSON.stringify(parameterSchema(toolCall)),
-					'Please fix the arguments.',
-				].join('\n'),
-			});
+		// 	const {
+		// 		object: repairedArgs,
+		// 		usage,
+		// 		warnings,
+		// 	} = await generateObject({
+		// 		model: openai('gpt-4o', { structuredOutputs: true }),
+		// 		schema: tool.parameters,
+		// 		prompt: [
+		// 			`The model tried to call the tool "${toolCall.toolName}"` + ` with the following arguments:`,
+		// 			JSON.stringify(toolCall.args),
+		// 			`The tool accepts the following schema:`,
+		// 			JSON.stringify(parameterSchema(toolCall)),
+		// 			'Please fix the arguments.',
+		// 		].join('\n'),
+		// 	});
 
-			return { ...toolCall, args: JSON.stringify(repairedArgs) };
-		},
+		// 	return { ...toolCall, args: JSON.stringify(repairedArgs) };
+		// },
 	});
 
 	const result = {
@@ -163,7 +166,7 @@ function actionToCoreMessage(
 					`<skill>${action.skillKey}</skill>`,
 					`<status>${action.status}</status>`,
 					`<content>${action.result}</content>`,
-				].join('\n'),
+				].join(''),
 			};
 	}
 }
@@ -172,11 +175,25 @@ async function loadTools(
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
-): Promise<Record<string, CoreTool>> {
+	skill: z.infer<typeof softSkillSchema>,
+): Promise<Record<string, Tool>> {
 	//
-	console.debug('loadTools');
+	console.debug('loading tools, config:', skill.config.availableSkills);
 
-	const tools = await _toolsForMagicRock(ctx, task, action);
+	if (skill.config.availableSkills === 'auto') {
+		const tools = await _toolsForMagicRock(ctx, task, action);
+		console.debug('loaded tools', Object.keys(tools));
+		return tools;
+	}
+
+	const tools = skill.config.availableSkills.reduce((acc, toolKey) => {
+		//
+		const tool = createBuiltInTool(ctx, task, action, _builtInSkills[toolKey as keyof typeof _builtInSkills]);
+		tool.execute = undefined;
+
+		return { ...acc, [toolKey]: tool };
+		//
+	}, {});
 
 	console.debug('loaded tools', Object.keys(tools));
 
@@ -186,30 +203,63 @@ async function loadTools(
 // TODO: persist a copy of the messages in CoreMessage format? or it gets too big?
 async function renderHistory(
 	ctx: ActionCtx | MutationCtx, //
-	taskId: Id<'tasks'>,
-	author: z.infer<typeof authorSchema>,
-	since: number,
+	task: Doc<'tasks'>,
+	action: Doc<'actions'>,
 ): Promise<Array<CoreMessage>> {
 	//
-	const actions = await ctx.runQuery(internal.action.private._findAllSince, { taskId, since });
+	const actions = await ctx.runQuery(internal.action.private._findAllSince, {
+		taskId: task._id,
+		since: task.lastSummarizedAt ?? 0,
+	});
 
 	const history = actions
 		.filter((action) => action.skillKey !== 'react')
 		.filter((action) => action.status !== 'skipped')
-		.map((action) => ({ action, author: author === action.author ? ('user' as const) : ('assistant' as const) }))
+		.filter((a) => a._id !== action._id) // doesn't include the current action
+		.map((action) => ({
+			action,
+			author:
+				task.owner === action.author
+					? ('user' as const) //
+					: ('assistant' as const),
+		}))
 		.map(({ action, author }) => actionToCoreMessage(action, author))
 		.filter((action): action is CoreMessage => action !== undefined)
 		.flatMap((message) => message);
 
-	// history will be empty right after an updateTask(), so we artificially add a temporary user message to keep going
-	if (history.length === 0) {
-		history.push({
-			role: 'user',
-			content: 'keep going',
-		});
-	}
+	// history.push(
+	// 	...actions
+	// 		.filter((action) => action.skillKey !== 'react')
+	// 		.filter((action) => action.status !== 'skipped')
+	// 		.map((action) => ({
+	// 			action,
+	// 			author: author === action.author ? ('user' as const) : ('assistant' as const),
+	// 		}))
+	// 		.map(({ action, author }) => actionToCoreMessage(action, author))
+	// 		.filter((action): action is CoreMessage => action !== undefined)
+	// 		.flatMap((message) => message),
+	// );
 
-	console.debug(`renderHistory since ${new Date(since).toISOString()}`, history);
+	// history will be empty right after an updateTask(), so we artificially add a temporary user message to keep going
+	// if (history.length === 0) {
+	// 	history.push({
+	// 		role: 'user',
+	// 		content: 'keep going',
+	// 	});
+	// }
+
+	// const final = [
+	// 	{
+	// 		role: 'user' as const,
+	// 		content: [
+	// 			`### Current task`, //
+	// 			promptForTask(task),
+	// 		].join('\n'),
+	// 	},
+	// 	...history,
+	// ];
+
+	console.debug(`renderHistory since ${new Date(task.lastSummarizedAt ?? 0).toISOString()}`, history);
 
 	// validateHistory(history); we're now validating before add react() action, TODO: revist this
 
@@ -218,18 +268,18 @@ async function renderHistory(
 	return history;
 }
 
-function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
-	//
-	const maxConsecutiveCompanionActions = env.MAX_CONSECUTIVE_COMPANION_ACTIONS;
-	const lastMessages = history.filter((message) => message.role !== 'tool').slice(-maxConsecutiveCompanionActions);
+// function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
+// 	//
+// 	const maxConsecutiveCompanionActions = env.MAX_CONSECUTIVE_COMPANION_ACTIONS;
+// 	const lastMessages = history.filter((message) => message.role !== 'tool').slice(-maxConsecutiveCompanionActions);
 
-	// throw if Companion did >= {maxConsecutiveCompanionActions}
-	if (lastMessages.every((message) => message.role === 'assistant')) {
-		throw new Error(`Too many (${maxConsecutiveCompanionActions}) consecutive companion actions.`);
-	}
+// 	// throw if Companion did >= {maxConsecutiveCompanionActions}
+// 	if (lastMessages.every((message) => message.role === 'assistant')) {
+// 		throw new Error(`Too many (${maxConsecutiveCompanionActions}) consecutive companion actions.`);
+// 	}
 
-	return history;
-}
+// 	return history;
+// }
 
 // TODO: a more robust one
 const promptForTask = (task: Doc<'tasks'>) =>

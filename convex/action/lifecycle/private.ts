@@ -4,15 +4,13 @@ import { internal } from '../../_generated/api';
 import { Doc, Id } from '../../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
-import { authorSchema } from '../../schemas/authorSchema';
 import { env } from '../../schemas/envSchema';
 import { skillSchema } from '../../schemas/skillSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
 import { calculateProviderCost } from '../../skills/createAITool';
 import { createTool } from '../../skills/tools';
-import { _findOne as _findOneTask, _useFunds } from '../../tasks/private';
+import { _useFunds } from '../../tasks/private';
 import { asDollars } from '../../utils/money';
-import { _add, _skipAllEnqueuedReactions } from '../private';
 
 export const _execute = internalAction({
 	args: {
@@ -55,18 +53,25 @@ export const _execute = internalAction({
 			const args = parseArgs(tool, action.args);
 
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool execution
-			const { result, costs } = await tool.execute(args);
+			const { result, costs, reactions } = await tool.execute(args);
 
 			await _setResolved(ctx, {
 				actionId,
 				result: result ?? 'unknown',
 				status: 'succeeded',
 				costs: costs,
+				// TODO: also persist reactions
 			});
+
+			// schedule all reactions
+			// TODO: optimize using a single mutation
+			await Promise.all(reactions.map((reaction) => ctx.runMutation(internal.action.private._add, reaction)));
 			//
 		} catch (error) {
 			//
 			console.error(`action ${actionId} execution failed: ${error}`); // TODO: notify
+
+			// TODO: with the new flow we lost the ability to fix itself on errors
 
 			await _setResolved(ctx, {
 				actionId,
@@ -82,31 +87,42 @@ export const _execute = internalAction({
 	},
 });
 
-export const _react = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-		author: authorSchema,
-	},
-	handler: async (ctx, { taskId, author }) => {
-		//
-		const task = await _findOneTask(ctx, { taskId });
+// export const _react = internalMutation({
+// 	args: {
+// 		taskId: zid('tasks'),
+// 		author: authorSchema,
+// 	},
+// 	handler: async (ctx, { taskId, author }) => {
+// 		//
+// 		const task = await _findOneTask(ctx, { taskId });
 
-		if (task.isDone) {
-			console.debug(`Skipping reacting for task ${taskId} because it's already done.`);
-			return;
-		}
+// 		if (task.isDone) {
+// 			console.debug(`Skipping reacting for task ${taskId} because it's already done.`);
+// 			return;
+// 		}
 
-		await _skipAllEnqueuedReactions(ctx, { taskId });
+// 		await _skipAllEnqueuedReactions(ctx, { taskId });
 
-		return await _add(ctx, {
-			taskId,
-			author,
-			owner: task.owner,
-			skillKey: 'react',
-			args: {},
-		});
-	},
-});
+// 		// TODO: optimization: skip feedback() if the task has no summary
+// 		// if (!task.summary) {
+// 		// 	return await _add(ctx, {
+// 		// 		taskId,
+// 		// 		author,
+// 		// 		owner: task.owner,
+// 		// 		skillKey: 'refineTask',
+// 		// 		args: {},
+// 		// 	});
+// 		// }
+
+// 		return await _add(ctx, {
+// 			taskId,
+// 			author,
+// 			owner: task.owner,
+// 			skillKey: 'feedback',
+// 			args: {},
+// 		});
+// 	},
+// });
 
 export const _start = internalMutation({
 	args: {
@@ -177,10 +193,15 @@ export const _resolve = internalMutation({
 
 		await ctx.db.patch(actionId, { result, status, costs });
 
-		// this if avoids silicon-based life forms to take over
-		if (action.skillKey !== 'react' && action.skillKey !== 'askForClarification') {
-			await _react(ctx, { taskId: action.taskId, author: action._id });
-		}
+		// // this if avoids silicon-based life forms to take over
+		// if (
+		// 	action.skillKey !== 'feedback' &&
+		// 	action.skillKey !== 'askForClarification' &&
+		// 	action.skillKey !== 'refineTask'
+		// ) {
+		// 	// TODO: make this configurable
+		// 	await _react(ctx, { taskId: action.taskId, author: action._id });
+		// }
 	},
 });
 
@@ -286,6 +307,8 @@ async function _tryAutoApprove(
 	skill: z.infer<typeof skillSchema>,
 	expectedCost: bigint,
 ) {
+	// return false; // TODO: remove
+
 	// auto approve if the author is the task owner
 	if (action.author === task.owner) return _autoApprove(ctx, task, action);
 

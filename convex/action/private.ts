@@ -9,14 +9,16 @@ import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
 import { _findOne as _findOneTask } from '../tasks/private';
 import { _runNextActionIfNeeded } from './lifecycle/private';
 
+export const newActionSchema = z.object({
+	taskId: zid('tasks'),
+	owner: zid('users'),
+	author: authorSchema,
+	skillKey: z.string().describe('The key of the skill to use'),
+	args: z.record(z.any()),
+});
+
 export const _add = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-		author: authorSchema,
-		owner: zid('users'),
-		skillKey: z.string().describe('The key of the skill to use'),
-		args: z.record(z.any()),
-	},
+	args: newActionSchema.shape,
 	handler: async (ctx, { taskId, author, owner, skillKey, args }) => {
 		//
 		console.debug(`${author} acts: ${skillKey}`);
@@ -26,6 +28,7 @@ export const _add = internalMutation({
 		// if task is already done, prepend with a reopen action
 		// TODO: this should only happen for user actions. Should we check here?
 		// We're not checking here but meseeks should not be able to _add() actions if task is done
+		// TODO: I think this should be handled client-side, by the Composer. I think.
 		if (task.isDone) {
 			await ctx.db.insert('actions', {
 				taskId,
@@ -178,23 +181,23 @@ export const _findNext = internalQuery({
 	},
 });
 
-export const _findAllEnqueuedReactions = internalQuery({
-	args: {
-		taskId: zid('tasks'),
-	},
-	handler: async (ctx, { taskId }) => {
-		//
-		return await ctx.db
-			.query('actions')
-			.withIndex('by_task_status', (q) =>
-				q
-					.eq('taskId', taskId) //
-					.eq('status', 'enqueued'),
-			)
-			.filter((q) => q.eq(q.field('skillKey'), 'react'))
-			.collect();
-	},
-});
+// export const _findAllEnqueuedReactions = internalQuery({
+// 	args: {
+// 		taskId: zid('tasks'),
+// 	},
+// 	handler: async (ctx, { taskId }) => {
+// 		//
+// 		return await ctx.db
+// 			.query('actions')
+// 			.withIndex('by_task_status', (q) =>
+// 				q
+// 					.eq('taskId', taskId) //
+// 					.eq('status', 'enqueued'),
+// 			)
+// 			.filter((q) => q.eq(q.field('skillKey'), 'feedback'))
+// 			.collect();
+// 	},
+// });
 
 export const _findLastActions = internalQuery({
 	args: {
@@ -211,25 +214,25 @@ export const _findLastActions = internalQuery({
 	},
 });
 
-export const _skipAllEnqueuedReactions = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-	},
-	handler: async (ctx, { taskId }) => {
-		//
-		const enqueuedReactions = await _findAllEnqueuedReactions(ctx, { taskId });
+// export const _skipAllEnqueuedReactions = internalMutation({
+// 	args: {
+// 		taskId: zid('tasks'),
+// 	},
+// 	handler: async (ctx, { taskId }) => {
+// 		//
+// 		const enqueuedReactions = await _findAllEnqueuedReactions(ctx, { taskId });
 
-		return await Promise.all(
-			enqueuedReactions.map((action) =>
-				ctx.db.patch(action._id, {
-					status: 'skipped',
-					result: 'outdated — new actions happened before this action could run',
-					costs: [],
-				}),
-			),
-		);
-	},
-});
+// 		return await Promise.all(
+// 			enqueuedReactions.map((action) =>
+// 				ctx.db.patch(action._id, {
+// 					status: 'skipped',
+// 					result: 'outdated — new actions happened before this action could run',
+// 					costs: [],
+// 				}),
+// 			),
+// 		);
+// 	},
+// });
 
 function _findByStatus(
 	ctx: QueryCtx,

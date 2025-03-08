@@ -52,16 +52,16 @@ const httpConfigSchema = z.object({
 });
 
 const decisionConfigSchema = z.object({
+	instructions: z.string().describe('Instructions for the decision-making process'),
+	temperature: z.number().min(0).max(2).optional().describe('Temperature to use'),
+	maxTokens: z.number().optional().describe('Maximum number of tokens to use'),
+	availableSkills: z.union([
+		z.literal('auto'),
+		z.array(z.string()).describe('Skills that can be used to make the decision'),
+	]),
 	// TODO: based on AI SDK types
 	// model: z.string().describe('LLM model to use'),
-	// temperature: z.number().describe('Temperature to use'),
 	// maxSteps: z.number().describe('Maximum number of steps to take'),
-	maxTokens: z.number().optional().describe('Maximum number of tokens to use'),
-	instructions: z.string().describe('Instructions for the decision-making process'),
-	availableTools: z.union([
-		z.literal('auto'),
-		z.array(z.string()).describe('Tools that can be used to make the decision'),
-	]),
 });
 
 const coreSkillSchema = z.object({
