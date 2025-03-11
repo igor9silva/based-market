@@ -171,9 +171,10 @@ async function renderHistory(
 	action: Doc<'actions'>,
 ): Promise<Array<CoreMessage>> {
 	//
+	const since = task.lastSummarizedAt ?? task.lastUpdatedAt ?? 0;
 	const actions = await ctx.runQuery(internal.action.private._findAllSince, {
 		taskId: task._id,
-		since: task.lastSummarizedAt ?? 0,
+		since,
 	});
 
 	const history = actions
@@ -223,7 +224,7 @@ async function renderHistory(
 	// 	...history,
 	// ];
 
-	console.debug(`renderHistory since ${new Date(task.lastSummarizedAt ?? 0).toISOString()}`, history);
+	console.debug(`renderHistory since ${new Date(since).toISOString()}`, history);
 
 	// validateHistory(history); we're now validating before add react() action, TODO: revist this
 

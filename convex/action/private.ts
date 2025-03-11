@@ -6,7 +6,6 @@ import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
-import { _findOne as _findOneTask } from '../tasks/private';
 import { _runNextActionIfNeeded } from './lifecycle/private';
 
 export const newActionSchema = z.object({
@@ -21,39 +20,47 @@ export const _add = internalMutation({
 	args: newActionSchema.shape,
 	handler: async (ctx, { taskId, author, owner, skillKey, args }) => {
 		//
-		console.debug(`${author} acts: ${skillKey}`);
-
-		const task = await _findOneTask(ctx, { taskId });
-
-		// if task is already done, prepend with a reopen action
-		// TODO: this should only happen for user actions. Should we check here?
-		// We're not checking here but meseeks should not be able to _add() actions if task is done
-		// TODO: I think this should be handled client-side, by the Composer. I think.
-		if (task.isDone) {
-			await ctx.db.insert('actions', {
-				taskId,
-				author,
-				owner,
-				status: 'enqueued',
-				result: null,
-				skillKey: 'reopen',
-				args: {},
-			});
-		}
-
-		const actionId = await ctx.db.insert('actions', {
+		const actionIds = await _addMany(ctx, {
 			taskId,
 			author,
 			owner,
-			status: 'enqueued',
-			result: null,
-			skillKey,
-			args,
+			skills: [{ skillKey, args }],
 		});
+
+		return actionIds[0];
+	},
+});
+export const _addMany = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		owner: zid('users'),
+		author: authorSchema,
+		skills: z.array(
+			z.object({
+				skillKey: z.string().describe('The key of the skill to use'),
+				args: z.record(z.any()),
+			}),
+		),
+	},
+	handler: async (ctx, { taskId, owner, author, skills }) => {
+		//
+		const actionIds = await Promise.all(
+			skills.map((skill) =>
+				ctx.db.insert('actions', {
+					taskId,
+					author,
+					owner,
+					status: 'enqueued',
+					result: null,
+					skillKey: skill.skillKey,
+					args: skill.args,
+				}),
+			),
+		);
 
 		await _runNextActionIfNeeded(ctx, taskId);
 
-		return actionId;
+		return actionIds;
 	},
 });
 
@@ -79,7 +86,7 @@ export const _authorize = internalMutation({
 
 		const patch = approved
 			? {
-					status: action.status === 'running' ? ('running' as const) : ('enqueued' as const),
+					status: approvedStatus,
 					approvedBy: approver,
 					approvedAt: Date.now(),
 				}

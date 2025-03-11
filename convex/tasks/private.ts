@@ -1,6 +1,6 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { _add as _addAction } from '../action/private';
+import { _addMany as _addActions } from '../action/private';
 import { internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
 import { taskStatusSchema } from '../schemas/taskSchema';
@@ -112,22 +112,22 @@ export const _add = internalMutation({
 
 		// TODO: receive actions instead of using hardcoded ones
 		// also, should we have e `createTask` action? to make it explicit?
-		await Promise.all([
-			_addAction(ctx, {
-				skillKey: 'increaseBudget',
-				args: { amount: initialFunds },
-				taskId,
-				author,
-				owner,
-			}),
-			_addAction(ctx, {
-				skillKey: 'say',
-				args: { message: details },
-				taskId,
-				author,
-				owner,
-			}),
-		]);
+
+		await _addActions(ctx, {
+			taskId,
+			author,
+			owner,
+			skills: [
+				{
+					skillKey: 'increaseBudget',
+					args: { amount: initialFunds },
+				},
+				{
+					skillKey: 'say',
+					args: { message: details },
+				},
+			],
+		});
 
 		return taskId;
 	},
@@ -302,7 +302,7 @@ export const _update = internalMutation({
 		return await ctx.db.patch(taskId, {
 			...(title !== undefined && { title }),
 			...(details !== undefined && { details }),
-			lastSummarizedAt: Date.now(),
+			lastUpdatedAt: Date.now(),
 		});
 	},
 });
