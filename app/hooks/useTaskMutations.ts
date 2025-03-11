@@ -18,6 +18,7 @@ export function useTaskMutations() {
 			taskId,
 			skillKey: 'say',
 			args: { message },
+			shouldReopen: true,
 		});
 	};
 
@@ -34,6 +35,7 @@ export function useTaskMutations() {
 			taskId,
 			skillKey: 'updateTask',
 			args: { title, details },
+			shouldReopen: true,
 		});
 	};
 
@@ -61,18 +63,6 @@ export function useTaskMutations() {
 		});
 	};
 
-	const reopen = ({
-		taskId, //
-	}: {
-		taskId: Id<'tasks'>;
-	}) => {
-		return act({
-			taskId,
-			skillKey: 'reopen',
-			args: {},
-		});
-	};
-
 	const increaseBudget = ({
 		taskId, //
 		amount,
@@ -84,6 +74,7 @@ export function useTaskMutations() {
 			taskId,
 			skillKey: 'increaseBudget',
 			args: { amount },
+			shouldReopen: true,
 		});
 	};
 
@@ -120,7 +111,6 @@ export function useTaskMutations() {
 		updateTask,
 		resolve,
 		discard,
-		reopen,
 		increaseBudget,
 		approveAction,
 		rejectAction,

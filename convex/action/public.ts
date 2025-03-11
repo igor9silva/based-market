@@ -10,8 +10,9 @@ export const act = mutation({
 		taskId: zid('tasks'),
 		skillKey: z.string(),
 		args: z.record(z.any()),
+		shouldReopen: z.boolean().optional().default(false),
 	},
-	handler: async (ctx, { taskId, skillKey, args }) => {
+	handler: async (ctx, { taskId, skillKey, args, shouldReopen }) => {
 		//
 		console.debug(`use skill on task '${taskId}'`);
 
@@ -23,6 +24,7 @@ export const act = mutation({
 			taskId,
 			author: currentUser._id,
 			owner: currentUser._id,
+			shouldReopen,
 		});
 	},
 });

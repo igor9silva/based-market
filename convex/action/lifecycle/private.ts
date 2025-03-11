@@ -66,7 +66,10 @@ export const _execute = internalAction({
 
 			// schedule all reactions
 			// TODO: optimize using a single mutation
-			await Promise.all(reactions.map((reaction) => ctx.runMutation(internal.action.private._add, reaction)));
+			if (task.isActive) {
+				await ctx.runMutation(internal.action.private._skipAllPendingReactions, { taskId, owner: task.owner });
+				await Promise.all(reactions.map((reaction) => ctx.runMutation(internal.action.private._add, reaction)));
+			}
 			//
 		} catch (error) {
 			//
@@ -194,6 +197,8 @@ export const _resolve = internalMutation({
 
 		await ctx.db.patch(actionId, { result, status, costs });
 
+		// TODO: aggregate task status
+
 		// // this if avoids silicon-based life forms to take over
 		// if (
 		// 	action.skillKey !== 'feedback' &&
@@ -277,7 +282,7 @@ async function _ensureWithinBudget(
 	//
 	const expectedCost = await _expectedCostFor(ctx, action, skill);
 
-	if (expectedCost > task.availableBudgetUSD) {
+	if (expectedCost > task.budgetUSDC.available) {
 		throw new Error(
 			`Not enough budget. Expected cost: ${asDollars({ bigInt: expectedCost })}.\n<IncreaseTaskBudgetCard taskId='${task._id}' />`,
 		);

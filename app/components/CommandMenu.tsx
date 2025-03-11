@@ -7,6 +7,7 @@ import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuthActions } from '@convex-dev/auth/react';
+import { asBigInt } from 'convex/utils/money';
 import {
 	BadgeCent,
 	Circle,
@@ -239,21 +240,21 @@ function DiscardTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 function ReopenTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 	//
 	const { close } = useCommandMenu();
-	const { reopen } = useTaskMutations();
+	const { increaseBudget } = useTaskMutations();
 
 	const currentTask = useQuery(api.tasks.public.findOne, { taskId });
 	if (!currentTask || currentTask.isActive) return null;
 
 	const handleSelect = () => {
 		//
-		reopen({ taskId: currentTask._id });
+		increaseBudget({ taskId: currentTask._id, amount: asBigInt({ dollars: 0.1 }) });
 		close();
 	};
 
 	return (
 		<CommandItem keywords={['reopen', 'current']} onSelect={handleSelect}>
 			<RotateCcw className="mr-2" />
-			Reopen current task
+			Reopen with $0.10 of budget
 		</CommandItem>
 	);
 }

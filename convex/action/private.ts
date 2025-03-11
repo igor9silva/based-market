@@ -6,6 +6,7 @@ import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
+import { _findOne as _findOneTask } from '../tasks/private';
 import { _runNextActionIfNeeded } from './lifecycle/private';
 
 export const newActionSchema = z.object({
@@ -17,14 +18,18 @@ export const newActionSchema = z.object({
 });
 
 export const _add = internalMutation({
-	args: newActionSchema.shape,
-	handler: async (ctx, { taskId, author, owner, skillKey, args }) => {
+	args: {
+		...newActionSchema.shape,
+		shouldReopen: z.boolean().optional().default(false),
+	},
+	handler: async (ctx, { taskId, author, owner, skillKey, args, shouldReopen }) => {
 		//
 		const actionIds = await _addMany(ctx, {
 			taskId,
 			author,
 			owner,
 			skills: [{ skillKey, args }],
+			shouldReopen,
 		});
 
 		return actionIds[0];
@@ -41,9 +46,22 @@ export const _addMany = internalMutation({
 				args: z.record(z.any()),
 			}),
 		),
+		shouldReopen: z.boolean().optional().default(false),
 	},
-	handler: async (ctx, { taskId, owner, author, skills }) => {
+	handler: async (ctx, { taskId, owner, author, skills, shouldReopen }) => {
 		//
+		const task = await _findOneTask(ctx, { taskId });
+
+		// skip all pending reactions if adding human actions
+		if (author === owner) {
+			await _skipAllPendingReactions(ctx, { taskId, owner });
+		}
+
+		// reopen if needed and requested
+		if (!task.isActive && shouldReopen) {
+			skills.unshift({ skillKey: 'reopen', args: {} });
+		}
+
 		const actionIds = await Promise.all(
 			skills.map((skill) =>
 				ctx.db.insert('actions', {
@@ -185,23 +203,25 @@ export const _findNext = internalQuery({
 	},
 });
 
-// export const _findAllEnqueuedReactions = internalQuery({
-// 	args: {
-// 		taskId: zid('tasks'),
-// 	},
-// 	handler: async (ctx, { taskId }) => {
-// 		//
-// 		return await ctx.db
-// 			.query('actions')
-// 			.withIndex('by_task_status', (q) =>
-// 				q
-// 					.eq('taskId', taskId) //
-// 					.eq('status', 'enqueued'),
-// 			)
-// 			.filter((q) => q.eq(q.field('skillKey'), 'feedback'))
-// 			.collect();
-// 	},
-// });
+export const _findReactions = internalQuery({
+	args: {
+		taskId: zid('tasks'),
+		owner: zid('users'),
+		status: z.enum(['enqueued', 'pending authorization']),
+	},
+	handler: async (ctx, { taskId, owner, status }) => {
+		//
+		return await ctx.db
+			.query('actions')
+			.withIndex('by_task_status', (q) =>
+				q
+					.eq('taskId', taskId) //
+					.eq('status', status),
+			)
+			.filter((q) => q.neq(q.field('author'), owner)) // author !== owner
+			.collect();
+	},
+});
 
 export const _findLastActions = internalQuery({
 	args: {
@@ -218,25 +238,31 @@ export const _findLastActions = internalQuery({
 	},
 });
 
-// export const _skipAllEnqueuedReactions = internalMutation({
-// 	args: {
-// 		taskId: zid('tasks'),
-// 	},
-// 	handler: async (ctx, { taskId }) => {
-// 		//
-// 		const enqueuedReactions = await _findAllEnqueuedReactions(ctx, { taskId });
+// this will skip all pending companion (author !== owner) actions
+// running actions won't be stopped
+export const _skipAllPendingReactions = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		owner: zid('users'),
+	},
+	handler: async (ctx, { taskId, owner }) => {
+		//
+		const pendingReactions = await Promise.all([
+			_findReactions(ctx, { taskId, owner, status: 'enqueued' }),
+			_findReactions(ctx, { taskId, owner, status: 'pending authorization' }),
+		]).then(([A, B]) => A.concat(B));
 
-// 		return await Promise.all(
-// 			enqueuedReactions.map((action) =>
-// 				ctx.db.patch(action._id, {
-// 					status: 'skipped',
-// 					result: 'outdated — new actions happened before this action could run',
-// 					costs: [],
-// 				}),
-// 			),
-// 		);
-// 	},
-// });
+		return await Promise.all(
+			pendingReactions.map((action) =>
+				ctx.db.patch(action._id, {
+					status: 'skipped',
+					result: 'new human actions happened before this one could run',
+					costs: [],
+				}),
+			),
+		);
+	},
+});
 
 function _findByStatus(
 	ctx: QueryCtx,

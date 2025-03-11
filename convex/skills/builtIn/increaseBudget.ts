@@ -11,11 +11,11 @@ export const increaseBudget = defineSkill({
 		amount: z.bigint().min(0n).describe('The amount of funds to add, in USD.'),
 	}),
 	reactions: [
-		// {
-		// 	skillKey: 'iterate',
-		// 	args: {},
-		// 	condition: 'owner',
-		// },
+		{
+			skillKey: 'inferUserIntent',
+			args: {},
+			condition: 'owner',
+		},
 	],
 	execute:
 		(execution: ToolExecution) =>
