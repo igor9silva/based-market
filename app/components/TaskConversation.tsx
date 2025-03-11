@@ -84,7 +84,7 @@ export function TaskConversation({
 					)}
 				</StickToBottomContent>
 			</StickToBottom>
-			<ActionComposer className="mr-2 mb-2" task={task} />
+			<ActionComposer className="mr-2" task={task} />
 		</div>
 	);
 }
