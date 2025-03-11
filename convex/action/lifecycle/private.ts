@@ -12,6 +12,7 @@ import { createTool } from '../../skills/tools';
 import { _useFunds } from '../../tasks/private';
 import { asDollars } from '../../utils/money';
 
+// TODO: if that since we dropped support for sync actions, we can use ActionCtx only, and remove MutationCtx from the arg type
 export const _execute = internalAction({
 	args: {
 		taskId: zid('tasks'),
