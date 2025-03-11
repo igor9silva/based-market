@@ -25,7 +25,7 @@ export default function TaskDetail({
 }) {
 	const query = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(query);
-	const { updateTask, markAsDone } = useTaskMutations();
+	const { updateTask } = useTaskMutations();
 
 	return (
 		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto h-full p-4 md:p-0', className)}>
@@ -38,14 +38,14 @@ export default function TaskDetail({
 							onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
 							viewClassName="text-2xl font-bold leading-none break-all"
 							asView={({ value, className, isEmpty }) => (
-								<h1 className={cn(task.isDone && 'line-through', className)}>
+								<h1 className={cn(!task.isActive && 'line-through', className)}>
 									{isEmpty ? <span className="text-muted-foreground">Untitled task</span> : value}
 								</h1>
 							)}
 						/>
 						<div className="flex flex-row flex-shrink-0 items-center gap-1">
 							<CircleDollarSign className="size-4" />
-							{asDollars({ bigInt: task.availableBudgetUSD })}
+							{asDollars({ bigInt: task.budgetUSDC.available })}
 						</div>
 						{showExpand && (
 							<Link to="/$" params={{ _splat: `/chat/${task._id}` }}>
@@ -92,11 +92,11 @@ export default function TaskDetail({
 					editClassName="min-h-56"
 				/>
 			</CardContent>
-			{task.resolution && (
+			{task.summary && (
 				<>
 					<Separator />
 					<CardFooter className="p-0 md:p-4 ">
-						<MDX text={task.resolution} />
+						<MDX text={task.summary} />
 					</CardFooter>
 				</>
 			)}

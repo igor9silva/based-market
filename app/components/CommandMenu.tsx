@@ -7,7 +7,18 @@ import * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAuthActions } from '@convex-dev/auth/react';
-import { BadgeCent, Circle, CircleCheckBig, CirclePlus, Inbox, LogOut, RefreshCcw, Wallet } from 'lucide-react';
+import {
+	BadgeCent,
+	Circle,
+	CircleCheckBig,
+	CirclePlus,
+	CircleX,
+	Inbox,
+	LogOut,
+	RefreshCcw,
+	RotateCcw,
+	Wallet,
+} from 'lucide-react';
 import {
 	CommandDialog,
 	CommandGroup,
@@ -136,7 +147,9 @@ export function CommandMenuDialog() {
 						<LogOut className="mr-2" />
 						Sign out
 					</CommandItem>
-					{currentTaskId && <MarkAsDoneCommandItem taskId={currentTaskId} />}
+					{currentTaskId && <ResolveTaskCommandItem taskId={currentTaskId} />}
+					{currentTaskId && <DiscardTaskCommandItem taskId={currentTaskId} />}
+					{currentTaskId && <ReopenTaskCommandItem taskId={currentTaskId} />}
 				</CommandGroup>
 
 				{/* Pinned tasks */}
@@ -163,12 +176,12 @@ export function CommandMenuDialog() {
 							<CommandItem
 								key={task._id}
 								value={`/chat/${task._id}`}
-								keywords={[task.summary ?? 'Untitled task']}
+								keywords={[task.title ?? 'Untitled task']}
 								onSelect={onSelect}
 							>
-								{task.isDone ? <CircleCheckBig className="mr-2" /> : <Circle className="mr-2" />}
-								<span className={task.isDone ? 'line-through' : ''}>
-									{task.summary ?? 'Untitled task'}
+								{!task.isActive ? <CircleCheckBig className="mr-2" /> : <Circle className="mr-2" />}
+								<span className={!task.isActive ? 'line-through' : ''}>
+									{task.title ?? 'Untitled task'}
 								</span>
 							</CommandItem>
 						);
@@ -179,23 +192,68 @@ export function CommandMenuDialog() {
 	);
 }
 
-function MarkAsDoneCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
+function ResolveTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 	//
 	const { close } = useCommandMenu();
-	const { markAsDone } = useTaskMutations();
+	const { resolve } = useTaskMutations();
 
 	const currentTask = useQuery(api.tasks.public.findOne, { taskId });
-	if (!currentTask) return null;
+	if (!currentTask || !currentTask.isActive) return null;
 
 	const handleSelect = () => {
-		markAsDone({ taskId: currentTask._id, isDone: !currentTask.isDone });
+		//
+		resolve({ taskId: currentTask._id });
 		close();
 	};
 
 	return (
-		<CommandItem keywords={['mark', 'as done', 'as not done']} onSelect={handleSelect}>
-			{currentTask.isDone ? <Circle className="mr-2" /> : <CircleCheckBig className="mr-2" />}
-			{currentTask.isDone ? 'Unmark' : 'Mark'} as done
+		<CommandItem keywords={['resolve', 'done', 'current']} onSelect={handleSelect}>
+			<CircleCheckBig className="mr-2" />
+			Resolve current task
+		</CommandItem>
+	);
+}
+
+function DiscardTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
+	//
+	const { close } = useCommandMenu();
+	const { discard } = useTaskMutations();
+
+	const currentTask = useQuery(api.tasks.public.findOne, { taskId });
+	if (!currentTask || !currentTask.isActive) return null;
+
+	const handleSelect = () => {
+		//
+		discard({ taskId: currentTask._id });
+		close();
+	};
+
+	return (
+		<CommandItem keywords={['discard', 'done', 'current']} onSelect={handleSelect}>
+			<CircleX className="mr-2" />
+			Discard current task
+		</CommandItem>
+	);
+}
+
+function ReopenTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
+	//
+	const { close } = useCommandMenu();
+	const { reopen } = useTaskMutations();
+
+	const currentTask = useQuery(api.tasks.public.findOne, { taskId });
+	if (!currentTask || currentTask.isActive) return null;
+
+	const handleSelect = () => {
+		//
+		reopen({ taskId: currentTask._id });
+		close();
+	};
+
+	return (
+		<CommandItem keywords={['reopen', 'current']} onSelect={handleSelect}>
+			<RotateCcw className="mr-2" />
+			Reopen current task
 		</CommandItem>
 	);
 }

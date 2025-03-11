@@ -8,7 +8,7 @@ import { useClickOutside } from '~/hooks/useClickOutside';
 import { cn } from '~/lib/utils';
 
 import { StatusIndicator } from '~/components/StatusIndicator';
-import { TaskAction } from '~/components/TaskAction';
+// import { TaskAction } from '~/components/TaskAction';
 import { Button } from '~/components/ui/button';
 
 const TRANSITION = { duration: 0.25, type: 'spring' };
@@ -93,11 +93,11 @@ const Expanded = forwardRef<HTMLDivElement, { actions: Doc<'actions'>[] }>(({ ac
 					<h3 className="font-medium">Actions</h3>
 					<span className="text-sm text-gray-400">{actions.length} actions</span>
 				</div>
-				<div className="space-y-3">
+				{/* <div className="space-y-3">
 					{actions.map((action) => (
 						<TaskAction key={action._id} action={action} />
 					))}
-				</div>
+				</div> */}
 			</div>
 		</motion.div>
 	);

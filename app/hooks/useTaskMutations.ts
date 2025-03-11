@@ -37,17 +37,39 @@ export function useTaskMutations() {
 		});
 	};
 
-	const markAsDone = ({
+	const resolve = ({
 		taskId, //
-		isDone,
 	}: {
 		taskId: Id<'tasks'>;
-		isDone: boolean;
 	}) => {
 		return act({
 			taskId,
-			skillKey: 'markAsDone',
-			args: { isDone },
+			skillKey: 'resolve',
+			args: {},
+		});
+	};
+
+	const discard = ({
+		taskId, //
+	}: {
+		taskId: Id<'tasks'>;
+	}) => {
+		return act({
+			taskId,
+			skillKey: 'discard',
+			args: {},
+		});
+	};
+
+	const reopen = ({
+		taskId, //
+	}: {
+		taskId: Id<'tasks'>;
+	}) => {
+		return act({
+			taskId,
+			skillKey: 'reopen',
+			args: {},
 		});
 	};
 
@@ -96,7 +118,9 @@ export function useTaskMutations() {
 	return {
 		say,
 		updateTask,
-		markAsDone,
+		resolve,
+		discard,
+		reopen,
 		increaseBudget,
 		approveAction,
 		rejectAction,

@@ -17,6 +17,7 @@ export const taskSchema = z
 		owner: zid('users').describe('The user who is responsible for the task.'),
 		title: z.string().max(100).optional().describe('A short title for the task. Max 100 characters.'),
 		details: z.string().optional().describe('An MDX detailed description of the task.'),
+		summary: z.string().optional().describe('A summary of the task activity.'),
 		status: taskStatusSchema,
 		isActive: z.boolean().describe('Computed from status.'),
 		parentId: zid('tasks').optional().describe('The parent task ID of this task.'),
