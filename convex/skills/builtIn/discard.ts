@@ -13,16 +13,9 @@ export const discard = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
-			// Make sure task has no resolution
-			await execution.ctx.runMutation(internal.tasks.private._setResolution, {
+			await execution.ctx.runMutation(internal.tasks.private._setStatus, {
 				taskId: execution.task._id,
-				resolution: undefined,
-			});
-
-			// Mark it as done
-			await execution.ctx.runMutation(internal.tasks.private._markAsDone, {
-				taskId: execution.task._id,
-				isDone: true,
+				newStatus: 'discarded',
 			});
 
 			return {

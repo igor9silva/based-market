@@ -4,7 +4,7 @@ import { defineSchema, defineTable } from 'convex/server';
 import { actionSchema } from './schemas/actionSchema';
 import { componentSchema } from './schemas/componentSchema';
 import { skillSchema } from './schemas/skillSchema';
-import { taskEmbeddingsSchema, taskSchema } from './schemas/taskSchema';
+import { taskSchema } from './schemas/taskSchema';
 import { topUpSchema } from './schemas/topUpSchema';
 import { transactionSchema } from './schemas/transactionSchema';
 import { userSchema } from './schemas/userSchema';
@@ -27,22 +27,23 @@ export default defineSchema({
 	tasks: defineTable(
 		zodToConvex(taskSchema),
 	).index(
-		'by_author_parentId_isDone', ['author', 'parentId', 'isDone'],
+		'by_owner_parentId_isActive', ['owner', 'parentId', 'isActive'],
 	).index(
-		'by_parent_isDone', ['parentId', 'isDone'],
+		'by_parent_isActive', ['parentId', 'isActive'],
 	).index(
-		'by_author_isDone', ['author', 'isDone'],
-	).index(
-		'by_embeddingId', ['embeddingId'],
+		'by_owner_isActive', ['owner', 'isActive'],
 	),
+	// .index(
+	// 	'by_embeddingId', ['embeddingId'],
+	// ),
 
-	taskEmbeddings: defineTable(
-		zodToConvex(taskEmbeddingsSchema),
-	).vectorIndex("by_embedding", {
-		dimensions: 3072,
-		vectorField: 'embedding',
-		filterFields: ['isDone'],
-	}),
+	// taskEmbeddings: defineTable(
+	// 	zodToConvex(taskEmbeddingsSchema),
+	// ).vectorIndex("by_embedding", {
+	// 	dimensions: 3072,
+	// 	vectorField: 'embedding',
+	// 	filterFields: ['isDone'],
+	// }),
 	
 	actions: defineTable(
 		zodToConvex(actionSchema),

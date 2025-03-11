@@ -2,24 +2,34 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { authorSchema } from './authorSchema';
 
+export const taskStatusSchema = z.enum([
+	'idle', //
+	'acting', // companion is working
+	'unread', // companion is not working, you have unread actions
+	'blocked', // companion is block, requires your attention
+	'discarded', // task was discarded, not relevant for future reference
+	'done', // task was resolved
+]);
+
 export const taskSchema = z
 	.object({
 		author: authorSchema.describe('Who created the task.'),
 		owner: zid('users').describe('The user who is responsible for the task.'),
 		title: z.string().max(100).optional().describe('A short title for the task. Max 100 characters.'),
 		details: z.string().optional().describe('An MDX detailed description of the task.'),
-		lastSummarizedAt: z.number().optional().describe('The last time the task was summarized.'),
-		resolution: z
-			.string()
-			.optional()
-			.describe('How was the task resolved, in MDX. If filled but task is not yet done, its a draft resolution.'),
+		status: taskStatusSchema,
+		isActive: z.boolean().describe('Computed from status.'),
 		parentId: zid('tasks').optional().describe('The parent task ID of this task.'),
-		availableBudgetUSD: z
-			.bigint()
-			.describe('The remaining/available amount of money available to spend on this task.'),
-		isDone: z
-			.boolean()
-			.describe('Whether the task has been resolved. If done but not resolution, its considered archived.'),
+		lastUpdatedAt: z.number().optional().describe('The last time the task details were reviewed/updated.'),
+		lastSummarizedAt: z.number().optional().describe('The last time the task activity was summarized.'),
+		budgetUSDC: z.object({
+			total: z
+				.bigint() //
+				.describe('The total amount of money the user has budgeted for this task.'),
+			available: z
+				.bigint() //
+				.describe('The remaining/available amount of money available to spend on this task (total - spent).'),
+		}),
 		embeddingId: zid('taskEmbeddings').optional(),
 	})
 	.describe(`It's a goal to be achieved. A Task is the basic and most fundamental entity of Meseeks.`);
@@ -27,5 +37,5 @@ export const taskSchema = z
 export const taskEmbeddingsSchema = z.object({
 	taskId: zid('tasks'),
 	embedding: z.array(z.number()),
-	isDone: z.boolean(),
+	status: taskStatusSchema,
 });

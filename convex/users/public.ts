@@ -32,7 +32,7 @@ export const findLockedBalance = query({
 		const currentUser = await current(ctx, {});
 
 		const activeTasks = await _findActiveTasks(ctx, { owner: currentUser._id });
-		const activeTasksBalance = activeTasks.reduce((acc, task) => acc + task.availableBudgetUSD, 0n);
+		const activeTasksBalance = activeTasks.reduce((acc, task) => acc + task.budgetUSDC.available, 0n);
 
 		return activeTasksBalance;
 	},

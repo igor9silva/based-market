@@ -6,6 +6,7 @@ import { Doc } from './_generated/dataModel';
 import { ActionCtx, MutationCtx } from './_generated/server';
 import { softSkillSchema } from './schemas/skillSchema';
 import { _toolsForMagicRock } from './skills/tools';
+import { asDollars } from './utils/money';
 
 // TODO: move to DB
 export async function _askMagicRock(
@@ -250,8 +251,18 @@ const promptForTask = (task: Doc<'tasks'>) =>
 		`<id>${task._id}</id>`, //
 		`<title>${task.title}</title>`,
 		`<details>${task.details}</details>`,
-		`<resolution>${task.resolution}</resolution>`,
+		// `<status>${task.status}</status>`,
 		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
-		// `<availableBudget>${task.availableBudgetUSD}</availableBudget>`,
+		`<lastUpdatedAt>${dateOrNever(task.lastUpdatedAt)}</lastUpdatedAt>`,
+		`<lastSummarizedAt>${dateOrNever(task.lastSummarizedAt)}</lastSummarizedAt>`,
+		`<budgetUSDC>
+			<total alt="Total money user has budgeted for this task">${asDollars({ bigInt: task.budgetUSDC.total })}</total>
+			<spent alt="Amount already spent from the budget">${asDollars({ bigInt: task.budgetUSDC.total - task.budgetUSDC.available })}</spent>
+			<available alt="Remaining money available to resolve this task">${asDollars({ bigInt: task.budgetUSDC.available })}</available>
+		</budgetUSDC>`,
 		// `<parentId>${task.parentId}</parentId>`,
 	].join('\n');
+
+function dateOrNever(date: number | undefined) {
+	return date ? new Date(date).toISOString() : 'never';
+}

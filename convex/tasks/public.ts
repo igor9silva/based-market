@@ -17,23 +17,23 @@ export const findAll = query({
 
 		await ensureTaskOwner(ctx, { taskId: parentId });
 
-		const find = ({ isDone }: { isDone: boolean }) =>
+		const find = ({ isActive }: { isActive: boolean }) =>
 			ctx.db
 				.query('tasks')
-				.withIndex('by_parent_isDone', (q) =>
+				.withIndex('by_parent_isActive', (q) =>
 					q
 						.eq('parentId', parentId) //
-						.eq('isDone', isDone),
+						.eq('isActive', isActive),
 				)
 				.order('desc')
 				.collect();
 
-		const [notDone, done] = await Promise.all([
-			find({ isDone: false }), //
-			find({ isDone: true }),
+		const [active, inactive] = await Promise.all([
+			find({ isActive: true }), //
+			find({ isActive: false }),
 		]);
 
-		return notDone.concat(done);
+		return active.concat(inactive);
 	},
 });
 
@@ -43,24 +43,24 @@ export const findAllAtInbox = query({
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 
-		const find = ({ isDone }: { isDone: boolean }) =>
+		const find = ({ isActive }: { isActive: boolean }) =>
 			ctx.db
 				.query('tasks')
-				.withIndex('by_author_parentId_isDone', (q) =>
+				.withIndex('by_owner_parentId_isActive', (q) =>
 					q
-						.eq('author', currentUser._id) //
+						.eq('owner', currentUser._id) //
 						.eq('parentId', undefined)
-						.eq('isDone', isDone),
+						.eq('isActive', isActive),
 				)
 				.order('desc')
 				.collect();
 
-		const [notDone, done] = await Promise.all([
-			find({ isDone: false }), //
-			find({ isDone: true }),
+		const [active, inactive] = await Promise.all([
+			find({ isActive: true }), //
+			find({ isActive: false }),
 		]);
 
-		return notDone.concat(done);
+		return active.concat(inactive);
 	},
 });
 

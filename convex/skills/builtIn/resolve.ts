@@ -19,9 +19,9 @@ export const resolve = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
-			await execution.ctx.runMutation(internal.tasks.private._markAsDone, {
+			await execution.ctx.runMutation(internal.tasks.private._setStatus, {
 				taskId: execution.task._id,
-				isDone: true,
+				newStatus: 'done',
 			});
 
 			return {

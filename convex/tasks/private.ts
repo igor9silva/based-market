@@ -1,12 +1,9 @@
-import { openai } from '@ai-sdk/openai';
-import { embed } from 'ai';
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { internal } from '../_generated/api';
-import { Doc } from '../_generated/dataModel';
 import { _add as _addAction } from '../action/private';
-import { internalAction, internalMutation, internalQuery } from '../lib';
+import { internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
+import { taskStatusSchema } from '../schemas/taskSchema';
 import { _addFundTask, _addRefundTask } from '../transactions/private';
 import { _findOne as _findOneUser } from '../users/private';
 import { InsufficientAccountFunds, NotFound } from '../utils/errors';
@@ -25,48 +22,48 @@ export const _findOne = internalQuery({
 	},
 });
 
-export const _findAllNotEmbedded = internalQuery({
-	args: {},
-	handler: async (ctx) => {
-		//
-		return await ctx.db
-			.query('tasks')
-			.withIndex('by_embeddingId', (q) => q.eq('embeddingId', undefined))
-			.collect();
-	},
-});
+// export const _findAllNotEmbedded = internalQuery({
+// 	args: {},
+// 	handler: async (ctx) => {
+// 		//
+// 		return await ctx.db
+// 			.query('tasks')
+// 			.withIndex('by_embeddingId', (q) => q.eq('embeddingId', undefined))
+// 			.collect();
+// 	},
+// });
 
-export const _findAllByEmbeddingIds = internalQuery({
-	args: {
-		embeddings: z.array(
-			z.object({
-				_id: zid('taskEmbeddings'),
-				_score: z.number(),
-			}),
-		),
-	},
-	handler: async (ctx, { embeddings }) => {
-		//
-		const tasks = await Promise.all(
-			embeddings.map(async ({ _id, _score }) => {
-				const task = await ctx.db
-					.query('tasks')
-					.withIndex('by_embeddingId', (q) => q.eq('embeddingId', _id))
-					.unique();
+// export const _findAllByEmbeddingIds = internalQuery({
+// 	args: {
+// 		embeddings: z.array(
+// 			z.object({
+// 				_id: zid('taskEmbeddings'),
+// 				_score: z.number(),
+// 			}),
+// 		),
+// 	},
+// 	handler: async (ctx, { embeddings }) => {
+// 		//
+// 		const tasks = await Promise.all(
+// 			embeddings.map(async ({ _id, _score }) => {
+// 				const task = await ctx.db
+// 					.query('tasks')
+// 					.withIndex('by_embeddingId', (q) => q.eq('embeddingId', _id))
+// 					.unique();
 
-				if (!task) return null;
+// 				if (!task) return null;
 
-				return {
-					...task,
-					description: undefined, // not sending description to avoid too much data
-					_score,
-				};
-			}),
-		);
+// 				return {
+// 					...task,
+// 					description: undefined, // not sending description to avoid too much data
+// 					_score,
+// 				};
+// 			}),
+// 		);
 
-		return tasks.filter((task) => task !== null);
-	},
-});
+// 		return tasks.filter((task) => task !== null);
+// 	},
+// });
 
 export const _findActiveTasks = internalQuery({
 	args: {
@@ -76,10 +73,10 @@ export const _findActiveTasks = internalQuery({
 		//
 		return await ctx.db
 			.query('tasks')
-			.withIndex('by_author_isDone', (q) =>
+			.withIndex('by_owner_isActive', (q) =>
 				q
-					.eq('author', owner) //
-					.eq('isDone', false),
+					.eq('owner', owner) //
+					.eq('isActive', true),
 			)
 			.collect();
 	},
@@ -105,10 +102,16 @@ export const _add = internalMutation({
 			owner,
 			parentId,
 			title,
-			isDone: false,
-			availableBudgetUSD: 0n,
+			status: 'idle',
+			isActive: true,
+			budgetUSDC: {
+				total: 0n,
+				available: 0n,
+			},
 		});
 
+		// TODO: receive actions instead of using hardcoded ones
+		// also, should we have e `createTask` action? to make it explicit?
 		await Promise.all([
 			_addAction(ctx, {
 				skillKey: 'increaseBudget',
@@ -118,7 +121,6 @@ export const _add = internalMutation({
 				owner,
 			}),
 			_addAction(ctx, {
-				// TODO: receive an action instead of using hardcoded `say`
 				skillKey: 'say',
 				args: { message: details },
 				taskId,
@@ -142,8 +144,12 @@ export const _addInboxTask = internalMutation({
 			author,
 			owner,
 			title: 'Look at me!',
-			isDone: false,
-			availableBudgetUSD: 0n,
+			status: 'idle',
+			isActive: true,
+			budgetUSDC: {
+				total: 0n,
+				available: 0n,
+			},
 			details: `
 ## ooh-wee, welcome to Meseeks! 
 Here, everything is a task.
@@ -192,96 +198,96 @@ Happy hacking 🚀
 	},
 });
 
-export const _semanticSearch = internalAction({
-	args: {
-		query: z.string(),
-	},
-	handler: async (ctx, { query }): Promise<Array<Doc<'tasks'> & { _score: number }>> => {
-		//
-		const { embedding, usage } = await embed({
-			model: openai.embedding('text-embedding-3-large'),
-			value: query,
-		});
+// export const _semanticSearch = internalAction({
+// 	args: {
+// 		query: z.string(),
+// 	},
+// 	handler: async (ctx, { query }): Promise<Array<Doc<'tasks'> & { _score: number }>> => {
+// 		//
+// 		const { embedding, usage } = await embed({
+// 			model: openai.embedding('text-embedding-3-large'),
+// 			value: query,
+// 		});
 
-		console.log('embedding usage', usage);
+// 		console.log('embedding usage', usage);
 
-		const results = await ctx.vectorSearch('taskEmbeddings', 'by_embedding', {
-			vector: embedding,
-			limit: 16,
-			// filter: (q) => q.eq('isDone', false),
-		});
+// 		const results = await ctx.vectorSearch('taskEmbeddings', 'by_embedding', {
+// 			vector: embedding,
+// 			limit: 16,
+// 			// filter: (q) => q.eq('isDone', false),
+// 		});
 
-		const tasks = await ctx.runQuery(internal.tasks.private._findAllByEmbeddingIds, {
-			embeddings: results,
-		});
+// 		const tasks = await ctx.runQuery(internal.tasks.private._findAllByEmbeddingIds, {
+// 			embeddings: results,
+// 		});
 
-		return tasks;
-	},
-});
+// 		return tasks;
+// 	},
+// });
 
-export const _addEmbedding = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-		embedding: z.array(z.number()),
-		isDone: z.boolean(),
-	},
-	handler: async (ctx, { taskId, embedding, isDone }) => {
-		//
-		const embeddingId = await ctx.db.insert('taskEmbeddings', { taskId, embedding, isDone });
-		await ctx.db.patch(taskId, { embeddingId });
-	},
-});
+// export const _addEmbedding = internalMutation({
+// 	args: {
+// 		taskId: zid('tasks'),
+// 		embedding: z.array(z.number()),
+// 		isDone: z.boolean(),
+// 	},
+// 	handler: async (ctx, { taskId, embedding, isDone }) => {
+// 		//
+// 		const embeddingId = await ctx.db.insert('taskEmbeddings', { taskId, embedding, isDone });
+// 		await ctx.db.patch(taskId, { embeddingId });
+// 	},
+// });
 
-export const _removeEmbedding = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-	},
-	handler: async (ctx, { taskId }) => {
-		//
-		const task = await _findOne(ctx, { taskId });
-		if (!task.embeddingId) return;
+// export const _removeEmbedding = internalMutation({
+// 	args: {
+// 		taskId: zid('tasks'),
+// 	},
+// 	handler: async (ctx, { taskId }) => {
+// 		//
+// 		const task = await _findOne(ctx, { taskId });
+// 		if (!task.embeddingId) return;
 
-		await ctx.db.patch(taskId, { embeddingId: undefined });
-		await ctx.db.delete(task.embeddingId);
-	},
-});
+// 		await ctx.db.patch(taskId, { embeddingId: undefined });
+// 		await ctx.db.delete(task.embeddingId);
+// 	},
+// });
 
-export const _embedTask = internalAction({
-	args: {
-		taskId: zid('tasks'),
-	},
-	handler: async (ctx, { taskId }) => {
-		//
-		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
+// export const _embedTask = internalAction({
+// 	args: {
+// 		taskId: zid('tasks'),
+// 	},
+// 	handler: async (ctx, { taskId }) => {
+// 		//
+// 		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 
-		if (!task.details) return;
+// 		if (!task.details) return;
 
-		const { embedding, usage } = await embed({
-			model: openai.embedding('text-embedding-3-large'),
-			value: task.details,
-		});
+// 		const { embedding, usage } = await embed({
+// 			model: openai.embedding('text-embedding-3-large'),
+// 			value: task.details,
+// 		});
 
-		console.log('embedding usage', usage);
+// 		console.log('embedding usage', usage);
 
-		await ctx.runMutation(internal.tasks.private._addEmbedding, {
-			taskId,
-			embedding,
-			isDone: task.isDone,
-		});
-	},
-});
+// 		await ctx.runMutation(internal.tasks.private._addEmbedding, {
+// 			taskId,
+// 			embedding,
+// 			status: task.status,
+// 		});
+// 	},
+// });
 
-export const _embedAllMissingTasks = internalAction({
-	args: {},
-	handler: async (ctx) => {
-		//
-		const tasks = await ctx.runQuery(internal.tasks.private._findAllNotEmbedded);
+// export const _embedAllMissingTasks = internalAction({
+// 	args: {},
+// 	handler: async (ctx) => {
+// 		//
+// 		const tasks = await ctx.runQuery(internal.tasks.private._findAllNotEmbedded);
 
-		for (const task of tasks) {
-			await ctx.runAction(internal.tasks.private._embedTask, { taskId: task._id });
-		}
-	},
-});
+// 		for (const task of tasks) {
+// 			await ctx.runAction(internal.tasks.private._embedTask, { taskId: task._id });
+// 		}
+// 	},
+// });
 
 export const _update = internalMutation({
 	args: {
@@ -301,78 +307,31 @@ export const _update = internalMutation({
 	},
 });
 
-export const _markAsDone = internalMutation({
+export const _setStatus = internalMutation({
 	args: {
 		taskId: zid('tasks'),
-		isDone: z.boolean(),
+		newStatus: taskStatusSchema,
 	},
-	handler: async (ctx, { taskId, isDone }) => {
+	handler: async (ctx, { taskId, newStatus }) => {
 		//
-		if (isDone) {
+		if (newStatus === 'done' || newStatus === 'discarded') {
 			//
 			const task = await _findOne(ctx, { taskId });
 			if (!task) throw new Error('Task not found');
 
-			if (task.availableBudgetUSD && task.availableBudgetUSD > 0) {
-				await _removeFunds(ctx, { taskId, amount: task.availableBudgetUSD });
-				await ctx.db.patch(taskId, { availableBudgetUSD: 0n });
+			// remove funds from the task
+			if (task.budgetUSDC.available > 0n) {
+				await _removeFunds(ctx, { taskId, amount: task.budgetUSDC.available });
 			}
 		}
 
-		return await ctx.db.patch(taskId, { isDone });
-	},
-});
-
-export const _setResolution = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-		resolution: z.string().optional(),
-	},
-	handler: async (ctx, { taskId, resolution }) => {
-		//
-		return await ctx.db.patch(taskId, { resolution });
-	},
-});
-
-export const _resolve = internalMutation({
-	args: {
-		taskId: zid('tasks'),
-		resolution: z.string().optional(),
-	},
-	handler: async (ctx, { taskId, resolution }) => {
-		//
-		// const task = await execution.ctx.runQuery(internal.tasks.private._findOne, {
-		// 	taskId: execution.task._id,
-		// });
-
-		// 1. Set resolution if provided
-		if (resolution) {
-			//
-			// const finalResolution = args.resolution || 'Task completed successfully.';
-			// TODO: generate resolution if needed
-
-			await ctx.runMutation(internal.tasks.private._setResolution, {
-				taskId,
-				resolution,
-			});
-			//
-		}
-
-		// 2. Mark task as done (which will refund any unused funds)
-		await ctx.runMutation(internal.tasks.private._markAsDone, {
-			taskId,
-			isDone: true,
+		return await ctx.db.patch(taskId, {
+			status: newStatus,
+			isActive: newStatus !== 'discarded' && newStatus !== 'done',
 		});
-
-		// await execution.ctx.runMutation(internal.action.private._add, {
-		// 	taskId: execution.task._id,
-		// 	author: execution.action.author,
-		// 	owner: execution.task.owner,
-		// 	skillKey: '_learnFromTask',
-		// 	args: {},
-		// });
 	},
 });
+
 // export const _learn = internalAction({
 // 	args: {
 // 		taskId: zid('tasks'),
@@ -414,7 +373,7 @@ export const _useFunds = internalMutation({
 
 		console.debug(`using ${asDollars({ bigInt: amount })} from task ${taskId}`);
 
-		if (task.availableBudgetUSD < amount) {
+		if (task.budgetUSDC.available < amount) {
 			//
 			console.warn(
 				'Insufficient funds on task',
@@ -422,17 +381,22 @@ export const _useFunds = internalMutation({
 				'cost',
 				asDollars({ bigInt: amount }),
 				'available',
-				asDollars({ bigInt: task.availableBudgetUSD }),
+				asDollars({ bigInt: task.budgetUSDC.available }),
 				'missing',
-				asDollars({ bigInt: amount - task.availableBudgetUSD }),
+				asDollars({ bigInt: amount - task.budgetUSDC.available }),
 				'Will use all available funds',
 			);
 
-			amount = task.availableBudgetUSD;
+			amount = task.budgetUSDC.available;
 		}
 
 		// update the task balance
-		await ctx.db.patch(taskId, { availableBudgetUSD: task.availableBudgetUSD - amount });
+		await ctx.db.patch(taskId, {
+			budgetUSDC: {
+				total: task.budgetUSDC.total,
+				available: task.budgetUSDC.available - amount,
+			},
+		});
 	},
 });
 
@@ -473,7 +437,12 @@ export const _increaseBudget = internalMutation({
 		});
 
 		// update the task balance
-		await ctx.db.patch(taskId, { availableBudgetUSD: task.availableBudgetUSD + amount });
+		await ctx.db.patch(taskId, {
+			budgetUSDC: {
+				total: task.budgetUSDC.total + amount,
+				available: task.budgetUSDC.available + amount,
+			},
+		});
 	},
 });
 
@@ -496,7 +465,12 @@ export const _removeFunds = internalMutation({
 		});
 
 		// update the task balance
-		await ctx.db.patch(taskId, { availableBudgetUSD: task.availableBudgetUSD - amount });
+		await ctx.db.patch(taskId, {
+			budgetUSDC: {
+				total: task.budgetUSDC.total - amount,
+				available: task.budgetUSDC.available - amount,
+			},
+		});
 	},
 });
 
