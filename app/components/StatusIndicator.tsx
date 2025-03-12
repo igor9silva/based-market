@@ -8,13 +8,12 @@ const sizeClasses = {
 type StatusIndicatorProps = {
 	size?: keyof typeof sizeClasses;
 	className?: string;
-	pulse?: boolean;
 };
 
-export function StatusIndicator({ size = 'sm', className = '', pulse = true }: StatusIndicatorProps) {
+export function StatusIndicator({ size = 'sm', className = '' }: StatusIndicatorProps) {
 	return (
 		<div
-			className={`rounded-full ${sizeClasses[size]} ${pulse ? 'animate-pulse-blur' : ''} ${className}`}
+			className={`rounded-full flex-shrink-0 blur-[0.5px] ${sizeClasses[size]} ${className}`}
 			aria-live="polite"
 			aria-label="Status Indicator"
 		>

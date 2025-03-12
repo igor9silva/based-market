@@ -6,7 +6,7 @@ import { internalMutation, internalQuery } from '../lib';
 import { actionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
-import { _findOne as _findOneTask } from '../tasks/private';
+import { _findOne as _findOneTask, _setStatus as _setTaskStatus } from '../tasks/private';
 import { _runNextActionIfNeeded } from './lifecycle/private';
 
 export const newActionSchema = z.object({
@@ -82,6 +82,12 @@ export const _addMany = internalMutation({
 	},
 });
 
+// TODO: I think this should be splitted/abstracted
+// one logic for auto-approval (i.e. from within action.perform())
+// another one for explicit human approval/rejection (i.e. from the UI)
+// e.g. update the task status from here feels wrong
+// instintic: if reject, should call resolve
+//	also maybe rename 'resolve' to something else because of task's
 export const _authorize = internalMutation({
 	args: {
 		taskId: zid('tasks'),
@@ -90,9 +96,9 @@ export const _authorize = internalMutation({
 			zid('users'), //
 			z.literal('auto'),
 		]),
-		approved: z.boolean(),
+		hasApproved: z.boolean(),
 	},
-	handler: async (ctx, { taskId, actionId, approver, approved }) => {
+	handler: async (ctx, { taskId, actionId, approver, hasApproved }) => {
 		//
 		const action = await _findOne(ctx, { actionId });
 		if (action.approvedAt) return;
@@ -100,9 +106,9 @@ export const _authorize = internalMutation({
 		// if already running, keep running - else enqueue
 		const approvedStatus = action.status === 'running' ? ('running' as const) : ('enqueued' as const);
 
-		console.debug(`${approver} ${approved ? 'approved' : 'rejected'} ${action.skillKey} (${action._id})`);
+		console.debug(`${approver} ${hasApproved ? 'approved' : 'rejected'} ${action.skillKey} (${action._id})`);
 
-		const patch = approved
+		const patch = hasApproved
 			? {
 					status: approvedStatus,
 					approvedBy: approver,
@@ -113,6 +119,11 @@ export const _authorize = internalMutation({
 					result: 'rejected by ' + approver,
 					costs: [],
 				};
+
+		// if rejected by user, go back to 'idle' (not 'unread' because it's an explicit user action)
+		if (!hasApproved) {
+			await _setTaskStatus(ctx, { taskId, newStatus: 'idle' });
+		}
 
 		await ctx.db.patch(actionId, patch);
 		await _runNextActionIfNeeded(ctx, taskId);
@@ -252,6 +263,7 @@ export const _skipAllPendingReactions = internalMutation({
 			_findReactions(ctx, { taskId, owner, status: 'pending authorization' }),
 		]).then(([A, B]) => A.concat(B));
 
+		// TODO: maybe this also must call resolve
 		return await Promise.all(
 			pendingReactions.map((action) =>
 				ctx.db.patch(action._id, {

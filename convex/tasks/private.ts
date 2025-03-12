@@ -332,6 +332,19 @@ export const _setStatus = internalMutation({
 	},
 });
 
+export const _markAsRead = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		actionId: zid('actions'),
+	},
+	handler: async (ctx, { taskId, actionId }) => {
+		//
+		return await ctx.db.patch(taskId, {
+			lastReadAction: actionId,
+		});
+	},
+});
+
 // export const _learn = internalAction({
 // 	args: {
 // 		taskId: zid('tasks'),

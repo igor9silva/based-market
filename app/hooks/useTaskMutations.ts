@@ -88,7 +88,7 @@ export function useTaskMutations() {
 		return authorize({
 			taskId,
 			actionId,
-			approved: true,
+			hasApproved: true,
 		});
 	};
 
@@ -102,7 +102,7 @@ export function useTaskMutations() {
 		return authorize({
 			taskId,
 			actionId,
-			approved: false,
+			hasApproved: false,
 		});
 	};
 

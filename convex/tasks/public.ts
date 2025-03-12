@@ -5,7 +5,7 @@ import { MutationCtx, QueryCtx } from '../_generated/server';
 import { mutation, query } from '../lib';
 import { current as getCurrentUser } from '../users/public';
 import { asBigInt } from '../utils/money';
-import { _add } from './private';
+import { _add, _markAsRead } from './private';
 
 export const findAll = query({
 	args: {
@@ -111,6 +111,18 @@ export const add = mutation({
 	},
 });
 
+export const markAsRead = mutation({
+	args: {
+		taskId: zid('tasks'),
+		actionId: zid('actions'),
+	},
+	handler: async (ctx, { taskId, actionId }) => {
+		//
+		await ensureTaskOwner(ctx, { taskId });
+
+		return await _markAsRead(ctx, { taskId, actionId });
+	},
+});
 export const ensureTaskOwner = async (
 	ctx: QueryCtx | MutationCtx, //
 	args: {

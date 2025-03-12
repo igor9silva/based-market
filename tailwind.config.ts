@@ -79,7 +79,7 @@ export default {
 						filter: 'blur(3px)',
 					},
 					'50%': {
-						transform: 'scale(1.2)',
+						transform: 'scale(1.1)',
 						filter: 'blur(1.5px)',
 					},
 				},

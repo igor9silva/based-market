@@ -33,9 +33,9 @@ export const authorize = mutation({
 	args: {
 		taskId: zid('tasks'),
 		actionId: zid('actions'),
-		approved: z.boolean(),
+		hasApproved: z.boolean(),
 	},
-	handler: async (ctx, { taskId, actionId, approved }) => {
+	handler: async (ctx, { taskId, actionId, hasApproved }) => {
 		//
 		const { currentUser } = await ensureTaskOwner(ctx, { taskId });
 
@@ -43,7 +43,7 @@ export const authorize = mutation({
 			taskId,
 			actionId,
 			approver: currentUser._id,
-			approved,
+			hasApproved,
 		});
 	},
 });

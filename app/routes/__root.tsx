@@ -10,7 +10,6 @@ import { CommandMenuDialog } from '~/components/CommandMenu';
 
 import { Loading } from '~/components/Loading';
 import { MainHeader } from '~/components/MainHeader';
-import { MainSidebar } from '~/components/MainSidebar';
 import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
 import { SidebarProvider } from '~/components/ui/sidebar';
@@ -111,9 +110,9 @@ function Main({ children }: { children: React.ReactNode }) {
 
 	return (
 		<div className="flex h-svh w-full">
-			<div className="hidden md:block">
+			{/* <div className="hidden md:block">
 				<MainSidebar />
-			</div>
+			</div> */}
 			<main className="flex-1 flex flex-col-reverse md:flex-col overflow-hidden p-4 md:p-0">
 				<MainHeader className="mt-0" />
 				<div className="flex-1 overflow-auto">{children}</div>

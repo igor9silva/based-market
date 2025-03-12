@@ -4,9 +4,9 @@ import { Suspense } from 'react';
 import { cn } from '~/lib/utils';
 
 import { toast } from 'sonner';
-import { ActionIsland } from '~/components/ActionIsland';
 import { Balance } from '~/components/Balance';
 import { useCommandMenu } from '~/components/CommandMenu';
+import { TaskStatusIndicator } from '~/components/TaskStatusIndicator';
 import { Button } from '~/components/ui/button';
 import { useSplatParams } from '~/hooks/useSplatParams';
 
@@ -76,10 +76,9 @@ export function MainHeader({ className }: { className?: string }) {
 				<Balance />
 				{taskId && (
 					<Suspense fallback={null}>
-						<ActionIsland
-							taskId={taskId}
-							className="md:relative" // Add positioning context for desktop
-						/>
+						<div className="flex items-center p-1">
+							<TaskStatusIndicator className="" taskId={taskId} />
+						</div>
 					</Suspense>
 				)}
 			</div>

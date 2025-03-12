@@ -9,11 +9,11 @@ import { skillSchema } from '../../schemas/skillSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
 import { calculateProviderCost } from '../../skills/createAITool';
 import { createTool } from '../../skills/tools';
-import { _useFunds } from '../../tasks/private';
+import { _setStatus as _setTaskStatus, _useFunds } from '../../tasks/private';
 import { asDollars } from '../../utils/money';
 
 // TODO: if that since we dropped support for sync actions, we can use ActionCtx only, and remove MutationCtx from the arg type
-export const _execute = internalAction({
+export const _perform = internalAction({
 	args: {
 		taskId: zid('tasks'),
 		actionId: zid('actions'),
@@ -47,7 +47,7 @@ export const _execute = internalAction({
 				const wasAutoApproved = await _tryAutoApprove(ctx, task, action, skill, expectedCost);
 
 				// if failed, request human approval
-				if (!wasAutoApproved) return await _requestHumanApproval(ctx, actionId);
+				if (!wasAutoApproved) return await _requestHumanApproval(ctx, actionId, taskId);
 			}
 
 			const tool = createTool(ctx, task, action, skill);
@@ -58,6 +58,7 @@ export const _execute = internalAction({
 
 			await _setResolved(ctx, {
 				actionId,
+				taskId,
 				result: result ?? 'unknown',
 				status: 'succeeded',
 				costs: costs,
@@ -79,6 +80,7 @@ export const _execute = internalAction({
 
 			await _setResolved(ctx, {
 				actionId,
+				taskId,
 				result: `${error instanceof Error ? error.message : 'Unknown error'}`,
 				status: 'failed',
 				costs: [],
@@ -131,12 +133,14 @@ export const _execute = internalAction({
 export const _start = internalMutation({
 	args: {
 		actionId: zid('actions'),
+		taskId: zid('tasks'),
 	},
-	handler: async (ctx, { actionId }) => {
+	handler: async (ctx, { actionId, taskId }) => {
 		//
 		console.debug(`${actionId} starts`);
 
-		return await ctx.db.patch(actionId, { status: 'running' });
+		await ctx.db.patch(actionId, { status: 'running' });
+		await _setTaskStatus(ctx, { taskId, newStatus: 'acting' }); // if any running action, task is 'acting'
 	},
 });
 
@@ -153,18 +157,21 @@ export const _setEstimatedCost = internalMutation({
 export const _requestAuthorization = internalMutation({
 	args: {
 		actionId: zid('actions'),
+		taskId: zid('tasks'),
 	},
-	handler: async (ctx, { actionId }) => {
+	handler: async (ctx, { actionId, taskId }) => {
 		//
 		console.debug(`requesting authorization for ${actionId}`);
 
-		return await ctx.db.patch(actionId, { status: 'pending authorization' });
+		await ctx.db.patch(actionId, { status: 'pending authorization' });
+		await _setTaskStatus(ctx, { taskId, newStatus: 'blocked' }); // if any pending authorization action, task is 'blocked'
 	},
 });
 
 export const _resolve = internalMutation({
 	args: {
 		actionId: zid('actions'),
+		taskId: zid('tasks'),
 		result: z.string(),
 		status: z.enum(['succeeded', 'failed']),
 		costs: z.array(
@@ -175,7 +182,7 @@ export const _resolve = internalMutation({
 			}),
 		),
 	},
-	handler: async (ctx, { actionId, result, status, costs }) => {
+	handler: async (ctx, { actionId, taskId, result, status, costs }) => {
 		//
 		console.debug(`${actionId} resolved with ${status}`);
 
@@ -196,18 +203,7 @@ export const _resolve = internalMutation({
 		}
 
 		await ctx.db.patch(actionId, { result, status, costs });
-
-		// TODO: aggregate task status
-
-		// // this if avoids silicon-based life forms to take over
-		// if (
-		// 	action.skillKey !== 'feedback' &&
-		// 	action.skillKey !== 'askForClarification' &&
-		// 	action.skillKey !== 'refineTask'
-		// ) {
-		// 	// TODO: make this configurable
-		// 	await _react(ctx, { taskId: action.taskId, author: action._id });
-		// }
+		await _setTaskStatus(ctx, { taskId, newStatus: 'unread' }); // after an action is resolved, task is get to 'unread' until a new action starts()
 	},
 });
 
@@ -300,7 +296,7 @@ async function _autoApprove(
 		taskId: task._id,
 		actionId: action._id,
 		approver: 'auto',
-		approved: true,
+		hasApproved: true,
 	});
 
 	return true;
@@ -348,15 +344,20 @@ async function _hasReachedMaxConsecutiveCompanionActions(
 	return lastActions.every((action) => action.author !== task.owner);
 }
 
-async function _requestHumanApproval(ctx: ActionCtx | MutationCtx, actionId: Id<'actions'>) {
+async function _requestHumanApproval(
+	ctx: ActionCtx | MutationCtx, //
+	actionId: Id<'actions'>,
+	taskId: Id<'tasks'>,
+) {
 	//
-	await ctx.runMutation(internal.action.lifecycle.private._requestAuthorization, { actionId });
+	await ctx.runMutation(internal.action.lifecycle.private._requestAuthorization, { actionId, taskId });
 }
 
 async function _setResolved(
 	ctx: ActionCtx | MutationCtx,
 	args: {
 		actionId: Id<'actions'>;
+		taskId: Id<'tasks'>;
 		result: string;
 		status: 'succeeded' | 'failed';
 		costs: Array<{
@@ -382,9 +383,9 @@ export async function _runAction(
 	if (action.result) throw new Error('Action is already done.');
 
 	// ideally, status=`running` would be set in the action itself, but that'd lead into a race condition
-	await ctx.runMutation(internal.action.lifecycle.private._start, { actionId: action._id });
+	await ctx.runMutation(internal.action.lifecycle.private._start, { actionId: action._id, taskId });
 
-	return await ctx.scheduler.runAfter(0, internal.action.lifecycle.private._execute, {
+	return await ctx.scheduler.runAfter(0, internal.action.lifecycle.private._perform, {
 		taskId,
 		actionId: action._id,
 	});

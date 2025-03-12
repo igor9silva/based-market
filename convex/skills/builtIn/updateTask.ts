@@ -6,7 +6,7 @@ export const updateTask = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Update the task title and/or details.',
 	parameters: z.object({
-		title: z.string().max(100).optional().describe('A short title for the task. Max 100 characters.'),
+		title: z.string().max(60).optional().describe('A short title for the task. Max 60 characters.'),
 		details: z
 			.string()
 			.optional()

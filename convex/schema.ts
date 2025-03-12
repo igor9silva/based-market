@@ -32,6 +32,8 @@ export default defineSchema({
 		'by_parent_isActive', ['parentId', 'isActive'],
 	).index(
 		'by_owner_isActive', ['owner', 'isActive'],
+	).index(
+		'by_owner_status', ['owner', 'status'],
 	),
 	// .index(
 	// 	'by_embeddingId', ['embeddingId'],
