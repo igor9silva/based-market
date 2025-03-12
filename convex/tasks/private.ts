@@ -86,8 +86,7 @@ export const _add = internalMutation({
 	args: {
 		author: authorSchema,
 		owner: zid('users'),
-		title: z.string().optional(),
-		details: z.string().optional(),
+		message: z.string().optional(),
 		parentId: zid('tasks').optional(),
 		initialFunds: z
 			.bigint()
@@ -95,13 +94,12 @@ export const _add = internalMutation({
 			.max(asBigInt({ dollars: 100000 }))
 			.optional(),
 	},
-	handler: async (ctx, { author, owner, title, details, parentId, initialFunds }) => {
+	handler: async (ctx, { author, owner, message, parentId, initialFunds }) => {
 		//
 		const taskId = await ctx.db.insert('tasks', {
 			author,
 			owner,
 			parentId,
-			title,
 			status: 'idle',
 			isActive: true,
 			budgetUSDC: {
@@ -124,7 +122,7 @@ export const _add = internalMutation({
 				},
 				{
 					skillKey: 'say',
-					args: { message: details },
+					args: { message },
 				},
 			],
 		});
@@ -150,7 +148,8 @@ export const _addInboxTask = internalMutation({
 				total: 0n,
 				available: 0n,
 			},
-			details: `
+			instructions: `
+# Look at me!
 ## ooh-wee, welcome to Meseeks! 
 Here, everything is a task.
 <br />
@@ -260,11 +259,11 @@ Happy hacking 🚀
 // 		//
 // 		const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 
-// 		if (!task.details) return;
+// 		if (!task.instructions) return;
 
 // 		const { embedding, usage } = await embed({
 // 			model: openai.embedding('text-embedding-3-large'),
-// 			value: task.details,
+// 			value: task.instructions,
 // 		});
 
 // 		console.log('embedding usage', usage);
@@ -293,15 +292,15 @@ export const _update = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		title: z.string().optional(),
-		details: z.string().optional(),
+		instructions: z.string().optional(),
 	},
-	handler: async (ctx, { taskId, title, details }) => {
+	handler: async (ctx, { taskId, title, instructions }) => {
 		//
-		if (title === undefined && details === undefined) throw new Error('No changes to update');
+		if (title === undefined && instructions === undefined) throw new Error('Nothing to do');
 
 		return await ctx.db.patch(taskId, {
 			...(title !== undefined && { title }),
-			...(details !== undefined && { details }),
+			...(instructions !== undefined && { instructions }),
 			lastUpdatedAt: Date.now(),
 		});
 	},

@@ -25,7 +25,7 @@ export default function TaskDetail({
 }) {
 	const query = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(query);
-	const { updateTask } = useTaskMutations();
+	const { updateInstructions } = useTaskMutations();
 
 	return (
 		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto h-full p-4 md:p-0', className)}>
@@ -35,7 +35,7 @@ export default function TaskDetail({
 						<EditableContent
 							key={task.title}
 							value={task.title ?? ''}
-							onSave={(newTitle) => updateTask({ taskId: task._id, title: newTitle })}
+							onSave={(newTitle) => updateInstructions({ taskId: task._id, title: newTitle })}
 							viewClassName="text-2xl font-bold leading-none break-all"
 							asView={({ value, className, isEmpty }) => (
 								<h1 className={cn(!task.isActive && 'line-through', className)}>
@@ -76,14 +76,16 @@ export default function TaskDetail({
 			</CardHeader>
 			<CardContent className="p-0 md:p-4 md:pt-0">
 				<EditableContent
-					key={task.details}
-					value={task.details ?? ''}
-					onSave={(newDetails) => updateTask({ taskId: task._id, details: newDetails })}
+					key={task.instructions}
+					value={task.instructions ?? ''}
+					onSave={(newInstructions) =>
+						updateInstructions({ taskId: task._id, instructions: newInstructions })
+					}
 					multiline
 					asView={({ value, enterEditMode, className, isEmpty }) => (
 						<div className={cn('overflow-x-auto', className)}>
 							{isEmpty ? (
-								<div className="text-muted-foreground">No details</div>
+								<div className="text-muted-foreground text-sm">No instructions.</div>
 							) : (
 								<MDX text={value} onClickFix={enterEditMode} />
 							)}

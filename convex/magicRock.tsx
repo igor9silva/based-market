@@ -207,7 +207,7 @@ async function renderHistory(
 	// 		.flatMap((message) => message),
 	// );
 
-	// history will be empty right after an updateTask(), so we artificially add a temporary user message to keep going
+	// history will be empty right after an updateInstructions(), so we artificially add a temporary user message to keep going
 	// if (history.length === 0) {
 	// 	history.push({
 	// 		role: 'user',
@@ -253,7 +253,7 @@ const promptForTask = (task: Doc<'tasks'>) =>
 	[
 		`<id>${task._id}</id>`, //
 		`<title>${task.title}</title>`,
-		`<details>${task.details}</details>`,
+		`<instructions>${task.instructions}</instructions>`,
 		// `<status>${task.status}</status>`,
 		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
 		`<lastUpdatedAt>${dateOrNever(task.lastUpdatedAt)}</lastUpdatedAt>`,

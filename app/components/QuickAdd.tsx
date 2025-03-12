@@ -29,18 +29,18 @@ export function QuickAdd({ className }: { className?: string }) {
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
-			details: z.string().min(1, 'Details are required'),
+			message: z.string().min(1, 'Message is required'),
 			initialFunds: z.coerce.number().min(0).max(100).default(0.1),
 		}),
 		shouldAlwaysClearForm: false,
-		handler: async ({ details, initialFunds }) => {
+		handler: async ({ message, initialFunds }) => {
 			//
-			console.debug('QuickAdd', details, initialFunds);
+			console.debug('QuickAdd', message, initialFunds);
 
 			try {
 				//
 				const taskId = await addTask({
-					details,
+					message,
 					initialFunds: asBigInt({ dollars: initialFunds }),
 				});
 
@@ -73,7 +73,7 @@ export function QuickAdd({ className }: { className?: string }) {
 					<div className="flex flex-col gap-2">
 						<Textarea
 							ref={textareaRef}
-							name="details"
+							name="message"
 							placeholder="What are you seeking?"
 							required
 							defaultValue={newTaskText}

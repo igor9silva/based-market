@@ -22,19 +22,19 @@ export function useTaskMutations() {
 		});
 	};
 
-	const updateTask = ({
+	const updateInstructions = ({
 		taskId, //
 		title,
-		details,
+		instructions,
 	}: {
 		taskId: Id<'tasks'>;
 		title?: string;
-		details?: string;
+		instructions?: string;
 	}) => {
 		return act({
 			taskId,
-			skillKey: 'updateTask',
-			args: { title, details },
+			skillKey: 'updateInstructions',
+			args: { title, instructions },
 			shouldReopen: true,
 		});
 	};
@@ -108,7 +108,7 @@ export function useTaskMutations() {
 
 	return {
 		say,
-		updateTask,
+		updateInstructions,
 		resolve,
 		discard,
 		increaseBudget,

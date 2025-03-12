@@ -16,12 +16,15 @@ export const taskSchema = z
 		author: authorSchema.describe('Who created the task.'),
 		owner: zid('users').describe('The user who is responsible for the task.'),
 		title: z.string().max(60).optional().describe('A short title for the task. Max 60 characters.'),
-		details: z.string().optional().describe('An MDX detailed description of the task.'),
+		instructions: z
+			.string()
+			.optional()
+			.describe('An MDX detailed description of what should be done to achieve the task.'),
 		summary: z.string().optional().describe('A summary of the task activity.'),
 		status: taskStatusSchema,
 		isActive: z.boolean().describe('Computed from status.'),
 		parentId: zid('tasks').optional().describe('The parent task ID of this task.'),
-		lastUpdatedAt: z.number().optional().describe('The last time the task details were reviewed/updated.'),
+		lastUpdatedAt: z.number().optional().describe('The last time the task instructions were reviewed/updated.'),
 		lastSummarizedAt: z.number().optional().describe('The last time the task activity was summarized.'),
 		lastReadAction: zid('actions').optional().describe('The last action that was "read" by the user.'),
 		budgetUSDC: z.object({

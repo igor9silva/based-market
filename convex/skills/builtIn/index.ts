@@ -8,12 +8,12 @@ import { resolve } from './resolve';
 import { say } from './say';
 import { subtract } from './subtract';
 import { sum } from './sum';
-import { updateTask } from './updateTask';
+import { updateInstructions } from './updateInstructions';
 
 export const _builtInSkills = {
 	// 1st step
 	askForClarification,
-	updateTask,
+	updateInstructions,
 	discard,
 	//
 	// evaluateUnderstanding,
