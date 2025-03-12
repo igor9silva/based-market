@@ -8,7 +8,7 @@ export const resolve = defineSkill({
 	parameters: z.object({
 		reasoning: z.string().optional().describe('A short explanation for resolving the task.'),
 	}),
-	reactions: [
+	knownReactions: [
 		// {
 		// 	skillKey: 'learn',
 		// 	args: {},
@@ -26,7 +26,7 @@ export const resolve = defineSkill({
 
 			return {
 				result: args.reasoning ?? 'ok',
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

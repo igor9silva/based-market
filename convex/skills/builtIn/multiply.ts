@@ -8,14 +8,14 @@ export const multiply = defineSkill({
 	parameters: z.object({
 		numbers: z.array(z.number()).describe('The numbers to multiply.'),
 	}),
-	reactions: [],
+	knownReactions: [],
 	execute:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
 				result: args.numbers.reduce((acc, curr) => acc * curr, 1).toString(),
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

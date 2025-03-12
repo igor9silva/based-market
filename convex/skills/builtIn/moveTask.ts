@@ -15,7 +15,7 @@ export const moveTask = defineSkill({
 				'The new parent id for the task. Use "inbox" to move the task to the Inbox (aka root, no parent).',
 			),
 	}),
-	reactions: [],
+	knownReactions: [],
 	execute:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
@@ -27,7 +27,7 @@ export const moveTask = defineSkill({
 
 			return {
 				result: 'ok',
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

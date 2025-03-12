@@ -79,7 +79,7 @@ const coreSkillSchema = z.object({
 				'If the expected cost is less than or equal to this amount (pre-approved cost), it will be automatically authorized to execute. If can be set to "none" to disable pre-approval at all, forcing a human-approval before execution.',
 			),
 	]),
-	reactions: z
+	knownReactions: z
 		.array(
 			z.object({
 				skillKey: z.string().describe('The key of the skill to use'),

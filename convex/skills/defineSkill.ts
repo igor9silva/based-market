@@ -7,7 +7,7 @@ export type Skill<T extends z.AnyZodObject> = {
 	preApprovedCost: bigint | 'none';
 	description: string;
 	parameters: T;
-	reactions: Array<Reaction>;
+	knownReactions: Array<Reaction>;
 	execute: (execution: ToolExecution) => (args: z.infer<T>) => Promise<ExecutionResult>;
 };
 

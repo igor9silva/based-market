@@ -14,7 +14,7 @@
 // 				'Instructions for the subtask. Make sure to add all required details so another Meseeks can handle it properly. Think through your current context carefully and send a complete and structured message.',
 // 			),
 // 	}),
-// 	reactions: [],
+// 	knownReactions: [],
 // 	execute:
 // 		(execution: ToolExecution) =>
 // 		async (args): Promise<ExecutionResult> => {
@@ -29,7 +29,7 @@
 
 // 			return {
 // 				result: 'ok',
-// 				reactions: execution.skill.reactions,
+// 				reactions: execution.skill.knownReactions,
 // 			};
 // 		},
 // });

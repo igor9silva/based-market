@@ -18,7 +18,7 @@ export const updateInstructions = defineSkill({
 			.optional()
 			.describe(`MDX. Add any details on how to handle the task, what should be done, how, references, etc.`),
 	}),
-	reactions: [
+	knownReactions: [
 		{
 			skillKey: 'seek',
 			args: {},
@@ -37,7 +37,7 @@ export const updateInstructions = defineSkill({
 
 			return {
 				result: 'ok',
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

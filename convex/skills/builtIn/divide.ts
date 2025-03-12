@@ -9,14 +9,14 @@ export const divide = defineSkill({
 		A: z.number().describe('The dividend.'),
 		B: z.number().describe('The divisor.'),
 	}),
-	reactions: [],
+	knownReactions: [],
 	execute:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
 				result: (args.A / args.B).toString(),
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

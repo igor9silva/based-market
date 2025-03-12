@@ -5,14 +5,14 @@ export const evaluateUnderstanding = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Evaluate whether the current task understanding is accurate.',
 	parameters: z.object({}),
-	reactions: [],
+	knownReactions: [],
 	execute:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
 				result: 'Evaluating understanding of task based on user input...',
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

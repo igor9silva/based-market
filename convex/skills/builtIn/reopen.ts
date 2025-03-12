@@ -7,7 +7,7 @@ export const reopen = defineSkill({
 	description: 'Re-open a task that was previously marked as done.',
 	isVisibleToMagicRock: false,
 	parameters: z.object({}),
-	reactions: [
+	knownReactions: [
 		{
 			skillKey: 'inferUserIntent',
 			args: {},
@@ -25,7 +25,7 @@ export const reopen = defineSkill({
 
 			return {
 				result: 'ok',
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

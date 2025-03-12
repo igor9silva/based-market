@@ -8,7 +8,7 @@ export const say = defineSkill({
 	parameters: z.object({
 		message: z.string().describe('The message in MDX format.'),
 	}),
-	reactions: [
+	knownReactions: [
 		{
 			skillKey: 'inferUserIntent',
 			args: {},
@@ -21,7 +21,7 @@ export const say = defineSkill({
 			//
 			return {
 				result: args.message,
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

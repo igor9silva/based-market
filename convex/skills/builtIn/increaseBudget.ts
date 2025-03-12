@@ -10,7 +10,7 @@ export const increaseBudget = defineSkill({
 	parameters: z.object({
 		amount: z.bigint().min(0n).describe('The amount of funds to add, in USD.'),
 	}),
-	reactions: [
+	knownReactions: [
 		{
 			skillKey: 'inferUserIntent',
 			args: {},
@@ -28,7 +28,7 @@ export const increaseBudget = defineSkill({
 
 			return {
 				result: `budget increased by ${asDollars({ bigInt: args.amount })}`,
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

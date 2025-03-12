@@ -8,7 +8,7 @@ export const updateSummary = defineSkill({
 	parameters: z.object({
 		summary: z.string().describe(`MDX. Add any details on what we have done so far. Bullet points are preferred.`),
 	}),
-	reactions: [
+	knownReactions: [
 		// {
 		// 	skillKey: 'seek',
 		// 	args: {},
@@ -26,7 +26,7 @@ export const updateSummary = defineSkill({
 
 			return {
 				result: 'ok',
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

@@ -9,14 +9,14 @@ export const reason = defineSkill({
 	parameters: z.object({
 		reasoning: z.string().describe('The reasoning.'),
 	}),
-	reactions: [],
+	knownReactions: [],
 	execute:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
 				result: args.reasoning,
-				reactions: execution.skill.reactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });
