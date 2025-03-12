@@ -5,7 +5,6 @@ import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 export const reopen = defineSkill({
 	preApprovedCost: 'none',
 	description: 'Re-open a task that was previously marked as done.',
-	isVisibleToMagicRock: false,
 	parameters: z.object({}),
 	knownReactions: [
 		{

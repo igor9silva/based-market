@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const multiply = defineSkill({
-	isVisibleToMagicRock: true,
 	preApprovedCost: 0n,
 	description: 'Multiply N numbers',
 	parameters: z.object({

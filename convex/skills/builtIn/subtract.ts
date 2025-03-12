@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const subtract = defineSkill({
-	isVisibleToMagicRock: true,
 	preApprovedCost: 0n,
 	description: 'Subtract N numbers',
 	parameters: z.object({

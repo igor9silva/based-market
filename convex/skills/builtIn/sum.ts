@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const sum = defineSkill({
-	isVisibleToMagicRock: true,
 	preApprovedCost: 0n,
 	description: 'Sum N numbers',
 	parameters: z.object({

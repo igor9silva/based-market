@@ -8,22 +8,6 @@ import { createAITool } from './createAITool';
 import { createBuiltInTool } from './createBuiltInTool';
 import { createHTTPTool } from './createHttpTool';
 
-export const _allSkillsAsTools = async (
-	ctx: ActionCtx, //
-	task: Doc<'tasks'>,
-	action: Doc<'actions'>,
-) => {
-	//
-	const skills = await ctx.runQuery(internal.skills.private._findAll, {
-		owner: task.owner,
-	});
-
-	return {
-		...toMap(skills, (skill) => createTool(ctx, task, action, skill)),
-		..._builtInTools(ctx, task, action),
-	};
-};
-
 export const _toolsForMagicRock = async (
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
@@ -37,7 +21,7 @@ export const _toolsForMagicRock = async (
 
 	const map = {
 		...toMap(skills, (skill) => createTool(ctx, task, action, skill)),
-		..._builtInTools(ctx, task, action, true),
+		..._builtInTools(ctx, task, action),
 	};
 
 	Object.values(map).forEach((skill) => {
@@ -52,7 +36,6 @@ export const _builtInTools = (
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
-	isForMagicRock: boolean = false, // TODO: this is a temporary solution. Skill selection should be done on the action.
 ) => {
 	//
 
@@ -60,8 +43,6 @@ export const _builtInTools = (
 		(acc, key) => {
 			//
 			const skill = _builtInSkills[key as keyof typeof _builtInSkills];
-
-			if (isForMagicRock && !skill.isVisibleToMagicRock) return acc;
 
 			acc[key] = createBuiltInTool(ctx, task, action, skill);
 

@@ -3,7 +3,6 @@ import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
 
 export type Skill<T extends z.AnyZodObject> = {
-	isVisibleToMagicRock?: boolean;
 	preApprovedCost: bigint | 'none';
 	description: string;
 	parameters: T;
@@ -29,8 +28,5 @@ export type ExecutionResult = {
 	reactions: Array<Reaction>;
 };
 
-export const defineSkill = <T extends z.AnyZodObject>(skill: Skill<T>) => ({
-	// TODO: this is a temporary solution. Skill selection should be done on the action.
-	...skill,
-	isVisibleToMagicRock: skill.isVisibleToMagicRock === undefined ? true : skill.isVisibleToMagicRock,
-});
+// for the types
+export const defineSkill = <T extends z.AnyZodObject>(skill: Skill<T>) => skill;

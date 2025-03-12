@@ -4,7 +4,6 @@ import { internal } from '../../_generated/api';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const moveTask = defineSkill({
-	isVisibleToMagicRock: false,
 	preApprovedCost: 'none',
 	description: 'Move the task to a new parent',
 	parameters: z.object({

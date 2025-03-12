@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const divide = defineSkill({
-	isVisibleToMagicRock: true,
 	preApprovedCost: 0n,
 	description: 'Divide N numbers',
 	parameters: z.object({

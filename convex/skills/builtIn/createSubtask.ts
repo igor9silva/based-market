@@ -3,7 +3,6 @@
 // import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 // export const createSubtask = defineSkill({
-// 	isVisibleToMagicRock: false,
 // 	preApprovedCost: 'none',
 // 	description: 'Create a subtask',
 // 	parameters: z.object({

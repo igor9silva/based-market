@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const say = defineSkill({
-	isVisibleToMagicRock: false,
 	preApprovedCost: 0n,
 	description: 'Send a text message',
 	parameters: z.object({

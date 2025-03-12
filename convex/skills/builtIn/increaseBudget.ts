@@ -4,7 +4,6 @@ import { asDollars } from '../../utils/money';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const increaseBudget = defineSkill({
-	isVisibleToMagicRock: false,
 	preApprovedCost: 'none',
 	description: 'Increase the budget of the task',
 	parameters: z.object({
