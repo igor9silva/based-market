@@ -1,3 +1,4 @@
+import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 
 export const userSchema = z.object({
@@ -13,4 +14,9 @@ export const userSchema = z.object({
 	walletChain: z.enum(['worldchain']).optional(),
 	isReady: z.boolean().default(false),
 	balanceUSD: z.bigint().default(0n),
+});
+
+export const userPreferencesSchema = z.object({
+	owner: zid('users'),
+	instructions: z.string().optional().describe('The instructions for the user'),
 });

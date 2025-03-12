@@ -58,6 +58,8 @@ import type * as topUps_private from "../topUps/private.js";
 import type * as topUps_public from "../topUps/public.js";
 import type * as transactions_private from "../transactions/private.js";
 import type * as transactions_public from "../transactions/public.js";
+import type * as users_preferences_private from "../users/preferences/private.js";
+import type * as users_preferences_public from "../users/preferences/public.js";
 import type * as users_private from "../users/private.js";
 import type * as users_public from "../users/public.js";
 import type * as utils_errors from "../utils/errors.js";
@@ -128,6 +130,8 @@ declare const fullApi: ApiFromModules<{
   "topUps/public": typeof topUps_public;
   "transactions/private": typeof transactions_private;
   "transactions/public": typeof transactions_public;
+  "users/preferences/private": typeof users_preferences_private;
+  "users/preferences/public": typeof users_preferences_public;
   "users/private": typeof users_private;
   "users/public": typeof users_public;
   "utils/errors": typeof utils_errors;

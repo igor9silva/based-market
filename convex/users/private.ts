@@ -47,6 +47,8 @@ export const _seedIfNeeded = async (
 		return;
 	}
 
+	// TODO: create user preferences
+
 	const refUser = await _findOne(ctx, { userId: env.REF_USER_ID as Id<'users'> });
 	if (!refUser) throw new Error('Ref user not found'); // FATAL (will stop seeding user forever), TODO: notify fatal
 

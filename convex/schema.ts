@@ -7,7 +7,7 @@ import { skillSchema } from './schemas/skillSchema';
 import { taskSchema } from './schemas/taskSchema';
 import { topUpSchema } from './schemas/topUpSchema';
 import { transactionSchema } from './schemas/transactionSchema';
-import { userSchema } from './schemas/userSchema';
+import { userPreferencesSchema, userSchema } from './schemas/userSchema';
 
 // prettier-ignore
 export default defineSchema({
@@ -22,6 +22,12 @@ export default defineSchema({
 		'phone', ['phone'],
 	).index(
 		'walletAddress_chain', ['walletAddress', 'walletChain'],
+	),
+
+	user_preferences: defineTable(
+		zodToConvex(userPreferencesSchema),
+	).index(
+		'by_owner', ['owner'],
 	),
 
 	tasks: defineTable(
