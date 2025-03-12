@@ -3,6 +3,10 @@ import { ArrowLeft, ArrowRight, ArrowUp, Share } from 'lucide-react';
 import { Suspense } from 'react';
 import { cn } from '~/lib/utils';
 
+import { convexQuery } from '@convex-dev/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { api } from 'convex/_generated/api';
+import { Id } from 'convex/_generated/dataModel';
 import { toast } from 'sonner';
 import { Balance } from '~/components/Balance';
 import { useCommandMenu } from '~/components/CommandMenu';
@@ -77,11 +81,23 @@ export function MainHeader({ className }: { className?: string }) {
 				{taskId && (
 					<Suspense fallback={null}>
 						<div className="flex items-center p-1">
-							<TaskStatusIndicator className="" taskId={taskId} />
+							<TaskStatusIndicatorProvider taskId={taskId} />
 						</div>
 					</Suspense>
 				)}
 			</div>
 		</header>
 	);
+}
+
+function TaskStatusIndicatorProvider({
+	taskId, //
+}: {
+	taskId: Id<'tasks'>;
+}) {
+	//
+	const query = convexQuery(api.tasks.public.findOne, { taskId });
+	const { data: task } = useSuspenseQuery(query);
+
+	return <TaskStatusIndicator className="" task={task} />;
 }

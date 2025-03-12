@@ -29,7 +29,7 @@ export function TaskItem({
 					>
 						{task.title || 'Untitled task'}
 					</h3>
-					<TaskStatusIndicator taskId={task._id} />
+					<TaskStatusIndicator task={task} />
 				</div>
 				<TimeAgo date={task._creationTime} className="text-sm text-muted-foreground" />
 			</div>

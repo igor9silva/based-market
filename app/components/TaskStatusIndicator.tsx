@@ -1,7 +1,4 @@
-import { convexQuery } from '@convex-dev/react-query';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { api } from 'convex/_generated/api';
-import { Id } from 'convex/_generated/dataModel';
+import { Doc } from 'convex/_generated/dataModel';
 import { taskStatusSchema } from 'convex/schemas/taskSchema';
 import { z } from 'zod';
 import { StatusIndicator } from '~/components/StatusIndicator';
@@ -17,15 +14,12 @@ const classMap: Record<z.infer<typeof taskStatusSchema>, string> = {
 };
 
 export const TaskStatusIndicator = ({
-	taskId, //
+	task, //
 	className,
 }: {
-	taskId: Id<'tasks'>;
+	task: Doc<'tasks'>;
 	className?: string;
 }) => {
 	//
-	const query = convexQuery(api.tasks.public.findOne, { taskId });
-	const { data: task } = useSuspenseQuery(query);
-
 	return <StatusIndicator className={cn(classMap[task.status], className)} />;
 };
