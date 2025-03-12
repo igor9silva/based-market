@@ -42,3 +42,16 @@ export const _updateUserInstructions = internalMutation({
 		await ctx.db.patch(existing._id, { instructions });
 	},
 });
+
+export const _updateInboxDetailWidthPercent = internalMutation({
+	args: {
+		userId: zid('users'),
+		widthPercent: z.number().min(0).max(100),
+	},
+	handler: async (ctx, { userId, widthPercent }) => {
+		//
+		const existing = await _preferencesForUser(ctx, { userId });
+
+		await ctx.db.patch(existing._id, { inboxDetailWidthPercent: widthPercent });
+	},
+});

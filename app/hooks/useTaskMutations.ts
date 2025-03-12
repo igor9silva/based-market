@@ -6,6 +6,7 @@ export function useTaskMutations() {
 	//
 	const act = useMutation(api.action.public.act);
 	const authorize = useMutation(api.action.public.authorize);
+	const updateInboxDetailWidthPercent = useMutation(api.users.preferences.public.updateInboxDetailWidthPercent);
 
 	const say = ({
 		taskId, //
@@ -106,6 +107,14 @@ export function useTaskMutations() {
 		});
 	};
 
+	const setInboxDetailWidthPercent = ({
+		widthPercent, //
+	}: {
+		widthPercent: number;
+	}) => {
+		return updateInboxDetailWidthPercent({ widthPercent });
+	};
+
 	return {
 		say,
 		updateInstructions,
@@ -114,5 +123,6 @@ export function useTaskMutations() {
 		increaseBudget,
 		approveAction,
 		rejectAction,
+		setInboxDetailWidthPercent,
 	};
 }

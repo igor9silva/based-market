@@ -77,7 +77,7 @@ export function QuickAdd({ className }: { className?: string }) {
 							placeholder="What are you seeking?"
 							required
 							defaultValue={newTaskText}
-							className="min-h-[240px] resize-none text-base"
+							className="min-h-32 resize-none text-base"
 						/>
 					</div>
 					<BudgetSelector name="initialFunds" defaultValue={0.1} />

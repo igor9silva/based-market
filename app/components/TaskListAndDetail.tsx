@@ -3,12 +3,16 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
+import { useCallback } from 'react';
 import { cn } from '~/lib/utils';
 
-import { ListAndDetail } from '~/components/layout/ListAndDetail';
 import { QuickAdd } from '~/components/QuickAdd';
 import TaskDetail from '~/components/TaskDetail';
 import { TaskItem } from '~/components/TaskItem';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
+import { useDebounce } from '~/hooks/useDebounce';
+import { useIsMobile } from '~/hooks/useIsMobile';
+import { useTaskMutations } from '~/hooks/useTaskMutations';
 
 export function TaskListAndDetail({
 	taskId, //
@@ -21,14 +25,38 @@ export function TaskListAndDetail({
 	const query = convexQuery(api.tasks.public.findAll, args);
 	const { data: subtasks } = useSuspenseQuery(query);
 
+	const preferencesQuery = convexQuery(api.users.preferences.public.getPreferences, {});
+	const { data: preferences } = useSuspenseQuery(preferencesQuery);
+
 	const { selectedSubtaskId } = useSearch({ strict: false });
 
-	if (subtasks.length === 0) return <QuickAdd />;
+	const detailWidthPercent = preferences.inboxDetailWidthPercent ?? 70;
+
+	const isMobile = useIsMobile();
+	const direction = isMobile ? 'vertical' : 'horizontal';
+
+	const { setInboxDetailWidthPercent } = useTaskMutations();
+
+	const debouncedSetWidth = useDebounce((widthPercent: number) => {
+		setInboxDetailWidthPercent({ widthPercent });
+	}, 500);
+
+	const handleLayoutChange = useCallback(
+		(sizes: number[]) => {
+			debouncedSetWidth(sizes[1]);
+		},
+		[debouncedSetWidth],
+	);
 
 	return (
-		<ListAndDetail
-			list={
+		<ResizablePanelGroup
+			direction={direction}
+			onLayout={handleLayoutChange}
+			className={cn('overflow-hidden', className)}
+		>
+			<ResizablePanel id="list" order={0} defaultSize={100 - (selectedSubtaskId ? detailWidthPercent : 0)}>
 				<div className="overflow-auto h-full">
+					<QuickAdd />
 					{subtasks.map((task) => (
 						<Link
 							key={task._id}
@@ -40,16 +68,17 @@ export function TaskListAndDetail({
 						</Link>
 					))}
 				</div>
-			}
-			detail={
-				selectedSubtaskId && (
+			</ResizablePanel>
+			{selectedSubtaskId && <ResizableHandle withHandle />}
+			{selectedSubtaskId && (
+				<ResizablePanel id="detail" order={1} defaultSize={detailWidthPercent}>
 					<TaskDetail
 						taskId={selectedSubtaskId}
 						showExpand={false}
 						className="animate-in slide-in-from-right duration-100"
 					/>
-				)
-			}
-		/>
+				</ResizablePanel>
+			)}
+		</ResizablePanelGroup>
 	);
 }
