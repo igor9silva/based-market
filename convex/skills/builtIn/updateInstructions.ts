@@ -29,7 +29,7 @@ export const updateInstructions = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
-			await execution.ctx.runMutation(internal.tasks.private._update, {
+			await execution.ctx.runMutation(internal.tasks.private._updateInstructions, {
 				taskId: execution.task._id,
 				title: args.title,
 				instructions: args.instructions,
