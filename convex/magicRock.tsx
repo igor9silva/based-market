@@ -33,6 +33,8 @@ export async function _askMagicRock(
 		model: openai('gpt-4o', {
 			parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
 		}), // 2nd best
+		// model: ollama('phi4-mini'),
+		// model: ollama('gemma3:4b'),
 		// model: anthropic('claude-3-5-haiku-20241022'), // ok, but very far from Sonnet
 		// model: deepseek('deepseek-chat'), // complete failure, reasoner can't call tools
 		// model: google('gemini-2.0-flash-001'), // useful for some tools, can search using Google
