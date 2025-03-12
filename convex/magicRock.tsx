@@ -149,14 +149,8 @@ async function loadTools(
 	//
 	console.debug('loading tools, config:', skill.config.availableSkills);
 
-	const allTools = await _toolsForMagicRock(ctx, task, action);
-
-	if (skill.config.availableSkills === 'auto') {
-		console.debug('loaded all tools');
-		return allTools;
-	}
-
 	// TODO: optimize
+	const allTools = await _toolsForMagicRock(ctx, task, action);
 	const tools = Object.fromEntries(
 		Object.entries(allTools).filter(([key]) => skill.config.availableSkills.includes(key)),
 	);

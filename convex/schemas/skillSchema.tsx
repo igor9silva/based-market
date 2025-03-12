@@ -55,10 +55,7 @@ const decisionConfigSchema = z.object({
 	instructions: z.string().describe('Instructions for the decision-making process'),
 	temperature: z.number().min(0).max(2).optional().describe('Temperature to use'),
 	maxTokens: z.number().optional().describe('Maximum number of tokens to use'),
-	availableSkills: z.union([
-		z.literal('auto'),
-		z.array(z.string()).describe('Skills that can be used to make the decision'),
-	]),
+	availableSkills: z.array(z.string()).describe('Skills that can be used to make the decision'),
 	// TODO: based on AI SDK types
 	// model: z.string().describe('LLM model to use'),
 	// maxSteps: z.number().describe('Maximum number of steps to take'),
