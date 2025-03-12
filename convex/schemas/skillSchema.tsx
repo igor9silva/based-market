@@ -67,7 +67,8 @@ const decisionConfigSchema = z.object({
 const coreSkillSchema = z.object({
 	key: z.string(),
 	description: z.string(),
-	parametersSchema: z.string(), // TODO: enforce that this is a valid zod schema
+	inputSchema: z.string(), // TODO: enforce that this is a valid zod schema
+	// outputSchema?: z.string(), // not yet
 	preApprovedCost: z.union([
 		z.literal('none'),
 		z

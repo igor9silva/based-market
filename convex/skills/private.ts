@@ -72,7 +72,7 @@ export const _findOne = internalQuery({
 			return builtInSkillSchema.parse({
 				key,
 				description: builtInTool.description,
-				parametersSchema: zodToString(builtInTool.parameters),
+				inputSchema: zodToString(builtInTool.parameters),
 				preApprovedCost: builtInTool.preApprovedCost,
 				kind: 'built-in',
 				owner: 'built-in',
