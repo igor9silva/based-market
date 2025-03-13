@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai';
+import { google } from '@ai-sdk/google';
 import { CoreMessage, generateText, Tool } from 'ai';
 import { z } from 'zod';
 import { internal } from './_generated/api';
@@ -30,9 +30,10 @@ export async function _askMagicRock(
 		//
 	} = await generateText({
 		// model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
-		model: openai('gpt-4o', {
-			parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
-		}), // 2nd best
+		// model: openai('gpt-4o', {
+		// 	parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
+		// }), // 2nd best
+		model: google('gemini-2.0-flash-exp'),
 		// model: ollama('phi4-mini'),
 		// model: ollama('gemma3:4b'),
 		// model: anthropic('claude-3-5-haiku-20241022'), // ok, but very far from Sonnet

@@ -353,7 +353,7 @@ export const _setStatus = internalMutation({
 
 		return await ctx.db.patch(taskId, {
 			status: newStatus,
-			isActive: newStatus !== 'discarded' && newStatus !== 'done',
+			isActive: newStatus !== 'done' && newStatus !== 'discarded',
 		});
 	},
 });

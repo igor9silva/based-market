@@ -203,7 +203,12 @@ export const _resolve = internalMutation({
 		}
 
 		await ctx.db.patch(actionId, { result, status, costs });
-		await _setTaskStatus(ctx, { taskId, newStatus: 'unread' }); // after an action is resolved, task is get to 'unread' until a new action starts()
+
+		const task = await ctx.db.get(taskId);
+
+		if (task?.isActive) {
+			await _setTaskStatus(ctx, { taskId, newStatus: 'unread' });
+		}
 	},
 });
 
