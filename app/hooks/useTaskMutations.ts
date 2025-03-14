@@ -23,6 +23,18 @@ export function useTaskMutations() {
 		});
 	};
 
+	const stop = ({
+		taskId, //
+	}: {
+		taskId: Id<'tasks'>;
+	}) => {
+		return act({
+			taskId,
+			skillKey: 'stop',
+			args: {},
+		});
+	};
+
 	const updateInstructions = ({
 		taskId, //
 		title,
@@ -117,6 +129,7 @@ export function useTaskMutations() {
 
 	return {
 		say,
+		stop,
 		updateInstructions,
 		resolve,
 		discard,

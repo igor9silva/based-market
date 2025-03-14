@@ -65,6 +65,7 @@ const decisionConfigSchema = z.object({
 	model: modelsSchema,
 	instructions: z.string().describe('Instructions for the decision-making process'),
 	temperature: z.number().min(0).max(2).describe('Temperature to use'),
+	availableSkills: z.array(z.string()).describe('Skills that can be used to make the decision'),
 	topP: z
 		.number()
 		.min(0)
@@ -79,7 +80,10 @@ const decisionConfigSchema = z.object({
 		.describe(
 			'Only sample from the top K options for each subsequent token. Only sample from the top K options for each subsequent token. Used to remove "long tail" low probability responses. Recommended for advanced use cases only. Usually `temperature` is enough.',
 		),
-	maxTokens: z.number().optional().describe('Maximum number of tokens to use'),
+	maxTokens: z
+		.number() //
+		.optional()
+		.describe('Maximum number of tokens to use'),
 	maxRetries: z
 		.number()
 		.optional()
@@ -104,10 +108,6 @@ const decisionConfigSchema = z.object({
 		.describe(
 			'The seed (integer) to use for random sampling. If set and supported by the model, calls will generate deterministic results.',
 		),
-	availableSkills: z.array(z.string()).describe('Skills that can be used to make the decision'),
-	// TODO: based on AI SDK types
-	// model: z.string().describe('LLM model to use'),
-	// maxSteps: z.number().describe('Maximum number of steps to take'),
 });
 
 const coreSkillSchema = z.object({

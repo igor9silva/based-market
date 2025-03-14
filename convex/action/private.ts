@@ -258,13 +258,17 @@ export const _skipAllPendingReactions = internalMutation({
 	},
 	handler: async (ctx, { taskId, owner }) => {
 		//
+		console.debug('skipping all pending reactions taskId', taskId, 'owner', owner);
+
 		const pendingReactions = await Promise.all([
 			_findReactions(ctx, { taskId, owner, status: 'enqueued' }),
 			_findReactions(ctx, { taskId, owner, status: 'pending authorization' }),
 		]).then(([A, B]) => A.concat(B));
 
+		console.debug('pending reactions', pendingReactions);
+
 		// TODO: maybe this also must call resolve
-		return await Promise.all(
+		await Promise.all(
 			pendingReactions.map((action) =>
 				ctx.db.patch(action._id, {
 					status: 'skipped',

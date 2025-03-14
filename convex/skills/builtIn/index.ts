@@ -6,6 +6,7 @@ import { multiply } from './multiply';
 import { reopen } from './reopen';
 import { resolve } from './resolve';
 import { say } from './say';
+import { stop } from './stop';
 import { subtract } from './subtract';
 import { sum } from './sum';
 import { updateInstructions } from './updateInstructions';
@@ -28,9 +29,13 @@ export const _builtInSkills = {
 	//
 	// seek
 	resolve,
-	// math
+
+	/* math */
 	sum,
 	multiply,
 	divide,
 	subtract,
+
+	/* */
+	stop,
 };

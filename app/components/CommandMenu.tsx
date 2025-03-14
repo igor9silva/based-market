@@ -151,6 +151,7 @@ export function CommandMenuDialog() {
 					{currentTaskId && <ResolveTaskCommandItem taskId={currentTaskId} />}
 					{currentTaskId && <DiscardTaskCommandItem taskId={currentTaskId} />}
 					{currentTaskId && <ReopenTaskCommandItem taskId={currentTaskId} />}
+					{currentTaskId && <StopReactionsCommandItem taskId={currentTaskId} />}
 				</CommandGroup>
 
 				{/* Pinned tasks */}
@@ -255,6 +256,28 @@ function ReopenTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 		<CommandItem keywords={['reopen', 'current']} onSelect={handleSelect}>
 			<RotateCcw className="mr-2" />
 			Reopen with $0.10 of budget
+		</CommandItem>
+	);
+}
+
+function StopReactionsCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
+	//
+	const { close } = useCommandMenu();
+	const { stop } = useTaskMutations();
+
+	const currentTask = useQuery(api.tasks.public.findOne, { taskId });
+	if (!currentTask || currentTask.status !== 'acting') return null;
+
+	const handleSelect = () => {
+		//
+		stop({ taskId: currentTask._id });
+		close();
+	};
+
+	return (
+		<CommandItem keywords={['stop', 'reactions', 'reacting', 'current']} onSelect={handleSelect}>
+			<RotateCcw className="mr-2" />
+			Stop reacting
 		</CommandItem>
 	);
 }
