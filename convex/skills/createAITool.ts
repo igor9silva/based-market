@@ -30,14 +30,10 @@ export function createAITool(
 				finishReason,
 				usage,
 				warnings,
-				reasoning,
-				reasoningDetails,
 				providerMetadata,
 				//
 			} = await _askMagicRock(ctx, task, action, skill);
 
-			console.debug('Reasoning', reasoning);
-			console.debug('Reasoning details', reasoningDetails);
 			console.debug('Provider metadata', providerMetadata);
 
 			const reactions = [] as Array<z.infer<typeof newActionSchema>>;
@@ -66,26 +62,21 @@ export function createAITool(
 					);
 					break;
 
-				case 'stop':
-					// if (result.text.length < 1) break;
-					say(text);
-					break;
+				// prettier-ignore
+				case 'stop': say(text); break;
 
-				case 'error':
-					say(text);
-					break;
+				// prettier-ignore
+				case 'error': say(text); break;
 
-				case 'content-filter':
-					say(`[damn @sama] Content filter hit: ${warnings}`);
-					break;
+				// prettier-ignore
+				case 'content-filter': say(`[damn @sama] Content filter hit: ${warnings}`); break;
 
-				case 'length':
-					// TODO: better handling of max length
-					say(`Max length hit: ${warnings}`);
-					break;
+				// TODO: better handling of max length
+				// prettier-ignore
+				case 'length': say(`Max length hit: ${warnings}`); break;
 
-				default:
-					throw new Error(`Unknown finish reason: ${finishReason}`);
+				// prettier-ignore
+				default: throw new Error(`Unknown finish reason: ${finishReason}`);
 			}
 
 			if (warnings?.length) console.warn('Decision skill warnings', warnings);
@@ -96,11 +87,7 @@ export function createAITool(
 				costs: [
 					{
 						symbol: 'USD',
-						amount: calculateProviderCost(
-							usage.promptTokens,
-							usage.completionTokens,
-							reasoningTokensFrom(providerMetadata),
-						),
+						amount: calculateProviderCost(usage.promptTokens, usage.completionTokens),
 						description: 'Provider cost',
 					},
 					{
@@ -114,17 +101,9 @@ export function createAITool(
 	});
 }
 
-function reasoningTokensFrom(providerMetadata: any) {
-	//
-	const reasoningTokens = providerMetadata?.openai?.reasoningTokens ?? 0;
-	//
-	return typeof reasoningTokens === 'number' ? reasoningTokens : 0;
-}
-
 export function calculateProviderCost(
 	inputTokens: number, //
 	outputTokens: number,
-	reasoningTokens: number,
 ) {
 	// TODO: make it dynamic, per model
 	const INPUT_TOKEN_COST = asBigInt({ dollars: 2.5 }) / 1_000_000n;
@@ -134,7 +113,7 @@ export function calculateProviderCost(
 	console.debug('Output tokens', outputTokens);
 
 	const inputCost = BigInt(inputTokens) * INPUT_TOKEN_COST;
-	const outputCost = BigInt(outputTokens + reasoningTokens) * OUTPUT_TOKEN_COST;
+	const outputCost = BigInt(outputTokens) * OUTPUT_TOKEN_COST;
 	const totalProviderCost = inputCost + outputCost;
 
 	console.debug('Decision provider cost', asDollars({ bigInt: totalProviderCost, precision: 6 }));

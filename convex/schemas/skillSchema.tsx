@@ -51,10 +51,59 @@ const httpConfigSchema = z.object({
 		.optional(),
 });
 
+const modelsSchema = z.enum([
+	'anthropic/claude-3.7-sonnet',
+	'anthropic/claude-3.5-haiku',
+	'openai/gpt-4o',
+	'openai/gpt-4o-mini',
+	'google/gemini-2.0-flash',
+	'google/gemma-3-27b',
+	'deepseek/v3',
+]);
+
 const decisionConfigSchema = z.object({
+	model: modelsSchema,
 	instructions: z.string().describe('Instructions for the decision-making process'),
-	temperature: z.number().min(0).max(2).optional().describe('Temperature to use'),
+	temperature: z.number().min(0).max(2).describe('Temperature to use'),
+	topP: z
+		.number()
+		.min(0)
+		.max(1)
+		.optional()
+		.describe(
+			'Nucleus sampling. This is a number between 0 and 1. E.g. 0.1 would mean that only tokens with the top 10% probability mass are considered. It is recommended to set either `temperature` or `topP`, but not both.',
+		),
+	topK: z
+		.number()
+		.optional()
+		.describe(
+			'Only sample from the top K options for each subsequent token. Only sample from the top K options for each subsequent token. Used to remove "long tail" low probability responses. Recommended for advanced use cases only. Usually `temperature` is enough.',
+		),
 	maxTokens: z.number().optional().describe('Maximum number of tokens to use'),
+	maxRetries: z
+		.number()
+		.optional()
+		.describe('Maximum number of (AI SDK internal) retries. Set to 0 to disable retries.'),
+	frequencyPenalty: z
+		.number()
+		.min(-1)
+		.max(1)
+		.optional()
+		.describe(
+			`Affects the likelihood of the model to repeatedly use the same words or phrases. Is a number between -1 (increase repetition) and 1 (maximum penalty, decrease repetition). 0 means no penalty.`,
+		),
+	stopSequences: z
+		.array(z.string())
+		.optional()
+		.describe(
+			'If set, the model will stop generating text when one of the stop sequences is generated. Providers may have limits on the number of stop sequences.',
+		),
+	seed: z
+		.number()
+		.optional()
+		.describe(
+			'The seed (integer) to use for random sampling. If set and supported by the model, calls will generate deterministic results.',
+		),
 	availableSkills: z.array(z.string()).describe('Skills that can be used to make the decision'),
 	// TODO: based on AI SDK types
 	// model: z.string().describe('LLM model to use'),

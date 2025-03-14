@@ -1,5 +1,9 @@
+import { anthropic } from '@ai-sdk/anthropic';
+import { deepseek } from '@ai-sdk/deepseek';
 import { google } from '@ai-sdk/google';
-import { CoreMessage, generateText, Tool } from 'ai';
+import { openai } from '@ai-sdk/openai';
+
+import { CoreMessage, generateText, LanguageModel, Tool } from 'ai';
 import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc } from './_generated/dataModel';
@@ -16,36 +20,25 @@ export async function _askMagicRock(
 	skill: z.infer<typeof softSkillSchema>,
 ) {
 	const {
-		finishReason, //
+		finishReason,
 		text,
 		toolCalls,
-		// toolResults,
-		// steps,
 		usage,
 		warnings,
-		// response,
-		reasoning,
-		reasoningDetails,
 		providerMetadata,
 		//
 	} = await generateText({
-		// model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
-		// model: openai('gpt-4o', {
-		// 	parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
-		// }), // 2nd best
-		model: google('gemini-2.0-flash-exp'),
-		// model: ollama('phi4-mini'),
-		// model: ollama('gemma3:4b'),
-		// model: anthropic('claude-3-5-haiku-20241022'), // ok, but very far from Sonnet
-		// model: deepseek('deepseek-chat'), // complete failure, reasoner can't call tools
-		// model: google('gemini-2.0-flash-001'), // useful for some tools, can search using Google
-		// model: openai('o3-mini', { // suprisingly bad, worse than GPT-4o on every test
-		// 	reasoningEffort: 'low',
-		// 	structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
-		// }),
+		model: languageModelFrom(skill),
+		temperature: skill.config.temperature,
 		maxTokens: skill.config.maxTokens ?? undefined,
-		maxSteps: 1,
-		temperature: skill.config.temperature ?? 0,
+		frequencyPenalty: skill.config.frequencyPenalty ?? undefined,
+		maxRetries: skill.config.maxRetries ?? undefined,
+		seed: skill.config.seed ?? undefined,
+		topK: skill.config.topK ?? undefined,
+		topP: skill.config.topP ?? undefined,
+		stopSequences: skill.config.stopSequences ?? undefined,
+		maxSteps: 1, // we are not using AI SDK to run tools or multi-step stuff
+		toolChoice: 'required',
 		system: [
 			//
 			skill.config.instructions,
@@ -64,48 +57,13 @@ export async function _askMagicRock(
 			`- Igor is a software developer, entrepreneur and investor.`,
 			//
 			`### Current task`,
-			promptForTask(task),
+			renderTask(task),
 			//
 		].join('\n'),
 
 		// assuming task.author is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task, action),
 		tools: await loadTools(ctx, task, action, skill),
-		toolChoice: 'required',
-
-		// experimental_repairToolCall: async ({ toolCall, tools, parameterSchema, error, messages, system }) => {
-		// 	//
-		// 	if (NoSuchToolError.isInstance(error)) {
-		// 		return null; // do not attempt to fix invalid tool names
-		// 	}
-
-		// 	// TODO: 2025-02-24 not yet sure how to handle broken tool calls
-		// 	// hard to just sum usage, also hard to predict, might go over budget
-		// 	// hard to split into a second action
-		// 	// TODO: trace this call, maybe aggregate to the action usage data
-
-		// 	console.debug('repairToolCall', toolCall);
-
-		// 	const tool = tools[toolCall.toolName as keyof typeof tools];
-
-		// 	const {
-		// 		object: repairedArgs,
-		// 		usage,
-		// 		warnings,
-		// 	} = await generateObject({
-		// 		model: openai('gpt-4o', { structuredOutputs: true }),
-		// 		schema: tool.parameters,
-		// 		prompt: [
-		// 			`The model tried to call the tool "${toolCall.toolName}"` + ` with the following arguments:`,
-		// 			JSON.stringify(toolCall.args),
-		// 			`The tool accepts the following schema:`,
-		// 			JSON.stringify(parameterSchema(toolCall)),
-		// 			'Please fix the arguments.',
-		// 		].join('\n'),
-		// 	});
-
-		// 	return { ...toolCall, args: JSON.stringify(repairedArgs) };
-		// },
 	});
 
 	const result = {
@@ -114,8 +72,6 @@ export async function _askMagicRock(
 		toolCalls,
 		usage,
 		warnings,
-		reasoning,
-		reasoningDetails,
 		providerMetadata,
 	};
 
@@ -124,21 +80,76 @@ export async function _askMagicRock(
 	return result;
 }
 
-// TODO: new render
-function actionToCoreMessage(
-	action: Doc<'actions'>, //
-	author: 'user' | 'assistant',
-): CoreMessage | Array<CoreMessage> | undefined {
+function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageModel {
 	//
-	return {
-		role: author,
-		content: [
-			`<date>${new Date(action._creationTime).toISOString()}</date>`,
-			`<skill>${action.skillKey}</skill>`,
-			`<status>${action.status}</status>`,
-			`<content>${action.result}</content>`,
-		].join(''),
-	};
+	switch (skill.config.model) {
+		//
+		case 'anthropic/claude-3.7-sonnet':
+			return anthropic('claude-3-7-sonnet-20250219');
+
+		case 'anthropic/claude-3.5-haiku':
+			return anthropic('claude-3-5-haiku-latest');
+
+		case 'openai/gpt-4o':
+			return openai('gpt-4o', {
+				parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
+			});
+
+		case 'openai/gpt-4o-mini':
+			return openai('gpt-4o-mini', {
+				parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
+			});
+
+		case 'google/gemini-2.0-flash':
+			return google('gemini-2.0-flash-exp', {
+				// TODO: using experimental model
+				safetySettings: [
+					{
+						category: 'HARM_CATEGORY_UNSPECIFIED',
+						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
+					},
+					{
+						category: 'HARM_CATEGORY_CIVIC_INTEGRITY',
+						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
+					},
+					{
+						category: 'HARM_CATEGORY_HARASSMENT',
+						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
+					},
+					{
+						category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
+					},
+					{
+						category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
+					},
+					{
+						category: 'HARM_CATEGORY_HATE_SPEECH',
+						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
+					},
+				],
+			});
+
+		case 'google/gemma-3-27b':
+			return google('gemma-3-27b-it');
+
+		case 'deepseek/v3':
+			return deepseek('deepseek-chat');
+	}
+
+	// model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
+	// model: openai('gpt-4o', { parallelToolCalls: false }), // 2nd best
+	// model: google('gemma-3-27b-it'),
+	// model: ollama('phi4-mini'),
+	// model: ollama('gemma3:4b'),
+	// model: anthropic('claude-3-5-haiku-20241022'), // ok, but very far from Sonnet
+	// model: deepseek('deepseek-'), // complete failure, reasoner can't call tools
+	// model: google('gemini-2.0-flash-001'), // useful for some tools, can search using Google
+	// model: openai('o3-mini', { // suprisingly bad, worse than GPT-4o on every test
+	// 	reasoningEffort: 'low',
+	// 	structuredOutputs: false, // if setting to true, it gets more strict on tool schemas and disable parallel tool calls
+	// }),
 }
 
 async function loadTools(
@@ -161,7 +172,22 @@ async function loadTools(
 	return tools;
 }
 
-// TODO: persist a copy of the messages in CoreMessage format? or it gets too big?
+function renderAction(
+	action: Doc<'actions'>, //
+	isUser: boolean,
+): CoreMessage | Array<CoreMessage> | undefined {
+	//
+	return {
+		role: isUser ? 'user' : 'assistant',
+		content: [
+			`<date>${new Date(action._creationTime).toISOString()}</date>`,
+			`<skill>${action.skillKey}</skill>`,
+			`<status>${action.status}</status>`,
+			`<content>${action.result}</content>`,
+		].join(''),
+	};
+}
+
 async function renderHistory(
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
@@ -175,80 +201,27 @@ async function renderHistory(
 	});
 
 	const history = actions
-		// .filter((action) => action.skillKey !== 'react')
+		// remove unfinished or skipped actions
 		.filter((action) => ['succeeded', 'failed'].includes(action.status))
-		.filter((a) => a._id !== action._id) // doesn't include the current action
-		.map((action) => ({
-			action,
-			author:
-				task.owner === action.author
-					? ('user' as const) //
-					: ('assistant' as const),
-		}))
-		.map(({ action, author }) => actionToCoreMessage(action, author))
-		.filter((action): action is CoreMessage => action !== undefined)
+		// remove the current action
+		.filter((a) => a._id !== action._id)
+		// render
+		.map((action) => renderAction(action, task.owner === action.author))
+		// filter out undefined
+		.filter((action) => action !== undefined)
+		// flatten
 		.flatMap((message) => message);
 
-	// history.push(
-	// 	...actions
-	// 		.filter((action) => action.skillKey !== 'react')
-	// 		.filter((action) => action.status !== 'skipped')
-	// 		.map((action) => ({
-	// 			action,
-	// 			author: author === action.author ? ('user' as const) : ('assistant' as const),
-	// 		}))
-	// 		.map(({ action, author }) => actionToCoreMessage(action, author))
-	// 		.filter((action): action is CoreMessage => action !== undefined)
-	// 		.flatMap((message) => message),
-	// );
-
-	// history will be empty right after an updateInstructions(), so we artificially add a temporary user message to keep going
-	// if (history.length === 0) {
-	// 	history.push({
-	// 		role: 'user',
-	// 		content: 'keep going',
-	// 	});
-	// }
-
-	// const final = [
-	// 	{
-	// 		role: 'user' as const,
-	// 		content: [
-	// 			`### Current task`, //
-	// 			promptForTask(task),
-	// 		].join('\n'),
-	// 	},
-	// 	...history,
-	// ];
-
-	console.debug(`renderHistory since ${new Date(since).toISOString()}`, history);
-
-	// validateHistory(history); we're now validating before add react() action, TODO: revist this
-
-	// console.debug('renderHistory validated');
+	console.debug(`rendered history since ${new Date(since).toISOString()}`, history);
 
 	return history;
 }
 
-// function validateHistory(history: Array<CoreMessage>): Array<CoreMessage> {
-// 	//
-// 	const maxConsecutiveCompanionActions = env.MAX_CONSECUTIVE_COMPANION_ACTIONS;
-// 	const lastMessages = history.filter((message) => message.role !== 'tool').slice(-maxConsecutiveCompanionActions);
-
-// 	// throw if Companion did >= {maxConsecutiveCompanionActions}
-// 	if (lastMessages.every((message) => message.role === 'assistant')) {
-// 		throw new Error(`Too many (${maxConsecutiveCompanionActions}) consecutive companion actions.`);
-// 	}
-
-// 	return history;
-// }
-
-// TODO: a more robust one
-const promptForTask = (task: Doc<'tasks'>) =>
+const dateOrNever = (date: number | undefined) => (date ? new Date(date).toISOString() : 'never');
+const renderTask = (task: Doc<'tasks'>) =>
 	[
 		`<id>${task._id}</id>`, //
 		`<title>${task.title}</title>`,
-		`<instructions>${task.instructions}</instructions>`,
 		// `<status>${task.status}</status>`,
 		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
 		`<lastUpdatedAt>${dateOrNever(task.lastUpdatedAt)}</lastUpdatedAt>`,
@@ -258,9 +231,6 @@ const promptForTask = (task: Doc<'tasks'>) =>
 			<spent alt="Amount already spent from the budget">${asDollars({ bigInt: task.budgetUSDC.total - task.budgetUSDC.available })}</spent>
 			<available alt="Remaining money available to resolve this task">${asDollars({ bigInt: task.budgetUSDC.available })}</available>
 		</budgetUSDC>`,
+		`<instructions>${task.instructions}</instructions>`,
 		// `<parentId>${task.parentId}</parentId>`,
-	].join('\n');
-
-function dateOrNever(date: number | undefined) {
-	return date ? new Date(date).toISOString() : 'never';
-}
+	].join('');

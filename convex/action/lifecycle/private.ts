@@ -233,7 +233,7 @@ function estimateCostFor(
 	const inputTokens = Math.ceil(instructionsLength / env.CHAR_PER_TOKEN); // TODO: properly account for tools
 	const outputTokens = Math.ceil(Math.min(375, inputTokens / 2)); // half of input tokens, but min. 375
 
-	const providerCost = calculateProviderCost(inputTokens, outputTokens, 0);
+	const providerCost = calculateProviderCost(inputTokens, outputTokens);
 	const actionCost = env.ACTION_COST_USD;
 	const totalCost = providerCost + actionCost;
 
