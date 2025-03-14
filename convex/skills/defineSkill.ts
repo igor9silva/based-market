@@ -7,7 +7,7 @@ export type Skill<T extends z.AnyZodObject> = {
 	description: string;
 	parameters: T;
 	knownReactions: Array<Reaction>;
-	execute: (execution: ToolExecution) => (args: z.infer<T>) => Promise<ExecutionResult>;
+	use: (execution: ToolExecution) => (args: z.infer<T>) => Promise<ExecutionResult>;
 };
 
 export type ToolExecution = {
