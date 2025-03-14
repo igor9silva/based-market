@@ -1,11 +1,11 @@
-import { tool } from 'ai';
+import { CoreMessage, tool, ToolSet } from 'ai';
 import { z } from 'zod';
-import { Doc } from '../_generated/dataModel';
+import { Doc, Id } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
 import { newActionSchema } from '../action/private';
-import { _askMagicRock } from '../magicRock';
+import { _askMagicRock, MagicRockContext } from '../magicRock';
 import { env } from '../schemas/envSchema';
-import { softSkillSchema } from '../schemas/skillSchema';
+import { modelsSchema, skillSchema, softSkillSchema } from '../schemas/skillSchema';
 import { AITool } from '../schemas/toolSchema';
 import { asBigInt, asDollars } from '../utils/money';
 import { stringToZod } from '../utils/zodToString';
@@ -15,8 +15,16 @@ export function createAITool(
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 	skill: z.infer<typeof softSkillSchema>,
+	context?: MagicRockContext,
 ): AITool {
 	//
+	if (!context) {
+		return {
+			description: skill.description,
+			parameters: stringToZod(skill.inputSchema),
+		};
+	}
+
 	return tool({
 		description: skill.description,
 		parameters: stringToZod(skill.inputSchema),
@@ -32,7 +40,7 @@ export function createAITool(
 				warnings,
 				providerMetadata,
 				//
-			} = await _askMagicRock(ctx, task, action, skill);
+			} = await _askMagicRock(context);
 
 			console.debug('Provider metadata', providerMetadata);
 
@@ -87,13 +95,17 @@ export function createAITool(
 				costs: [
 					{
 						symbol: 'USD',
-						amount: calculateProviderCost(usage.promptTokens, usage.completionTokens),
+						amount: calculateProviderCost({
+							model: skill.config.model,
+							inputTokens: { uncached: usage.promptTokens },
+							outputTokens: { uncached: usage.completionTokens },
+						}),
 						description: 'Provider cost',
 					},
 					{
 						symbol: 'USD',
 						amount: env.ACTION_COST_USD,
-						description: '1 Meseeks action',
+						description: 'Meseeks action (included on your plan)',
 					},
 				],
 			};
@@ -101,23 +113,140 @@ export function createAITool(
 	});
 }
 
-export function calculateProviderCost(
-	inputTokens: number, //
-	outputTokens: number,
+export function estimateCostFor(
+	skill: z.infer<typeof skillSchema>, //
+	actionId: Id<'actions'>,
+	context?: MagicRockContext,
 ) {
-	// TODO: make it dynamic, per model
-	const INPUT_TOKEN_COST = asBigInt({ dollars: 2.5 }) / 1_000_000n;
-	const OUTPUT_TOKEN_COST = asBigInt({ dollars: 10 }) / 1_000_000n;
+	//
+	if (skill.cost !== 'dynamic') return skill.cost;
+	if (!context) throw new Error('Context is required for dynamic cost estimation');
+
+	const instructionsLength = context.system?.length ?? 0;
+	const toolsLength = computeToolsLength(context.tools);
+	const historyLength = computeHistoryLength(context.messages as Array<CoreMessage>);
+
+	const inputLength = instructionsLength + toolsLength + historyLength;
+
+	const inputTokens = Math.ceil(inputLength / env.CHAR_PER_TOKEN);
+	const outputTokens = Math.min(8000, inputTokens); // same size as input capped at 8000, TODO: improve
+
+	// assume worst-cast scenario with no cached tokens
+	const providerCost = calculateProviderCost({
+		model: skill.config.model,
+		inputTokens: { uncached: inputTokens },
+		outputTokens: { uncached: outputTokens },
+	});
+
+	const actionCost = env.ACTION_COST_USD;
+	const totalCost = providerCost + actionCost;
+
+	// add a fixed margin to account for unpredictable costs and bad math
+	const marginPercent = env.COST_PREDICTION_MARGIN / 100;
+	const marginFactor = 100n + BigInt(Math.round(marginPercent * 100));
+	const totalCostWithMargin = (totalCost * marginFactor) / 100n;
+
+	console.debug(
+		`Estimated cost for ${skill.key} (${actionId}): ${asDollars({ bigInt: totalCostWithMargin, precision: 6 })} USD`,
+	);
+	console.debug(`Input tokens: ${inputTokens}`);
+	console.debug(`Output tokens: ${outputTokens}`);
+
+	return totalCostWithMargin;
+}
+
+export function calculateProviderCost({
+	model, //
+	inputTokens,
+	outputTokens,
+}: {
+	model: z.infer<typeof modelsSchema>;
+	inputTokens: {
+		uncached: number;
+		cached?: number;
+	};
+	outputTokens: {
+		uncached: number;
+		cached?: number;
+	};
+}) {
+	// TODO: inspect loggged providerMetadata to get the cached tokens path
+	const pricing = pricingFor(model);
 
 	console.debug('Input tokens', inputTokens);
 	console.debug('Output tokens', outputTokens);
 
-	const inputCost = BigInt(inputTokens) * INPUT_TOKEN_COST;
-	const outputCost = BigInt(outputTokens) * OUTPUT_TOKEN_COST;
+	const inputCost = BigInt(inputTokens.uncached) * pricing.inputToken;
+	const outputCost = BigInt(outputTokens.uncached) * pricing.outputToken;
 	const totalProviderCost = inputCost + outputCost;
 
 	console.debug('Decision provider cost', asDollars({ bigInt: totalProviderCost, precision: 6 }));
 	console.debug('Action cost', asDollars({ bigInt: env.ACTION_COST_USD, precision: 6 }));
 
 	return totalProviderCost;
+}
+
+function computeToolsLength(toolSet?: ToolSet) {
+	//
+	if (!toolSet) return 0;
+
+	let length = 0;
+
+	// ToolSet is an object, so we need to iterate over its values
+	for (const key in toolSet) {
+		const tool = toolSet[key];
+		length += tool.description?.length ?? 0;
+		length += typeof tool.parameters === 'string' ? tool.parameters.length : 0;
+	}
+
+	return length;
+}
+
+function computeHistoryLength(messages: Array<CoreMessage>) {
+	return messages.reduce((acc, message) => acc + message.content.length, 0);
+}
+
+function pricingFor(model: z.infer<typeof modelsSchema>): {
+	inputToken: bigint;
+	outputToken: bigint;
+} {
+	//
+	switch (model) {
+		//
+		case 'anthropic/claude-3.7-sonnet':
+			return {
+				inputToken: asBigInt({ dollars: 3 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 15 }) / 1_000_000n,
+			};
+
+		case 'anthropic/claude-3.5-haiku':
+			return {
+				inputToken: asBigInt({ dollars: 0.8 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 4 }) / 1_000_000n,
+			};
+
+		case 'openai/gpt-4o':
+			return {
+				inputToken: asBigInt({ dollars: 2.5 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 10 }) / 1_000_000n,
+			};
+
+		case 'openai/gpt-4o-mini':
+			return {
+				inputToken: asBigInt({ dollars: 0.15 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 0.6 }) / 1_000_000n,
+			};
+
+		case 'google/gemini-2.0-flash':
+			return {
+				inputToken: asBigInt({ dollars: 0.1 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 0.4 }) / 1_000_000n,
+			};
+
+		case 'deepseek/v3':
+			return {
+				inputToken: asBigInt({ dollars: 0.27 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 1.1 }) / 1_000_000n,
+			};
+	}
 }

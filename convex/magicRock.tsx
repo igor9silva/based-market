@@ -12,22 +12,32 @@ import { softSkillSchema } from './schemas/skillSchema';
 import { _toolsForMagicRock } from './skills/tools';
 import { asDollars } from './utils/money';
 
-// TODO: move to DB
-export async function _askMagicRock(
-	ctx: ActionCtx | MutationCtx, //
+// >be human
+// >dig shiny rocks from ground
+// >grind rocks into powder
+// >transform rock powder into rock wafers
+// >enchant wafers with lightning
+// >rocks can now do math
+// >use rocks to exchange information globally
+// >combine global information into new enchantments
+// >rocks can think now
+// >ask magic rock questions
+// >magic rock knows everything
+// >delegate all tasks to magic rocks
+// >tfw automation achieves infinite productivity
+// >singularity.png
+// >mfw humanity peaked by tricking rocks into thinking
+
+export type MagicRockContext = Parameters<typeof generateText>[0];
+
+export async function _prepareContext(
+	ctx: ActionCtx | MutationCtx,
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 	skill: z.infer<typeof softSkillSchema>,
-) {
-	const {
-		finishReason,
-		text,
-		toolCalls,
-		usage,
-		warnings,
-		providerMetadata,
-		//
-	} = await generateText({
+): Promise<MagicRockContext> {
+	//
+	return {
 		model: languageModelFrom(skill),
 		temperature: skill.config.temperature,
 		maxTokens: skill.config.maxTokens ?? undefined,
@@ -64,7 +74,20 @@ export async function _askMagicRock(
 		// assuming task.author is always an user, could also use action.author since we're replying to a user message
 		messages: await renderHistory(ctx, task, action),
 		tools: await loadTools(ctx, task, action, skill),
-	});
+	};
+}
+
+export async function _askMagicRock(args: MagicRockContext) {
+	//
+	const {
+		finishReason,
+		text,
+		toolCalls,
+		usage,
+		warnings,
+		providerMetadata,
+		//
+	} = await generateText(args);
 
 	const result = {
 		finishReason,
@@ -130,9 +153,6 @@ function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageMode
 					},
 				],
 			});
-
-		case 'google/gemma-3-27b':
-			return google('gemma-3-27b-it');
 
 		case 'deepseek/v3':
 			return deepseek('deepseek-chat');

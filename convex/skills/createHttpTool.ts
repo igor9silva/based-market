@@ -81,7 +81,7 @@ export function createHTTPTool(
 					{
 						symbol: 'USD',
 						amount: env.ACTION_COST_USD,
-						description: '1 Meseeks Action',
+						description: 'Meseeks action (included on your plan)',
 					},
 				],
 			};

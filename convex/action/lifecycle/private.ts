@@ -4,10 +4,11 @@ import { internal } from '../../_generated/api';
 import { Doc, Id } from '../../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
+import { _prepareContext, MagicRockContext } from '../../magicRock';
 import { env } from '../../schemas/envSchema';
 import { skillSchema } from '../../schemas/skillSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
-import { calculateProviderCost } from '../../skills/createAITool';
+import { estimateCostFor } from '../../skills/createAITool';
 import { createTool } from '../../skills/tools';
 import { _setStatus as _setTaskStatus, _useFunds } from '../../tasks/private';
 import { asDollars } from '../../utils/money';
@@ -26,6 +27,7 @@ export const _perform = internalAction({
 			//
 			console.debug(`Executing action ${actionId} for task ${taskId}`);
 
+			// TODO: optimize into a single query
 			const task = await ctx.runQuery(internal.tasks.private._findOne, { taskId });
 			const action = await ctx.runQuery(internal.action.private._findOne, { actionId });
 			const skill = await ctx.runQuery(internal.skills.private._findOne, {
@@ -37,8 +39,11 @@ export const _perform = internalAction({
 				`Using skill ${skill.key} with ${Object.keys(action.args).length} args: ${Object.keys(action.args).join(', ')}`,
 			);
 
+			// prepare context if needed
+			const context = skill.kind === 'soft' ? await _prepareContext(ctx, task, action, skill) : undefined;
+
 			// check budget
-			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill);
+			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill, context);
 			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost, precision: 6 })} USD.`);
 
 			// if the action is not yet authorized, try auto-approving it
@@ -50,7 +55,7 @@ export const _perform = internalAction({
 				if (!wasAutoApproved) return await _requestHumanApproval(ctx, actionId, taskId);
 			}
 
-			const tool = createTool(ctx, task, action, skill);
+			const tool = createTool(ctx, task, action, skill, context);
 			const args = parseArgs(tool, action.args);
 
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool execution
@@ -221,46 +226,15 @@ function parseArgs(tool: ReturnType<typeof createTool>, args: unknown) {
 	return parsedArgs.data;
 }
 
-function estimateCostFor(
-	skill: z.infer<typeof skillSchema>, //
-	actionId: Id<'actions'>,
-) {
-	//
-	if (skill.cost !== 'dynamic') return skill.cost;
-
-	const instructionsLength = skill.config.instructions.length;
-
-	const inputTokens = Math.ceil(instructionsLength / env.CHAR_PER_TOKEN); // TODO: properly account for tools
-	const outputTokens = Math.ceil(Math.min(375, inputTokens / 2)); // half of input tokens, but min. 375
-
-	const providerCost = calculateProviderCost(inputTokens, outputTokens);
-	const actionCost = env.ACTION_COST_USD;
-	const totalCost = providerCost + actionCost;
-
-	// Add a fixed margin to account for unpredictable costs, like repairing tools and output size
-	const marginPercent = env.COST_PREDICTION_MARGIN / 100;
-	const marginFactor = 100n + BigInt(Math.round(marginPercent * 100));
-	const totalCostWithMargin = (totalCost * marginFactor) / 100n;
-
-	console.debug(
-		`Estimated cost for ${skill.key} (${actionId}): ${asDollars({ bigInt: totalCostWithMargin, precision: 6 })} USD`,
-	);
-	console.debug(`Input tokens: ${inputTokens}, instruction length: ${instructionsLength}`);
-	console.debug(`Output tokens: ${outputTokens}`);
-
-	// TODO: what about history? 💀
-
-	return totalCostWithMargin;
-}
-
-async function _expectedCostFor(
+async function _estimateAndPersistCost(
 	ctx: ActionCtx | MutationCtx,
 	action: Doc<'actions'>,
 	skill: z.infer<typeof skillSchema>,
+	context?: MagicRockContext,
 ) {
 	if (action.estimatedCost) return action.estimatedCost;
 
-	const estimatedCost = estimateCostFor(skill, action._id);
+	const estimatedCost = estimateCostFor(skill, action._id, context);
 
 	console.debug(
 		`Setting estimated cost for ${action._id}: ${asDollars({ bigInt: estimatedCost, precision: 6 })} USD`,
@@ -279,17 +253,18 @@ async function _ensureWithinBudget(
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 	skill: z.infer<typeof skillSchema>,
+	context?: MagicRockContext,
 ) {
 	//
-	const expectedCost = await _expectedCostFor(ctx, action, skill);
+	const estimatedCost = await _estimateAndPersistCost(ctx, action, skill, context);
 
-	if (expectedCost > task.budgetUSDC.available) {
+	if (estimatedCost > task.budgetUSDC.available) {
 		throw new Error(
-			`Not enough budget. Expected cost: ${asDollars({ bigInt: expectedCost })}.\n<IncreaseTaskBudgetCard taskId='${task._id}' />`,
+			`Not enough budget. Estimated cost: ${asDollars({ bigInt: estimatedCost })}.\n<IncreaseTaskBudgetCard taskId='${task._id}' />`,
 		);
 	}
 
-	return expectedCost;
+	return estimatedCost;
 }
 
 async function _autoApprove(

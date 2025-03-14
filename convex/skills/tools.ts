@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Doc } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
+import { MagicRockContext } from '../magicRock';
 import { skillSchema } from '../schemas/skillSchema';
 import { _builtInSkills } from './builtIn/index';
 import { createAITool } from './createAITool';
@@ -14,13 +15,19 @@ export const _toolsForMagicRock = async (
 	action: Doc<'actions'>,
 ) => {
 	//
-	const skills = await ctx.runQuery(internal.skills.private._findAll, {
+	const hardSkills = await ctx.runQuery(internal.skills.private._findAll, {
 		owner: task.owner,
 		kind: 'hard',
 	});
 
+	const softSkills = await ctx.runQuery(internal.skills.private._findAll, {
+		owner: task.owner,
+		kind: 'soft',
+	});
+
 	const map = {
-		...toMap(skills, (skill) => createTool(ctx, task, action, skill)),
+		...toMap(hardSkills, (skill) => createTool(ctx, task, action, skill)),
+		...toMap(softSkills, (skill) => createTool(ctx, task, action, skill)),
 		..._builtInTools(ctx, task, action),
 	};
 
@@ -57,12 +64,13 @@ export function createTool(
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 	skill: z.infer<typeof skillSchema>,
+	context?: MagicRockContext,
 ) {
 	//
 	// prettier-ignore
 	switch (skill.kind) {
 		case 'hard': return createHTTPTool(ctx, task, action, skill);
-		case 'soft': return createAITool(ctx, task, action, skill);
+		case 'soft': return createAITool(ctx, task, action, skill, context);
 		case 'built-in': {
 			//
 			if (skill.key in _builtInSkills) {
