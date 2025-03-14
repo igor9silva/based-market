@@ -8,7 +8,7 @@ export const multiply = defineSkill({
 		numbers: z.array(z.number()).describe('The numbers to multiply.'),
 	}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

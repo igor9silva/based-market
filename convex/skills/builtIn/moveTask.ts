@@ -15,7 +15,7 @@ export const moveTask = defineSkill({
 			),
 	}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

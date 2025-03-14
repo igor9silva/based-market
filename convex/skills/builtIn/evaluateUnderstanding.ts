@@ -6,7 +6,7 @@ export const evaluateUnderstanding = defineSkill({
 	description: 'Evaluate whether the current task understanding is accurate.',
 	parameters: z.object({}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

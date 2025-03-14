@@ -13,7 +13,7 @@ export const reopen = defineSkill({
 			condition: 'owner',
 		},
 	],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

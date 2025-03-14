@@ -14,7 +14,7 @@
 // 			),
 // 	}),
 // 	knownReactions: [],
-// 	execute:
+// 	use:
 // 		(execution: ToolExecution) =>
 // 		async (args): Promise<ExecutionResult> => {
 // 			//

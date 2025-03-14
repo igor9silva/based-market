@@ -8,7 +8,7 @@ export const sum = defineSkill({
 		numbers: z.array(z.number()).describe('The numbers to sum.'),
 	}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

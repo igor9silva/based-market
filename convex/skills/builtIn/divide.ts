@@ -9,7 +9,7 @@ export const divide = defineSkill({
 		B: z.number().describe('The divisor.'),
 	}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

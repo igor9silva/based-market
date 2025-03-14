@@ -9,7 +9,7 @@ export const askForClarification = defineSkill({
 		message: z.string().describe('The message to send to the user in MDX format.'),
 	}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

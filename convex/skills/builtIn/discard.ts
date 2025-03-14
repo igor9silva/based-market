@@ -9,7 +9,7 @@ export const discard = defineSkill({
 		reasoning: z.string().optional().describe('A short explanation for discarding the task.'),
 	}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

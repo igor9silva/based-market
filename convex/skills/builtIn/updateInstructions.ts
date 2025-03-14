@@ -25,7 +25,7 @@ export const updateInstructions = defineSkill({
 			condition: 'any',
 		},
 	],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

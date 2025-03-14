@@ -6,7 +6,7 @@ export const stop = defineSkill({
 	description: 'Stop the reaction chain',
 	parameters: z.object({}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

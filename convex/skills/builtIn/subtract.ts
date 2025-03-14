@@ -8,7 +8,7 @@ export const subtract = defineSkill({
 		numbers: z.array(z.number()).describe('The numbers to subtract.'),
 	}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//

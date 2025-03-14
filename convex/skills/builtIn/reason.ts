@@ -9,7 +9,7 @@ export const reason = defineSkill({
 		reasoning: z.string().describe('The reasoning.'),
 	}),
 	knownReactions: [],
-	execute:
+	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
