@@ -49,29 +49,7 @@ export async function _prepareContext(
 		stopSequences: skill.config.stopSequences ?? undefined,
 		maxSteps: 1, // we are not using AI SDK to run tools or multi-step stuff
 		toolChoice: 'required',
-		system: [
-			//
-			skill.config.instructions,
-			//
-			// TODO: dynamic user info based on Inbox
-			`## Context`,
-			`### User information`,
-			`- Language: I speak English (advanced, preferred), BR Portuguese (native) and a little bit of Spanish.`,
-			`- Location: I live in Setúbal, Portugal. I was born in São Paulo, Brazil.`,
-			`- Timezone: UTC.`, // TODO: dynamic timezone because of the damn DST
-			`- Current time: ${new Date().toISOString()}`,
-			`- Name: Igor Silva`,
-			`- Twitter: @igor9silva`,
-			`- Birthday: 1997-01-22 (aged 28 as of today)`,
-			`- Igor is your creator. He's actively working on improving you (Meseeks, the companion app).`,
-			`- Igor is a software developer, entrepreneur and investor.`,
-			//
-			`### Current task`,
-			renderTask(task),
-			//
-		].join('\n'),
-
-		// assuming task.author is always an user, could also use action.author since we're replying to a user message
+		system: await renderInstructions(task, skill),
 		messages: await renderHistory(ctx, task, action, skill),
 		tools: await loadTools(ctx, task, action, skill),
 	};
@@ -192,6 +170,38 @@ async function loadTools(
 	return tools;
 }
 
+async function renderHistory(
+	ctx: ActionCtx | MutationCtx, //
+	task: Doc<'tasks'>,
+	action: Doc<'actions'>,
+	skill: z.infer<typeof softSkillSchema>,
+): Promise<Array<CoreMessage>> {
+	//
+	const since = computeSince(task, skill);
+	const actions = await ctx.runQuery(internal.action.private._findAllSince, {
+		taskId: task._id,
+		since,
+	});
+
+	// TODO: add the summary as a message?
+
+	const history = actions
+		// remove unfinished or skipped actions
+		.filter((action) => ['succeeded', 'failed'].includes(action.status))
+		// remove the current action
+		.filter((a) => a._id !== action._id)
+		// render
+		.map((action) => renderAction(action, task.owner === action.author))
+		// filter out undefined
+		.filter((action) => action !== undefined)
+		// flatten
+		.flatMap((message) => message);
+
+	console.debug(`rendered history since ${new Date(since).toISOString()}`, history);
+
+	return history;
+}
+
 function renderAction(
 	action: Doc<'actions'>, //
 	isUser: boolean,
@@ -226,50 +236,138 @@ function computeSince(
 	}
 }
 
-async function renderHistory(
-	ctx: ActionCtx | MutationCtx, //
-	task: Doc<'tasks'>,
-	action: Doc<'actions'>,
+async function renderInstructions(
+	task: Doc<'tasks'>, //
 	skill: z.infer<typeof softSkillSchema>,
-): Promise<Array<CoreMessage>> {
+) {
 	//
-	const since = computeSince(task, skill);
-	const actions = await ctx.runQuery(internal.action.private._findAllSince, {
-		taskId: task._id,
-		since,
-	});
+	let result = skill.config.instructions;
+	let prevResult = '';
 
-	const history = actions
-		// remove unfinished or skipped actions
-		.filter((action) => ['succeeded', 'failed'].includes(action.status))
-		// remove the current action
-		.filter((a) => a._id !== action._id)
-		// render
-		.map((action) => renderAction(action, task.owner === action.author))
-		// filter out undefined
-		.filter((action) => action !== undefined)
-		// flatten
-		.flatMap((message) => message);
+	// continue replacing until no more variables to replace
+	while (result !== prevResult) {
+		//
+		prevResult = result;
 
-	console.debug(`rendered history since ${new Date(since).toISOString()}`, history);
+		// find all variables in the format {{variable}}
+		result = result.replace(/\{\{([^{}]+)\}\}/g, (match, variableName) => {
+			// replace with the value
+			return valueForVariable(variableName.trim(), task);
+		});
+	}
 
-	return history;
+	return result;
 }
 
-const dateOrNever = (date: number | undefined) => (date ? new Date(date).toISOString() : 'never');
-const renderTask = (task: Doc<'tasks'>) =>
-	[
-		`<id>${task._id}</id>`, //
-		`<title>${task.title}</title>`,
-		// `<status>${task.status}</status>`,
-		`<createdAt>${new Date(task._creationTime).toISOString()}</createdAt>`,
-		`<lastUpdatedAt>${dateOrNever(task.lastUpdatedAt)}</lastUpdatedAt>`,
-		`<lastSummarizedAt>${dateOrNever(task.lastSummarizedAt)}</lastSummarizedAt>`,
-		`<budgetUSDC>
-			<total alt="Total money user has budgeted for this task">${asDollars({ bigInt: task.budgetUSDC.total })}</total>
-			<spent alt="Amount already spent from the budget">${asDollars({ bigInt: task.budgetUSDC.total - task.budgetUSDC.available })}</spent>
-			<available alt="Remaining money available to resolve this task">${asDollars({ bigInt: task.budgetUSDC.available })}</available>
-		</budgetUSDC>`,
-		`<instructions>${task.instructions}</instructions>`,
-		// `<parentId>${task.parentId}</parentId>`,
-	].join('');
+export const instructionVariableSchema = z.union([
+	z.literal('task').describe('The full task structure, in a XML-like format'),
+	z.literal('task.id'),
+	z.literal('task.title'),
+	z.literal('task.status'),
+	z.literal('task.createdAt'),
+	z.literal('task.lastUpdatedAt'),
+	z.literal('task.lastSummarizedAt'),
+	z.literal('task.instructions'),
+	z.literal('task.summary'),
+	z.literal('task.parent'),
+	z.literal('task.budgetUSDC').describe('The full task budget structure, in a XML-like format'),
+	z.literal('task.budgetUSDC.total'),
+	z.literal('task.budgetUSDC.spent'),
+	z.literal('task.budgetUSDC.available'),
+	z.literal('currentDate').describe('The current date and time in ISO 8601 format'),
+	z.literal('userInfo').describe('Information about the user, written by themself'),
+]);
+
+function valueForVariable(
+	variable: z.infer<typeof instructionVariableSchema>, //
+	task: Doc<'tasks'>,
+): string {
+	//
+	switch (variable) {
+		//
+		case 'task':
+			return [
+				`<id>{{task.id}}</id>`, //
+				`<title>{{task.title}}</title>`,
+				`<status>{{task.status}}</status>`,
+				`<createdAt>{{task.createdAt}}</createdAt>`,
+				`<lastUpdatedAt>{{task.lastUpdatedAt}}</lastUpdatedAt>`,
+				`<lastSummarizedAt>{{task.lastSummarizedAt}}</lastSummarizedAt>`,
+				`<budgetUSDC>{{task.budgetUSDC}}</budgetUSDC>`,
+				`<instructions>{{task.instructions}}</instructions>`,
+				// `<parent>${task.parent}</parent>`,
+			]
+				.join('')
+				.replaceAll('\t', '');
+
+		case 'task.id':
+			return task._id;
+
+		case 'task.title':
+			return task.title ?? '<system>no title</system>';
+
+		case 'task.status':
+			return task.status;
+
+		case 'task.createdAt':
+			return dateOrNever(task._creationTime);
+
+		case 'task.lastUpdatedAt':
+			return dateOrNever(task.lastUpdatedAt);
+
+		case 'task.lastSummarizedAt':
+			return dateOrNever(task.lastSummarizedAt);
+
+		case 'task.instructions':
+			return task.instructions ?? '<system>no instructions</system>';
+
+		case 'task.summary':
+			return task.summary ?? '<system>no summary</system>';
+
+		case 'task.parent':
+			return task.parentId ?? '<system>no parent</system>';
+
+		case 'task.budgetUSDC':
+			return [
+				`<total alt="Total money user has budgeted for this task">{{task.budgetUSDC.total}}</total>`,
+				`<spent alt="Amount already spent from the budget">{{task.budgetUSDC.spent}}</spent>`,
+				`<available alt="Remaining money available to resolve this task">{{task.budgetUSDC.available}}</available>`,
+			].join('');
+
+		case 'task.budgetUSDC.total':
+			return asDollars({ bigInt: task.budgetUSDC.total });
+
+		case 'task.budgetUSDC.spent':
+			return asDollars({ bigInt: task.budgetUSDC.total - task.budgetUSDC.available });
+
+		case 'task.budgetUSDC.available':
+			return asDollars({ bigInt: task.budgetUSDC.available });
+
+		case 'currentDate':
+			return new Date().toISOString();
+
+		case 'userInfo': // TODO: read from preferences
+			const MS_PER_YEAR = 31556952000;
+			const birthdate = new Date('1997-01-22T03:36:00.000-02:00');
+			const age = Math.floor((new Date().getTime() - birthdate.getTime()) / MS_PER_YEAR);
+			return [
+				`I'm Igor Silva, born at ${birthdate.toDateString()} (aged ${age} as of today) in São Paulo, Brazil.`,
+				`Raised in Santos, São Paulo, where I lived until Nov/2023 when I moved to Setúbal, Portugal.`,
+				`I'm both a portuguese and brazilian citizen.`,
+				`I'm a engineer, entrepreneur and investor.`,
+				`I speak English (advanced, preferred), BR Portuguese (native) and a little bit of Spanish.`,
+				`My twitter handle is @igor9silva.`,
+				`I'm the creator of Meseeks (you), the companion app. I'm actively working on improving it.`,
+			].join('\n');
+
+		default:
+			throw new Error(`Unknown variable: ${variable}`);
+	}
+}
+
+function dateOrNever(date: number | undefined) {
+	//
+	if (!date) return 'never' as const;
+
+	return new Date(date).toISOString();
+}

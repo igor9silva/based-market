@@ -11,6 +11,15 @@ export const taskStatusSchema = z.enum([
 	'done', // task was resolved
 ]);
 
+export const taskBudgetSchema = z.object({
+	total: z
+		.bigint() //
+		.describe('The total amount of money the user has budgeted for this task.'),
+	available: z
+		.bigint() //
+		.describe('The remaining/available amount of money available to spend on this task (total - spent).'),
+});
+
 export const taskSchema = z
 	.object({
 		author: authorSchema.describe('Who created the task.'),
@@ -27,14 +36,7 @@ export const taskSchema = z
 		lastUpdatedAt: z.number().optional().describe('The last time the task instructions were reviewed/updated.'),
 		lastSummarizedAt: z.number().optional().describe('The last time the task activity was summarized.'),
 		lastReadAction: zid('actions').optional().describe('The last action that was "read" by the user.'),
-		budgetUSDC: z.object({
-			total: z
-				.bigint() //
-				.describe('The total amount of money the user has budgeted for this task.'),
-			available: z
-				.bigint() //
-				.describe('The remaining/available amount of money available to spend on this task (total - spent).'),
-		}),
+		budgetUSDC: taskBudgetSchema,
 		embeddingId: zid('taskEmbeddings').optional(),
 	})
 	.describe(`It's a goal to be achieved. A Task is the basic and most fundamental entity of Meseeks.`);
