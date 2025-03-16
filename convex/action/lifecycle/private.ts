@@ -21,8 +21,6 @@ export const _perform = internalAction({
 	},
 	handler: async (ctx, { taskId, actionId }) => {
 		//
-		// TODO: also bring the "max consecutive" logic to here, from react()
-
 		try {
 			//
 			console.debug(`Executing action ${actionId} for task ${taskId}`);
@@ -79,7 +77,7 @@ export const _perform = internalAction({
 			//
 		} catch (error) {
 			//
-			console.error(`action ${actionId} execution failed: ${error}`); // TODO: notify
+			console.error(`action ${actionId} execution failed: ${error}`); // TODO: notify, monitor error() and warn()
 
 			// TODO: with the new flow we lost the ability to fix itself on errors
 
@@ -97,43 +95,6 @@ export const _perform = internalAction({
 		}
 	},
 });
-
-// export const _react = internalMutation({
-// 	args: {
-// 		taskId: zid('tasks'),
-// 		author: authorSchema,
-// 	},
-// 	handler: async (ctx, { taskId, author }) => {
-// 		//
-// 		const task = await _findOneTask(ctx, { taskId });
-
-// 		if (task.isDone) {
-// 			console.debug(`Skipping reacting for task ${taskId} because it's already done.`);
-// 			return;
-// 		}
-
-// 		await _skipAllEnqueuedReactions(ctx, { taskId });
-
-// 		// TODO: optimization: skip feedback() if the task has no summary
-// 		// if (!task.summary) {
-// 		// 	return await _add(ctx, {
-// 		// 		taskId,
-// 		// 		author,
-// 		// 		owner: task.owner,
-// 		// 		skillKey: 'refineTask',
-// 		// 		args: {},
-// 		// 	});
-// 		// }
-
-// 		return await _add(ctx, {
-// 			taskId,
-// 			author,
-// 			owner: task.owner,
-// 			skillKey: 'feedback',
-// 			args: {},
-// 		});
-// 	},
-// });
 
 export const _start = internalMutation({
 	args: {
@@ -289,8 +250,6 @@ async function _tryAutoApprove(
 	skill: z.infer<typeof skillSchema>,
 	expectedCost: bigint,
 ) {
-	// return false; // TODO: remove
-
 	// auto approve if the author is the task owner
 	if (action.author === task.owner) return _autoApprove(ctx, task, action);
 

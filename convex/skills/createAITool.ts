@@ -170,7 +170,8 @@ export function calculateProviderCost({
 		cached?: number;
 	};
 }) {
-	// TODO: inspect loggged providerMetadata to get the cached tokens path
+	// TODO: account for cached tokens
+	// inspect loggged providerMetadata to get the cached tokens path
 	const pricing = pricingFor(model);
 
 	console.debug('Input tokens', inputTokens);

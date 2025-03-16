@@ -109,7 +109,8 @@ export const _add = internalMutation({
 		});
 
 		// TODO: receive actions instead of using hardcoded ones
-		// also, should we have e `createTask` action? to make it explicit?
+		// also, should we have a `createTask` action? to make it explicit?
+		// instead: no explicit createTask(), you just act() and a new task is created if not provided
 
 		await _addActions(ctx, {
 			taskId,
@@ -189,9 +190,6 @@ Happy hacking 🚀
 		// 	skillKey: 'say',
 		// 	args: { message: description },
 		// });
-
-		// TODO: create a 2nd decision skill, for onboarding
-		// TODO: insert a few actions
 
 		return taskId;
 	},
