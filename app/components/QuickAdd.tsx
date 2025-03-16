@@ -74,7 +74,7 @@ export function QuickAdd({ className }: { className?: string }) {
 						<Textarea
 							ref={textareaRef}
 							name="message"
-							placeholder="What are you seeking?"
+							placeholder={randomPlaceholder()}
 							required
 							defaultValue={newTaskText}
 							className="min-h-32 resize-none text-base"
@@ -91,4 +91,19 @@ export function QuickAdd({ className }: { className?: string }) {
 			</CardContent>
 		</Card>
 	);
+}
+
+function randomPlaceholder() {
+	//
+	const placeholders = [
+		"What's happening?",
+		"What's going on?",
+		'What troubles you?',
+		'What are you thinking about?',
+		'What are you feeling?',
+		'What are you trying to achieve?',
+		'ooh-wee, look at me!',
+	];
+
+	return placeholders[Math.floor(Math.random() * placeholders.length)];
 }
