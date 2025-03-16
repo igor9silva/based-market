@@ -3,12 +3,13 @@ import { deepseek } from '@ai-sdk/deepseek';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
 
-import { CoreMessage, generateText, LanguageModel, Tool } from 'ai';
+import { CoreMessage, generateText, LanguageModel } from 'ai';
 import { z } from 'zod';
 import { internal } from './_generated/api';
 import { Doc } from './_generated/dataModel';
 import { ActionCtx, MutationCtx } from './_generated/server';
 import { softSkillSchema } from './schemas/skillSchema';
+import { AITool } from './schemas/toolSchema';
 import { _toolsForMagicRock } from './skills/tools';
 import { asDollars } from './utils/money';
 
@@ -155,7 +156,7 @@ async function loadTools(
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
 	skill: z.infer<typeof softSkillSchema>,
-): Promise<Record<string, Tool>> {
+): Promise<Record<string, AITool>> {
 	//
 	console.debug('loading tools, config:', skill.config.availableSkills);
 
@@ -329,19 +330,19 @@ function valueForVariable(
 
 		case 'task.budgetUSDC':
 			return [
-				`<total alt="Total money user has budgeted for this task">{{task.budgetUSDC.total}}</total>`,
-				`<spent alt="Amount already spent from the budget">{{task.budgetUSDC.spent}}</spent>`,
-				`<available alt="Remaining money available to resolve this task">{{task.budgetUSDC.available}}</available>`,
+				`<total alt="Total money user has budgeted for this task, in USDC">{{task.budgetUSDC.total}}</total>`,
+				`<spent alt="Amount already spent from the budget, in USDC">{{task.budgetUSDC.spent}}</spent>`,
+				`<available alt="Remaining money available to resolve this task, in USDC">{{task.budgetUSDC.available}}</available>`,
 			].join('');
 
 		case 'task.budgetUSDC.total':
-			return asDollars({ bigInt: task.budgetUSDC.total });
+			return asDollars({ bigInt: task.budgetUSDC.total, precision: 10 });
 
 		case 'task.budgetUSDC.spent':
-			return asDollars({ bigInt: task.budgetUSDC.total - task.budgetUSDC.available });
+			return asDollars({ bigInt: task.budgetUSDC.total - task.budgetUSDC.available, precision: 10 });
 
 		case 'task.budgetUSDC.available':
-			return asDollars({ bigInt: task.budgetUSDC.available });
+			return asDollars({ bigInt: task.budgetUSDC.available, precision: 10 });
 
 		case 'currentDate':
 			return new Date().toISOString();
