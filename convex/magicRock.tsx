@@ -72,7 +72,7 @@ export async function _prepareContext(
 		].join('\n'),
 
 		// assuming task.author is always an user, could also use action.author since we're replying to a user message
-		messages: await renderHistory(ctx, task, action),
+		messages: await renderHistory(ctx, task, action, skill),
 		tools: await loadTools(ctx, task, action, skill),
 	};
 }
@@ -208,13 +208,32 @@ function renderAction(
 	};
 }
 
+function computeSince(
+	task: Doc<'tasks'>, //
+	skill: z.infer<typeof softSkillSchema>,
+) {
+	//
+	switch (skill.config.historyMode) {
+		//
+		case 'since last summarized':
+			return task.lastSummarizedAt ?? task.lastUpdatedAt ?? 0;
+
+		case 'since last instructed':
+			return task.lastUpdatedAt ?? 0;
+
+		case 'all':
+			return 0;
+	}
+}
+
 async function renderHistory(
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
 	action: Doc<'actions'>,
+	skill: z.infer<typeof softSkillSchema>,
 ): Promise<Array<CoreMessage>> {
 	//
-	const since = task.lastSummarizedAt ?? task.lastUpdatedAt ?? 0;
+	const since = computeSince(task, skill);
 	const actions = await ctx.runQuery(internal.action.private._findAllSince, {
 		taskId: task._id,
 		since,

@@ -65,6 +65,12 @@ const decisionConfigSchema = z.object({
 	instructions: z.string().describe('Instructions for the decision-making process'),
 	temperature: z.number().min(0).max(2).describe('Temperature to use'),
 	availableSkills: z.array(z.string()).describe('Skills that can be used to make the decision'),
+	historyMode: z.enum([
+		// 'none', //
+		'since last summarized',
+		'since last instructed',
+		'all',
+	]),
 	topP: z
 		.number()
 		.min(0)
