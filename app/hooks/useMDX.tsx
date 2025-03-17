@@ -39,6 +39,7 @@ export function useMDX(mdx: string) {
 			const code = await compileMDX(mdx);
 			return await runMDX(code);
 		},
+		staleTime: Infinity,
 	});
 
 	return { Component, error, isPending };
