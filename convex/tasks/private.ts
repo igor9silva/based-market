@@ -116,6 +116,7 @@ export const _add = internalMutation({
 			taskId,
 			author,
 			owner,
+			depth: 0,
 			skills: [
 				{
 					skillKey: 'increaseBudget',

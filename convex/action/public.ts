@@ -22,6 +22,7 @@ export const act = mutation({
 			skillKey,
 			args,
 			taskId,
+			depth: 0,
 			author: currentUser._id,
 			owner: currentUser._id,
 			shouldReopen,

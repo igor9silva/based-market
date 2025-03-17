@@ -7,6 +7,7 @@ const coreActionSchema = z.object({
 	taskId: zid('tasks'),
 	owner: zid('users'),
 	author: authorSchema,
+	depth: z.number().min(0).max(1000),
 	skillKey: z.string(),
 	args: z.record(z.any()),
 	// TODO: idea: inherit the argsSchema from the skill, so we can drill types

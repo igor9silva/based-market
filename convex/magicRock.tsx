@@ -38,8 +38,17 @@ export async function _prepareContext(
 	skill: z.infer<typeof softSkillSchema>,
 ): Promise<MagicRockContext> {
 	//
+	const model = languageModelFrom(skill);
+	const [history, tools, instructions] = await Promise.all([
+		renderHistory(ctx, task, action, skill),
+		loadTools(ctx, task, action, skill),
+		renderInstructions(task, skill),
+	]);
+
+	console.debug('model', model);
+
 	return {
-		model: languageModelFrom(skill),
+		model,
 		temperature: skill.config.temperature,
 		maxTokens: skill.config.maxTokens ?? undefined,
 		frequencyPenalty: skill.config.frequencyPenalty ?? undefined,
@@ -50,9 +59,9 @@ export async function _prepareContext(
 		stopSequences: skill.config.stopSequences ?? undefined,
 		maxSteps: 1, // we are not using AI SDK to run tools or multi-step stuff
 		toolChoice: 'required',
-		system: await renderInstructions(task, skill),
-		messages: await renderHistory(ctx, task, action, skill),
-		tools: await loadTools(ctx, task, action, skill),
+		system: instructions,
+		messages: history,
+		tools: tools,
 	};
 }
 

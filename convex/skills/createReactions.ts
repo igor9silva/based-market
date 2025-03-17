@@ -22,6 +22,7 @@ export function createReactions(
 			args: reaction.args,
 			taskId: action.taskId,
 			owner: action.owner,
+			depth: action.depth + 1,
 			author: action._id as Id<'actions'> | Id<'users'>, // I have no idea why I need that cast, as it expects a union of Id<'actions'> or Id<'users'>
 		}));
 }

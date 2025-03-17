@@ -53,6 +53,7 @@ export function createAITool(
 				taskId: task._id,
 				author: action._id,
 				owner: task.owner,
+				depth: action.depth + 1,
 			});
 
 			switch (finishReason) {
@@ -66,6 +67,7 @@ export function createAITool(
 							taskId: task._id,
 							author: action._id,
 							owner: task.owner,
+							depth: action.depth + 1,
 						})),
 					);
 					break;

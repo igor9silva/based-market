@@ -15,6 +15,7 @@ export const newActionSchema = z.object({
 	author: authorSchema,
 	skillKey: z.string().describe('The key of the skill to use'),
 	args: z.record(z.any()),
+	depth: z.number().min(0).max(1000),
 });
 
 export const _add = internalMutation({
@@ -22,14 +23,15 @@ export const _add = internalMutation({
 		...newActionSchema.shape,
 		shouldReopen: z.boolean().optional().default(false),
 	},
-	handler: async (ctx, { taskId, author, owner, skillKey, args, shouldReopen }) => {
+	handler: async (ctx, { taskId, author, owner, skillKey, args, depth, shouldReopen }) => {
 		//
 		const actionIds = await _addMany(ctx, {
 			taskId,
 			author,
 			owner,
-			skills: [{ skillKey, args }],
+			depth,
 			shouldReopen,
+			skills: [{ skillKey, args }],
 		});
 
 		return actionIds[0];
@@ -40,15 +42,16 @@ export const _addMany = internalMutation({
 		taskId: zid('tasks'),
 		owner: zid('users'),
 		author: authorSchema,
+		depth: z.number().min(0).max(1000),
+		shouldReopen: z.boolean().optional().default(false),
 		skills: z.array(
 			z.object({
 				skillKey: z.string().describe('The key of the skill to use'),
 				args: z.record(z.any()),
 			}),
 		),
-		shouldReopen: z.boolean().optional().default(false),
 	},
-	handler: async (ctx, { taskId, owner, author, skills, shouldReopen }) => {
+	handler: async (ctx, { taskId, owner, author, skills, depth, shouldReopen }) => {
 		//
 		const task = await _findOneTask(ctx, { taskId });
 
@@ -68,6 +71,7 @@ export const _addMany = internalMutation({
 					taskId,
 					author,
 					owner,
+					depth,
 					status: 'enqueued',
 					result: null,
 					skillKey: skill.skillKey,
