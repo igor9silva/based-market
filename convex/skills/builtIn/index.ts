@@ -10,24 +10,19 @@ import { stop } from './stop';
 import { subtract } from './subtract';
 import { sum } from './sum';
 import { updateInstructions } from './updateInstructions';
+import { updateSummary } from './updateSummary';
 
 export const _builtInSkills = {
-	// 1st step
+	discard,
 	askForClarification,
 	updateInstructions,
-	discard,
-	//
-	// evaluateUnderstanding,
-	// reason,
-	// setResolution,
+	updateSummary,
 	// moveTask,
 	// createSubtask,
+
 	say,
 	reopen,
-	// ,
 	increaseBudget,
-	//
-	// seek
 	resolve,
 
 	/* math */
@@ -36,6 +31,5 @@ export const _builtInSkills = {
 	divide,
 	subtract,
 
-	/* */
 	stop,
 };
