@@ -305,6 +305,7 @@ function valueForVariable(
 				`<lastSummarizedAt>{{task.lastSummarizedAt}}</lastSummarizedAt>`,
 				`<budgetUSDC>{{task.budgetUSDC}}</budgetUSDC>`,
 				`<instructions>{{task.instructions}}</instructions>`,
+				`<summary>{{task.summary}}</summary>`,
 				// `<parent>${task.parent}</parent>`,
 			]
 				.join('')

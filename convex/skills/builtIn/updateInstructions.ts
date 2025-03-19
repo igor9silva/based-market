@@ -20,7 +20,7 @@ export const updateInstructions = defineSkill({
 	}),
 	knownReactions: [
 		{
-			skillKey: 'seek',
+			skillKey: 'evaluateProgress',
 			args: {},
 			condition: 'any',
 		},

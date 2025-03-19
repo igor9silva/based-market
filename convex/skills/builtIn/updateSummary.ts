@@ -9,11 +9,11 @@ export const updateSummary = defineSkill({
 		summary: z.string().describe(`MDX. Add any details on what we have done so far. Bullet points are preferred.`),
 	}),
 	knownReactions: [
-		// {
-		// 	skillKey: 'seek',
-		// 	args: {},
-		// 	condition: 'any',
-		// },
+		{
+			skillKey: 'iterate',
+			args: {},
+			condition: 'companion',
+		},
 	],
 	use:
 		(execution: ToolExecution) =>
