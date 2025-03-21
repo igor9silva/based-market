@@ -19,8 +19,10 @@ import { TaskListAndDetail } from '~/components/TaskListAndDetail';
 import { TopUpCard } from '~/components/TopUpCard';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
+import { CodeBlock, CodeBlockCode } from '~/components/ui/code-block';
 import { ScrollArea } from '~/components/ui/scroll-area';
 import { Separator } from '~/components/ui/separator';
+import { cn } from '~/lib/utils';
 
 const components = {
 	IncreaseTaskBudgetCard,
@@ -52,10 +54,12 @@ export default function MDX({
 	text, //
 	onClickFix,
 	errorFallback,
+	className,
 }: {
 	text: string;
 	onClickFix?: (e: React.MouseEvent) => void;
 	errorFallback?: React.ReactNode;
+	className?: string;
 }) {
 	//
 	const { Component, error, isPending } = useMDX(text);
@@ -66,7 +70,7 @@ export default function MDX({
 	if (!Component) throw new Error('No component found');
 
 	return (
-		<div className="whitespace-normal [&>*]:break-all h-full">
+		<div className={cn('whitespace-normal [&>*]:break-all h-full', className)}>
 			<Component
 				components={{
 					a: ({ children, href }) => (
@@ -79,14 +83,33 @@ export default function MDX({
 							{children}
 						</a>
 					),
-					pre: ({ children }) => (
-						<pre className="p-4 bg-muted rounded-md overflow-x-auto my-2">{children}</pre>
-					),
-					code: ({ children }) => (
-						<code className="bg-muted dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 px-1.5 py-0.5 rounded text-sm font-mono">
-							{children}
-						</code>
-					),
+					code: function CodeComponent({ className, children, ...props }) {
+						// const isInline =
+						// 	!props.node?.position?.start.line ||
+						// 	props.node?.position?.start.line === props.node?.position?.end.line;
+
+						// if (isInline) {
+						// 	return (
+						// 		<span
+						// 			className={cn('bg-primary-foreground rounded-sm px-1 font-mono text-sm', className)}
+						// 			{...props}
+						// 		>
+						// 			{children}
+						// 		</span>
+						// 	);
+						// }
+
+						const language = extractLanguage(className);
+
+						return (
+							<CodeBlock className={className}>
+								<CodeBlockCode code={children as string} language={language} />
+							</CodeBlock>
+						);
+					},
+					pre: function PreComponent({ children }) {
+						return <>{children}</>;
+					},
 					blockquote: ({ children }) => (
 						<blockquote className="pl-4 border-l-4 border-muted-foreground/20 italic my-4 text-muted-foreground">
 							{children}
@@ -167,4 +190,10 @@ function MDXError({
 			</div>
 		</div>
 	);
+}
+
+function extractLanguage(className?: string): string {
+	if (!className) return 'plaintext';
+	const match = className.match(/language-(\w+)/);
+	return match ? match[1] : 'plaintext';
 }

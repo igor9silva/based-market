@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { Textarea } from '~/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
@@ -59,7 +59,7 @@ function PromptInput({ className, maxHeight = 240, onSubmit, children, disabled 
 
 export type PromptInputTextareaProps = {
 	disableAutosize?: boolean;
-	inputRef?: React.RefObject<HTMLTextAreaElement>;
+	inputRef: React.RefObject<HTMLTextAreaElement>;
 } & React.ComponentProps<typeof Textarea>;
 
 function PromptInputTextarea({
@@ -71,38 +71,44 @@ function PromptInputTextarea({
 }: PromptInputTextareaProps) {
 	//
 	const { maxHeight, disabled } = usePromptInput();
-	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	// Auto-resize functionality
-	const handleInput = () => {
+	const resizeIfNeeded = () => {
 		//
 		if (disableAutosize) return;
+		if (!inputRef.current) return;
 
-		const ref = inputRef ?? textareaRef;
-		if (!ref.current) return;
-
-		ref.current.style.height = 'auto';
-		ref.current.style.height =
+		inputRef.current.style.height = 'auto';
+		inputRef.current.style.height =
 			typeof maxHeight === 'number'
-				? `${Math.min(ref.current.scrollHeight, maxHeight)}px`
-				: `min(${ref.current.scrollHeight}px, ${maxHeight})`;
+				? `${Math.min(inputRef.current.scrollHeight, maxHeight)}px`
+				: `min(${inputRef.current.scrollHeight}px, ${maxHeight})`;
 	};
 
-	// Set up the input event listener for auto-resize
+	const handleFormReset = () => setTimeout(resizeIfNeeded, 0);
+
+	// Set up event listeners for auto-resize
 	useEffect(() => {
 		//
-		const ref = inputRef ?? textareaRef;
-		if (!ref.current) return;
+		if (!inputRef.current) return;
 
-		ref.current.addEventListener('input', handleInput);
-		return () => ref.current?.removeEventListener('input', handleInput);
+		const form = inputRef.current.closest('form');
+		if (!form) return console.warn('No form found (should have one)');
+
+		inputRef.current.addEventListener('input', resizeIfNeeded); // on input, resize
+		form.addEventListener('reset', handleFormReset); // after submission, resize
+
+		return () => {
+			inputRef.current?.removeEventListener('input', resizeIfNeeded);
+			form.removeEventListener('reset', handleFormReset);
+		};
 		//
 	}, [inputRef, disableAutosize, maxHeight]);
 
 	return (
 		<Textarea
 			name="message"
-			ref={inputRef ?? textareaRef}
+			ref={inputRef}
 			className={cn(
 				'text-primary min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
 				className,
