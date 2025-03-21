@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { GenericAction } from '~/components/actions/generic';
 import { Button } from '~/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
-import { FailedMessage, Message, MessageContent, RunningMessage } from '~/components/ui/message';
+import { FailedMessage, Message, MessageContent, SimpleMessage } from '~/components/ui/message';
 import { useIsNew } from '~/hooks/useIsNew';
 
 export function SearchWebAction(props: {
@@ -32,7 +32,7 @@ export function SearchWebAction(props: {
 			return <Error action={action} />;
 
 		case 'running':
-			return <RunningMessage text={`🔍 Searching "${action.args['query']}"`} />;
+			return <SimpleMessage running text={`🔍 Searching "${action.args['query']}"`} />;
 
 		case 'succeeded':
 			return <Success action={action} />;

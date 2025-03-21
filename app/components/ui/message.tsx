@@ -80,25 +80,27 @@ const MessageAction = ({ tooltip, children, className, side = 'top', ...props }:
 	);
 };
 
-const RunningMessage = ({ text }: { text: string }) => (
+const SimpleMessage = ({ text, running }: { text: string; running?: boolean }) => (
 	<Message>
-		<TextShimmer text={text} />
+		{running ? (
+			<TextShimmer text={text} /> //
+		) : (
+			<div className="text-sm text-muted-foreground">{text}</div>
+		)}
 	</Message>
 );
 
 const FailedMessage = ({ text, error }: { text: string; error: string }) => (
 	<Message>
-		<Message>
-			<Collapsible>
-				<CollapsibleTrigger>
-					<MessageContent className="text-sm text-muted-foreground text-left" text={text} />
-				</CollapsibleTrigger>
-				<CollapsibleContent>
-					<pre className="text-sm text-muted-foreground text-left">{error}</pre>
-				</CollapsibleContent>
-			</Collapsible>
-		</Message>
+		<Collapsible>
+			<CollapsibleTrigger>
+				<MessageContent className="text-sm text-muted-foreground text-left" text={text} />
+			</CollapsibleTrigger>
+			<CollapsibleContent>
+				<pre className="text-sm text-muted-foreground text-left">{error}</pre>
+			</CollapsibleContent>
+		</Collapsible>
 	</Message>
 );
 
-export { FailedMessage, Message, MessageAction, MessageActions, MessageAvatar, MessageContent, RunningMessage };
+export { FailedMessage, Message, MessageAction, MessageActions, MessageAvatar, MessageContent, SimpleMessage };
