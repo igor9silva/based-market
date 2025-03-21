@@ -83,6 +83,10 @@ export default {
 						filter: 'blur(1.5px)',
 					},
 				},
+				'shimmer': {
+					'0%': { backgroundPosition: '200% 50%' },
+					'100%': { backgroundPosition: '-200% 50%' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',

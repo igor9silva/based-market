@@ -4,7 +4,7 @@ import { Link, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
 import { usePaginatedQuery } from 'convex/react';
-import { Bug, MoveDown } from 'lucide-react';
+import { Bug, ChevronDown } from 'lucide-react';
 import { RefCallback, useEffect, useMemo, useState } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { Action } from '~/components/Action';
@@ -157,7 +157,7 @@ function StickToBottomContent({
 	);
 }
 
-function ScrollToBottom() {
+function ScrollToBottom({ className }: { className?: string }) {
 	//
 	const { isAtBottom, scrollToBottom } = useStickToBottomContext();
 	const onClick = () => scrollToBottom();
@@ -165,8 +165,17 @@ function ScrollToBottom() {
 	return (
 		!isAtBottom && (
 			<div className="flex justify-center z-10">
-				<Button variant="outline" className="p-1 size-5 [&_svg]:size-3 bg-background/75" onClick={onClick}>
-					<MoveDown />
+				<Button
+					variant="outline"
+					size="icon"
+					className={cn(
+						'h-8 w-8 rounded-full transition-all duration-150 ease-out',
+						'translate-y-0 scale-100 opacity-100',
+						className,
+					)}
+					onClick={onClick}
+				>
+					<ChevronDown className="size-4" />
 				</Button>
 			</div>
 		)
