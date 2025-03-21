@@ -3,6 +3,7 @@ import { Doc, Id } from 'convex/_generated/dataModel';
 import { GenericAction } from '~/components/actions/generic';
 import { SayAction } from '~/components/actions/say';
 import { ScrapeLinkAction } from '~/components/actions/scrapeLink';
+import { SearchPlacesAction } from '~/components/actions/searchPlaces';
 import { SearchWebAction } from '~/components/actions/searchWeb';
 import { UpdateInstructionsAction } from '~/components/actions/updateInstructions';
 
@@ -11,6 +12,7 @@ const componentMap = {
 	searchWeb: SearchWebAction,
 	updateInstructions: UpdateInstructionsAction,
 	scrapeLink: ScrapeLinkAction,
+	searchPlaces: SearchPlacesAction,
 };
 
 export function Action(props: {
