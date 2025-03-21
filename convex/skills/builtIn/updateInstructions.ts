@@ -6,13 +6,7 @@ export const updateInstructions = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Update the task instructions.',
 	parameters: z.object({
-		title: z
-			.string()
-			.max(60)
-			.optional()
-			.describe(
-				'A short title for the task. Max 60 characters. Make sure it encodes THE ENTIRE instructions as much as you can.',
-			),
+		title: z.string().max(60).optional().describe('A short title for the task. **Max 60 characters**.'),
 		instructions: z
 			.string()
 			.optional()
