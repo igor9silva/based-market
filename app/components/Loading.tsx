@@ -1,10 +1,10 @@
-import { TextShimmerLoader } from '~/components/ui/text-shimmer-loader';
+import { TextShimmer } from '~/components/ui/text-shimmer';
 import { cn } from '~/lib/utils';
 
 export function Loading({ className }: { className?: string }) {
 	return (
 		<div className={cn('flex flex-col items-center justify-center h-screen w-full gap-4', className)}>
-			<TextShimmerLoader text="Loading..." />
+			<TextShimmer text="Loading..." />
 		</div>
 	);
 }

@@ -1,5 +1,7 @@
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@radix-ui/react-collapsible';
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar';
 import MDX from '~/components/ui/mdx';
+import { TextShimmer } from '~/components/ui/text-shimmer';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { cn } from '~/lib/utils';
 
@@ -41,7 +43,7 @@ const MessageContent = ({ text, className, ...props }: MessageContentProps) => {
 	return (
 		<MDX
 			text={text}
-			className={cn('rounded-lg p-2 text-foreground bg-secondary prose break-words whitespace-normal', className)}
+			className={cn('rounded-lg text-foreground prose break-words whitespace-normal', className)}
 			{...props}
 		/>
 	);
@@ -78,4 +80,25 @@ const MessageAction = ({ tooltip, children, className, side = 'top', ...props }:
 	);
 };
 
-export { Message, MessageAction, MessageActions, MessageAvatar, MessageContent };
+const RunningMessage = ({ text }: { text: string }) => (
+	<Message>
+		<TextShimmer text={text} />
+	</Message>
+);
+
+const FailedMessage = ({ text, error }: { text: string; error: string }) => (
+	<Message>
+		<Message>
+			<Collapsible>
+				<CollapsibleTrigger>
+					<MessageContent className="text-sm text-muted-foreground text-left" text={text} />
+				</CollapsibleTrigger>
+				<CollapsibleContent>
+					<pre className="text-sm text-muted-foreground text-left">{error}</pre>
+				</CollapsibleContent>
+			</Collapsible>
+		</Message>
+	</Message>
+);
+
+export { FailedMessage, Message, MessageAction, MessageActions, MessageAvatar, MessageContent, RunningMessage };

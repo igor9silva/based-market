@@ -2,9 +2,11 @@ import { Doc, Id } from 'convex/_generated/dataModel';
 
 import { GenericAction } from '~/components/actions/generic';
 import { SayAction } from '~/components/actions/say';
+import { SearchWebAction } from '~/components/actions/searchWeb';
 
 const componentMap = {
 	say: SayAction,
+	searchWeb: SearchWebAction,
 };
 
 export function Action(props: {

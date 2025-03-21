@@ -1,6 +1,6 @@
 import { cn } from '~/lib/utils';
 
-export function TextShimmerLoader({
+export function TextShimmer({
 	text = 'Thinking',
 	className,
 	size = 'md',

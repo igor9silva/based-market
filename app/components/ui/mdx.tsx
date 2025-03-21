@@ -75,10 +75,10 @@ export default function MDX({
 				components={{
 					a: ({ children, href }) => (
 						<a
-							href={href}
+							href={href} //
 							className="text-blue-500 hover:underline"
 							target="_blank"
-							rel="noopener noreferrer"
+							rel="noopener"
 						>
 							{children}
 						</a>

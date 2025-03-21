@@ -20,11 +20,16 @@ export function SayAction({
 	const isNew = useIsNew(action._creationTime, initialRenderDate);
 
 	return (
-		<Message className={cn('justify-end', className)}>
+		<Message
+			className={cn(
+				isAuthorCurrentUser ? 'justify-end' : 'justify-start', //
+				className,
+			)}
+		>
 			<MessageContent
 				text={action.args['message']}
 				className={cn({
-					'bg-primary text-primary-foreground': isAuthorCurrentUser,
+					'bg-primary text-primary-foreground p-2': isAuthorCurrentUser,
 				})}
 			/>
 		</Message>
