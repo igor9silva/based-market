@@ -1,15 +1,16 @@
 import { Doc, Id } from 'convex/_generated/dataModel';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { z } from 'zod';
 
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { GenericAction } from '~/components/actions/generic';
 import { Button } from '~/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
+import MDX from '~/components/ui/mdx';
 import { FailedMessage, Message, MessageContent, SimpleMessage } from '~/components/ui/message';
 import { useIsNew } from '~/hooks/useIsNew';
 
-export function SearchWebAction(props: {
+export function ScrapeLinkAction(props: {
 	className?: string;
 	action: Doc<'actions'>;
 	initialRenderDate: Date;
@@ -32,23 +33,33 @@ export function SearchWebAction(props: {
 			return <Error action={action} />;
 
 		case 'running':
-			return <SimpleMessage running text={`🔍 Searching "${action.args['query']}"`} />;
+			return <SimpleMessage running text={`🧵 Scraping "${action.args['url']}"`} />;
 
 		case 'succeeded':
 			return <Success action={action} />;
 	}
 }
 
-const SearchResultSchema = z.object({
-	query: z.string(),
-	results: z.array(
-		z.object({
-			url: z.string().optional(),
-			title: z.string().optional(),
-			content: z.string().optional(),
-			score: z.number().optional(),
-		}),
-	),
+const ScrapeResultSchema = z.object({
+	success: z.literal(true),
+	data: z.object({
+		// metadata: z.object({
+		// 	// 'title': 'Portugal’s New IFICI – NHR 2.0 Framework 2025 – Best Citizenships',
+		// 	// 'favicon': 'https://best-citizenships.com/wp-content/uploads/2024/05/cropped-favicon-32x32.png',
+		// 	// 'viewport': 'width=device-width, initial-scale=1',
+		// 	// 'robots': 'max-image-preview:large',
+		// 	// 'language': 'en-US',
+		// 	// 'generator': 'WordPress 6.7.2',
+		// 	// 'msapplication-TileImage':
+		// 	// 	'https://best-citizenships.com/wp-content/uploads/2024/05/cropped-favicon-270x270.png',
+		// 	// 'scrapeId': '75d3ffac-821c-4e24-a9de-2681cba33dba',
+		// 	// 'sourceURL': 'https://best-citizenships.com/2025/02/24/portugals-new-ifici-nhr-2-0-framework-2025/',
+		// 	// 'url': 'https://best-citizenships.com/2025/02/24/portugals-new-ifici-nhr-2-0-framework-2025/',
+		// 	// 'statusCode': 200,
+
+		// }),
+		markdown: z.string(),
+	}),
 });
 
 function Error({ action }: { action: Doc<'actions'> }) {
@@ -57,14 +68,14 @@ function Error({ action }: { action: Doc<'actions'> }) {
 
 function Success({ action }: { action: Doc<'actions'> }) {
 	//
-	const response = SearchResultSchema.safeParse(JSON.parse(action.result ?? '{}'));
+	const response = ScrapeResultSchema.safeParse(JSON.parse(action.result ?? '{}'));
 
 	if (!response.success) {
 		console.warn('Invalid (or no) result found succeeded action', action._id);
 		return <Error action={action} />;
 	}
 
-	const { query, results } = response.data;
+	const { data } = response.data;
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
@@ -73,7 +84,7 @@ function Success({ action }: { action: Doc<'actions'> }) {
 				<CollapsibleTrigger className="flex gap-0 items-center">
 					<MessageContent
 						className="text-sm text-muted-foreground text-left"
-						text={`🌐 Found ${results.length} results for "${query}"`}
+						text={`🧵 Scraped "${action.args['url']}"`}
 					/>
 					<Button
 						variant="link"
@@ -85,18 +96,7 @@ function Success({ action }: { action: Doc<'actions'> }) {
 					</Button>
 				</CollapsibleTrigger>
 				<CollapsibleContent>
-					<ul>
-						{results.map((result) => (
-							<li key={result.url}>
-								<a className="text-blue-500 hover:underline" rel="noopener" href={result.url}>
-									<p className="text-sm">{result.title}</p>
-									{result.url && (
-										<p className="text-xs text-muted-foreground">{new URL(result.url).hostname}</p>
-									)}
-								</a>
-							</li>
-						))}
-					</ul>
+					<MDX text={data.markdown} />
 				</CollapsibleContent>
 			</Collapsible>
 		</Message>

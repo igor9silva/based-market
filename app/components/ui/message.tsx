@@ -36,16 +36,21 @@ const MessageAvatar = ({ src, alt, fallback, delayMs, className }: MessageAvatar
 export type MessageContentProps = {
 	text: string;
 	className?: string;
+	isMDX?: boolean;
 } & React.HTMLProps<HTMLDivElement>;
 
-const MessageContent = ({ text, className, ...props }: MessageContentProps) => {
+const MessageContent = ({ text, className, isMDX = false, ...props }: MessageContentProps) => {
 	//
-	return (
+	return isMDX ? (
 		<MDX
 			text={text}
 			className={cn('rounded-lg text-foreground prose break-words whitespace-normal', className)}
 			{...props}
 		/>
+	) : (
+		<div className={cn('text-sm text-muted-foreground', className)} {...props}>
+			{text}
+		</div>
 	);
 };
 
@@ -85,7 +90,7 @@ const SimpleMessage = ({ text, running }: { text: string; running?: boolean }) =
 		{running ? (
 			<TextShimmer text={text} /> //
 		) : (
-			<div className="text-sm text-muted-foreground">{text}</div>
+			<MessageContent text={text} />
 		)}
 	</Message>
 );

@@ -27,6 +27,7 @@ export function SayAction({
 			)}
 		>
 			<MessageContent
+				isMDX={true}
 				text={action.args['message']}
 				className={cn({
 					'bg-primary text-primary-foreground p-2': isAuthorCurrentUser,
