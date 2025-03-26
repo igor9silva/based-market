@@ -16,7 +16,7 @@ import { Toggle } from '~/components/ui/toggle';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 import { cn } from '~/lib/utils';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 35;
 const NEAR_TOP_THRESHOLD = 200; // px
 
 export function TaskConversation({
