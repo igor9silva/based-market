@@ -137,17 +137,6 @@ function Result({
 		return <div className={cn('text-card-foreground overflow-x-auto', className)}>{mdx}</div>;
 	}
 
-	if (skillKey === 'say') {
-		return (
-			<div className={cn('text-card-foreground overflow-x-auto', className)}>
-				<MDX
-					text={args['message']}
-					errorFallback={<pre className="whitespace-pre-wrap">{args['message']}</pre>}
-				/>
-			</div>
-		);
-	}
-
 	if (skillKey === 'reason') {
 		return (
 			<div className={cn('text-muted-foreground overflow-x-auto text-xs', className)}>

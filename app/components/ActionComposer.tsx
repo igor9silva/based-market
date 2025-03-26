@@ -1,6 +1,6 @@
 import { Doc } from 'convex/_generated/dataModel';
-import { ArrowUp, Paperclip, Square, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ArrowUp, Paperclip, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
 import { PromptInput, PromptInputAction, PromptInputActions, PromptInputTextarea } from '~/components/ui/prompt-input';
@@ -18,7 +18,8 @@ export function ActionComposer({
 	//
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const [files, setFiles] = useState<File[]>([]);
-	const { say } = useTaskMutations();
+	const { say, approveBlockingAction } = useTaskMutations();
+	const [isEmpty, setIsEmpty] = useState(true);
 
 	useEffect(() => {
 		textareaRef.current?.focus();
@@ -31,6 +32,10 @@ export function ActionComposer({
 		handler: async ({ message }) => {
 			await say({ message, taskId: task._id });
 			setFiles([]); // Clear files after submission
+			if (textareaRef.current) {
+				textareaRef.current.value = ''; // Clear textarea after submission
+				setIsEmpty(true); // Reset isEmpty after submission
+			}
 		},
 	});
 
@@ -44,11 +49,37 @@ export function ActionComposer({
 	const handleRemoveFile = (index: number) => {
 		setFiles((prev) => prev.filter((_, i) => i !== index));
 	};
+	
+	// Memoized value determining if we should approve the blocking action
+	const shouldApproveBlockingAction = useMemo(() => 
+		task.status === 'blocked' && isEmpty
+	, [task.status, isEmpty]);
 
-	const isLoading = false;
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+		//
+		if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			
+			if (shouldApproveBlockingAction) {
+				approveBlockingAction({ taskId: task._id });
+				return;
+			}
+			
+			// Otherwise, submit the form
+			e.currentTarget.requestSubmit();
+		}
+	};
+	
+	const handleTextareaChange = () => {
+		setIsEmpty(!textareaRef.current?.value.trim());
+	};
 
 	return (
-		<PromptInput onSubmit={handleSubmit} className={cn('bg-sidebar max-w-(--breakpoint-md)', className)}>
+		<PromptInput 
+			onSubmit={handleSubmit} 
+			className={cn('bg-sidebar max-w-(--breakpoint-md)', className)}
+			onKeyDown={handleKeyDown}
+		>
 			{files.length > 0 && (
 				<div className="flex flex-wrap gap-2 pb-2">
 					{files.map((file, index) => (
@@ -66,7 +97,11 @@ export function ActionComposer({
 				</div>
 			)}
 
-			<PromptInputTextarea placeholder="What's next?" inputRef={textareaRef} />
+			<PromptInputTextarea 
+				placeholder="What's next?" 
+				inputRef={textareaRef} 
+				onChange={handleTextareaChange}
+			/>
 
 			<PromptInputActions className="flex items-center justify-between gap-2 pt-2">
 				<PromptInputAction tooltip="Attach files">
@@ -86,11 +121,21 @@ export function ActionComposer({
 					</label>
 				</PromptInputAction>
 
-				<PromptInputAction tooltip={isLoading ? 'Stop generation' : 'Send message'}>
-					<Button type="submit" variant="default" size="icon" className="h-8 w-8 rounded-full">
-						{isLoading ? <Square className="size-5 fill-current" /> : <ArrowUp className="size-5" />}
-					</Button>
-				</PromptInputAction>
+				<div className="flex items-center gap-2 ml-auto">
+					{shouldApproveBlockingAction && (
+						<span className="flex items-center text-xs text-muted-foreground gap-1.5">
+							<kbd className="inline-flex items-center rounded border bg-background px-1 font-mono text-xs">
+								<span className="mr-0.5">⌘</span>Enter
+							</kbd>
+							to authorize
+						</span>
+					)}
+					<PromptInputAction tooltip={'Say'}>
+						<Button type="submit" variant="default" size="icon" className="h-8 w-8 rounded-full">
+							<ArrowUp className="size-5" />
+						</Button>
+					</PromptInputAction>
+				</div>
 			</PromptInputActions>
 		</PromptInput>
 	);

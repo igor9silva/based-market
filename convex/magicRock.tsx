@@ -42,7 +42,7 @@ export async function _prepareContext(
 	const [history, tools, instructions] = await Promise.all([
 		renderHistory(ctx, task, action, skill),
 		loadTools(ctx, task, action, skill),
-		renderInstructions(task, skill),
+		renderInstructions(task, action, skill),
 	]);
 
 	console.debug('model', model);
@@ -248,6 +248,7 @@ function computeSince(
 
 async function renderInstructions(
 	task: Doc<'tasks'>, //
+	action: Doc<'actions'>,
 	skill: z.infer<typeof softSkillSchema>,
 ) {
 	//
@@ -262,7 +263,7 @@ async function renderInstructions(
 		// find all variables in the format {{variable}}
 		result = result.replace(/\{\{([^{}]+)\}\}/g, (match, variableName) => {
 			// replace with the value
-			return valueForVariable(variableName.trim(), task);
+			return valueForVariable(variableName.trim(), task, action);
 		});
 	}
 
@@ -286,11 +287,13 @@ export const instructionVariableSchema = z.union([
 	z.literal('task.budgetUSDC.available'),
 	z.literal('currentDate').describe('The current date and time in ISO 8601 format'),
 	z.literal('userInfo').describe('Information about the user, written by themself'),
+	// z.literal('input.instructions'),
 ]);
 
 function valueForVariable(
 	variable: z.infer<typeof instructionVariableSchema>, //
 	task: Doc<'tasks'>,
+	action: Doc<'actions'>,
 ): string {
 	//
 	switch (variable) {
@@ -370,6 +373,9 @@ function valueForVariable(
 				`My twitter handle is @igor9silva.`,
 				`I'm the creator of Meseeks (you), the companion app. I'm actively working on improving it.`,
 			].join('\n');
+
+		// case 'input.instructions':
+		// 	return action.args.instructions ?? '<system>no instructions</system>';
 
 		default:
 			throw new Error(`Unknown variable: ${variable}`);

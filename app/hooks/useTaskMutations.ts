@@ -6,6 +6,7 @@ export function useTaskMutations() {
 	//
 	const act = useMutation(api.action.public.act);
 	const authorize = useMutation(api.action.public.authorize);
+	const approveBlocking = useMutation(api.action.public.approveBlockingAction);
 	const updateInboxDetailWidthPercent = useMutation(api.users.preferences.public.updateInboxDetailWidthPercent);
 
 	const say = ({
@@ -127,6 +128,16 @@ export function useTaskMutations() {
 		return updateInboxDetailWidthPercent({ widthPercent });
 	};
 
+	const approveBlockingAction = ({
+		taskId, //
+	}: {
+		taskId: Id<'tasks'>;
+	}) => {
+		return approveBlocking({
+			taskId,
+		});
+	};
+
 	return {
 		say,
 		stop,
@@ -137,5 +148,6 @@ export function useTaskMutations() {
 		approveAction,
 		rejectAction,
 		setInboxDetailWidthPercent,
+		approveBlockingAction,
 	};
 }

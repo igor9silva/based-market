@@ -31,19 +31,21 @@ export function createHTTPTool(
 				//
 				const value = args[source as keyof typeof args];
 
-				switch (type) {
-					case 'search':
-						url.searchParams.set(target, String(value));
-						break;
-					case 'header':
-						headers[target] = String(value);
-						break;
-					case 'path':
-						url.pathname = url.pathname.replace(`:${target}`, String(value));
-						break;
-					case 'body':
-						body[target] = value;
-						break;
+				if (value) {
+					switch (type) {
+						case 'search':
+							url.searchParams.set(target, String(value));
+							break;
+						case 'header':
+							headers[target] = String(value);
+							break;
+						case 'path':
+							url.pathname = url.pathname.replace(`:${target}`, String(value));
+							break;
+						case 'body':
+							body[target] = value;
+							break;
+					}
 				}
 
 				return body;

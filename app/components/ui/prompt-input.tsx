@@ -30,11 +30,20 @@ type PromptInputProps = {
 	children: React.ReactNode;
 	className?: string;
 	disabled?: boolean;
+	onKeyDown?: (e: React.KeyboardEvent<HTMLFormElement>) => void;
 };
 
-function PromptInput({ className, maxHeight = 240, onSubmit, children, disabled = false }: PromptInputProps) {
+function PromptInput({ className, maxHeight = 240, onSubmit, children, disabled = false, onKeyDown }: PromptInputProps) {
 	//
-	const handleKeyDown = useSubmitHotkey();
+	const defaultKeyDownHandler = useSubmitHotkey();
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+		if (onKeyDown) {
+			onKeyDown(e);
+		} else {
+			defaultKeyDownHandler(e);
+		}
+	};
 
 	return (
 		<TooltipProvider>
@@ -138,6 +147,7 @@ type PromptInputActionProps = {
 } & React.ComponentProps<typeof Tooltip>;
 
 function PromptInputAction({ tooltip, children, className, side = 'top', ...props }: PromptInputActionProps) {
+	//
 	const { disabled } = usePromptInput();
 
 	return (
