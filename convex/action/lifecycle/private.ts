@@ -5,6 +5,7 @@ import { Doc, Id } from '../../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../../_generated/server';
 import { internalAction, internalMutation } from '../../lib';
 import { _prepareContext, MagicRockContext } from '../../magicRock';
+import { newActionSchema } from '../../schemas/actionSchema';
 import { env } from '../../schemas/envSchema';
 import { skillSchema } from '../../schemas/skillSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
@@ -57,12 +58,12 @@ export const _perform = internalAction({
 			const args = parseArgs(tool, action.args);
 
 			// @ts-expect-error we intentionally do not support exposing toolCallId or message history to the tool execution
-			const { result, costs, reactions } = await tool.execute(args);
+			const { result, costs } = await tool.execute(args);
 
 			await _setResolved(ctx, {
 				actionId,
 				taskId,
-				result: result ?? 'unknown',
+				result,
 				status: 'succeeded',
 				costs: costs,
 				// TODO: also persist reactions
@@ -72,7 +73,9 @@ export const _perform = internalAction({
 			// TODO: optimize using a single mutation
 			if (task.isActive) {
 				await ctx.runMutation(internal.action.private._skipAllPendingReactions, { taskId, owner: task.owner });
-				await Promise.all(reactions.map((reaction) => ctx.runMutation(internal.action.private._add, reaction)));
+				await Promise.all(
+					result.reactions.map((reaction) => ctx.runMutation(internal.action.private._add, reaction)),
+				);
 			}
 			//
 		} catch (error) {
@@ -84,9 +87,12 @@ export const _perform = internalAction({
 			await _setResolved(ctx, {
 				actionId,
 				taskId,
-				result: `${error instanceof Error ? error.message : 'Unknown error'}`,
 				status: 'failed',
 				costs: [],
+				result: {
+					text: `${error instanceof Error ? error.message : 'Unknown error'}`,
+					reactions: [],
+				},
 			});
 			//
 		} finally {
@@ -138,7 +144,10 @@ export const _resolve = internalMutation({
 	args: {
 		actionId: zid('actions'),
 		taskId: zid('tasks'),
-		result: z.string(),
+		result: z.object({
+			text: z.string().optional(),
+			reactions: z.array(newActionSchema),
+		}),
 		status: z.enum(['succeeded', 'failed']),
 		costs: z.array(
 			z.object({
@@ -161,7 +170,7 @@ export const _resolve = internalMutation({
 		const totalCost = costs.reduce((acc, cost) => acc + cost.amount, 0n);
 
 		console.debug(
-			`Resolved as ${status} with ${result.length} characters. Total cost: ${asDollars({ bigInt: totalCost, precision: 6 })}`,
+			`Resolved as ${status} with ${result.text?.length} characters. Total cost: ${asDollars({ bigInt: totalCost, precision: 6 })}`,
 		);
 
 		if (status === 'succeeded' && totalCost > 0) {
@@ -297,7 +306,10 @@ async function _setResolved(
 	args: {
 		actionId: Id<'actions'>;
 		taskId: Id<'tasks'>;
-		result: string;
+		result: {
+			text?: string | undefined;
+			reactions: Array<z.infer<typeof newActionSchema>>;
+		};
 		status: 'succeeded' | 'failed';
 		costs: Array<{
 			symbol: z.infer<typeof tokenSchema>;

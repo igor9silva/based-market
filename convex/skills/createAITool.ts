@@ -2,8 +2,8 @@ import { CoreMessage, tool, ToolSet } from 'ai';
 import { z } from 'zod';
 import { Doc, Id } from '../_generated/dataModel';
 import { ActionCtx, MutationCtx } from '../_generated/server';
-import { newActionSchema } from '../action/private';
 import { _askMagicRock, MagicRockContext } from '../magicRock';
+import { newActionSchema } from '../schemas/actionSchema';
 import { env } from '../schemas/envSchema';
 import { modelsSchema, skillSchema, softSkillSchema } from '../schemas/skillSchema';
 import { AITool } from '../schemas/toolSchema';
@@ -92,8 +92,9 @@ export function createAITool(
 			if (warnings?.length) console.warn('Decision skill warnings', warnings);
 
 			return {
-				result: toolCalls.map((call) => `${call.toolName}()`).join(', ') ?? 'nothing',
-				reactions,
+				result: {
+					reactions,
+				},
 				costs: [
 					{
 						symbol: 'USD',

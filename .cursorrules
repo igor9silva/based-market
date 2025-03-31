@@ -7,3 +7,5 @@ Do not EVER remove comments. I'll do that manually when review the commit.
 DO NOT MESS UP WITH MY INDENTATION.
 
 Prefer `Boolean()` over `!!` as it's more readable.
+
+Always use `bun` instead of `npm` or any other. Including `bunx` instead of `npx`.

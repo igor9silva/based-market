@@ -3,20 +3,11 @@ import { z } from 'zod';
 import { Id } from '../_generated/dataModel';
 import { QueryCtx } from '../_generated/server';
 import { internalMutation, internalQuery } from '../lib';
-import { actionSchema } from '../schemas/actionSchema';
+import { actionSchema, newActionSchema } from '../schemas/actionSchema';
 import { authorSchema } from '../schemas/authorSchema';
 import { paginationOptionsSchema } from '../schemas/paginationOptionsSchema';
 import { _findOne as _findOneTask, _setStatus as _setTaskStatus } from '../tasks/private';
 import { _runNextActionIfNeeded } from './lifecycle/private';
-
-export const newActionSchema = z.object({
-	taskId: zid('tasks'),
-	owner: zid('users'),
-	author: authorSchema,
-	skillKey: z.string().describe('The key of the skill to use'),
-	args: z.record(z.any()),
-	depth: z.number().min(0).max(1000),
-});
 
 export const _add = internalMutation({
 	args: {
@@ -120,8 +111,11 @@ export const _authorize = internalMutation({
 				}
 			: {
 					status: 'skipped' as const,
-					result: 'rejected by ' + approver,
 					costs: [],
+					result: {
+						text: 'rejected by ' + approver,
+						reactions: [],
+					},
 				};
 
 		// if rejected by user, go back to 'idle' (not 'unread' because it's an explicit user action)
@@ -276,8 +270,11 @@ export const _skipAllPendingReactions = internalMutation({
 			pendingReactions.map((action) =>
 				ctx.db.patch(action._id, {
 					status: 'skipped',
-					result: 'new human actions happened before this one could run',
 					costs: [],
+					result: {
+						text: 'new human actions happened before this one could run',
+						reactions: [],
+					},
 				}),
 			),
 		);

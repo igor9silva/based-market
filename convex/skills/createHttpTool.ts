@@ -72,8 +72,10 @@ export function createHTTPTool(
 			}
 
 			return {
-				result: result,
-				reactions: createReactions(action, skill.knownReactions),
+				result: {
+					...(result ? { text: result } : {}),
+					reactions: createReactions(action, skill.knownReactions),
+				},
 				costs: [
 					{
 						symbol: 'USD',

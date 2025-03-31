@@ -21,8 +21,10 @@ export function createBuiltInTool(
 			const { result, reactions } = await skill.use({ ctx, task, action, skill })(args);
 
 			return {
-				result: result,
-				reactions: createReactions(action, reactions),
+				result: {
+					...(result ? { text: result } : {}),
+					reactions: createReactions(action, reactions),
+				},
 				costs: [
 					{
 						symbol: 'USD',
