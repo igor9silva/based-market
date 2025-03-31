@@ -11,7 +11,6 @@ export const stop = defineSkill({
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
-				result: 'stopped',
 				reactions: execution.skill.knownReactions,
 			};
 		},

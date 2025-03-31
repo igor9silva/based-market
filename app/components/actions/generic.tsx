@@ -88,9 +88,9 @@ export function GenericAction({
 					</div>
 				) : (
 					<>
-						{typeof action.result === 'string' ? (
+						{action.result ? (
 							<Result
-								result={action.result}
+								result={action.result.text ?? ''}
 								status={action.status}
 								skillKey={action.skillKey}
 								args={action.args}

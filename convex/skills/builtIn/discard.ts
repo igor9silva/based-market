@@ -19,7 +19,7 @@ export const discard = defineSkill({
 			});
 
 			return {
-				result: args.reasoning ?? 'ok',
+				text: args.reasoning ?? undefined,
 				reactions: execution.skill.knownReactions,
 			};
 		},

@@ -62,12 +62,12 @@ const ScrapeResultSchema = z.object({
 });
 
 function Error({ action }: { action: Doc<'actions'> }) {
-	return <FailedMessage text={`🚫 Failed to scrape "${action.args['url']}"`} error={action.result ?? ''} />;
+	return <FailedMessage text={`🚫 Failed to scrape "${action.args['url']}"`} error={action.result?.text ?? ''} />;
 }
 
 function Success({ action }: { action: Doc<'actions'> }) {
 	//
-	const response = ScrapeResultSchema.safeParse(JSON.parse(action.result ?? '{}'));
+	const response = ScrapeResultSchema.safeParse(JSON.parse(action.result?.text ?? '{}'));
 
 	if (!response.success) {
 		console.warn('Invalid (or no) result found succeeded action', action._id);

@@ -9,6 +9,7 @@ import { UpdateInstructionsAction } from '~/components/actions/updateInstruction
 
 const componentMap = {
 	say: SayAction,
+	askForClarification: SayAction,
 	searchWeb: SearchWebAction,
 	updateInstructions: UpdateInstructionsAction,
 	scrapeLink: ScrapeLinkAction,

@@ -11,7 +11,7 @@ export const increaseBudget = defineSkill({
 	}),
 	knownReactions: [
 		{
-			skillKey: 'inferUserIntent',
+			skillKey: 'iterate',
 			args: {},
 			condition: 'owner',
 		},
@@ -26,7 +26,7 @@ export const increaseBudget = defineSkill({
 			});
 
 			return {
-				result: `budget increased by ${asDollars({ bigInt: args.amount })}`,
+				text: `budget increased by ${asDollars({ bigInt: args.amount })}`,
 				reactions: execution.skill.knownReactions,
 			};
 		},

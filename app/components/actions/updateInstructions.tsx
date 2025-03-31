@@ -24,7 +24,7 @@ export function UpdateInstructionsAction(props: {
 			return <GenericAction {...props} />;
 
 		case 'failed':
-			return <FailedMessage text={`🚫 Failed to update instructions`} error={action.result ?? ''} />;
+			return <FailedMessage text={`🚫 Failed to update instructions`} error={action.result.text ?? ''} />;
 
 		case 'running':
 			return <SimpleMessage running text={`✍️ Updating instructions`} />;

@@ -24,7 +24,7 @@ export type Reaction = {
 };
 
 export type ExecutionResult = {
-	result?: string | undefined;
+	text?: string | undefined;
 	reactions: Array<Reaction>;
 };
 

@@ -23,7 +23,6 @@ export const reopen = defineSkill({
 			});
 
 			return {
-				result: 'ok',
 				reactions: execution.skill.knownReactions,
 			};
 		},

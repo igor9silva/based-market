@@ -3,6 +3,15 @@ import { z } from 'zod';
 import { authorSchema } from './authorSchema';
 import { tokenSchema } from './topUpSchema';
 
+export const newActionSchema = z.object({
+	taskId: zid('tasks'),
+	owner: zid('users'),
+	author: authorSchema,
+	skillKey: z.string().describe('The key of the skill to use'),
+	args: z.record(z.any()),
+	depth: z.number().min(0).max(1000),
+});
+
 const coreActionSchema = z.object({
 	taskId: zid('tasks'),
 	owner: zid('users'),
@@ -38,12 +47,7 @@ export const resolvedActionSchema = coreActionSchema.extend({
 	]),
 	result: z.object({
 		text: z.string().optional(),
-		reactions: z.array(
-			z.object({
-				skillKey: z.string(),
-				args: z.record(z.any()),
-			}),
-		),
+		reactions: z.array(newActionSchema),
 	}),
 	costs: z.array(
 		z.object({
@@ -62,12 +66,3 @@ export const actionSchema = z
 	.describe(
 		'An Action is any occurrence within a Task.', //
 	);
-
-export const newActionSchema = z.object({
-	taskId: zid('tasks'),
-	owner: zid('users'),
-	author: authorSchema,
-	skillKey: z.string().describe('The key of the skill to use'),
-	args: z.record(z.any()),
-	depth: z.number().min(0).max(1000),
-});

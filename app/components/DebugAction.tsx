@@ -153,13 +153,13 @@ export function DebugAction({
 					</div>
 				)}
 
-				{action.result && (
+				{action.result?.text && (
 					<div>
 						<h3 className="font-medium mb-1">Result</h3>
 						<div className="bg-muted rounded-md border p-2 overflow-auto min-h-[32px] max-h-64">
 							<div className="font-mono">
-								{typeof action.result === 'string' ? (
-									<StructuredValue value={action.result} />
+								{typeof action.result.text === 'string' ? (
+									<StructuredValue value={action.result.text} />
 								) : (
 									<StructuredValue value={null} />
 								)}

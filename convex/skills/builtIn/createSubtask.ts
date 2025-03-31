@@ -27,7 +27,6 @@
 // 			});
 
 // 			return {
-// 				result: 'ok',
 // 				reactions: execution.skill.knownReactions,
 // 			};
 // 		},

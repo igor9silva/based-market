@@ -8,13 +8,19 @@ export const divide = defineSkill({
 		A: z.number().describe('The dividend.'),
 		B: z.number().describe('The divisor.'),
 	}),
-	knownReactions: [],
+	knownReactions: [
+		{
+			skillKey: 'iterate',
+			args: {},
+			condition: 'companion',
+		},
+	],
 	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
-				result: (args.A / args.B).toString(),
+				text: (args.A / args.B).toString(),
 				reactions: execution.skill.knownReactions,
 			};
 		},

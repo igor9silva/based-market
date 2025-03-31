@@ -55,12 +55,12 @@ const SearchResultSchema = z.object({
 });
 
 function Error({ action }: { action: Doc<'actions'> }) {
-	return <FailedMessage text={`🚫 Failed to search places "${action.args['query']}"`} error={action.result ?? ''} />;
+	return <FailedMessage text={`🚫 Failed to search places "${action.args['query']}"`} error={action.result?.text ?? ''} />;
 }
 
 function Success({ action }: { action: Doc<'actions'> }) {
 	//
-	const response = SearchResultSchema.safeParse(JSON.parse(action.result ?? '{}'));
+	const response = SearchResultSchema.safeParse(JSON.parse(action.result?.text ?? '{}'));
 
 	if (!response.success) {
 		console.warn('Invalid (or no) result found succeeded action', action._id);

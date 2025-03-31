@@ -6,6 +6,11 @@ export const say = defineSkill({
 	description: 'Send a text message',
 	parameters: z.object({
 		message: z.string().describe('The message in MDX format.'),
+		isDone: z
+			.boolean()
+			.optional()
+			.default(false)
+			.describe('Whether to keep iterating. If `true`, will stop the loop and await for user feedback.'),
 	}),
 	knownReactions: [
 		{
@@ -13,14 +18,19 @@ export const say = defineSkill({
 			args: {},
 			condition: 'owner',
 		},
+		{
+			skillKey: 'iterate',
+			args: {},
+			condition: 'companion',
+		},
 	],
 	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
-				result: args.message,
-				reactions: execution.skill.knownReactions,
+				text: args.message,
+				reactions: args.isDone ? [] : execution.skill.knownReactions,
 			};
 		},
 });

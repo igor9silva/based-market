@@ -25,7 +25,6 @@ export const moveTask = defineSkill({
 			});
 
 			return {
-				result: 'ok',
 				reactions: execution.skill.knownReactions,
 			};
 		},

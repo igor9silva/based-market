@@ -64,16 +64,16 @@ export function createHTTPTool(
 			console.debug('Response', response.status, response.statusText);
 
 			// treat everything as text and let the LLM do its magic
-			const result = await response.text();
-			console.debug('Result', result);
+			const text = await response.text();
+			console.debug('Result', text);
 
 			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}: ${response.statusText}. Body: ${result}`);
+				throw new Error(`HTTP ${response.status}: ${response.statusText}. Body: ${text}`);
 			}
 
 			return {
 				result: {
-					...(result ? { text: result } : {}),
+					...(text ? { text } : {}),
 					reactions: createReactions(action, skill.knownReactions),
 				},
 				costs: [

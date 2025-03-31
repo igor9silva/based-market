@@ -187,17 +187,16 @@ async function renderHistory(
 	skill: z.infer<typeof softSkillSchema>,
 ): Promise<Array<CoreMessage>> {
 	//
-	const since = computeSince(task, skill);
-	const actions = await ctx.runQuery(internal.action.private._findAllSince, {
+	const actions = await ctx.runQuery(internal.action.private._findLastActions, {
 		taskId: task._id,
-		since,
+		amount: 25, // TODO: env
 	});
 
 	// TODO: add the summary as a message?
 
 	const history = actions
 		// remove unfinished or skipped actions
-		.filter((action) => ['succeeded', 'failed'].includes(action.status))
+		// .filter((action) => ['succeeded', 'failed'].includes(action.status))
 		// remove the current action
 		.filter((a) => a._id !== action._id)
 		// render
@@ -205,9 +204,11 @@ async function renderHistory(
 		// filter out undefined
 		.filter((action) => action !== undefined)
 		// flatten
-		.flatMap((message) => message);
+		.flatMap((message) => message)
+		// reverse to show the most recent actions last
+		.reverse();
 
-	console.debug(`rendered history since ${new Date(since).toISOString()}`, history);
+	console.debug(`rendered last ${actions.length} actions as history`, history);
 
 	return history;
 }
@@ -223,7 +224,8 @@ function renderAction(
 			`<date>${new Date(action._creationTime).toISOString()}</date>`,
 			`<skill>${action.skillKey}</skill>`,
 			`<status>${action.status}</status>`,
-			`<result>${action.result}</result>`,
+			`<result>${action.result?.text}</result>`,
+			// `<cost>${action.costs.reduce}</cost>`,
 		].join(''),
 	};
 }

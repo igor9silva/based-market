@@ -14,7 +14,7 @@ export const askForClarification = defineSkill({
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
-				result: args.message,
+				text: args.message,
 				reactions: execution.skill.knownReactions,
 			};
 		},

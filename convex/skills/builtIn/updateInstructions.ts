@@ -14,7 +14,7 @@ export const updateInstructions = defineSkill({
 	}),
 	knownReactions: [
 		{
-			skillKey: 'evaluateProgress',
+			skillKey: 'iterate',
 			args: {},
 			condition: 'any',
 		},
@@ -30,7 +30,6 @@ export const updateInstructions = defineSkill({
 			});
 
 			return {
-				result: 'ok',
 				reactions: execution.skill.knownReactions,
 			};
 		},

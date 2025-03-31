@@ -25,7 +25,6 @@ export const updateSummary = defineSkill({
 			});
 
 			return {
-				result: 'ok',
 				reactions: execution.skill.knownReactions,
 			};
 		},

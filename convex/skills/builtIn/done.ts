@@ -1,11 +1,16 @@
 import { z } from 'zod';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
-export const multiply = defineSkill({
+export const done = defineSkill({
 	preApprovedCost: 0n,
-	description: 'Multiply N numbers',
+	description: 'Stop iterating.',
 	parameters: z.object({
-		numbers: z.array(z.number()).describe('The numbers to multiply.'),
+		message: z.string().optional().describe('An optional (final) message to the user.'),
+		reason: z.enum([
+			'resolved', //
+			// 'running out of budget',
+			'blocked',
+		]),
 	}),
 	knownReactions: [],
 	use:
@@ -13,7 +18,6 @@ export const multiply = defineSkill({
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
-				text: args.numbers.reduce((acc, curr) => acc * curr, 1).toString(),
 				reactions: execution.skill.knownReactions,
 			};
 		},

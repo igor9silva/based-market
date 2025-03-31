@@ -25,7 +25,7 @@ export const resolve = defineSkill({
 			});
 
 			return {
-				result: args.reasoning ?? 'ok',
+				text: args.reasoning ?? undefined,
 				reactions: execution.skill.knownReactions,
 			};
 		},

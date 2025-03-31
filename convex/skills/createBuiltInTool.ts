@@ -18,11 +18,11 @@ export function createBuiltInTool(
 		execute: async (args) => {
 			//
 			// @ts-expect-error no time to fight this shit
-			const { result, reactions } = await skill.use({ ctx, task, action, skill })(args);
+			const { text, reactions } = await skill.use({ ctx, task, action, skill })(args);
 
 			return {
 				result: {
-					...(result ? { text: result } : {}),
+					...(text ? { text } : {}),
 					reactions: createReactions(action, reactions),
 				},
 				costs: [

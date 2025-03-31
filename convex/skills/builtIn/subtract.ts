@@ -7,13 +7,19 @@ export const subtract = defineSkill({
 	parameters: z.object({
 		numbers: z.array(z.number()).describe('The numbers to subtract.'),
 	}),
-	knownReactions: [],
+	knownReactions: [
+		{
+			skillKey: 'iterate',
+			args: {},
+			condition: 'companion',
+		},
+	],
 	use:
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
-				result: args.numbers.reduce((acc, curr) => acc - curr, 0).toString(),
+				text: args.numbers.reduce((acc, curr) => acc - curr, 0).toString(),
 				reactions: execution.skill.knownReactions,
 			};
 		},

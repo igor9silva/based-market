@@ -1,6 +1,7 @@
 import { askForClarification } from './askForClarification';
 import { discard } from './discard';
 import { divide } from './divide';
+import { done } from './done';
 import { increaseBudget } from './increaseBudget';
 import { multiply } from './multiply';
 import { reopen } from './reopen';
@@ -18,7 +19,7 @@ export const _builtInSkills = {
 	// updateSummary,
 	// moveTask,
 	// createSubtask,
-
+	done,
 	say,
 	reopen,
 	increaseBudget,
