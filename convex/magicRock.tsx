@@ -223,7 +223,7 @@ function renderAction(
 			`<date>${new Date(action._creationTime).toISOString()}</date>`,
 			`<skill>${action.skillKey}</skill>`,
 			`<status>${action.status}</status>`,
-			`<content>${action.result}</content>`,
+			`<result>${action.result}</result>`,
 		].join(''),
 	};
 }
@@ -279,7 +279,7 @@ export const instructionVariableSchema = z.union([
 	z.literal('task.lastUpdatedAt'),
 	z.literal('task.lastSummarizedAt'),
 	z.literal('task.instructions'),
-	z.literal('task.summary'),
+	// z.literal('task.summary'),
 	z.literal('task.parent'),
 	z.literal('task.budgetUSDC').describe('The full task budget structure, in a XML-like format'),
 	z.literal('task.budgetUSDC.total'),
@@ -308,7 +308,7 @@ function valueForVariable(
 				`<lastSummarizedAt>{{task.lastSummarizedAt}}</lastSummarizedAt>`,
 				`<budgetUSDC>{{task.budgetUSDC}}</budgetUSDC>`,
 				`<instructions>{{task.instructions}}</instructions>`,
-				`<summary>{{task.summary}}</summary>`,
+				// `<summary>{{task.summary}}</summary>`,
 				// `<parent>${task.parent}</parent>`,
 			]
 				.join('')
@@ -335,8 +335,8 @@ function valueForVariable(
 		case 'task.instructions':
 			return task.instructions ?? '<system>no instructions</system>';
 
-		case 'task.summary':
-			return task.summary ?? '<system>no summary</system>';
+		// case 'task.summary':
+		// 	return task.summary ?? '<system>no summary</system>';
 
 		case 'task.parent':
 			return task.parentId ?? '<system>no parent</system>';

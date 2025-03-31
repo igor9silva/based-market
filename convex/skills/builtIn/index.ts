@@ -10,13 +10,12 @@ import { stop } from './stop';
 import { subtract } from './subtract';
 import { sum } from './sum';
 import { updateInstructions } from './updateInstructions';
-import { updateSummary } from './updateSummary';
 
 export const _builtInSkills = {
 	discard,
 	askForClarification,
 	updateInstructions,
-	updateSummary,
+	// updateSummary,
 	// moveTask,
 	// createSubtask,
 

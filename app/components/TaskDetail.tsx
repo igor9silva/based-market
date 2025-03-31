@@ -7,9 +7,8 @@ import { asDollars } from 'convex/utils/money';
 import { CircleDollarSign, Maximize2 } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '~/components/ui/card';
+import { Card, CardContent, CardHeader } from '~/components/ui/card';
 import MDX from '~/components/ui/mdx';
-import { Separator } from '~/components/ui/separator';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
 import { EditableContent } from './EditableContent';
@@ -94,14 +93,14 @@ export default function TaskDetail({
 					editClassName="min-h-56"
 				/>
 			</CardContent>
-			{task.summary && (
+			{/* {task.summary && (
 				<>
 					<Separator />
 					<CardFooter className="p-0 md:p-4 ">
 						<MDX text={task.summary} />
 					</CardFooter>
 				</>
-			)}
+			)} */}
 		</Card>
 	);
 }
