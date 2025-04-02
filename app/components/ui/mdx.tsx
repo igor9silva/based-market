@@ -101,6 +101,19 @@ export default function MDX({
 
 						const language = extractLanguage(className);
 
+						// claude randomly added that
+						// if (typeof children !== 'string' || children.includes('\n') === false) {
+						// 	// This is inline code
+						// 	return (
+						// 		<span 
+						// 			className={cn('bg-muted text-foreground rounded-sm px-1 py-0.5 font-mono text-sm', className)}
+						// 			{...props}
+						// 		>
+						// 			{children}
+						// 		</span>
+						// 	);
+						// }
+
 						return (
 							<CodeBlock className={className}>
 								<CodeBlockCode code={children as string} language={language} />
@@ -117,7 +130,7 @@ export default function MDX({
 					),
 					table: ({ children }) => <table className="w-full border-collapse my-4">{children}</table>,
 					td: ({ children }) => <td className="border border-border p-2">{children}</td>,
-					th: ({ children }) => <th className="border border-border p-2 bg-muted font-bold">{children}</th>,
+					th: ({ children }) => <th className="border border-border p-2 font-bold text-primary">{children}</th>,
 					tr: ({ children }) => <tr className="even:bg-muted/50">{children}</tr>,
 					thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
 					tbody: ({ children }) => <tbody className="">{children}</tbody>,
@@ -133,7 +146,7 @@ export default function MDX({
 					h5: ({ children }) => <h5 className="text-sm font-bold mt-2 mb-1">{children}</h5>,
 					h6: ({ children }) => <h6 className="text-xs font-bold mt-2 mb-1">{children}</h6>,
 					p: ({ children }) => <p className="my-2 md:my-1 leading-relaxed">{children}</p>,
-					strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+					strong: ({ children }) => <strong className="font-bold">{children}</strong>,
 					em: ({ children }) => <em className="italic">{children}</em>,
 					del: ({ children }) => <del className="line-through">{children}</del>,
 					...components,
@@ -180,7 +193,7 @@ function MDXError({
 		<div className="flex flex-col gap-2">
 			<div className="flex flex-col">
 				<p>Error loading content:</p>
-				<pre onClick={handleErrorClick} className="text-red-500 whitespace-pre-wrap">
+				<pre onClick={handleErrorClick} className="text-destructive whitespace-pre-wrap">
 					{error.message}
 				</pre>
 			</div>
