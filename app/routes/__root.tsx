@@ -36,8 +36,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 					'viewport-fit=cover',
 				].join(','),
 			},
-			{ rel: 'icon', href: '/static/favicon-dark.ico', media: '(prefers-color-scheme: dark)' },
-			{ rel: 'icon', href: '/static/favicon-light.ico', media: '(prefers-color-scheme: light)' },
+			{ rel: 'icon', href: '/static/favicon-dark.ico' },
 		],
 		links: [
 			{ rel: 'stylesheet', href: appCss },
