@@ -58,6 +58,7 @@ export const modelsSchema = z.enum([
 	'openai/gpt-4o-mini',
 	'google/gemini-2.0-flash',
 	'deepseek/v3',
+	'deepinfra/deepseek-v3',
 ]);
 
 const decisionConfigSchema = z.object({

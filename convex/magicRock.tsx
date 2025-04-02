@@ -1,15 +1,16 @@
 import { anthropic } from '@ai-sdk/anthropic';
+import { deepinfra } from '@ai-sdk/deepinfra';
 import { deepseek } from '@ai-sdk/deepseek';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
 
-import { CoreMessage, generateText, LanguageModel } from 'ai';
+import { type CoreMessage, generateText, type LanguageModel } from 'ai';
 import { z } from 'zod';
 import { internal } from './_generated/api';
-import { Doc } from './_generated/dataModel';
-import { ActionCtx, MutationCtx } from './_generated/server';
-import { softSkillSchema } from './schemas/skillSchema';
-import { AITool } from './schemas/toolSchema';
+import type { Doc } from './_generated/dataModel';
+import type { ActionCtx, MutationCtx } from './_generated/server';
+import type { softSkillSchema } from './schemas/skillSchema';
+import type { AITool } from './schemas/toolSchema';
 import { _toolsForMagicRock } from './skills/tools';
 import { asDollars } from './utils/money';
 
@@ -45,7 +46,8 @@ export async function _prepareContext(
 		renderInstructions(task, action, skill),
 	]);
 
-	console.debug('model', model);
+	console.debug('model', model.modelId, model.provider);
+	console.debug('instructions', instructions);
 
 	return {
 		model,
@@ -144,6 +146,19 @@ function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageMode
 
 		case 'deepseek/v3':
 			return deepseek('deepseek-chat');
+
+		case 'deepinfra/deepseek-v3':
+			// return groq('llama-3.3-70b-versatile'); // mei burro, mas tem potencial
+			return deepinfra('deepseek-ai/DeepSeek-V3-0324'); // POTENCIAL
+		// return togetherai('meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo');
+		// return togetherai('google/gemma-2-27b-it');
+		// return togetherai('Qwen/Qwen2.5-72B-Instruct-Turbo');
+		// return togetherai('mistralai/Mistral-7B-Instruct-v0.3');
+		// return togetherai('meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo');
+		// return groq('deepseek-r1-distill-llama-70b');
+		// return deepinfra('deepseek-ai/DeepSeek-R1');
+		// return deepinfra('microsoft/Phi-4-multimodal-instruct');
+		// return deepinfra('google/gemma-2-27b-it');
 	}
 
 	// model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
@@ -354,7 +369,10 @@ function valueForVariable(
 			return asDollars({ bigInt: task.budgetUSDC.total, precision: 10 });
 
 		case 'task.budgetUSDC.spent':
-			return asDollars({ bigInt: task.budgetUSDC.total - task.budgetUSDC.available, precision: 10 });
+			return asDollars({
+				bigInt: task.budgetUSDC.total - task.budgetUSDC.available,
+				precision: 10,
+			});
 
 		case 'task.budgetUSDC.available':
 			return asDollars({ bigInt: task.budgetUSDC.available, precision: 10 });

@@ -1,12 +1,12 @@
-import { CoreMessage, tool, ToolSet } from 'ai';
-import { z } from 'zod';
-import { Doc, Id } from '../_generated/dataModel';
-import { ActionCtx, MutationCtx } from '../_generated/server';
-import { _askMagicRock, MagicRockContext } from '../magicRock';
-import { newActionSchema } from '../schemas/actionSchema';
+import { type CoreMessage, tool, type ToolSet } from 'ai';
+import type { z } from 'zod';
+import type { Doc, Id } from '../_generated/dataModel';
+import type { ActionCtx, MutationCtx } from '../_generated/server';
+import { _askMagicRock, type MagicRockContext } from '../magicRock';
+import type { newActionSchema } from '../schemas/actionSchema';
 import { env } from '../schemas/envSchema';
-import { modelsSchema, skillSchema, softSkillSchema } from '../schemas/skillSchema';
-import { AITool } from '../schemas/toolSchema';
+import type { modelsSchema, skillSchema, softSkillSchema } from '../schemas/skillSchema';
+import type { AITool } from '../schemas/toolSchema';
 import { asBigInt, asDollars } from '../utils/money';
 import { stringToZod } from '../utils/zodToString';
 
@@ -251,6 +251,12 @@ function pricingFor(model: z.infer<typeof modelsSchema>): {
 			return {
 				inputToken: asBigInt({ dollars: 0.27 }) / 1_000_000n,
 				outputToken: asBigInt({ dollars: 1.1 }) / 1_000_000n,
+			};
+
+		case 'deepinfra/deepseek-v3':
+			return {
+				inputToken: asBigInt({ dollars: 0.4 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 0.89 }) / 1_000_000n,
 			};
 	}
 }

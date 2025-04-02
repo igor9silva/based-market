@@ -1,5 +1,6 @@
 import { Doc, Id } from 'convex/_generated/dataModel';
 
+import { DoneAction } from '~/components/actions/done';
 import { GenericAction } from '~/components/actions/generic';
 import { SayAction } from '~/components/actions/say';
 import { ScrapeLinkAction } from '~/components/actions/scrapeLink';
@@ -9,6 +10,7 @@ import { UpdateInstructionsAction } from '~/components/actions/updateInstruction
 
 const componentMap = {
 	say: SayAction,
+	done: DoneAction,
 	askForClarification: SayAction,
 	searchWeb: SearchWebAction,
 	updateInstructions: UpdateInstructionsAction,
