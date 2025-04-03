@@ -96,23 +96,15 @@ export function DebugAction({
 	// Format creation time as a readable string
 	const creationTime = new Date(action._creationTime).toLocaleString();
 
-	// Get status color
-	const getStatusColor = () => {
-		switch (action.status) {
-			case 'running':
-				return 'bg-blue-500';
-			case 'succeeded':
-				return 'bg-green-500';
-			case 'failed':
-				return 'bg-red-500';
-			case 'skipped':
-				return 'bg-gray-500';
-			case 'pending authorization':
-				return 'bg-yellow-500';
-			default:
-				return 'bg-slate-500';
-		}
+	// Status color map
+	const statusColorMap: Record<string, string> = {
+		running: 'bg-blue-500',
+		succeeded: 'bg-green-500',
+		failed: 'bg-red-500',
+		skipped: 'bg-gray-500',
+		'pending authorization': 'bg-yellow-500',
 	};
+	const defaultStatusColor = 'bg-slate-500';
 
 	return (
 		<Card className={cn('overflow-hidden', isHighlighted && 'ring-2 ring-primary ring-offset-2', className)}>
@@ -121,9 +113,9 @@ export function DebugAction({
 			<CardContent className="space-y-2">
 				<div className="flex items-center justify-between">
 					<CardTitle id={`action-${action._id}`} className="text-lg">
-						{action.skillKey} <span className="font-mono text-xs text-muted-foreground">{action._id}</span>
+						{action.skillKey} ({action.depth}) <span className="font-mono text-xs text-muted-foreground">{action._id}</span>
 					</CardTitle>
-					<Badge className={cn('ml-2', getStatusColor())}>{action.status}</Badge>
+					<Badge className={cn('ml-2', statusColorMap[action.status] ?? defaultStatusColor)}>{action.status}</Badge>
 				</div>
 				<div className="text-sm text-muted-foreground flex justify-between items-center">
 					<TimeAgo date={action._creationTime} />
