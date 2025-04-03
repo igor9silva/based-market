@@ -25,6 +25,22 @@ export function ActionComposer({
 		textareaRef.current?.focus();
 	}, []);
 
+	useEffect(() => {
+		//
+		const handleGlobalKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'i' && (e.metaKey || e.ctrlKey)) {
+				e.preventDefault();
+				textareaRef.current?.focus();
+			}
+		};
+
+		document.addEventListener('keydown', handleGlobalKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleGlobalKeyDown);
+		};
+	}, []);
+
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
 			message: z.string().min(1, 'Message is required'),
