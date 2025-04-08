@@ -18,7 +18,7 @@ export function ActionComposer({
 	//
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const [files, setFiles] = useState<File[]>([]);
-	const { say, approveBlockingAction } = useTaskMutations();
+	const { say, approveBlockingAction, stop } = useTaskMutations();
 	const [isEmpty, setIsEmpty] = useState(true);
 
 	useEffect(() => {
@@ -65,34 +65,49 @@ export function ActionComposer({
 	const handleRemoveFile = (index: number) => {
 		setFiles((prev) => prev.filter((_, i) => i !== index));
 	};
-	
+
 	// Memoized value determining if we should approve the blocking action
-	const shouldApproveBlockingAction = useMemo(() => 
-		task.status === 'blocked' && isEmpty
-	, [task.status, isEmpty]);
+	const canApproveBlockingAction = useMemo(
+		() => task.status === 'blocked' && isEmpty, //
+		[task.status, isEmpty],
+	);
+
+	const canStopTask = useMemo(
+		() => task.status === 'acting' && isEmpty, //
+		[task.status, isEmpty],
+	);
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
 		//
 		if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
 			e.preventDefault();
-			
-			if (shouldApproveBlockingAction) {
+
+			if (canApproveBlockingAction) {
 				approveBlockingAction({ taskId: task._id });
 				return;
 			}
-			
+
 			// Otherwise, submit the form
 			e.currentTarget.requestSubmit();
 		}
+
+		// Handle Cmd+Backspace to stop the task
+		if (e.key === 'Backspace' && (e.metaKey || e.ctrlKey)) {
+			if (isEmpty) {
+				e.preventDefault();
+				stop({ taskId: task._id });
+				return;
+			}
+		}
 	};
-	
+
 	const handleTextareaChange = () => {
 		setIsEmpty(!textareaRef.current?.value.trim());
 	};
 
 	return (
-		<PromptInput 
-			onSubmit={handleSubmit} 
+		<PromptInput
+			onSubmit={handleSubmit}
 			className={cn('bg-sidebar max-w-(--breakpoint-md)', className)}
 			onKeyDown={handleKeyDown}
 		>
@@ -113,11 +128,7 @@ export function ActionComposer({
 				</div>
 			)}
 
-			<PromptInputTextarea 
-				placeholder="What's next?" 
-				inputRef={textareaRef} 
-				onChange={handleTextareaChange}
-			/>
+			<PromptInputTextarea placeholder="What's next?" inputRef={textareaRef} onChange={handleTextareaChange} />
 
 			<PromptInputActions className="flex items-center justify-between gap-2 pt-2">
 				<PromptInputAction tooltip="Attach files">
@@ -138,7 +149,15 @@ export function ActionComposer({
 				</PromptInputAction>
 
 				<div className="flex items-center gap-2 ml-auto">
-					{shouldApproveBlockingAction && (
+					{isEmpty && (
+						<span className="flex items-center text-xs text-muted-foreground gap-1.5">
+							<kbd className="inline-flex items-center rounded border bg-background px-1 font-mono text-xs">
+								<span className="mr-0.5">⌘</span>Backspace
+							</kbd>
+							to stop
+						</span>
+					)}
+					{canApproveBlockingAction && (
 						<span className="flex items-center text-xs text-muted-foreground gap-1.5">
 							<kbd className="inline-flex items-center rounded border bg-background px-1 font-mono text-xs">
 								<span className="mr-0.5">⌘</span>Enter

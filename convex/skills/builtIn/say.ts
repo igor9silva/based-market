@@ -6,11 +6,6 @@ export const say = defineSkill({
 	description: 'Send a text message',
 	parameters: z.object({
 		message: z.string().describe('The message in MDX format.'),
-		isDone: z
-			.boolean()
-			.optional()
-			.default(false)
-			.describe('Whether to keep iterating. If `true`, will stop the loop and await for user feedback.'),
 	}),
 	knownReactions: [
 		{
@@ -30,7 +25,7 @@ export const say = defineSkill({
 			//
 			return {
 				text: args.message,
-				reactions: args.isDone ? [] : execution.skill.knownReactions,
+				reactions: execution.skill.knownReactions,
 			};
 		},
 });

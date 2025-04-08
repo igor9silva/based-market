@@ -147,7 +147,7 @@ function StickToBottomContent({
 	// Auto-scroll when new events are added and we're at the bottom
 	useEffect(() => {
 		//
-		if (isAtBottom) scrollToBottom(isLoaded ? "smooth" : "instant");
+		if (isAtBottom) setTimeout(() => scrollToBottom(isLoaded ? "smooth" : "instant"), 100);
 		//
 	}, [isAtBottom, isLoaded, scrollToBottom]);
 
