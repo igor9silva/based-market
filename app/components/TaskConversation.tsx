@@ -1,20 +1,20 @@
-import { convexQuery } from "@convex-dev/react-query";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useSearch } from "@tanstack/react-router";
-import { api } from "convex/_generated/api";
-import type { Doc, Id } from "convex/_generated/dataModel";
-import { usePaginatedQuery } from "convex/react";
-import { Bug, ChevronDown } from "lucide-react";
-import { type RefCallback, useEffect, useMemo, useState } from "react";
-import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
-import { Action } from "~/components/Action";
-import { ActionComposer } from "~/components/ActionComposer";
-import { DebugAction } from "~/components/DebugAction";
-import { Loading } from "~/components/Loading";
-import { Button } from "~/components/ui/button";
-import { Toggle } from "~/components/ui/toggle";
-import { useCurrentUser } from "~/hooks/useCurrentUser";
-import { cn } from "~/lib/utils";
+import { convexQuery } from '@convex-dev/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { Link, useSearch } from '@tanstack/react-router';
+import { api } from 'convex/_generated/api';
+import type { Doc, Id } from 'convex/_generated/dataModel';
+import { usePaginatedQuery } from 'convex/react';
+import { Bug, ChevronDown } from 'lucide-react';
+import { type RefCallback, useEffect, useMemo, useState } from 'react';
+import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
+import { Action } from '~/components/Action';
+import { ActionComposer } from '~/components/ActionComposer';
+import { DebugAction } from '~/components/DebugAction';
+import { Loading } from '~/components/Loading';
+import { Button } from '~/components/ui/button';
+import { Toggle } from '~/components/ui/toggle';
+import { useCurrentUser } from '~/hooks/useCurrentUser';
+import { cn } from '~/lib/utils';
 
 const PAGE_SIZE = 35;
 const NEAR_TOP_THRESHOLD = 200; // px
@@ -23,7 +23,7 @@ export function TaskConversation({
 	taskId, //
 	className,
 }: {
-	taskId: Id<"tasks">;
+	taskId: Id<'tasks'>;
 	className?: string;
 }) {
 	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
@@ -45,10 +45,10 @@ export function TaskConversation({
 	const reversedActions = useMemo(() => [...actions].reverse(), [actions]);
 	const initialRenderDate = useMemo(() => new Date(), []);
 
-	if (status === "LoadingFirstPage" && actions.length === 0) return <Loading />;
+	if (status === 'LoadingFirstPage' && actions.length === 0) return <Loading />;
 
 	return (
-		<div className={cn("flex flex-col h-full p-2 gap-2", className)}>
+		<div className={cn('flex flex-col h-full p-2 gap-2', className)}>
 			<div className="flex justify-end bg-background/75">
 				<Link to="/$" search={{ debug: debug ? undefined : true }} replace>
 					<Toggle
@@ -61,17 +61,8 @@ export function TaskConversation({
 					</Toggle>
 				</Link>
 			</div>
-			<StickToBottom
-				mass={1}
-				initial="instant"
-				resize="instant"
-				className="flex-1 overflow-auto"
-			>
-				<StickToBottomContent
-					actions={actions}
-					status={status}
-					loadMore={loadMore}
-				>
+			<StickToBottom mass={1} initial="instant" resize="instant" className="flex-1 overflow-auto">
+				<StickToBottomContent actions={actions} status={status} loadMore={loadMore}>
 					{reversedActions.map((action) =>
 						debug ? (
 							<DebugAction
@@ -104,8 +95,8 @@ function StickToBottomContent({
 	loadMore,
 	children,
 }: {
-	actions: Doc<"actions">[];
-	status: "CanLoadMore" | "LoadingMore" | "Exhausted" | "LoadingFirstPage";
+	actions: Doc<'actions'>[];
+	status: 'CanLoadMore' | 'LoadingMore' | 'Exhausted' | 'LoadingFirstPage';
 	loadMore: (n: number) => void;
 	children: React.ReactNode;
 }) {
@@ -136,11 +127,11 @@ function StickToBottomContent({
 			if (ref.current.scrollTop === 0) ref.current.scrollTop = 1;
 
 			// Load more when near the top
-			if (isNearTop && status === "CanLoadMore") loadMore(PAGE_SIZE);
+			if (isNearTop && status === 'CanLoadMore') loadMore(PAGE_SIZE);
 		};
 
-		ref.current?.addEventListener("scroll", handleScroll);
-		return () => ref.current?.removeEventListener("scroll", handleScroll);
+		ref.current?.addEventListener('scroll', handleScroll);
+		return () => ref.current?.removeEventListener('scroll', handleScroll);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loadMore, status, ref.current]);
 
@@ -156,14 +147,12 @@ function StickToBottomContent({
 	return (
 		<StickToBottom.Content className="relative h-full p-2">
 			<div className="h-full">
-				{status === "LoadingMore" && (
+				{status === 'LoadingMore' && (
 					<div className="px-4 pt-4">
 						<Loading className="h-6 w-fit" />
 					</div>
 				)}
-				<div className="flex flex-col flex-grow justify-end gap-2">
-					{children}
-				</div>
+				<div className="flex flex-col flex-grow justify-end gap-2">{children}</div>
 				<div className="sticky bottom-2 flex flex-col">
 					<ScrollToBottom />
 				</div>
@@ -184,8 +173,8 @@ function ScrollToBottom({ className }: { className?: string }) {
 					variant="outline"
 					size="icon"
 					className={cn(
-						"h-8 w-8 rounded-full transition-all duration-150 ease-out",
-						"translate-y-0 scale-100 opacity-100",
+						'h-8 w-8 rounded-full transition-all duration-150 ease-out',
+						'translate-y-0 scale-100 opacity-100',
 						className,
 					)}
 					onClick={onClick}

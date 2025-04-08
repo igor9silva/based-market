@@ -105,7 +105,7 @@ export default function MDX({
 						// if (typeof children !== 'string' || children.includes('\n') === false) {
 						// 	// This is inline code
 						// 	return (
-						// 		<span 
+						// 		<span
 						// 			className={cn('bg-muted text-foreground rounded-sm px-1 py-0.5 font-mono text-sm', className)}
 						// 			{...props}
 						// 		>
@@ -130,7 +130,9 @@ export default function MDX({
 					),
 					table: ({ children }) => <table className="w-full border-collapse my-4">{children}</table>,
 					td: ({ children }) => <td className="border border-border p-2">{children}</td>,
-					th: ({ children }) => <th className="border border-border p-2 font-bold text-primary">{children}</th>,
+					th: ({ children }) => (
+						<th className="border border-border p-2 font-bold text-primary">{children}</th>
+					),
 					tr: ({ children }) => <tr className="even:bg-muted/50">{children}</tr>,
 					thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
 					tbody: ({ children }) => <tbody className="">{children}</tbody>,

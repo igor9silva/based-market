@@ -55,7 +55,12 @@ const SearchResultSchema = z.object({
 });
 
 function Error({ action }: { action: Doc<'actions'> }) {
-	return <FailedMessage text={`🚫 Failed to search places "${action.args['query']}"`} error={action.result?.text ?? ''} />;
+	return (
+		<FailedMessage
+			text={`🚫 Failed to search places "${action.args['query']}"`}
+			error={action.result?.text ?? ''}
+		/>
+	);
 }
 
 function Success({ action }: { action: Doc<'actions'> }) {

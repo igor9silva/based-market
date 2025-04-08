@@ -33,7 +33,14 @@ type PromptInputProps = {
 	onKeyDown?: (e: React.KeyboardEvent<HTMLFormElement>) => void;
 };
 
-function PromptInput({ className, maxHeight = 240, onSubmit, children, disabled = false, onKeyDown }: PromptInputProps) {
+function PromptInput({
+	className,
+	maxHeight = 240,
+	onSubmit,
+	children,
+	disabled = false,
+	onKeyDown,
+}: PromptInputProps) {
 	//
 	const defaultKeyDownHandler = useSubmitHotkey();
 

@@ -98,10 +98,10 @@ export function DebugAction({
 
 	// Status color map
 	const statusColorMap: Record<string, string> = {
-		running: 'bg-blue-500',
-		succeeded: 'bg-green-500',
-		failed: 'bg-red-500',
-		skipped: 'bg-gray-500',
+		'running': 'bg-blue-500',
+		'succeeded': 'bg-green-500',
+		'failed': 'bg-red-500',
+		'skipped': 'bg-gray-500',
 		'pending authorization': 'bg-yellow-500',
 	};
 	const defaultStatusColor = 'bg-slate-500';
@@ -113,9 +113,12 @@ export function DebugAction({
 			<CardContent className="space-y-2">
 				<div className="flex items-center justify-between">
 					<CardTitle id={`action-${action._id}`} className="text-lg">
-						{action.skillKey} ({action.depth}) <span className="font-mono text-xs text-muted-foreground">{action._id}</span>
+						{action.skillKey} ({action.depth}){' '}
+						<span className="font-mono text-xs text-muted-foreground">{action._id}</span>
 					</CardTitle>
-					<Badge className={cn('ml-2', statusColorMap[action.status] ?? defaultStatusColor)}>{action.status}</Badge>
+					<Badge className={cn('ml-2', statusColorMap[action.status] ?? defaultStatusColor)}>
+						{action.status}
+					</Badge>
 				</div>
 				<div className="text-sm text-muted-foreground flex justify-between items-center">
 					<TimeAgo date={action._creationTime} />
