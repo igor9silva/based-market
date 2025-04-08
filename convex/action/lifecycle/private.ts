@@ -267,7 +267,7 @@ async function _tryAutoApprove(
 	if (skill.preApprovedCost < expectedCost) return false;
 
 	// reject if too many consecutive actions are from Meseeks
-	if (await _hasReachedMaxConsecutiveCompanionActions(ctx, task)) {
+	if (expectedCost > 0n && (await _hasReachedMaxConsecutiveCompanionActions(ctx, task))) {
 		//
 		console.debug(
 			`Skipping reacting for task ${task._id} because the last ${env.MAX_CONSECUTIVE_COMPANION_ACTIONS} actions are from Meseeks.`,

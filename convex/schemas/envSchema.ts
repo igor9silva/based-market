@@ -69,10 +69,11 @@ export const env = createEnv({
 		OPENAI_API_KEY: z.string().min(1).describe('OpenAI API key.'),
 
 		MAX_CONSECUTIVE_COMPANION_ACTIONS: z
-			.number()
-			.min(1)
+			.string()
+			.transform((s) => parseInt(s, 10))
+			.pipe(z.number())
 			.describe('The maximum number of consecutive companion actions.')
-			.default(20),
+			.default('20'),
 	},
 
 	/**

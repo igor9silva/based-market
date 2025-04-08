@@ -144,12 +144,14 @@ function StickToBottomContent({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loadMore, status, ref.current]);
 
-	// Auto-scroll when new events are added and we're at the bottom
+	// Track actions length changes to detect new messages
 	useEffect(() => {
 		//
-		if (isAtBottom) setTimeout(() => scrollToBottom(isLoaded ? "smooth" : "instant"), 100);
+		if (isAtBottom && actions.length > 0) {
+			setTimeout(() => scrollToBottom(isLoaded ? 'smooth' : 'instant'), 100);
+		}
 		//
-	}, [isAtBottom, isLoaded, scrollToBottom]);
+	}, [actions.length, isAtBottom, isLoaded, scrollToBottom]);
 
 	return (
 		<StickToBottom.Content className="relative h-full p-2">
