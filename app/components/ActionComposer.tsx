@@ -131,7 +131,7 @@ export function ActionComposer({
 			<PromptInputTextarea placeholder="What's next?" inputRef={textareaRef} onChange={handleTextareaChange} />
 
 			<PromptInputActions className="flex items-center justify-between gap-2 pt-2">
-				<PromptInputAction tooltip="Attach files">
+				{/* <PromptInputAction tooltip="Attach files">
 					<label
 						htmlFor="file-upload"
 						className="hover:bg-secondary-foreground/10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-2xl"
@@ -146,7 +146,7 @@ export function ActionComposer({
 						/>
 						<Paperclip className="text-primary size-5" />
 					</label>
-				</PromptInputAction>
+				</PromptInputAction> */}
 
 				<div className="flex items-center gap-2 ml-auto">
 					{isEmpty && (
