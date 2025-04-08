@@ -144,7 +144,7 @@ function StickToBottomContent({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loadMore, status, ref.current]);
 
-	// Track actions length changes to detect new messages
+	// Auto-scroll when new events are added and we're at the bottom
 	useEffect(() => {
 		//
 		if (isAtBottom && actions.length > 0) {

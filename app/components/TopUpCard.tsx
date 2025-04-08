@@ -38,7 +38,7 @@ export function TopUpCard() {
 			<CardContent className="p-0">
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
 					<div className="flex flex-col gap-0.5">
-						<p className="font-semibold">USD Amount</p>
+						<p className="font-semibold">USDC Amount</p>
 						<Input type="string" name="amount" placeholder="Amount" required defaultValue={0.1} />
 					</div>
 					<Button variant="default" type="submit">

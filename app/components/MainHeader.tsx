@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, useRouter } from '@tanstack/react-router';
-import { ArrowLeft, ArrowRight, ArrowUp, Share } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Inbox, Share } from 'lucide-react';
 import { Suspense } from 'react';
 import { cn } from '~/lib/utils';
 
@@ -40,7 +40,7 @@ export function MainHeader({ className }: { className?: string }) {
 					<ArrowLeft />
 				</Button>
 				<Button className="p-2" variant="ghost" onClick={goUp}>
-					<ArrowUp />
+					<Inbox />
 				</Button>
 			</div>
 

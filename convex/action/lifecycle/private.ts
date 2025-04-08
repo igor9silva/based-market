@@ -43,7 +43,7 @@ export const _perform = internalAction({
 
 			// check budget
 			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill, context);
-			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost, precision: 6 })} USD.`);
+			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost, precision: 6 })} USDC.`);
 
 			// if the action is not yet authorized, try auto-approving it
 			if (!action.approvedAt) {
@@ -207,7 +207,7 @@ async function _estimateAndPersistCost(
 	const estimatedCost = estimateCostFor(skill, action._id, context);
 
 	console.debug(
-		`Setting estimated cost for ${action._id}: ${asDollars({ bigInt: estimatedCost, precision: 6 })} USD`,
+		`Setting estimated cost for ${action._id}: ${asDollars({ bigInt: estimatedCost, precision: 6 })} USDC`,
 	);
 
 	await ctx.runMutation(internal.action.lifecycle.private._setEstimatedCost, {
