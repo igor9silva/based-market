@@ -2,6 +2,7 @@ import { Doc, Id } from 'convex/_generated/dataModel';
 
 import { DoneAction } from '~/components/actions/done';
 import { GenericAction } from '~/components/actions/generic';
+import { IterateAction } from '~/components/actions/iterate';
 import { SayAction } from '~/components/actions/say';
 import { ScrapeLinkAction } from '~/components/actions/scrapeLink';
 import { SearchPlacesAction } from '~/components/actions/searchPlaces';
@@ -10,6 +11,7 @@ import { UpdateInstructionsAction } from '~/components/actions/updateInstruction
 
 const componentMap = {
 	say: SayAction,
+	iterate: IterateAction,
 	done: DoneAction,
 	askForClarification: SayAction,
 	searchWeb: SearchWebAction,

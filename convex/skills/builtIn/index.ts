@@ -4,6 +4,7 @@ import { divide } from './divide';
 import { done } from './done';
 import { increaseBudget } from './increaseBudget';
 import { multiply } from './multiply';
+import { reason } from './reason';
 import { reopen } from './reopen';
 import { resolve } from './resolve';
 import { say } from './say';
@@ -21,6 +22,7 @@ export const _builtInSkills = {
 	// createSubtask,
 	done,
 	say,
+	reason,
 	reopen,
 	increaseBudget,
 	resolve,

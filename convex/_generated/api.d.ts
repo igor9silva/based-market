@@ -37,6 +37,7 @@ import type * as skills_builtIn_increaseBudget from "../skills/builtIn/increaseB
 import type * as skills_builtIn_index from "../skills/builtIn/index.js";
 import type * as skills_builtIn_moveTask from "../skills/builtIn/moveTask.js";
 import type * as skills_builtIn_multiply from "../skills/builtIn/multiply.js";
+import type * as skills_builtIn_reason from "../skills/builtIn/reason.js";
 import type * as skills_builtIn_reopen from "../skills/builtIn/reopen.js";
 import type * as skills_builtIn_resolve from "../skills/builtIn/resolve.js";
 import type * as skills_builtIn_say from "../skills/builtIn/say.js";
@@ -109,6 +110,7 @@ declare const fullApi: ApiFromModules<{
   "skills/builtIn/index": typeof skills_builtIn_index;
   "skills/builtIn/moveTask": typeof skills_builtIn_moveTask;
   "skills/builtIn/multiply": typeof skills_builtIn_multiply;
+  "skills/builtIn/reason": typeof skills_builtIn_reason;
   "skills/builtIn/reopen": typeof skills_builtIn_reopen;
   "skills/builtIn/resolve": typeof skills_builtIn_resolve;
   "skills/builtIn/say": typeof skills_builtIn_say;
