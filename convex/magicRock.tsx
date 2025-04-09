@@ -3,6 +3,7 @@ import { deepinfra } from '@ai-sdk/deepinfra';
 import { deepseek } from '@ai-sdk/deepseek';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
+import { togetherai } from '@ai-sdk/togetherai';
 
 import { type CoreMessage, generateText, type LanguageModel } from 'ai';
 import { z } from 'zod';
@@ -146,6 +147,9 @@ function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageMode
 
 		case 'deepseek/v3':
 			return deepseek('deepseek-chat');
+
+		case 'together/llama-4-mavericks':
+			return togetherai('meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8');
 
 		case 'deepinfra/deepseek-v3':
 			// return groq('llama-3.3-70b-versatile'); // mei burro, mas tem potencial

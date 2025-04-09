@@ -258,5 +258,11 @@ function pricingFor(model: z.infer<typeof modelsSchema>): {
 				inputToken: asBigInt({ dollars: 0.4 }) / 1_000_000n,
 				outputToken: asBigInt({ dollars: 0.89 }) / 1_000_000n,
 			};
+
+		case 'together/llama-4-mavericks':
+			return {
+				inputToken: asBigInt({ dollars: 0.27 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 0.85 }) / 1_000_000n,
+			};
 	}
 }
