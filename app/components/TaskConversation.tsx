@@ -4,16 +4,20 @@ import { Link, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { usePaginatedQuery } from 'convex/react';
-import { Bug, ChevronDown } from 'lucide-react';
+import { asBigInt } from 'convex/utils/money';
+import { Archive, Bug, CheckCircle, ChevronDown, DollarSign, RotateCcw } from 'lucide-react';
 import { type RefCallback, useEffect, useMemo, useState } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { Action } from '~/components/Action';
 import { ActionComposer } from '~/components/ActionComposer';
 import { DebugAction } from '~/components/DebugAction';
 import { Loading } from '~/components/Loading';
+import { BudgetSelector, type BudgetStep } from '~/components/ui/budget-selector';
 import { Button } from '~/components/ui/button';
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from '~/components/ui/drawer';
 import { Toggle } from '~/components/ui/toggle';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
+import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
 
 const PAGE_SIZE = 35;
@@ -29,6 +33,9 @@ export function TaskConversation({
 	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(taskQuery);
 	const { debug } = useSearch({ strict: false });
+	const { resolve, discard, increaseBudget, stop } = useTaskMutations();
+	const [showAddBudgetDrawer, setShowAddBudgetDrawer] = useState(false);
+	const [selectedBudget, setSelectedBudget] = useState<BudgetStep>(0.1);
 
 	const user = useCurrentUser();
 
@@ -45,11 +52,76 @@ export function TaskConversation({
 	const reversedActions = useMemo(() => [...actions].reverse(), [actions]);
 	const initialRenderDate = useMemo(() => new Date(), []);
 
+	// Global keyboard shortcut for Cmd+Backspace to stop task
+	useEffect(() => {
+		//
+		const handleGlobalKeyDown = (e: KeyboardEvent) => {
+			if (e.key === 'Backspace' && (e.metaKey || e.ctrlKey)) {
+				e.preventDefault();
+				stop({ taskId: task._id });
+			}
+		};
+
+		document.addEventListener('keydown', handleGlobalKeyDown);
+		return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+		//
+	}, [task._id, task.status, stop]);
+
+	const handleReopenTask = () => {
+		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: 0.1 }) });
+	};
+
+	const handleAddBudget = () => setShowAddBudgetDrawer(true);
+
+	const handleBudgetConfirm = () => {
+		//
+		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: selectedBudget }) });
+		setShowAddBudgetDrawer(false);
+	};
+
 	if (status === 'LoadingFirstPage' && actions.length === 0) return <Loading />;
 
 	return (
 		<div className={cn('flex flex-col h-full p-2 gap-2', className)}>
-			<div className="flex justify-end bg-background/75">
+			<div className="flex justify-between items-center bg-background/75">
+				<div className="flex gap-2">
+					{task.isActive ? (
+						<>
+							<Button
+								size="sm"
+								variant="ghost"
+								onClick={() => resolve({ taskId: task._id })}
+								className="flex items-center gap-1"
+							>
+								<CheckCircle className="h-4 w-4" />
+								Resolve
+							</Button>
+							<Button
+								size="sm"
+								variant="ghost"
+								onClick={() => discard({ taskId: task._id })}
+								className="flex items-center gap-1"
+							>
+								<Archive className="h-4 w-4" />
+								Discard
+							</Button>
+							<Button
+								size="sm"
+								variant="ghost"
+								onClick={handleAddBudget}
+								className="flex items-center gap-1"
+							>
+								<DollarSign className="h-4 w-4" />
+								Add Budget
+							</Button>
+						</>
+					) : (
+						<Button size="sm" onClick={handleReopenTask} className="flex items-center gap-1">
+							<RotateCcw className="h-4 w-4" />
+							Reopen with $0.10
+						</Button>
+					)}
+				</div>
 				<Link to="/$" search={{ debug: debug ? undefined : true }} replace>
 					<Toggle
 						aria-label="Toggle debug mode"
@@ -85,6 +157,23 @@ export function TaskConversation({
 				</StickToBottomContent>
 			</StickToBottom>
 			<ActionComposer task={task} />
+
+			<Drawer open={showAddBudgetDrawer} onOpenChange={setShowAddBudgetDrawer}>
+				<DrawerContent>
+					<DrawerHeader>
+						<DrawerTitle>Add Budget</DrawerTitle>
+					</DrawerHeader>
+					<div className="px-4 pb-4">
+						<BudgetSelector value={selectedBudget} onChange={setSelectedBudget} className="w-full" />
+					</div>
+					<DrawerFooter className="pt-2">
+						<Button onClick={handleBudgetConfirm}>Confirm</Button>
+						<DrawerClose asChild>
+							<Button variant="outline">Cancel</Button>
+						</DrawerClose>
+					</DrawerFooter>
+				</DrawerContent>
+			</Drawer>
 		</div>
 	);
 }

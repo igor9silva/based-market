@@ -77,6 +77,18 @@ export function useTaskMutations() {
 		});
 	};
 
+	const reopen = ({
+		taskId, //
+	}: {
+		taskId: Id<'tasks'>;
+	}) => {
+		return act({
+			taskId,
+			skillKey: 'reopen',
+			args: {},
+		});
+	};
+
 	const increaseBudget = ({
 		taskId, //
 		amount,
@@ -144,6 +156,7 @@ export function useTaskMutations() {
 		updateInstructions,
 		resolve,
 		discard,
+		reopen,
 		increaseBudget,
 		approveAction,
 		rejectAction,

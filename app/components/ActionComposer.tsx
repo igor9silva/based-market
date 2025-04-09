@@ -18,7 +18,7 @@ export function ActionComposer({
 	//
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const [files, setFiles] = useState<File[]>([]);
-	const { say, approveBlockingAction, stop } = useTaskMutations();
+	const { say, approveBlockingAction } = useTaskMutations();
 	const [isEmpty, setIsEmpty] = useState(true);
 
 	useEffect(() => {
@@ -72,11 +72,6 @@ export function ActionComposer({
 		[task.status, isEmpty],
 	);
 
-	const canStopTask = useMemo(
-		() => task.status === 'acting' && isEmpty, //
-		[task.status, isEmpty],
-	);
-
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
 		//
 		if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -89,15 +84,6 @@ export function ActionComposer({
 
 			// Otherwise, submit the form
 			e.currentTarget.requestSubmit();
-		}
-
-		// Handle Cmd+Backspace to stop the task
-		if (e.key === 'Backspace' && (e.metaKey || e.ctrlKey)) {
-			if (isEmpty) {
-				e.preventDefault();
-				stop({ taskId: task._id });
-				return;
-			}
 		}
 	};
 
