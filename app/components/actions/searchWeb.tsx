@@ -3,11 +3,10 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { z } from 'zod';
 
-import { GenericAction } from '~/components/actions/generic';
+import { GenericAction } from '~/components/actions/GenericAction';
 import { Button } from '~/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
 import { FailedMessage, Message, MessageContent, SimpleMessage } from '~/components/ui/message';
-import { useIsNew } from '~/hooks/useIsNew';
 
 export function SearchWebAction(props: {
 	className?: string;
@@ -17,7 +16,7 @@ export function SearchWebAction(props: {
 	taskId: Id<'tasks'>;
 }) {
 	const { action, initialRenderDate, isAuthorCurrentUser, taskId } = props;
-	const isNew = useIsNew(action._creationTime, initialRenderDate);
+	// const isNew = useIsNew(action._creationTime, initialRenderDate);
 
 	switch (action.status) {
 		//

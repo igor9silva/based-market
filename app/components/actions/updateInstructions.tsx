@@ -1,8 +1,7 @@
 import { Doc, Id } from 'convex/_generated/dataModel';
 
-import { GenericAction } from '~/components/actions/generic';
+import { GenericAction } from '~/components/actions/GenericAction';
 import { FailedMessage, SimpleMessage } from '~/components/ui/message';
-import { useIsNew } from '~/hooks/useIsNew';
 
 export function UpdateInstructionsAction(props: {
 	className?: string;
@@ -12,7 +11,7 @@ export function UpdateInstructionsAction(props: {
 	taskId: Id<'tasks'>;
 }) {
 	const { action, initialRenderDate, isAuthorCurrentUser, taskId } = props;
-	const isNew = useIsNew(action._creationTime, initialRenderDate);
+	// const isNew = useIsNew(action._creationTime, initialRenderDate);
 
 	switch (action.status) {
 		//

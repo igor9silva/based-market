@@ -3,8 +3,7 @@ import { cn } from '~/lib/utils';
 
 import { Message } from '~/components/ui/message';
 import { TextShimmer } from '~/components/ui/text-shimmer';
-import { useIsNew } from '~/hooks/useIsNew';
-import { GenericAction } from './generic';
+import { GenericAction } from './GenericAction';
 
 export function IterateAction({
 	className, //
@@ -19,7 +18,7 @@ export function IterateAction({
 	isAuthorCurrentUser: boolean;
 	taskId: Id<'tasks'>;
 }) {
-	const isNew = useIsNew(action._creationTime, initialRenderDate);
+	// const isNew = useIsNew(action._creationTime, initialRenderDate);
 
 	const hiddenStatuses = ['enqueued', 'succeeded', 'skipped'];
 	if (hiddenStatuses.includes(action.status)) return null;

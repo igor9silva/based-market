@@ -47,6 +47,7 @@ export const resolvedActionSchema = coreActionSchema.extend({
 	]),
 	result: z.object({
 		text: z.string().optional(),
+		// setAt: z.number(),
 		reactions: z.array(newActionSchema),
 	}),
 	costs: z.array(

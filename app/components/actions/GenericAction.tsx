@@ -137,14 +137,6 @@ function Result({
 		return <div className={cn('text-card-foreground overflow-x-auto', className)}>{mdx}</div>;
 	}
 
-	if (skillKey === 'reason') {
-		return (
-			<div className={cn('text-muted-foreground overflow-x-auto text-xs', className)}>
-				<pre className="whitespace-pre-wrap">{result}</pre>
-			</div>
-		);
-	}
-
 	return (
 		<Collapsible className={cn('text-sm', className)}>
 			<CollapsibleTrigger>

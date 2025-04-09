@@ -2,7 +2,6 @@ import { Doc, Id } from 'convex/_generated/dataModel';
 import { cn } from '~/lib/utils';
 
 import { Message, MessageContent } from '~/components/ui/message';
-import { useIsNew } from '~/hooks/useIsNew';
 
 export function DoneAction({
 	className, //
@@ -17,7 +16,7 @@ export function DoneAction({
 	isAuthorCurrentUser: boolean;
 	taskId: Id<'tasks'>;
 }) {
-	const isNew = useIsNew(action._creationTime, initialRenderDate);
+	// const isNew = useIsNew(action._creationTime, initialRenderDate);
 
 	return (
 		<Message

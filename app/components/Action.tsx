@@ -1,24 +1,7 @@
 import { Doc, Id } from 'convex/_generated/dataModel';
 
-import { DoneAction } from '~/components/actions/done';
-import { GenericAction } from '~/components/actions/generic';
-import { IterateAction } from '~/components/actions/iterate';
-import { SayAction } from '~/components/actions/say';
-import { ScrapeLinkAction } from '~/components/actions/scrapeLink';
-import { SearchPlacesAction } from '~/components/actions/searchPlaces';
-import { SearchWebAction } from '~/components/actions/searchWeb';
-import { UpdateInstructionsAction } from '~/components/actions/updateInstructions';
-
-const componentMap = {
-	say: SayAction,
-	iterate: IterateAction,
-	done: DoneAction,
-	askForClarification: SayAction,
-	searchWeb: SearchWebAction,
-	updateInstructions: UpdateInstructionsAction,
-	scrapeLink: ScrapeLinkAction,
-	searchPlaces: SearchPlacesAction,
-};
+import index from './actions';
+import { GenericAction } from './actions/GenericAction';
 
 export function Action(props: {
 	className?: string;
@@ -28,8 +11,8 @@ export function Action(props: {
 	taskId: Id<'tasks'>;
 }) {
 	//
-	if (props.action.skillKey in componentMap) {
-		const Component = componentMap[props.action.skillKey as keyof typeof componentMap];
+	if (props.action.skillKey in index) {
+		const Component = index[props.action.skillKey as keyof typeof index];
 		return <Component {...props} />;
 	}
 
