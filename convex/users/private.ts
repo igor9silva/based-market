@@ -3,13 +3,9 @@ import { z } from 'zod';
 import { internal } from '../_generated/api';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx } from '../_generated/server';
-import { _add as _addComponent, _findAll } from '../components/private';
 import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/topUpSchema';
-import { _addInboxTask } from '../tasks/private';
-import { _addFreeCredits } from '../transactions/private';
-import { asBigInt } from '../utils/money';
 
 export const _seedIfNeeded = async (
 	ctx: MutationCtx, //
@@ -19,21 +15,21 @@ export const _seedIfNeeded = async (
 	const user = await _findOne(ctx, { userId });
 	if (user?.isReady) return;
 
-	const isVerified = user?.verificationLevel === 'orb';
+	// const isVerified = user?.verificationLevel === 'orb';
 
-	await _addFreeCredits(ctx, {
-		owner: userId,
-		value: {
-			symbol: 'USD',
-			amount: isVerified ? asBigInt({ dollars: 5 }) : asBigInt({ dollars: 1 }),
-		},
-		description: isVerified ? 'Free 500 actions for verified users!' : 'Free 100 actions for non-verified users',
-	});
+	// await _addFreeCredits(ctx, {
+	// 	owner: userId,
+	// 	value: {
+	// 		symbol: 'USD',
+	// 		amount: isVerified ? asBigInt({ dollars: 5 }) : asBigInt({ dollars: 1 }),
+	// 	},
+	// 	description: isVerified ? 'Free 500 actions for verified users!' : 'Free 100 actions for non-verified users',
+	// });
 
-	const inboxTaskId = await _addInboxTask(ctx, {
-		author: userId,
-		owner: userId,
-	});
+	// const inboxTaskId = await _addInboxTask(ctx, {
+	// 	author: userId,
+	// 	owner: userId,
+	// });
 
 	const markAreReady = () => {
 		// adding a fake delay for fun
@@ -47,37 +43,37 @@ export const _seedIfNeeded = async (
 		return;
 	}
 
-	// TODO: create user preferences
+	// // TODO: create user preferences
 
-	const refUser = await _findOne(ctx, { userId: env.REF_USER_ID as Id<'users'> });
-	if (!refUser) throw new Error('Ref user not found'); // FATAL (will stop seeding user forever), TODO: notify fatal
+	// const refUser = await _findOne(ctx, { userId: env.REF_USER_ID as Id<'users'> });
+	// if (!refUser) throw new Error('Ref user not found'); // FATAL (will stop seeding user forever), TODO: notify fatal
 
-	await _seedComponentsFromRef(ctx, refUser._id, userId, inboxTaskId);
-	markAreReady();
+	// await _seedComponentsFromRef(ctx, refUser._id, userId, inboxTaskId);
+	// markAreReady();
 };
 
-const _seedComponentsFromRef = async (
-	ctx: MutationCtx, //
-	refUserId: Id<'users'>,
-	newUserId: Id<'users'>,
-	inboxTaskId: Id<'tasks'>,
-) => {
-	//
-	// get all reference components
-	const refComponents = await _findAll(ctx, { userId: refUserId });
+// const _seedComponentsFromRef = async (
+// 	ctx: MutationCtx, //
+// 	refUserId: Id<'users'>,
+// 	newUserId: Id<'users'>,
+// 	inboxTaskId: Id<'tasks'>,
+// ) => {
+// 	//
+// 	// get all reference components
+// 	const refComponents = await _findAll(ctx, { userId: refUserId });
 
-	// add each one to the seeded user
-	await Promise.all(
-		refComponents.map((refComponent) =>
-			_addComponent(ctx, {
-				owner: newUserId,
-				body: refComponent.body,
-				defaultTaskId: refComponent.defaultTaskId ? inboxTaskId : undefined,
-				slug: refComponent.slug,
-			}),
-		),
-	);
-};
+// 	// add each one to the seeded user
+// 	await Promise.all(
+// 		refComponents.map((refComponent) =>
+// 			_addComponent(ctx, {
+// 				owner: newUserId,
+// 				body: refComponent.body,
+// 				defaultTaskId: refComponent.defaultTaskId ? inboxTaskId : undefined,
+// 				slug: refComponent.slug,
+// 			}),
+// 		),
+// 	);
+// };
 
 export const _markAreReady = internalMutation({
 	args: {

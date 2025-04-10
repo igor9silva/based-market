@@ -2,7 +2,10 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 
 export const componentSchema = z.object({
-	owner: zid('users'),
+	owner: z.union([
+		zid('users'), //
+		z.literal('isPro'),
+	]),
 	body: z.string().describe('MDX'),
 	defaultTaskId: zid('tasks').optional(),
 	slug: z

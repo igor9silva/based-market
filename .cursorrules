@@ -9,3 +9,5 @@ DO NOT MESS UP WITH MY INDENTATION.
 Prefer `Boolean()` over `!!` as it's more readable.
 
 Always use `bun` instead of `npm` or any other. Including `bunx` instead of `npx`.
+
+***Everything*** should be type-safe. i.e. using `any` is STRICTLY forbidden.

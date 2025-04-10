@@ -10,6 +10,7 @@ import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
 import { Checkbox } from '~/components/ui/checkbox';
 import MDX from '~/components/ui/mdx';
+import { useOptimisticTaskUpdate } from '~/hooks/useOptimisticTaskUpdate';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
 import { EditableContent } from './EditableContent';
@@ -26,8 +27,14 @@ export default function TaskDetail({
 	const query = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(query);
 	const { updateInstructions, resolve, reopen } = useTaskMutations();
+	const { updateTaskStatus } = useOptimisticTaskUpdate();
 
 	const handleCheckboxChange = (hasChecked: boolean) => {
+		//
+		// Optimistically update UI
+		updateTaskStatus({ task, isActive: !hasChecked });
+
+		// Execute the actual mutation
 		hasChecked ? resolve({ taskId: task._id }) : reopen({ taskId: task._id });
 	};
 
