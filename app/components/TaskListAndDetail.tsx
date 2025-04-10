@@ -38,6 +38,7 @@ export function TaskListAndDetail({
 	const { setInboxDetailWidthPercent } = useTaskMutations();
 
 	const debouncedSetWidth = useDebounce((widthPercent: number) => {
+		if (!widthPercent) return;
 		setInboxDetailWidthPercent({ widthPercent });
 	}, 500);
 
