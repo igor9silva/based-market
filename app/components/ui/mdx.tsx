@@ -84,35 +84,23 @@ export default function MDX({
 						</a>
 					),
 					code: function CodeComponent({ className, children, ...props }) {
-						// const isInline =
-						// 	!props.node?.position?.start.line ||
-						// 	props.node?.position?.start.line === props.node?.position?.end.line;
-
-						// if (isInline) {
-						// 	return (
-						// 		<span
-						// 			className={cn('bg-primary-foreground rounded-sm px-1 font-mono text-sm', className)}
-						// 			{...props}
-						// 		>
-						// 			{children}
-						// 		</span>
-						// 	);
-						// }
-
+						//
 						const language = extractLanguage(className);
 
-						// claude randomly added that
-						// if (typeof children !== 'string' || children.includes('\n') === false) {
-						// 	// This is inline code
-						// 	return (
-						// 		<span
-						// 			className={cn('bg-muted text-foreground rounded-sm px-1 py-0.5 font-mono text-sm', className)}
-						// 			{...props}
-						// 		>
-						// 			{children}
-						// 		</span>
-						// 	);
-						// }
+						// check if the code is inline (claude randomly added that, thanks!)
+						if (typeof children !== 'string' || children.includes('\n') === false) {
+							return (
+								<span
+									className={cn(
+										'bg-muted text-foreground rounded-sm px-1 py-0.5 font-mono text-sm',
+										className,
+									)}
+									{...props}
+								>
+									{children}
+								</span>
+							);
+						}
 
 						return (
 							<CodeBlock className={className}>
