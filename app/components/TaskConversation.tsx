@@ -35,7 +35,7 @@ export function TaskConversation({
 	const { debug } = useSearch({ strict: false });
 	const { resolve, discard, increaseBudget, stop } = useTaskMutations();
 	const [showAddBudgetDrawer, setShowAddBudgetDrawer] = useState(false);
-	const [selectedBudget, setSelectedBudget] = useState<BudgetStep>(0.1);
+	const [selectedBudget, setSelectedBudget] = useState<BudgetStep>(0.2);
 
 	const user = useCurrentUser();
 
@@ -68,7 +68,7 @@ export function TaskConversation({
 	}, [task._id, task.status, stop]);
 
 	const handleReopenTask = () => {
-		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: 0.1 }) });
+		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: 0.2 }) });
 	};
 
 	const handleAddBudget = () => setShowAddBudgetDrawer(true);
@@ -118,7 +118,7 @@ export function TaskConversation({
 					) : (
 						<Button size="sm" onClick={handleReopenTask} className="flex items-center gap-1">
 							<RotateCcw className="h-4 w-4" />
-							Reopen with $0.10
+							Reopen with $0.20
 						</Button>
 					)}
 				</div>

@@ -248,14 +248,14 @@ function ReopenTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 
 	const handleSelect = () => {
 		//
-		increaseBudget({ taskId: currentTask._id, amount: asBigInt({ dollars: 0.1 }) });
+		increaseBudget({ taskId: currentTask._id, amount: asBigInt({ dollars: 0.2 }) });
 		close();
 	};
 
 	return (
 		<CommandItem keywords={['reopen', 'current']} onSelect={handleSelect}>
 			<RotateCcw className="mr-2" />
-			Reopen with $0.10 of budget
+			Reopen with $0.20 of budget
 		</CommandItem>
 	);
 }

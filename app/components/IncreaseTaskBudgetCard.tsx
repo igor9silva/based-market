@@ -14,7 +14,7 @@ export function IncreaseTaskBudgetCard({ taskId }: { taskId: Id<'tasks'> }) {
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
-			amount: z.coerce.number().min(0).max(100).default(0.1),
+			amount: z.coerce.number().min(0).max(100).default(0.2),
 		}),
 		handler: async ({ amount }) => {
 			//
@@ -30,7 +30,7 @@ export function IncreaseTaskBudgetCard({ taskId }: { taskId: Id<'tasks'> }) {
 		<Card className="max-h-fit border-none rounded-none">
 			<CardContent className="p-4">
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-4">
-					<BudgetSelector name="amount" defaultValue={0.1} />
+					<BudgetSelector name="amount" />
 					<Button variant="default" type="submit">
 						Increase task budget
 					</Button>

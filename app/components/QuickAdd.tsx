@@ -30,7 +30,7 @@ export function QuickAdd({ className }: { className?: string }) {
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
 			message: z.string().min(1, 'Message is required'),
-			initialFunds: z.coerce.number().min(0).max(100).default(0.1),
+			initialFunds: z.coerce.number().min(0).max(100).default(0.2),
 		}),
 		shouldAlwaysClearForm: false,
 		handler: async ({ message, initialFunds }) => {
@@ -80,7 +80,7 @@ export function QuickAdd({ className }: { className?: string }) {
 							className="min-h-32 resize-none text-base"
 						/>
 					</div>
-					<BudgetSelector name="initialFunds" defaultValue={0.1} />
+					<BudgetSelector name="initialFunds" />
 					<Button variant="default" type="submit" size="lg">
 						Seek it
 						<kbd className="hidden md:inline-flex h-5 items-center gap-1 rounded border px-2 font-mono text-xs ml-2">
