@@ -1,62 +1,73 @@
-import { RefObject, useEffect, useState } from 'react';
-import { DEFAULT_MD_BREAKPOINT } from '~/lib/tailwind';
+import { useEffect, useState } from 'react';
+
+export type Dimension = 'width' | 'height';
 
 /**
- * A React hook that detects if the current container element's width is below a specified breakpoint.
+ * Observes a dimension (width or height) of a container element and returns
+ * whether it's below a given breakpoint.
  *
- * Returns a boolean indicating if the container width is less than the breakpoint.
- * The value updates automatically when the container is resized.
- * Requires a ref to the container element.
- *
- * @param {RefObject<T>} ref - A React ref attached to the container element.
- * @param {number} [breakpoint=DEFAULT_MD_BREAKPOINT] - The width breakpoint in pixels.
- * @returns {boolean} True if container width is less than the breakpoint, false otherwise.
- *
- * @example
- * function MyComponent() {
- *   const containerRef = useRef<HTMLDivElement>(null);
- *   const isBelowBreakpoint = useContainerBreakpoint(containerRef, 600);
- *   return <div ref={containerRef}>{isBelowBreakpoint ? <SmallView /> : <LargeView />}</div>;
- * }
+ * @param containerRef Ref object pointing to the container element.
+ * @param dimension The dimension to observe ('width' or 'height').
+ * @param breakpoint The threshold in pixels for the specified dimension.
+ * @returns True if the container dimension is less than the breakpoint, false otherwise.
  */
-export function useContainerBreakpoint<T extends HTMLElement>(
-	ref: RefObject<T>,
-	breakpoint: number = DEFAULT_MD_BREAKPOINT,
+export function useContainerBreakpoint(
+	containerRef: React.RefObject<HTMLElement>,
+	dimension: Dimension,
+	breakpoint: number,
 ): boolean {
 	//
-	const [isBelowBreakpoint, setIsBelowBreakpoint] = useState<boolean | undefined>(undefined);
+	const [isBelowBreakpoint, setIsBelowBreakpoint] = useState(false);
 
 	useEffect(() => {
 		//
-		if (!ref.current) {
-			console.warn('useContainerBreakpoint: Ref is not attached to an element.');
-			return;
-		}
-
-		const element = ref.current;
+		const element = containerRef.current;
+		if (!element) return;
 
 		const observer = new ResizeObserver((entries) => {
 			//
-			if (entries[0]) {
-				const { width } = entries[0].contentRect;
-				setIsBelowBreakpoint(width < breakpoint);
+			for (const entry of entries) {
+				//
+				let size: number;
+
+				if (entry.borderBoxSize) {
+					const borderBox = Array.isArray(entry.borderBoxSize) ? entry.borderBoxSize[0] : entry.borderBoxSize;
+
+					if (dimension === 'width') {
+						// Explicitly cast to access inlineSize, handling potential type issues
+						size = (borderBox as { inlineSize?: number }).inlineSize ?? entry.contentRect.width;
+					} else {
+						// Explicitly cast to access blockSize, handling potential type issues
+						size = (borderBox as { blockSize?: number }).blockSize ?? entry.contentRect.height;
+					}
+				} else {
+					// Fallback to contentRect
+					size = dimension === 'width' ? entry.contentRect.width : entry.contentRect.height;
+				}
+
+				setIsBelowBreakpoint(size < breakpoint);
 			}
 		});
 
 		observer.observe(element);
 
 		// initial check
-		setIsBelowBreakpoint(element.offsetWidth < breakpoint);
+		let initialSize: number;
+
+		if (element.getBoundingClientRect) {
+			initialSize =
+				dimension === 'width' ? element.getBoundingClientRect().width : element.getBoundingClientRect().height;
+		} else {
+			// fallback for older browsers or different environments
+			initialSize = dimension === 'width' ? element.offsetWidth : element.offsetHeight;
+		}
+
+		setIsBelowBreakpoint(initialSize < breakpoint);
 
 		return () => {
-			//
-			// check if element still exists before unobserving
-			// this can happen if the component unmounts quickly
-			if (element) {
-				observer.unobserve(element);
-			}
+			observer.disconnect();
 		};
-	}, [ref, breakpoint]);
+	}, [containerRef, dimension, breakpoint]);
 
-	return Boolean(isBelowBreakpoint);
+	return isBelowBreakpoint;
 }

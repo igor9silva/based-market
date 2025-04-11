@@ -15,3 +15,12 @@ Always use `bun` instead of `npm` or any other. Including `bunx` instead of `npx
 `const` is preferable, avoid using `let` when possible.
 
 // we do not Capitalize comments.
+
+For validation ifs, oneliners are preferable.
+e.g.
+BAD
+if (!element) {
+	return;
+}
+GOOD
+if (!element) return;
