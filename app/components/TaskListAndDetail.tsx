@@ -59,7 +59,7 @@ export function TaskListAndDetail({
 		>
 			<ResizablePanel id="list" order={0} defaultSize={100 - (selectedSubtaskId ? detailWidthPercent : 0)}>
 				<div className="overflow-auto h-full">
-					<QuickAdd />
+					{subtasks.length === 0 && <QuickAdd />}
 					{subtasks.map((task) => (
 						<Link
 							key={task._id}

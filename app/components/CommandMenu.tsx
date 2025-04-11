@@ -12,12 +12,12 @@ import {
 	BadgeCent,
 	Circle,
 	CircleCheckBig,
-	CirclePlus,
 	CircleX,
 	Inbox,
 	LogOut,
 	RefreshCcw,
 	RotateCcw,
+	SquarePen,
 	Wallet,
 } from 'lucide-react';
 import {
@@ -308,8 +308,8 @@ function NewTaskCommandItem({ shouldUseSearch }: { shouldUseSearch: boolean }) {
 
 	return (
 		<CommandItem value="/new" keywords={['new', 'task', search]} onSelect={handleSelect}>
-			<CirclePlus className="mr-2" />
-			{search ? `Seek for "${search}"` : 'New seek'}
+			<SquarePen className="mr-2" />
+			{search ? `Seek for "${search}"` : 'New task'}
 		</CommandItem>
 	);
 }
