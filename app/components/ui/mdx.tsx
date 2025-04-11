@@ -7,7 +7,7 @@ import { EasterEgg } from '~/components/EasterEgg';
 import { IncreaseTaskBudgetCard } from '~/components/IncreaseTaskBudgetCard';
 import { Grid } from '~/components/layout/Grid';
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
-import { ReversableListAndDetail } from '~/components/layout/ReversableListAndDetail';
+import { TaskDetailAndConversation } from '~/components/layout/TaskDetailAndConversation';
 import { TwoColumn } from '~/components/layout/TwoColumn';
 import { Loading } from '~/components/Loading';
 import { QuickAdd } from '~/components/QuickAdd';
@@ -44,7 +44,7 @@ const components = {
 	QuickAdd,
 	TaskListAndDetail,
 	ListAndDetail,
-	ReversableListAndDetail,
+	TaskDetailAndConversation,
 	ScrollArea,
 	EasterEgg,
 	TopUpCard,

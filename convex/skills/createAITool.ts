@@ -259,10 +259,22 @@ function pricingFor(model: z.infer<typeof modelsSchema>): {
 				outputToken: asBigInt({ dollars: 0.89 }) / 1_000_000n,
 			};
 
-		case 'together/llama-4-mavericks':
+		case 'together/llama-4-maverick':
 			return {
 				inputToken: asBigInt({ dollars: 0.27 }) / 1_000_000n,
 				outputToken: asBigInt({ dollars: 0.85 }) / 1_000_000n,
+			};
+
+		case 'groq/llama-4-scout':
+			return {
+				inputToken: asBigInt({ dollars: 0.11 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 0.34 }) / 1_000_000n,
+			};
+
+		case 'groq/llama-4-maverick':
+			return {
+				inputToken: asBigInt({ dollars: 0.2 }) / 1_000_000n,
+				outputToken: asBigInt({ dollars: 0.6 }) / 1_000_000n,
 			};
 	}
 }

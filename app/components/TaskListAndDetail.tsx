@@ -7,8 +7,10 @@ import { useCallback } from 'react';
 import { cn } from '~/lib/utils';
 
 import { QuickAdd } from '~/components/QuickAdd';
+import { TaskConversation } from '~/components/TaskConversation';
 import TaskDetail from '~/components/TaskDetail';
 import { TaskItem } from '~/components/TaskItem';
+import { TaskDetailAndConversation } from '~/components/layout/TaskDetailAndConversation';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
 import { useDebounce } from '~/hooks/useDebounce';
 import { useIsMobile } from '~/hooks/useIsMobile';
@@ -73,10 +75,10 @@ export function TaskListAndDetail({
 			{selectedSubtaskId && <ResizableHandle withHandle />}
 			{selectedSubtaskId && (
 				<ResizablePanel id="detail" order={1} defaultSize={detailWidthPercent}>
-					<TaskDetail
-						taskId={selectedSubtaskId}
-						showExpand={false}
-						className="animate-in slide-in-from-right duration-100"
+					<TaskDetailAndConversation
+						defaultListSize={50}
+						list={<TaskDetail taskId={selectedSubtaskId} />}
+						detail={<TaskConversation taskId={selectedSubtaskId} />}
 					/>
 				</ResizablePanel>
 			)}

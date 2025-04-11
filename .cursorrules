@@ -11,3 +11,7 @@ Prefer `Boolean()` over `!!` as it's more readable.
 Always use `bun` instead of `npm` or any other. Including `bunx` instead of `npx`.
 
 ***Everything*** should be type-safe. i.e. using `any` is STRICTLY forbidden.
+
+`const` is preferable, avoid using `let` when possible.
+
+// we do not Capitalize comments.

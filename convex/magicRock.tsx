@@ -2,9 +2,9 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { deepinfra } from '@ai-sdk/deepinfra';
 import { deepseek } from '@ai-sdk/deepseek';
 import { google } from '@ai-sdk/google';
+import { groq } from '@ai-sdk/groq';
 import { openai } from '@ai-sdk/openai';
 import { togetherai } from '@ai-sdk/togetherai';
-
 import { type CoreMessage, generateText, type LanguageModel } from 'ai';
 import { z } from 'zod';
 import { internal } from './_generated/api';
@@ -148,7 +148,13 @@ function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageMode
 		case 'deepseek/v3':
 			return deepseek('deepseek-chat');
 
-		case 'together/llama-4-mavericks':
+		case 'groq/llama-4-scout':
+			return groq('meta-llama/llama-4-scout-17b-16e-instruct');
+
+		case 'groq/llama-4-maverick':
+			return groq('meta-llama/llama-4-maverick-17b-128e-instruct');
+
+		case 'together/llama-4-maverick':
 			return togetherai('meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8');
 
 		case 'deepinfra/deepseek-v3':

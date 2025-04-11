@@ -59,7 +59,9 @@ export const modelsSchema = z.enum([
 	'google/gemini-2.0-flash',
 	'deepseek/v3',
 	'deepinfra/deepseek-v3',
-	'together/llama-4-mavericks',
+	'together/llama-4-maverick',
+	'groq/llama-4-scout',
+	'groq/llama-4-maverick',
 ]);
 
 const decisionConfigSchema = z.object({
