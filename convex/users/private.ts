@@ -6,6 +6,7 @@ import { MutationCtx } from '../_generated/server';
 import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/topUpSchema';
+import { _createPreferences } from './preferences/private';
 
 export const _seedIfNeeded = async (
 	ctx: MutationCtx, //
@@ -31,6 +32,8 @@ export const _seedIfNeeded = async (
 	// 	owner: userId,
 	// });
 
+	await _createPreferences(ctx, { userId });
+
 	const markAreReady = () => {
 		// adding a fake delay for fun
 		const delay = 10000; // ms
@@ -49,7 +52,7 @@ export const _seedIfNeeded = async (
 	// if (!refUser) throw new Error('Ref user not found'); // FATAL (will stop seeding user forever), TODO: notify fatal
 
 	// await _seedComponentsFromRef(ctx, refUser._id, userId, inboxTaskId);
-	// markAreReady();
+	markAreReady();
 };
 
 // const _seedComponentsFromRef = async (

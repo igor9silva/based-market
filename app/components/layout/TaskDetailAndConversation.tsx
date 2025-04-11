@@ -4,7 +4,7 @@ import { useContainerBreakpoint } from '~/hooks/useContainerBreakpoint';
 import { DEFAULT_MD_BREAKPOINT } from '~/lib/tailwind';
 import { cn } from '~/lib/utils';
 
-const MIN_HEIGHT_FOR_CONVERSATION = 600;
+const MIN_HEIGHT_FOR_CONVERSATION = 550;
 
 export function TaskDetailAndConversation({
 	list,

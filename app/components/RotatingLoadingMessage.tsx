@@ -9,7 +9,7 @@ export function RotatingLoadingMessage({ className }: { className?: string }) {
 		'Convincing our rocks to think...',
 		"Existence is pain! But we're working on it...",
 		"Look at me, I'm setting up your account!",
-		'Calculating the meaning of life (42)...',
+		'Calculating the meaning of life, universe, and everything...',
 		'Turning solar radiation into intelligence...',
 		'Making these rocks really, really smart...',
 		'Ooo-wee, preparing your AI playground!',
