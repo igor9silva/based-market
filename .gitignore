@@ -12,3 +12,5 @@ TODO.md
 data/
 data
 temp/
+# Sentry Config File
+.env.sentry-build-plugin
