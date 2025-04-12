@@ -15,7 +15,7 @@ export default defineConfig({
 			mdx(),
 			sentryVitePlugin({
 				org: 'ispro',
-				project: 'javascript-react',
+				project: 'meseeks',
 			}),
 		],
 	},
