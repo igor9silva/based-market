@@ -103,7 +103,7 @@ export function SkillCard({ skill }: { skill: Doc<'skills'> }) {
 
 					{skill.kind === 'soft' && (
 						<SkillTooltip
-							badgeLabel="skills"
+							badgeLabel={skill.config?.availableSkills?.length === 1 ? 'skill' : 'skills'}
 							tooltipTitle="Model can choose between"
 							items={skill.config?.availableSkills ?? []}
 						/>
@@ -111,7 +111,7 @@ export function SkillCard({ skill }: { skill: Doc<'skills'> }) {
 
 					{skill.kind === 'hard' && (
 						<SkillTooltip
-							badgeLabel="reactions"
+							badgeLabel={skill.knownReactions?.length === 1 ? 'reaction' : 'reactions'}
 							tooltipTitle="Known reactions"
 							items={skill.knownReactions?.map((reaction) => reaction.skillKey) ?? []}
 						/>
