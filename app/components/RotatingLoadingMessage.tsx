@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
+import { TextShimmer } from '~/components/ui/text-shimmer';
 import { cn } from '~/lib/utils';
-import { BasicError } from './BasicError';
 
 export function RotatingLoadingMessage({ className }: { className?: string }) {
 	//
@@ -34,5 +34,9 @@ export function RotatingLoadingMessage({ className }: { className?: string }) {
 		return () => clearInterval(interval);
 	}, [loadingMessages]);
 
-	return <BasicError text={currentMessage} className={cn('animate-pulse', className)} />;
+	return (
+		<div className={cn('flex flex-col items-center justify-center h-screen w-full gap-4', className)}>
+			<TextShimmer text={currentMessage} />
+		</div>
+	);
 }
