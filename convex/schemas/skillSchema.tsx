@@ -22,7 +22,7 @@ export const skillKindSchema = z.enum([
 
 // TODO: idea: the initial seed is just an action that happens on the onboarding task
 
-const httpConfigSchema = z.object({
+export const httpConfigSchema = z.object({
 	url: z.string().url(),
 	method: z.enum([
 		'GET', //
@@ -64,7 +64,7 @@ export const modelsSchema = z.enum([
 	'groq/llama-4-maverick',
 ]);
 
-const decisionConfigSchema = z.object({
+export const decisionConfigSchema = z.object({
 	model: modelsSchema,
 	instructions: z.string().describe('Instructions for the decision-making process'),
 	temperature: z.number().min(0).max(2).describe('Temperature to use'),

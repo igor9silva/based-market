@@ -1,3 +1,21 @@
+When installing NPM packages, ALWAYS use `bun`. Never ever use npm, yarn, pmpn or other - always Bun. The same goes for running stuff. Instead of `npx` I'll always do `bunx`.
+
+When using typescript/javascript, I'm used to add a blank comment line so prettier/Biome doens't remove that line. Specially for the very first line for a function declaration, I find it to be very important for readability, while also being unable to setup Prettier to keep that line blank.
+
+Please, never remove those comments. In fact, I'd like you to add them.
+
+Example:
+```ts
+export function useIsMobile() {
+	//
+	const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
+
+	React.useEffect(() => {
+// ... rest of the code ...
+```
+------------------------------------
+When using tailwind, NEVER use hardcoded values unless it's literally the only option. For example, instead of "min-w-[256px]", prefer to use tailwind conventions such as "min-w-64"
+------------------------------------
 Always prefer importing specific hooks from `React` over importing the entire library.
 e.g. `import { useEffect, useRef } from 'react'` instead of `import * as React from 'react'`
 
@@ -24,3 +42,9 @@ if (!element) {
 }
 GOOD
 if (!element) return;
+------------------------------------
+Project uses TanStack (NOT Next.js).
+Project uses Tailwind with shadcn-like components.
+For form validation, we use TanStack.
+For toasts/notifications, we use sonner (already present).
+
