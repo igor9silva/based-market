@@ -47,7 +47,7 @@ export function SkillListContent({
 
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-			{filteredSkills?.map((skill) => <SkillCard key={skill._id} skill={skill} type={skill.kind} />)}
+			{filteredSkills?.map((skill) => <SkillCard key={skill._id} skill={skill} />)}
 		</div>
 	);
 }
