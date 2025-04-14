@@ -1,4 +1,7 @@
+import { Link } from '@tanstack/react-router';
+import { PlusCircle } from 'lucide-react';
 import { Suspense, useState } from 'react';
+import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { SkillCardSkeleton } from './SkillCardSkeleton';
 import { SkillListContent } from './SkillListContent';
@@ -9,7 +12,13 @@ import { SkillListContent } from './SkillListContent';
  * 2. Uses suspense to show loading state
  * 3. Uses URL-based tab state (handled by parent component)
  */
-export function SkillList({ kind }: { kind: 'soft' | 'hard' }) {
+export function SkillList({
+	filter, //
+	shouldShowLearnButton = false,
+}: {
+	filter: 'personal' | 'public';
+	shouldShowLearnButton?: boolean;
+}) {
 	//
 	const [searchTerm, setSearchTerm] = useState('');
 
@@ -20,8 +29,15 @@ export function SkillList({ kind }: { kind: 'soft' | 'hard' }) {
 					placeholder="Search skills..."
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
-					className="max-w-sm"
 				/>
+				{shouldShowLearnButton && (
+					<Link to="/skills/new">
+						<Button>
+							<PlusCircle />
+							Learn
+						</Button>
+					</Link>
+				)}
 			</div>
 
 			<Suspense
@@ -33,7 +49,7 @@ export function SkillList({ kind }: { kind: 'soft' | 'hard' }) {
 					</div>
 				}
 			>
-				<SkillListContent kind={kind} searchTerm={searchTerm} />
+				<SkillListContent filter={filter} searchTerm={searchTerm} />
 			</Suspense>
 		</div>
 	);

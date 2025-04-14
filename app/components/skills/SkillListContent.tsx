@@ -3,9 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { skillSchema } from 'convex/schemas/skillSchema';
-import { PlusCircle } from 'lucide-react';
 import { z } from 'zod';
-import { Button } from '~/components/ui/button';
 import { SkillCard } from './SkillCard';
 
 /**
@@ -13,14 +11,14 @@ import { SkillCard } from './SkillCard';
  * Should be wrapped in Suspense
  */
 export function SkillListContent({
-	kind, //
+	filter, //
 	searchTerm,
 }: {
-	kind: 'soft' | 'hard';
+	filter: 'personal' | 'public';
 	searchTerm: string;
 }) {
 	//
-	const query = convexQuery(api.skills.public.findAll, { kind });
+	const query = convexQuery(api.skills.public[filter === 'personal' ? 'findAllPersonal' : 'findAllPublic'], {});
 	const { data: skills } = useSuspenseQuery(query);
 
 	// Filter skills based on search term
@@ -33,14 +31,18 @@ export function SkillListContent({
 	// Empty state
 	if (filteredSkills?.length === 0) {
 		return (
-			<div className="text-center py-10">
-				<p className="text-muted-foreground">No skills yet</p>
-				<Link to="/skills/new">
-					<Button>
-						<PlusCircle />
-						Learn
-					</Button>
-				</Link>
+			<div className="text-center py-6">
+				{searchTerm.length > 0 ? (
+					<p className="text-muted-foreground">No skills found for "{searchTerm}"</p>
+				) : (
+					<p className="text-muted-foreground">
+						No personal skills yet. Start by{' '}
+						<Link className="underline" to="/skills/new">
+							teaching it a new skill
+						</Link>
+						.
+					</p>
+				)}
 			</div>
 		);
 	}

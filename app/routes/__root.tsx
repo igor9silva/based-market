@@ -78,7 +78,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<html>
+		<html className="overflow-hidden">
 			<head>
 				<Meta />
 			</head>
@@ -98,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<SidebarProvider open={false}>
 			<AuthLoading>
-				<Loading />
+				<Loading className="h-svh" />
 			</AuthLoading>
 			<Unauthenticated>
 				<AccessDenied />

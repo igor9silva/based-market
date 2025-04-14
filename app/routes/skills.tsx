@@ -1,7 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { PlusCircle } from 'lucide-react';
+import { createFileRoute } from '@tanstack/react-router';
 import { SkillList } from '~/components/skills/SkillList';
-import { Button } from '~/components/ui/button';
 import { CardDescription, CardTitle } from '~/components/ui/card';
 import { Separator } from '~/components/ui/separator';
 
@@ -20,19 +18,13 @@ export default function RouteComponent() {
 						The building blocks of Meseeks. They define what your companion can do.
 					</CardDescription>
 				</div>
-				<Link to="/skills/new">
-					<Button>
-						<PlusCircle />
-						Learn
-					</Button>
-				</Link>
 			</div>
 			<div className="space-y-8">
 				<div>
 					<h2 className="text-lg font-semibold">Managed by you</h2>
-					{/* <CardDescription>Skills that you added yourself.</CardDescription> */}
+					<CardDescription>Skills that you taught yourself.</CardDescription>
 					<Separator className="mt-2 mb-4" />
-					<SkillList kind={'soft'} />
+					<SkillList filter={'personal'} shouldShowLearnButton={true} />
 				</div>
 
 				<div>
@@ -41,7 +33,7 @@ export default function RouteComponent() {
 						Skills that are managed by <strong>isPro</strong> (the Meseeks team).
 					</CardDescription>
 					<Separator className="my-4" />
-					<SkillList kind={'hard'} />
+					<SkillList filter={'public'} />
 				</div>
 			</div>
 		</div>
