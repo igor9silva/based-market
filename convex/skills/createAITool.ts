@@ -210,7 +210,7 @@ function computeHistoryLength(messages: Array<CoreMessage>) {
 	return messages.reduce((acc, message) => acc + message.content.length, 0);
 }
 
-function pricingFor(model: z.infer<typeof modelsSchema>): {
+export function pricingFor(model: z.infer<typeof modelsSchema>): {
 	inputToken: bigint;
 	outputToken: bigint;
 } {
