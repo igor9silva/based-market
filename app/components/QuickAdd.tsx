@@ -30,7 +30,7 @@ export function QuickAdd({ className }: { className?: string }) {
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
 			message: z.string().min(1, 'Message is required'),
-			initialFunds: z.coerce.number().min(0).max(100).default(0.2),
+			initialFunds: z.coerce.number().min(0).max(100000).default(0.2),
 		}),
 		shouldAlwaysClearForm: false,
 		handler: async ({ message, initialFunds }) => {
