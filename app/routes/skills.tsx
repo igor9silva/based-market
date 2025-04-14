@@ -1,28 +1,21 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { PlusCircle } from 'lucide-react';
-import { z } from 'zod';
 import { SkillList } from '~/components/skills/SkillList';
 import { Button } from '~/components/ui/button';
 import { CardDescription, CardTitle } from '~/components/ui/card';
 import { Separator } from '~/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 
 export const Route = createFileRoute('/skills')({
 	component: RouteComponent,
-	validateSearch: z.object({
-		tab: z.enum(['soft', 'hard']).optional().default('soft'),
-	}),
 });
 
 export default function RouteComponent() {
 	//
-	const { tab } = Route.useSearch();
-
 	return (
 		<div className="m-6">
-			<div className="flex flex-row items-center justify-between my-4">
+			<div className="flex flex-row items-center justify-between my-4 gap-2">
 				<div>
-					<CardTitle>Skills</CardTitle>
+					<CardTitle className="text-2xl">Skills</CardTitle>
 					<CardDescription>
 						The building blocks of Meseeks. They define what your companion can do.
 					</CardDescription>
@@ -34,28 +27,22 @@ export default function RouteComponent() {
 					</Button>
 				</Link>
 			</div>
-			<div>
-				<Tabs defaultValue="soft" value={tab} className="w-full">
-					<TabsList className="mb-4">
-						<Link to="/skills" search={{ tab: 'soft' }} activeOptions={{ exact: true }}>
-							<TabsTrigger value="soft" className="cursor-pointer">
-								Soft Skills (AI)
-							</TabsTrigger>
-						</Link>
-						<Link to="/skills" search={{ tab: 'hard' }} activeOptions={{ exact: true }}>
-							<TabsTrigger value="hard" className="cursor-pointer">
-								Hard Skills (HTTP)
-							</TabsTrigger>
-						</Link>
-					</TabsList>
-					<Separator className="mb-4" />
-					<TabsContent value="soft">
-						<SkillList kind={'soft'} />
-					</TabsContent>
-					<TabsContent value="hard">
-						<SkillList kind={'hard'} />
-					</TabsContent>
-				</Tabs>
+			<div className="space-y-8">
+				<div>
+					<h2 className="text-lg font-semibold">Managed by you</h2>
+					{/* <CardDescription>Skills that you added yourself.</CardDescription> */}
+					<Separator className="mt-2 mb-4" />
+					<SkillList kind={'soft'} />
+				</div>
+
+				<div>
+					<h2 className="text-lg font-semibold">Managed by us</h2>
+					<CardDescription>
+						Skills that are managed by <strong>isPro</strong> (the Meseeks team).
+					</CardDescription>
+					<Separator className="my-4" />
+					<SkillList kind={'hard'} />
+				</div>
 			</div>
 		</div>
 	);
