@@ -523,6 +523,19 @@ export function UnifiedSkillForm({ skillId, isCloning = false }: UnifiedSkillFor
 						required
 					/>
 				</div>
+
+				{/* Input Schema - Only for hard skills */}
+				{skillKind === 'hard' && (
+					<div className="space-y-2">
+						<LabelWithTooltip
+							htmlFor="inputSchema"
+							tooltip="Define the expected input parameters using Zod schema"
+						>
+							Input Schema
+						</LabelWithTooltip>
+						<ZodEditor value={commonFields.inputSchema} onChange={handleSchemaChange} />
+					</div>
+				)}
 			</div>
 
 			<Separator />
@@ -813,6 +826,25 @@ export function UnifiedSkillForm({ skillId, isCloning = false }: UnifiedSkillFor
 									</div>
 								</CardContent>
 							</Card>
+						</div>
+
+						{/* Body Template */}
+						<div className="space-y-2">
+							<LabelWithTooltip
+								htmlFor="bodyTemplate"
+								tooltip="JSON template for the request body. Use {'{parameter}'} for dynamic values."
+							>
+								Body Template
+							</LabelWithTooltip>
+							<Textarea
+								id="bodyTemplate"
+								value={hardSkillConfig.bodyTemplate}
+								onChange={(e) => {
+									setHardSkillConfig((prev) => ({ ...prev, bodyTemplate: e.target.value }));
+								}}
+								placeholder="{}"
+								className="font-mono h-32"
+							/>
 						</div>
 
 						{/* Parameter Mappings */}
