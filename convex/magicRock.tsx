@@ -4,7 +4,7 @@ import { deepseek } from '@ai-sdk/deepseek';
 import { google } from '@ai-sdk/google';
 import { groq } from '@ai-sdk/groq';
 import { openai } from '@ai-sdk/openai';
-import { togetherai } from '@ai-sdk/togetherai';
+import { xai } from '@ai-sdk/xai';
 import { type CoreMessage, generateText, type LanguageModel } from 'ai';
 import { z } from 'zod';
 import { internal } from './_generated/api';
@@ -96,88 +96,100 @@ export async function _askMagicRock(args: MagicRockContext) {
 
 function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageModel {
 	//
-	switch (skill.config.model) {
+	const openAIconfig = {
+		// TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
+		parallelToolCalls: false,
+	};
+
+	const googleConfig = {
+		safetySettings: [
+			{
+				category: 'HARM_CATEGORY_UNSPECIFIED' as const,
+				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
+			},
+			{
+				category: 'HARM_CATEGORY_CIVIC_INTEGRITY' as const,
+				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
+			},
+			{
+				category: 'HARM_CATEGORY_HARASSMENT' as const,
+				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
+			},
+			{
+				category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as const,
+				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
+			},
+			{
+				category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as const,
+				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
+			},
+			{
+				category: 'HARM_CATEGORY_HATE_SPEECH' as const,
+				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
+			},
+		],
+	};
+
+	const map = {
 		//
-		case 'anthropic/claude-3.7-sonnet':
-			return anthropic('claude-3-7-sonnet-20250219');
+		// Anthropic
+		'anthropic/claude-3.7-sonnet': anthropic('claude-3-7-sonnet-20250219'),
+		'anthropic/claude-3.5-haiku': anthropic('claude-3-5-haiku-latest'),
 
-		case 'anthropic/claude-3.5-haiku':
-			return anthropic('claude-3-5-haiku-latest');
+		// OpenAI
+		'openai/gpt-4o': openai('gpt-4o', openAIconfig),
+		'openai/gpt-4o-mini': openai('gpt-4o-mini', openAIconfig),
+		'openai/gpt-4.1': openai('gpt-4.1', openAIconfig),
+		'openai/gpt-4.1-mini': openai('gpt-4.1-mini', openAIconfig),
+		'openai/gpt-4.1-nano': openai('gpt-4.1-nano', openAIconfig),
 
-		case 'openai/gpt-4o':
-			return openai('gpt-4o', {
-				parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
-			});
+		// Google
+		'google/gemini-2.5-pro': google('gemini-2.5-pro-exp-03-25', googleConfig), // TODO: experimental model
+		'google/gemini-2.0-flash': google('gemini-2.0-flash-exp', googleConfig), // TODO: experimental model
+		'google/gemini-2.0-flash-lite': google('gemini-2.0-flash-lite-preview-02-05', googleConfig), // TODO: experimental model
 
-		case 'openai/gpt-4o-mini':
-			return openai('gpt-4o-mini', {
-				parallelToolCalls: false, // TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
-			});
+		// xAI
+		'xai/grok-3': xai('grok-3'),
+		'xai/grok-3-mini': xai('grok-3-mini'),
 
-		case 'google/gemini-2.0-flash':
-			return google('gemini-2.0-flash-exp', {
-				// TODO: using experimental model
-				safetySettings: [
-					{
-						category: 'HARM_CATEGORY_UNSPECIFIED',
-						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
-					},
-					{
-						category: 'HARM_CATEGORY_CIVIC_INTEGRITY',
-						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
-					},
-					{
-						category: 'HARM_CATEGORY_HARASSMENT',
-						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
-					},
-					{
-						category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
-					},
-					{
-						category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
-					},
-					{
-						category: 'HARM_CATEGORY_HATE_SPEECH',
-						threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED',
-					},
-				],
-			});
+		// Groq
+		'groq/llama-4-scout': groq('meta-llama/llama-4-scout-17b-16e-instruct'),
+		'groq/llama-4-maverick': groq('meta-llama/llama-4-maverick-17b-128e-instruct'),
 
-		case 'deepseek/v3':
-			return deepseek('deepseek-chat');
+		// DeepSeek
+		'deepseek/deepseek-v3': deepseek('deepseek-chat'),
 
-		case 'groq/llama-4-scout':
-			return groq('meta-llama/llama-4-scout-17b-16e-instruct');
+		// DeepInfra
+		'deepinfra/deepseek-v3': deepinfra('deepseek-ai/DeepSeek-V3-0324'),
 
-		case 'groq/llama-4-maverick':
-			return groq('meta-llama/llama-4-maverick-17b-128e-instruct');
+		// Together
+		// 'together/llama-4-maverick': togetherai('meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8'),
+	};
 
-		case 'together/llama-4-maverick':
-			return togetherai('meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8');
-
-		case 'deepinfra/deepseek-v3':
-			// return groq('llama-3.3-70b-versatile'); // mei burro, mas tem potencial
-			return deepinfra('deepseek-ai/DeepSeek-V3-0324'); // POTENCIAL
-		// return togetherai('meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo');
-		// return togetherai('google/gemma-2-27b-it');
-		// return togetherai('Qwen/Qwen2.5-72B-Instruct-Turbo');
-		// return togetherai('mistralai/Mistral-7B-Instruct-v0.3');
-		// return togetherai('meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo');
-		// return groq('deepseek-r1-distill-llama-70b');
-		// return deepinfra('deepseek-ai/DeepSeek-R1');
-		// return deepinfra('microsoft/Phi-4-multimodal-instruct');
-		// return deepinfra('google/gemma-2-27b-it');
+	if (skill.config.model in map) {
+		return map[skill.config.model];
 	}
 
+	throw new Error(`Unknown model: ${skill.config.model}`);
+
+	// EXPERIMENTS
 	// model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
 	// model: openai('gpt-4o', { parallelToolCalls: false }), // 2nd best
+	// return groq('llama-3.3-70b-versatile'); // mei burro, mas tem potencial
+	// return togetherai('meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo');
+	// return togetherai('google/gemma-2-27b-it');
+	// return togetherai('Qwen/Qwen2.5-72B-Instruct-Turbo');
+	// return togetherai('mistralai/Mistral-7B-Instruct-v0.3');
+	// return togetherai('meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo');
+	// return groq('deepseek-r1-distill-llama-70b');
+	// return deepinfra('deepseek-ai/DeepSeek-R1');
+	// return deepinfra('microsoft/Phi-4-multimodal-instruct');
+	// return deepinfra('google/gemma-2-27b-it');
 	// model: google('gemma-3-27b-it'),
 	// model: ollama('phi4-mini'),
 	// model: ollama('gemma3:4b'),
 	// model: anthropic('claude-3-5-haiku-20241022'), // ok, but very far from Sonnet
-	// model: deepseek('deepseek-'), // complete failure, reasoner can't call tools
+	// model: deepseek('deepseek-reasoner'), // complete failure, reasoner can't call tools
 	// model: google('gemini-2.0-flash-001'), // useful for some tools, can search using Google
 	// model: openai('o3-mini', { // suprisingly bad, worse than GPT-4o on every test
 	// 	reasoningEffort: 'low',

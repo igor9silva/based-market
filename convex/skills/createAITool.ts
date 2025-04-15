@@ -210,71 +210,70 @@ function computeHistoryLength(messages: Array<CoreMessage>) {
 	return messages.reduce((acc, message) => acc + message.content.length, 0);
 }
 
+function pricePerMillionTokens({ input, output }: { input: number; output: number }) {
+	return {
+		inputToken: asBigInt({ dollars: input }) / 1_000_000n,
+		outputToken: asBigInt({ dollars: output }) / 1_000_000n,
+	};
+}
+
 export function pricingFor(model: z.infer<typeof modelsSchema>): {
 	inputToken: bigint;
 	outputToken: bigint;
 } {
-	//
 	switch (model) {
 		//
+		// Anthropic
 		case 'anthropic/claude-3.7-sonnet':
-			return {
-				inputToken: asBigInt({ dollars: 3 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 15 }) / 1_000_000n,
-			};
-
+			return pricePerMillionTokens({ input: 3, output: 15 });
 		case 'anthropic/claude-3.5-haiku':
-			return {
-				inputToken: asBigInt({ dollars: 0.8 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 4 }) / 1_000_000n,
-			};
+			return pricePerMillionTokens({ input: 0.8, output: 4 });
 
+		// OpenAI
 		case 'openai/gpt-4o':
-			return {
-				inputToken: asBigInt({ dollars: 2.5 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 10 }) / 1_000_000n,
-			};
-
+			return pricePerMillionTokens({ input: 2.5, output: 10 });
 		case 'openai/gpt-4o-mini':
-			return {
-				inputToken: asBigInt({ dollars: 0.15 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 0.6 }) / 1_000_000n,
-			};
+			return pricePerMillionTokens({ input: 0.15, output: 0.6 });
+		case 'openai/gpt-4.1':
+			return pricePerMillionTokens({ input: 2.0, output: 8.0 });
+		case 'openai/gpt-4.1-mini':
+			return pricePerMillionTokens({ input: 0.4, output: 1.6 });
+		case 'openai/gpt-4.1-nano':
+			return pricePerMillionTokens({ input: 0.1, output: 0.4 });
 
+		// Google
+		case 'google/gemini-2.5-pro':
+			return pricePerMillionTokens({ input: 2.5, output: 15 });
 		case 'google/gemini-2.0-flash':
-			return {
-				inputToken: asBigInt({ dollars: 0.1 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 0.4 }) / 1_000_000n,
-			};
+			return pricePerMillionTokens({ input: 0.1, output: 0.4 });
+		case 'google/gemini-2.0-flash-lite':
+			return pricePerMillionTokens({ input: 0.075, output: 0.3 });
 
-		case 'deepseek/v3':
-			return {
-				inputToken: asBigInt({ dollars: 0.27 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 1.1 }) / 1_000_000n,
-			};
+		// xAI
+		case 'xai/grok-3':
+			return pricePerMillionTokens({ input: 3, output: 15 });
+		case 'xai/grok-3-mini':
+			return pricePerMillionTokens({ input: 0.3, output: 0.5 });
 
-		case 'deepinfra/deepseek-v3':
-			return {
-				inputToken: asBigInt({ dollars: 0.4 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 0.89 }) / 1_000_000n,
-			};
-
-		case 'together/llama-4-maverick':
-			return {
-				inputToken: asBigInt({ dollars: 0.27 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 0.85 }) / 1_000_000n,
-			};
-
+		// Groq
 		case 'groq/llama-4-scout':
-			return {
-				inputToken: asBigInt({ dollars: 0.11 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 0.34 }) / 1_000_000n,
-			};
-
+			return pricePerMillionTokens({ input: 0.11, output: 0.34 });
 		case 'groq/llama-4-maverick':
-			return {
-				inputToken: asBigInt({ dollars: 0.2 }) / 1_000_000n,
-				outputToken: asBigInt({ dollars: 0.6 }) / 1_000_000n,
-			};
+			return pricePerMillionTokens({ input: 0.2, output: 0.6 });
+
+		// DeepSeek
+		case 'deepseek/deepseek-v3':
+			return pricePerMillionTokens({ input: 0.27, output: 1.1 });
+
+		// DeepInfra
+		case 'deepinfra/deepseek-v3':
+			return pricePerMillionTokens({ input: 0.4, output: 0.89 });
+
+		// Together
+		// case 'together/llama-4-maverick':
+		// 	return pricePerMillionTokens({ inputPrice: 0.27, outputPrice: 0.85 });
+
+		default:
+			throw new Error(`Unknown model: ${model}`);
 	}
 }

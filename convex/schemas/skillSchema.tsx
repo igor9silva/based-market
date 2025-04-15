@@ -52,16 +52,39 @@ export const httpConfigSchema = z.object({
 });
 
 export const modelsSchema = z.enum([
+	//
+	// Anthropic
 	'anthropic/claude-3.7-sonnet',
 	'anthropic/claude-3.5-haiku',
+
+	// OpenAI
 	'openai/gpt-4o',
 	'openai/gpt-4o-mini',
+	'openai/gpt-4.1',
+	'openai/gpt-4.1-mini',
+	'openai/gpt-4.1-nano',
+
+	// Google
+	'google/gemini-2.5-pro',
 	'google/gemini-2.0-flash',
-	'deepseek/v3',
-	'deepinfra/deepseek-v3',
-	'together/llama-4-maverick',
+	'google/gemini-2.0-flash-lite',
+
+	// xAI
+	'xai/grok-3',
+	'xai/grok-3-mini',
+
+	// Groq
 	'groq/llama-4-scout',
 	'groq/llama-4-maverick',
+
+	// DeepSeek
+	'deepseek/deepseek-v3',
+
+	// DeepInfra
+	'deepinfra/deepseek-v3',
+
+	// Together
+	// 'together/llama-4-maverick',
 ]);
 
 export const decisionConfigSchema = z.object({
