@@ -91,6 +91,7 @@ export function GenericAction({
 					<>
 						{action.result ? (
 							<Result
+								isAuthorCurrentUser={isAuthorCurrentUser}
 								result={action.result.text ?? ''}
 								status={action.status}
 								skillKey={action.skillKey}
@@ -114,7 +115,8 @@ export function GenericAction({
 }
 
 function Result({
-	result, //
+	result,
+	isAuthorCurrentUser, //
 	skillKey,
 	args,
 	className,
@@ -122,6 +124,7 @@ function Result({
 	status,
 }: {
 	result: string;
+	isAuthorCurrentUser: boolean;
 	skillKey: string;
 	args: Record<string, any>;
 	costs: Array<{
@@ -135,7 +138,13 @@ function Result({
 	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
 
 	if (status === 'failed') {
-		return <FailedMessage text={`🚫 Failed to run ${skillKey}()`} error={result} />;
+		return (
+			<FailedMessage
+				text={`🚫 Failed to run ${skillKey}()`}
+				error={result}
+				isAuthorCurrentUser={isAuthorCurrentUser}
+			/>
+		);
 	}
 
 	return (

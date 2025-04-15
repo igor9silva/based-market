@@ -23,12 +23,20 @@ export function UpdateInstructionsAction(props: {
 			return <GenericAction {...props} />;
 
 		case 'failed':
-			return <FailedMessage text={`🚫 Failed to update instructions`} error={action.result.text ?? ''} />;
+			return (
+				<FailedMessage
+					text={`🚫 Failed to update instructions`}
+					error={action.result.text ?? ''}
+					isAuthorCurrentUser={isAuthorCurrentUser}
+				/>
+			);
 
 		case 'running':
-			return <SimpleMessage running text={`✍️ Updating instructions`} />;
+			return (
+				<SimpleMessage running text={`✍️ Updating instructions`} isAuthorCurrentUser={isAuthorCurrentUser} />
+			);
 
 		case 'succeeded':
-			return <SimpleMessage text={`Updated instructions.`} />;
+			return <SimpleMessage text={`Updated instructions.`} isAuthorCurrentUser={isAuthorCurrentUser} />;
 	}
 }

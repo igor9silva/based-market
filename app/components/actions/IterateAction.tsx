@@ -1,5 +1,4 @@
 import { Doc, Id } from 'convex/_generated/dataModel';
-import { cn } from '~/lib/utils';
 
 import { Message } from '~/components/ui/message';
 import { TextShimmer } from '~/components/ui/text-shimmer';
@@ -25,12 +24,7 @@ export function IterateAction({
 
 	if (action.status === 'running') {
 		return (
-			<Message
-				className={cn(
-					isAuthorCurrentUser ? 'justify-end' : 'justify-start', //
-					className,
-				)}
-			>
+			<Message isAuthorCurrentUser={isAuthorCurrentUser} className={className}>
 				<TextShimmer text="Thinking..." />
 			</Message>
 		);

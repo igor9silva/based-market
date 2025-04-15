@@ -28,13 +28,19 @@ export function SearchPlacesAction(props: {
 			return <GenericAction {...props} />;
 
 		case 'failed':
-			return <Error action={action} />;
+			return <Error action={action} isAuthorCurrentUser={isAuthorCurrentUser} />;
 
 		case 'running':
-			return <SimpleMessage running text={`📍 Searching places "${action.args['query']}"`} />;
+			return (
+				<SimpleMessage
+					running
+					text={`📍 Searching places "${action.args['query']}"`}
+					isAuthorCurrentUser={isAuthorCurrentUser}
+				/>
+			);
 
 		case 'succeeded':
-			return <Success action={action} />;
+			return <Success isAuthorCurrentUser={isAuthorCurrentUser} action={action} />;
 	}
 }
 
@@ -53,29 +59,30 @@ const SearchResultSchema = z.object({
 	),
 });
 
-function Error({ action }: { action: Doc<'actions'> }) {
+function Error({ action, isAuthorCurrentUser }: { action: Doc<'actions'>; isAuthorCurrentUser: boolean }) {
 	return (
 		<FailedMessage
 			text={`🚫 Failed to search places "${action.args['query']}"`}
 			error={action.result?.text ?? ''}
+			isAuthorCurrentUser={isAuthorCurrentUser}
 		/>
 	);
 }
 
-function Success({ action }: { action: Doc<'actions'> }) {
+function Success({ action, isAuthorCurrentUser }: { action: Doc<'actions'>; isAuthorCurrentUser: boolean }) {
 	//
 	const response = SearchResultSchema.safeParse(JSON.parse(action.result?.text ?? '{}'));
 
 	if (!response.success) {
 		console.warn('Invalid (or no) result found succeeded action', action._id);
-		return <Error action={action} />;
+		return <Error action={action} isAuthorCurrentUser={isAuthorCurrentUser} />;
 	}
 
 	const { places } = response.data;
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<Message>
+		<Message isAuthorCurrentUser={isAuthorCurrentUser}>
 			<Collapsible open={isOpen} onOpenChange={setIsOpen}>
 				<CollapsibleTrigger className="flex gap-0 items-center">
 					<MessageContent

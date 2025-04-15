@@ -1,5 +1,4 @@
 import { Doc, Id } from 'convex/_generated/dataModel';
-import { cn } from '~/lib/utils';
 
 import { Message, MessageContent } from '~/components/ui/message';
 
@@ -22,12 +21,7 @@ export function ReasonAction({
 	if (!action.result.text) console.warn('succeeded reason action with no text', action);
 
 	return (
-		<Message
-			className={cn(
-				isAuthorCurrentUser ? 'justify-end' : 'justify-start', //
-				className,
-			)}
-		>
+		<Message isAuthorCurrentUser={isAuthorCurrentUser} className={className}>
 			<MessageContent
 				text={action.result?.text ?? ''}
 				className="text-muted-foreground overflow-x-auto text-xs"

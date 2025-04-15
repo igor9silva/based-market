@@ -19,13 +19,7 @@ export function DoneAction({
 	// const isNew = useIsNew(action._creationTime, initialRenderDate);
 
 	return (
-		<Message
-			className={cn(
-				isAuthorCurrentUser ? 'justify-end' : 'justify-start', //
-				'flex-col',
-				className,
-			)}
-		>
+		<Message isAuthorCurrentUser={isAuthorCurrentUser} className={cn('flex-col', className)}>
 			{action.args['reason'] && <p className="text-sm text-muted-foreground">{action.args['reason']}</p>}
 			<MessageContent
 				isMDX={true}

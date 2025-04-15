@@ -19,12 +19,7 @@ export function SayAction({
 	// const isNew = useIsNew(action._creationTime, initialRenderDate);
 
 	return (
-		<Message
-			className={cn(
-				isAuthorCurrentUser ? 'justify-end' : 'justify-start', //
-				className,
-			)}
-		>
+		<Message isAuthorCurrentUser={isAuthorCurrentUser} className={className}>
 			<MessageContent
 				isMDX={true}
 				text={action.args['message']}

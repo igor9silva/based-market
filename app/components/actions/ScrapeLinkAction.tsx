@@ -28,13 +28,19 @@ export function ScrapeLinkAction(props: {
 			return <GenericAction {...props} />;
 
 		case 'failed':
-			return <Error action={action} />;
+			return <Error action={action} isAuthorCurrentUser={isAuthorCurrentUser} />;
 
 		case 'running':
-			return <SimpleMessage running text={`🧵 Scraping "${action.args['url']}"`} />;
+			return (
+				<SimpleMessage
+					running
+					text={`🧵 Scraping "${action.args['url']}"`}
+					isAuthorCurrentUser={isAuthorCurrentUser}
+				/>
+			);
 
 		case 'succeeded':
-			return <Success action={action} />;
+			return <Success isAuthorCurrentUser={isAuthorCurrentUser} action={action} />;
 	}
 }
 
@@ -60,24 +66,30 @@ const ScrapeResultSchema = z.object({
 	}),
 });
 
-function Error({ action }: { action: Doc<'actions'> }) {
-	return <FailedMessage text={`🚫 Failed to scrape "${action.args['url']}"`} error={action.result?.text ?? ''} />;
+function Error({ action, isAuthorCurrentUser }: { action: Doc<'actions'>; isAuthorCurrentUser: boolean }) {
+	return (
+		<FailedMessage
+			text={`🚫 Failed to scrape "${action.args['url']}"`}
+			error={action.result?.text ?? ''}
+			isAuthorCurrentUser={isAuthorCurrentUser}
+		/>
+	);
 }
 
-function Success({ action }: { action: Doc<'actions'> }) {
+function Success({ action, isAuthorCurrentUser }: { action: Doc<'actions'>; isAuthorCurrentUser: boolean }) {
 	//
 	const response = ScrapeResultSchema.safeParse(JSON.parse(action.result?.text ?? '{}'));
 
 	if (!response.success) {
 		console.warn('Invalid (or no) result found succeeded action', action._id);
-		return <Error action={action} />;
+		return <Error action={action} isAuthorCurrentUser={isAuthorCurrentUser} />;
 	}
 
 	const { data } = response.data;
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<Message>
+		<Message isAuthorCurrentUser={isAuthorCurrentUser}>
 			<Collapsible open={isOpen} onOpenChange={setIsOpen}>
 				<CollapsibleTrigger className="flex gap-0 items-center">
 					<MessageContent
@@ -94,7 +106,7 @@ function Success({ action }: { action: Doc<'actions'> }) {
 					</Button>
 				</CollapsibleTrigger>
 				<CollapsibleContent>
-					<SimpleMessage text={data.markdown} />
+					<SimpleMessage text={data.markdown} isAuthorCurrentUser={isAuthorCurrentUser} />
 				</CollapsibleContent>
 			</Collapsible>
 		</Message>

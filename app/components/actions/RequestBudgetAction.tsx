@@ -27,12 +27,7 @@ export function RequestBudgetAction(props: {
 	}
 
 	return (
-		<Message
-			className={cn(
-				isAuthorCurrentUser ? 'justify-end' : 'justify-start', //
-				className,
-			)}
-		>
+		<Message isAuthorCurrentUser={isAuthorCurrentUser} className={className}>
 			<MessageContent
 				isMDX={true}
 				text={action.result?.text ?? 'request budget'}

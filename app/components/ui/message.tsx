@@ -7,11 +7,19 @@ import { cn } from '~/lib/utils';
 
 export type MessageProps = {
 	children: React.ReactNode;
+	isAuthorCurrentUser: boolean;
 	className?: string;
 } & React.HTMLProps<HTMLDivElement>;
 
-const Message = ({ children, className, ...props }: MessageProps) => (
-	<div className={cn('flex gap-3', className)} {...props}>
+const Message = ({ children, className, isAuthorCurrentUser, ...props }: MessageProps) => (
+	<div
+		className={cn(
+			'flex gap-3', //
+			isAuthorCurrentUser ? 'justify-end' : 'justify-start',
+			className,
+		)}
+		{...props}
+	>
 		{children}
 	</div>
 );
@@ -85,8 +93,16 @@ const MessageAction = ({ tooltip, children, className, side = 'top', ...props }:
 	);
 };
 
-const SimpleMessage = ({ text, running }: { text: string; running?: boolean }) => (
-	<Message>
+const SimpleMessage = ({
+	text,
+	running,
+	isAuthorCurrentUser,
+}: {
+	text: string;
+	running?: boolean;
+	isAuthorCurrentUser: boolean;
+}) => (
+	<Message isAuthorCurrentUser={isAuthorCurrentUser}>
 		{running ? (
 			<TextShimmer text={text} /> //
 		) : (
@@ -95,8 +111,16 @@ const SimpleMessage = ({ text, running }: { text: string; running?: boolean }) =
 	</Message>
 );
 
-const FailedMessage = ({ text, error }: { text: string; error: string }) => (
-	<Message>
+const FailedMessage = ({
+	text,
+	error,
+	isAuthorCurrentUser,
+}: {
+	text: string;
+	error: string;
+	isAuthorCurrentUser: boolean;
+}) => (
+	<Message isAuthorCurrentUser={isAuthorCurrentUser}>
 		<Collapsible>
 			<CollapsibleTrigger>
 				<MessageContent className="text-sm text-muted-foreground text-left" text={text} />
