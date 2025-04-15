@@ -1,5 +1,4 @@
 import { anthropic } from '@ai-sdk/anthropic';
-import { deepinfra } from '@ai-sdk/deepinfra';
 import { deepseek } from '@ai-sdk/deepseek';
 import { google } from '@ai-sdk/google';
 import { groq } from '@ai-sdk/groq';
@@ -137,8 +136,8 @@ function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageMode
 		'anthropic/claude-3.5-haiku': anthropic('claude-3-5-haiku-latest'),
 
 		// OpenAI
-		'openai/gpt-4o': openai('gpt-4o', openAIconfig),
-		'openai/gpt-4o-mini': openai('gpt-4o-mini', openAIconfig),
+		// 'openai/gpt-4o': openai('gpt-4o', openAIconfig),
+		// 'openai/gpt-4o-mini': openai('gpt-4o-mini', openAIconfig),
 		'openai/gpt-4.1': openai('gpt-4.1', openAIconfig),
 		'openai/gpt-4.1-mini': openai('gpt-4.1-mini', openAIconfig),
 		'openai/gpt-4.1-nano': openai('gpt-4.1-nano', openAIconfig),
@@ -160,7 +159,7 @@ function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageMode
 		'deepseek/deepseek-v3': deepseek('deepseek-chat'),
 
 		// DeepInfra
-		'deepinfra/deepseek-v3': deepinfra('deepseek-ai/DeepSeek-V3-0324'),
+		// 'deepinfra/deepseek-v3': deepinfra('deepseek-ai/DeepSeek-V3-0324'),
 
 		// Together
 		// 'together/llama-4-maverick': togetherai('meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8'),
