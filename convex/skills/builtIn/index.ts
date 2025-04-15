@@ -6,6 +6,7 @@ import { increaseBudget } from './increaseBudget';
 import { multiply } from './multiply';
 import { reason } from './reason';
 import { reopen } from './reopen';
+import { requestBudget } from './requestBudget';
 import { resolve } from './resolve';
 import { say } from './say';
 import { stop } from './stop';
@@ -14,7 +15,6 @@ import { sum } from './sum';
 import { updateInstructions } from './updateInstructions';
 
 export const _builtInSkills = {
-	discard,
 	askForClarification,
 	updateInstructions,
 	// updateSummary,
@@ -33,5 +33,8 @@ export const _builtInSkills = {
 	divide,
 	subtract,
 
+	/* lifecycle */
 	stop,
+	requestBudget,
+	discard,
 };

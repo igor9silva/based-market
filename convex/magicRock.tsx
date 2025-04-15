@@ -382,9 +382,9 @@ function valueForVariable(
 
 		case 'task.budgetUSDC':
 			return [
-				`<total alt="Total money user has budgeted for this task, in USDC">{{task.budgetUSDC.total}}</total>`,
-				`<spent alt="Amount already spent from the budget, in USDC">{{task.budgetUSDC.spent}}</spent>`,
-				`<available alt="Remaining money available to resolve this task, in USDC">{{task.budgetUSDC.available}}</available>`,
+				`<total alt="Total money user has budgeted for this task, in USDc">{{task.budgetUSDC.total}}</total>`,
+				`<spent alt="Amount already spent from the budget, in USDc">{{task.budgetUSDC.spent}}</spent>`,
+				`<available alt="Remaining money available to resolve this task, in USDc">{{task.budgetUSDC.available}}</available>`,
 			].join('');
 
 		case 'task.budgetUSDC.total':

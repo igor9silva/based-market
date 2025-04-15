@@ -84,7 +84,7 @@ function TransactionItem({
 			<span
 				className={`flex-shrink-0 font-medium ${transaction.value.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}
 			>
-				{asDollars({ bigInt: transaction.value.amount, precision: 6 })} USDC
+				{asDollars({ bigInt: transaction.value.amount, precision: 6 })} USDc
 			</span>
 		</div>
 	);

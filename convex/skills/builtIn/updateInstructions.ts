@@ -6,7 +6,10 @@ export const updateInstructions = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Update the task instructions.',
 	parameters: z.object({
-		title: z.string().max(60).optional().describe('A short title for the task. **Max 60 characters**.'),
+		title: z
+			.string()
+			.optional()
+			.describe('A short title for the task. **Max 60 characters** (will truncate if longer).'),
 		instructions: z
 			.string()
 			.optional()
@@ -23,13 +26,19 @@ export const updateInstructions = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
+			const MAX_TITLE_LENGTH = 60;
+
 			await execution.ctx.runMutation(internal.tasks.private._updateInstructions, {
 				taskId: execution.task._id,
-				title: args.title,
+				title: args.title?.slice(0, MAX_TITLE_LENGTH),
 				instructions: args.instructions,
 			});
 
 			return {
+				text:
+					args.title && args.title.length > MAX_TITLE_LENGTH
+						? `WARNING: Title was truncated to ${MAX_TITLE_LENGTH} characters (from ${args.title.length} characters).`
+						: undefined,
 				reactions: execution.skill.knownReactions,
 			};
 		},

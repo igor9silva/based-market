@@ -189,7 +189,7 @@ export const hardSkillSchema = coreSkillSchema.extend({
 		.bigint() //
 		.min(asBigInt({ dollars: 0 }))
 		.max(asBigInt({ dollars: 1000 }))
-		.describe('The cost to use this skill, in USDC.'),
+		.describe('The cost to use this skill, in USDc.'),
 	config: httpConfigSchema,
 });
 
@@ -198,7 +198,7 @@ export const softSkillSchema = coreSkillSchema.extend({
 	cost: z
 		.literal('dynamic')
 		.describe(
-			'The cost to use this skill, in USDC. Dynamic cost means it will be known during usage. Budget is still accounted before execution.',
+			'The cost to use this skill, in USDc. Dynamic cost means it will be known during usage. Budget is still accounted before execution.',
 		),
 	config: decisionConfigSchema,
 });

@@ -2,9 +2,9 @@ import { toast } from 'sonner';
 import { useMDX } from '~/hooks/useMDX';
 
 import { useState } from 'react';
+import { AddBudgetButton } from '~/components/AddBudgetButton';
 import { Balance } from '~/components/Balance';
 import { EasterEgg } from '~/components/EasterEgg';
-import { IncreaseTaskBudgetCard } from '~/components/IncreaseTaskBudgetCard';
 import { Grid } from '~/components/layout/Grid';
 import { ListAndDetail } from '~/components/layout/ListAndDetail';
 import { TaskDetailAndConversation } from '~/components/layout/TaskDetailAndConversation';
@@ -25,7 +25,7 @@ import { Separator } from '~/components/ui/separator';
 import { cn } from '~/lib/utils';
 
 const components = {
-	IncreaseTaskBudgetCard,
+	AddBudgetButton,
 	Balance,
 	Separator,
 	Button,

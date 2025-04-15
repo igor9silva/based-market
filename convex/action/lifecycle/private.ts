@@ -10,9 +10,12 @@ import { env } from '../../schemas/envSchema';
 import { skillSchema } from '../../schemas/skillSchema';
 import { tokenSchema } from '../../schemas/topUpSchema';
 import { estimateCostFor } from '../../skills/createAITool';
+import { createReactions } from '../../skills/createReactions';
 import { createTool } from '../../skills/tools';
 import { _setStatus as _setTaskStatus, _useFunds } from '../../tasks/private';
+import { isError, NOT_ENOUGH_BUDGET_ERROR, NotEnoughBudget } from '../../utils/errors';
 import { asDollars } from '../../utils/money';
+import { _add, _skipAllPendingReactions } from '../private';
 
 // TODO: if that since we dropped support for sync actions, we can use ActionCtx only, and remove MutationCtx from the arg type
 export const _perform = internalAction({
@@ -43,7 +46,7 @@ export const _perform = internalAction({
 
 			// check budget
 			const expectedCost = await _ensureWithinBudget(ctx, task, action, skill, context);
-			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost, precision: 6 })} USDC.`);
+			console.debug(`Expected cost ${asDollars({ bigInt: expectedCost, precision: 6 })} USDc.`);
 
 			// if the action is not yet authorized, try auto-approving it
 			if (!action.approvedAt) {
@@ -68,15 +71,6 @@ export const _perform = internalAction({
 				costs: costs,
 				// TODO: also persist reactions
 			});
-
-			// schedule all reactions
-			// TODO: optimize using a single mutation
-			if (task.isActive) {
-				await ctx.runMutation(internal.action.private._skipAllPendingReactions, { taskId, owner: task.owner });
-				await Promise.all(
-					result.reactions.map((reaction) => ctx.runMutation(internal.action.private._add, reaction)),
-				);
-			}
 			//
 		} catch (error) {
 			//
@@ -84,15 +78,36 @@ export const _perform = internalAction({
 
 			// TODO: with the new flow we lost the ability to fix itself on errors
 
+			const result = {
+				text: `${error instanceof Error ? error.message : 'Unknown error'}`,
+				reactions: [] as Array<z.infer<typeof newActionSchema>>,
+			};
+
+			// react with `requestBudget` if this is a budget issue
+			if (isError(NOT_ENOUGH_BUDGET_ERROR, error)) {
+				//
+				console.debug(`Lacking budget for action ${actionId}. Requesting more budget.`);
+				const typedError = error as ReturnType<typeof NotEnoughBudget>;
+
+				result.text = typedError.data.message;
+				result.reactions = createReactions(typedError.data.action, [
+					{
+						skillKey: 'requestBudget',
+						args: {
+							estimatedCost: typedError.data.estimatedCost,
+							previousActionKey: typedError.data.previousActionKey,
+						},
+						condition: 'any',
+					},
+				]);
+			}
+
 			await _setResolved(ctx, {
 				actionId,
 				taskId,
 				status: 'failed',
 				costs: [],
-				result: {
-					text: `${error instanceof Error ? error.message : 'Unknown error'}`,
-					reactions: [],
-				},
+				result,
 			});
 			//
 		} finally {
@@ -182,7 +197,14 @@ export const _resolve = internalMutation({
 		const task = await ctx.db.get(taskId);
 
 		if (task?.isActive) {
+			//
 			await _setTaskStatus(ctx, { taskId, newStatus: 'unread' });
+
+			// schedule all reactions
+			// TODO: optimize using a single mutation
+			await _skipAllPendingReactions(ctx, { taskId, owner: task.owner });
+			// TODO: we should be using _addMany here, skippingReactions should likely be inside _addMany only
+			await Promise.all(result.reactions.map(async (reaction) => _add(ctx, reaction)));
 		}
 	},
 });
@@ -207,7 +229,7 @@ async function _estimateAndPersistCost(
 	const estimatedCost = estimateCostFor(skill, action._id, context);
 
 	console.debug(
-		`Setting estimated cost for ${action._id}: ${asDollars({ bigInt: estimatedCost, precision: 6 })} USDC`,
+		`Setting estimated cost for ${action._id}: ${asDollars({ bigInt: estimatedCost, precision: 6 })} USDc`,
 	);
 
 	await ctx.runMutation(internal.action.lifecycle.private._setEstimatedCost, {
@@ -229,8 +251,11 @@ async function _ensureWithinBudget(
 	const estimatedCost = await _estimateAndPersistCost(ctx, action, skill, context);
 
 	if (estimatedCost > task.budgetUSDC.available) {
-		throw new Error(
-			`Not enough budget. Estimated cost: ${asDollars({ bigInt: estimatedCost })}.\n<IncreaseTaskBudgetCard taskId='${task._id}' />`,
+		throw NotEnoughBudget(
+			`Not enough budget. Estimated cost: ${asDollars({ bigInt: estimatedCost })}.`,
+			action,
+			action.skillKey,
+			estimatedCost,
 		);
 	}
 

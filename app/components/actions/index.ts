@@ -1,6 +1,7 @@
 import { DoneAction } from '~/components/actions/DoneAction';
 import { IterateAction } from '~/components/actions/IterateAction';
 import { ReasonAction } from '~/components/actions/ReasonAction';
+import { RequestBudgetAction } from '~/components/actions/RequestBudgetAction';
 import { SayAction } from '~/components/actions/SayAction';
 import { ScrapeLinkAction } from '~/components/actions/ScrapeLinkAction';
 import { SearchPlacesAction } from '~/components/actions/SearchPlacesAction';
@@ -9,6 +10,7 @@ import { UpdateInstructionsAction } from '~/components/actions/UpdateInstruction
 
 export default {
 	say: SayAction,
+	requestBudget: RequestBudgetAction,
 	iterate: IterateAction,
 	done: DoneAction,
 	askForClarification: SayAction,

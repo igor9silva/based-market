@@ -6,6 +6,7 @@ import { asDollars } from 'convex/utils/money';
 import { Button } from '~/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '~/components/ui/collapsible';
 import MDX from '~/components/ui/mdx';
+import { FailedMessage } from '~/components/ui/message';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 
 export function GenericAction({
@@ -51,7 +52,7 @@ export function GenericAction({
 			<div
 				className={cn('max-w-full', {
 					'bg-green-700/30 animate-pulse rounded-lg p-2': action.status === 'running',
-					'bg-red-700/30 rounded-lg p-2': action.status === 'failed',
+					// 'bg-red-700/30 rounded-lg p-2': action.status === 'failed',
 				})}
 			>
 				{action.status === 'pending authorization' ? (
@@ -60,7 +61,7 @@ export function GenericAction({
 							<div className="text-md font-medium">{action.skillKey}()</div>
 							{typeof action.estimatedCost === 'bigint' && (
 								<div className="text-sm text-muted-foreground">
-									Expected cost: ${asDollars({ bigInt: action.estimatedCost, precision: 6 })} USDC
+									Expected cost: ${asDollars({ bigInt: action.estimatedCost, precision: 6 })} USDc
 								</div>
 							)}
 						</div>
@@ -134,7 +135,7 @@ function Result({
 	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
 
 	if (status === 'failed') {
-		return <div className={cn('text-card-foreground overflow-x-auto', className)}>{mdx}</div>;
+		return <FailedMessage text={`🚫 Failed to run ${skillKey}()`} error={result} />;
 	}
 
 	return (

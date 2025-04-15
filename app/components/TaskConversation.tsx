@@ -1,15 +1,16 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { Link, useSearch } from '@tanstack/react-router';
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { usePaginatedQuery } from 'convex/react';
 import { asBigInt } from 'convex/utils/money';
-import { Archive, Bug, CheckCircle, ChevronDown, DollarSign, RotateCcw } from 'lucide-react';
+import { Archive, Bug, CheckCircle, ChevronDown, RotateCcw } from 'lucide-react';
 import { type RefCallback, useEffect, useMemo, useState } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { Action } from '~/components/Action';
 import { ActionComposer } from '~/components/ActionComposer';
+import { AddBudgetButton } from '~/components/AddBudgetButton';
 import { DebugAction } from '~/components/DebugAction';
 import { Loading } from '~/components/Loading';
 import { BudgetSelector, type BudgetStep } from '~/components/ui/budget-selector';
@@ -31,10 +32,10 @@ export function TaskConversation({
 	className?: string;
 }) {
 	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
+	const navigate = useNavigate();
 	const { data: task } = useSuspenseQuery(taskQuery);
-	const { debug } = useSearch({ strict: false });
+	const { debug, isBudgetDrawerOpen } = useSearch({ strict: false });
 	const { resolve, discard, increaseBudget, stop } = useTaskMutations();
-	const [showAddBudgetDrawer, setShowAddBudgetDrawer] = useState(false);
 	const [selectedBudget, setSelectedBudget] = useState<BudgetStep>(0.2);
 
 	const user = useCurrentUser();
@@ -71,12 +72,10 @@ export function TaskConversation({
 		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: 0.2 }) });
 	};
 
-	const handleAddBudget = () => setShowAddBudgetDrawer(true);
-
 	const handleBudgetConfirm = () => {
 		//
 		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: selectedBudget }) });
-		setShowAddBudgetDrawer(false);
+		navigate({ to: '.', search: (prev) => ({ ...prev, isBudgetDrawerOpen: undefined }) });
 	};
 
 	if (status === 'LoadingFirstPage' && actions.length === 0) return <Loading />;
@@ -105,15 +104,7 @@ export function TaskConversation({
 								<Archive className="h-4 w-4" />
 								Discard
 							</Button>
-							<Button
-								size="sm"
-								variant="ghost"
-								onClick={handleAddBudget}
-								className="flex items-center gap-1"
-							>
-								<DollarSign className="h-4 w-4" />
-								Add Budget
-							</Button>
+							<AddBudgetButton variant="ghost" />
 						</>
 					) : (
 						<Button size="sm" onClick={handleReopenTask} className="flex items-center gap-1">
@@ -158,7 +149,15 @@ export function TaskConversation({
 			</StickToBottom>
 			<ActionComposer task={task} />
 
-			<Drawer open={showAddBudgetDrawer} onOpenChange={setShowAddBudgetDrawer}>
+			<Drawer
+				open={Boolean(isBudgetDrawerOpen)}
+				onOpenChange={(open) =>
+					navigate({
+						to: '.',
+						search: (prev) => ({ ...prev, isBudgetDrawerOpen: open || undefined }),
+					})
+				}
+			>
 				<DrawerContent>
 					<DrawerHeader>
 						<DrawerTitle>Add Budget</DrawerTitle>
