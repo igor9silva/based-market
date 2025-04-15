@@ -1,6 +1,8 @@
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
+import { modelsSchema } from 'convex/schemas/skillSchema';
+import { z } from 'zod';
 
 export function useTaskMutations() {
 	//
@@ -8,6 +10,7 @@ export function useTaskMutations() {
 	const authorize = useMutation(api.action.public.authorize);
 	const approveBlocking = useMutation(api.action.public.approveBlockingAction);
 	const updateInboxDetailWidthPercent = useMutation(api.users.preferences.public.updateInboxDetailWidthPercent);
+	const setPreferredIntelligenceMutation = useMutation(api.tasks.public.setPreferredIntelligence);
 
 	const say = ({
 		taskId, //
@@ -150,6 +153,16 @@ export function useTaskMutations() {
 		});
 	};
 
+	const setPreferredIntelligence = ({
+		taskId, //
+		preferredIntelligence,
+	}: {
+		taskId: Id<'tasks'>;
+		preferredIntelligence: z.infer<typeof modelsSchema>;
+	}) => {
+		return setPreferredIntelligenceMutation({ taskId, preferredIntelligence });
+	};
+
 	return {
 		say,
 		stop,
@@ -162,5 +175,6 @@ export function useTaskMutations() {
 		rejectAction,
 		setInboxDetailWidthPercent,
 		approveBlockingAction,
+		setPreferredIntelligence,
 	};
 }

@@ -3,9 +3,10 @@ import { z } from 'zod';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx, QueryCtx } from '../_generated/server';
 import { mutation, query } from '../lib';
+import { modelsSchema } from '../schemas/skillSchema';
 import { current as getCurrentUser } from '../users/public';
 import { asBigInt } from '../utils/money';
-import { _add, _markAsRead } from './private';
+import { _add, _markAsRead, _setPreferredIntelligence } from './private';
 
 export const findAll = query({
 	args: {
@@ -121,6 +122,20 @@ export const markAsRead = mutation({
 		return await _markAsRead(ctx, { taskId, actionId });
 	},
 });
+
+export const setPreferredIntelligence = mutation({
+	args: {
+		taskId: zid('tasks'),
+		preferredIntelligence: modelsSchema,
+	},
+	handler: async (ctx, { taskId, preferredIntelligence }) => {
+		//
+		await ensureTaskOwner(ctx, { taskId });
+
+		return await _setPreferredIntelligence(ctx, { taskId, preferredIntelligence });
+	},
+});
+
 export const ensureTaskOwner = async (
 	ctx: QueryCtx | MutationCtx, //
 	args: {

@@ -7,6 +7,7 @@ import { PromptInput, PromptInputAction, PromptInputActions, PromptInputTextarea
 import { useHandleSubmit } from '~/hooks/useHandleSubmit';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
+import { IntelligenceSelector } from './IntelligenceSelector';
 
 export function ActionComposer({
 	task, //
@@ -66,11 +67,8 @@ export function ActionComposer({
 		setFiles((prev) => prev.filter((_, i) => i !== index));
 	};
 
-	// Memoized value determining if we should approve the blocking action
-	const canApproveBlockingAction = useMemo(
-		() => task.status === 'blocked' && isEmpty, //
-		[task.status, isEmpty],
-	);
+	const canApproveBlockingAction = useMemo(() => task.status === 'blocked' && isEmpty, [task.status, isEmpty]);
+	const canStop = useMemo(() => task.status === 'acting' && isEmpty, [task.status, isEmpty]);
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
 		//
@@ -133,10 +131,11 @@ export function ActionComposer({
 						<Paperclip className="text-primary size-5" />
 					</label>
 				</PromptInputAction> */}
+				<IntelligenceSelector taskId={task._id} className="ml-2" />
 
-				<div className="flex items-center gap-2 ml-auto">
-					{isEmpty && (
-						<span className="flex items-center text-xs text-muted-foreground gap-1.5">
+				<div className="flex items-center gap-2">
+					{canStop && (
+						<span className="items-center text-xs text-muted-foreground gap-1.5 hidden md:flex">
 							<kbd className="inline-flex items-center rounded border bg-background px-1 font-mono text-xs">
 								<span className="mr-0.5">⌘</span>Backspace
 							</kbd>
@@ -144,7 +143,7 @@ export function ActionComposer({
 						</span>
 					)}
 					{canApproveBlockingAction && (
-						<span className="flex items-center text-xs text-muted-foreground gap-1.5">
+						<span className="items-center text-xs text-muted-foreground gap-1.5 hidden md:flex">
 							<kbd className="inline-flex items-center rounded border bg-background px-1 font-mono text-xs">
 								<span className="mr-0.5">⌘</span>Enter
 							</kbd>

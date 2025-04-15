@@ -58,8 +58,8 @@ export const modelsSchema = z.enum([
 	'anthropic/claude-3.5-haiku',
 
 	// OpenAI
-	'openai/gpt-4o',
-	'openai/gpt-4o-mini',
+	// 'openai/gpt-4o',
+	// 'openai/gpt-4o-mini',
 	'openai/gpt-4.1',
 	'openai/gpt-4.1-mini',
 	'openai/gpt-4.1-nano',
@@ -81,7 +81,7 @@ export const modelsSchema = z.enum([
 	'deepseek/deepseek-v3',
 
 	// DeepInfra
-	'deepinfra/deepseek-v3',
+	// 'deepinfra/deepseek-v3',
 
 	// Together
 	// 'together/llama-4-maverick',

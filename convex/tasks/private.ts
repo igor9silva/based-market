@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { _addMany as _addActions } from '../action/private';
 import { internalMutation, internalQuery } from '../lib';
 import { authorSchema } from '../schemas/authorSchema';
+import { modelsSchema } from '../schemas/skillSchema';
 import { taskStatusSchema } from '../schemas/taskSchema';
 import { _addFundTask, _addRefundTask } from '../transactions/private';
 import { _findOne as _findOneUser } from '../users/private';
@@ -510,5 +511,16 @@ export const _move = internalMutation({
 
 		// TODO: forbid adding to itself
 		// TODO: report to parents as well, old and new
+	},
+});
+
+export const _setPreferredIntelligence = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		preferredIntelligence: modelsSchema,
+	},
+	handler: async (ctx, { taskId, preferredIntelligence }) => {
+		//
+		return await ctx.db.patch(taskId, { preferredIntelligence });
 	},
 });

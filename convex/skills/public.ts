@@ -1,26 +1,20 @@
 import { zid } from 'convex-helpers/server/zod';
-import { z } from 'zod';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx, QueryCtx } from '../_generated/server';
 import { query } from '../lib';
 import { current as getCurrentUser } from '../users/public';
-import { _findAll } from './private';
+import { _findAllByOwner } from './private';
 
-export const findAll = query({
-	args: {
-		kind: z
-			.enum([
-				'hard', //
-				'soft',
-			])
-			.optional()
-			.describe('Filter by skill kind. Grab all if unspecified.'),
+export const findAllPublic = query({
+	handler: async (ctx) => {
+		return await _findAllByOwner(ctx, { owner: 'isPro' });
 	},
-	handler: async (ctx, args) => {
-		//
-		const currentUser = await getCurrentUser(ctx, {});
+});
 
-		return await _findAll(ctx, { owner: currentUser._id, kind: args.kind });
+export const findAllPersonal = query({
+	handler: async (ctx) => {
+		const currentUser = await getCurrentUser(ctx, {});
+		return await _findAllByOwner(ctx, { owner: currentUser._id });
 	},
 });
 
@@ -33,6 +27,82 @@ export const findOne = query({
 		const { skill } = await ensureSkillOwner(ctx, { skillId });
 
 		return skill;
+	},
+});
+
+export const availableIntelligences = query({
+	handler: async (ctx) => {
+		// TODO: make this list dynamic
+		return {
+			default: 'anthropic/claude-3.5-haiku',
+			recommended: [
+				{
+					key: 'anthropic/claude-3.7-sonnet',
+					name: 'Claude 3.7 Sonnet',
+					provider: 'Anthropic',
+					description: 'Best overall',
+				},
+				{
+					key: 'anthropic/claude-3.5-haiku',
+					name: 'Claude 3.5 Haiku',
+					provider: 'Anthropic',
+					description: 'Best value (recommended for most tasks)',
+				},
+				{
+					key: 'groq/llama-4-maverick',
+					name: 'Llama 4 Maverick',
+					provider: 'Groq',
+					description: 'Fastest and cheapest, but not that smart',
+				},
+			],
+			all: [
+				{
+					key: 'google/gemini-2.5-pro',
+					name: 'Gemini 2.5 Pro',
+					provider: 'Google',
+				},
+				{
+					key: 'google/gemini-2.0-flash',
+					name: 'Gemini 2.0 Flash',
+					provider: 'Google',
+				},
+				{
+					key: 'google/gemini-2.0-flash-lite',
+					name: 'Gemini 2.0 Flash Lite',
+					provider: 'Google',
+				},
+				{
+					key: 'openai/gpt-4.1',
+					name: 'GPT-4.1',
+					provider: 'OpenAI',
+				},
+				{
+					key: 'openai/gpt-4.1-mini',
+					name: 'GPT-4.1 Mini',
+					provider: 'OpenAI',
+				},
+				{
+					key: 'openai/gpt-4.1-nano',
+					name: 'GPT-4.1 Nano',
+					provider: 'OpenAI',
+				},
+				{
+					key: 'xai/grok-3',
+					name: 'Grok 3',
+					provider: 'xAI',
+				},
+				{
+					key: 'xai/grok-3-mini',
+					name: 'Grok 3 Mini',
+					provider: 'xAI',
+				},
+				{
+					key: 'deepseek/deepseek-v3',
+					name: 'DeepSeek V3',
+					provider: 'DeepSeek',
+				},
+			],
+		};
 	},
 });
 

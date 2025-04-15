@@ -1,6 +1,7 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { authorSchema } from './authorSchema';
+import { modelsSchema } from './skillSchema';
 
 export const taskStatusSchema = z.enum([
 	'idle', //
@@ -38,6 +39,7 @@ export const taskSchema = z
 		lastReadAction: zid('actions').optional().describe('The last action that was "read" by the user.'),
 		budgetUSDC: taskBudgetSchema,
 		embeddingId: zid('taskEmbeddings').optional(),
+		preferredIntelligence: modelsSchema.optional().describe('The preferred intelligence to use for this task.'),
 	})
 	.describe(`It's a goal to be achieved. A Task is the basic and most fundamental entity of Meseeks.`);
 

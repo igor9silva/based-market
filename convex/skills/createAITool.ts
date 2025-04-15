@@ -230,10 +230,10 @@ export function pricingFor(model: z.infer<typeof modelsSchema>): {
 			return pricePerMillionTokens({ input: 0.8, output: 4 });
 
 		// OpenAI
-		case 'openai/gpt-4o':
-			return pricePerMillionTokens({ input: 2.5, output: 10 });
-		case 'openai/gpt-4o-mini':
-			return pricePerMillionTokens({ input: 0.15, output: 0.6 });
+		// case 'openai/gpt-4o':
+		// 	return pricePerMillionTokens({ input: 2.5, output: 10 });
+		// case 'openai/gpt-4o-mini':
+		// 	return pricePerMillionTokens({ input: 0.15, output: 0.6 });
 		case 'openai/gpt-4.1':
 			return pricePerMillionTokens({ input: 2.0, output: 8.0 });
 		case 'openai/gpt-4.1-mini':
@@ -266,8 +266,8 @@ export function pricingFor(model: z.infer<typeof modelsSchema>): {
 			return pricePerMillionTokens({ input: 0.27, output: 1.1 });
 
 		// DeepInfra
-		case 'deepinfra/deepseek-v3':
-			return pricePerMillionTokens({ input: 0.4, output: 0.89 });
+		// case 'deepinfra/deepseek-v3':
+		// 	return pricePerMillionTokens({ input: 0.4, output: 0.89 });
 
 		// Together
 		// case 'together/llama-4-maverick':
