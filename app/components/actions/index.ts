@@ -1,11 +1,11 @@
-import { DoneAction } from '~/components/actions/done';
-import { IterateAction } from '~/components/actions/iterate';
+import { DoneAction } from '~/components/actions/DoneAction';
+import { IterateAction } from '~/components/actions/IterateAction';
 import { ReasonAction } from '~/components/actions/ReasonAction';
-import { SayAction } from '~/components/actions/say';
-import { ScrapeLinkAction } from '~/components/actions/scrapeLink';
-import { SearchPlacesAction } from '~/components/actions/searchPlaces';
-import { SearchWebAction } from '~/components/actions/searchWeb';
-import { UpdateInstructionsAction } from '~/components/actions/updateInstructions';
+import { SayAction } from '~/components/actions/SayAction';
+import { ScrapeLinkAction } from '~/components/actions/ScrapeLinkAction';
+import { SearchPlacesAction } from '~/components/actions/SearchPlacesAction';
+import { SearchWebAction } from '~/components/actions/SearchWebAction';
+import { UpdateInstructionsAction } from '~/components/actions/UpdateInstructionsAction';
 
 export default {
 	say: SayAction,
