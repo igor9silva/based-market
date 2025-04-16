@@ -131,7 +131,7 @@ export function ActionComposer({
 						<Paperclip className="text-primary size-5" />
 					</label>
 				</PromptInputAction> */}
-				<IntelligenceSelector taskId={task._id} className="ml-2" />
+				<IntelligenceSelector task={task} className="ml-2" />
 
 				<div className="flex items-center gap-2">
 					{canStop && (

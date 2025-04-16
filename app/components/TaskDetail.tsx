@@ -1,12 +1,8 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
-import { asDollars } from 'convex/utils/money';
-import { CircleDollarSign, Maximize2 } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
-import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader } from '~/components/ui/card';
 import { Checkbox } from '~/components/ui/checkbox';
 import MDX from '~/components/ui/mdx';
@@ -14,6 +10,7 @@ import { useOptimisticTaskUpdate } from '~/hooks/useOptimisticTaskUpdate';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
 import { EditableContent } from './EditableContent';
+import { TaskBudget } from './TaskBudget';
 
 export default function TaskDetail({
 	taskId,
@@ -42,7 +39,7 @@ export default function TaskDetail({
 		<Card className={cn('whitespace-pre-wrap border-none rounded-none overflow-auto h-full p-4 md:p-0', className)}>
 			<CardHeader className="p-0 md:p-4 max-w-full sticky top-0 bg-background/75 z-10">
 				<div className="flex flex-col">
-					<div className="flex flex-row justify-between gap-2">
+					<div className="flex flex-row justify-between gap-2 items-center">
 						<div className="flex items-center gap-2">
 							<Checkbox
 								id={`task-checkbox-${task._id}`}
@@ -61,36 +58,12 @@ export default function TaskDetail({
 								)}
 							/>
 						</div>
-						<div className="flex flex-row flex-shrink-0 items-center gap-1">
-							<CircleDollarSign className="size-4" />
-							{asDollars({ bigInt: task.budgetUSDC.available })}
-						</div>
-						{showExpand && (
-							<Link to="/$" params={{ _splat: `/chat/${task._id}` }}>
-								<Button variant="ghost" size="icon">
-									<Maximize2 className="size-4" />
-								</Button>
-							</Link>
-						)}
+						<TaskBudget task={task} />
 					</div>
 					<span className="text-sm text-muted-foreground shrink-0">
 						<TimeAgo date={task._creationTime} />
 					</span>
 				</div>
-				{/* <div className="flex flex-row justify-between">
-					<div className="flex flex-row flex-wrap items-baseline gap-2">
-						<Button
-							variant="secondary"
-							onClick={() => markAsDone({ taskId: task._id, isDone: !task.isDone })}
-						>
-							{task.isDone ? 'Unmark' : 'Mark'} as done
-						</Button>
-						{/* <RunTaskActionButton task={task} kind="fill" />
-					<RunTaskActionButton task={task} kind="minify" />
-					<RunTaskActionButton task={task} kind="scrape" />
-					<RunTaskActionButton task={task} kind="factCheck" /> *
-					</div>
-				</div> */}
 			</CardHeader>
 			<CardContent className="p-0 md:p-4 md:pt-0">
 				<EditableContent

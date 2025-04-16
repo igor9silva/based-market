@@ -1,7 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
-import { Id } from 'convex/_generated/dataModel';
+import { Doc } from 'convex/_generated/dataModel';
 import { modelsSchema } from 'convex/schemas/skillSchema';
 import { Brain, ChevronsUpDown } from 'lucide-react';
 import { Suspense, useState } from 'react';
@@ -22,11 +22,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
 
+// TODO: display the model cost
+
 export function IntelligenceSelector({
-	taskId, //
+	task, //
 	className,
 }: {
-	taskId: Id<'tasks'>;
+	task: Doc<'tasks'>;
 	className?: string;
 }) {
 	//
@@ -45,7 +47,7 @@ export function IntelligenceSelector({
 				</Tooltip>
 			</TooltipProvider>
 			<Suspense fallback={<Skeleton className="w-60 h-8" />}>
-				<IntelligenceCombobox taskId={taskId} />
+				<IntelligenceCombobox task={task} />
 			</Suspense>
 		</div>
 	);
@@ -68,10 +70,10 @@ function hasDescription(intelligence: IntelligenceOption): intelligence is Recom
 }
 
 function IntelligenceCombobox({
-	taskId, //
+	task, //
 	className,
 }: {
-	taskId: Id<'tasks'>;
+	task: Doc<'tasks'>;
 	className?: string;
 }) {
 	//
@@ -79,7 +81,7 @@ function IntelligenceCombobox({
 	const { data: intelligences } = useSuspenseQuery(query);
 
 	const [open, setOpen] = useState(false);
-	const [selected, setSelected] = useState(intelligences.default);
+	const [selected, setSelected] = useState(task.preferredIntelligence ?? intelligences.default);
 
 	const selectedOption = [...intelligences.recommended, ...intelligences.all].find(
 		(intelligence) => intelligence.key === selected,
@@ -87,9 +89,9 @@ function IntelligenceCombobox({
 
 	const { setPreferredIntelligence } = useTaskMutations();
 	const handleSelect = (key: string) => {
-		setSelected(key);
 		setOpen(false);
-		setPreferredIntelligence({ taskId, preferredIntelligence: key as z.infer<typeof modelsSchema> });
+		setSelected(key);
+		setPreferredIntelligence({ taskId: task._id, preferredIntelligence: key as z.infer<typeof modelsSchema> });
 	};
 
 	return (
@@ -135,7 +137,7 @@ function IntelligenceCombobox({
 									key={intelligence.key}
 									value={intelligence.key}
 									onSelect={handleSelect}
-									className={cn('py-2', selected === intelligence.key && 'bg-accent/75')}
+									className={cn('py-2', selected === intelligence.key && 'bg-yellow-200')}
 								>
 									<div className="flex flex-col w-full">
 										<div className="flex w-full justify-between items-center">
