@@ -99,7 +99,7 @@ export function createAITool(
 					{
 						symbol: 'USD',
 						amount: calculateProviderCost({
-							model: skill.config.model,
+							model: modelFrom(skill.config.model, task.preferredIntelligence),
 							inputTokens: { uncached: usage.promptTokens },
 							outputTokens: { uncached: usage.completionTokens },
 						}),
@@ -118,6 +118,7 @@ export function createAITool(
 
 export function estimateCostFor(
 	skill: z.infer<typeof skillSchema>, //
+	task: Doc<'tasks'>,
 	actionId: Id<'actions'>,
 	context?: MagicRockContext,
 ) {
@@ -136,7 +137,7 @@ export function estimateCostFor(
 
 	// assume worst-cast scenario with no cached tokens
 	const providerCost = calculateProviderCost({
-		model: skill.config.model,
+		model: modelFrom(skill.config.model, task.preferredIntelligence),
 		inputTokens: { uncached: inputTokens },
 		outputTokens: { uncached: outputTokens },
 	});
@@ -215,6 +216,16 @@ function pricePerMillionTokens({ input, output }: { input: number; output: numbe
 		inputToken: asBigInt({ dollars: input }) / 1_000_000n,
 		outputToken: asBigInt({ dollars: output }) / 1_000_000n,
 	};
+}
+
+export function modelFrom(
+	skillModel: z.infer<typeof modelsSchema> | 'auto', //
+	taskPreferredIntelligence?: z.infer<typeof modelsSchema>,
+): z.infer<typeof modelsSchema> {
+	//
+	if (skillModel === 'auto') return taskPreferredIntelligence ?? 'anthropic/claude-3.5-haiku';
+
+	return skillModel;
 }
 
 export function pricingFor(model: z.infer<typeof modelsSchema>): {

@@ -88,7 +88,7 @@ export const modelsSchema = z.enum([
 ]);
 
 export const decisionConfigSchema = z.object({
-	model: modelsSchema,
+	model: modelsSchema.or(z.literal('auto')),
 	instructions: z.string().describe('Instructions for the decision-making process'),
 	temperature: z.number().min(0).max(2).describe('Temperature to use'),
 	availableSkills: z.array(z.string()).describe('Skills that can be used to make the decision'),

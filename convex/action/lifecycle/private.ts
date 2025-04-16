@@ -221,12 +221,13 @@ function parseArgs(tool: ReturnType<typeof createTool>, args: unknown) {
 async function _estimateAndPersistCost(
 	ctx: ActionCtx | MutationCtx,
 	action: Doc<'actions'>,
+	task: Doc<'tasks'>,
 	skill: z.infer<typeof skillSchema>,
 	context?: MagicRockContext,
 ) {
 	if (action.estimatedCost) return action.estimatedCost;
 
-	const estimatedCost = estimateCostFor(skill, action._id, context);
+	const estimatedCost = estimateCostFor(skill, task, action._id, context);
 
 	console.debug(
 		`Setting estimated cost for ${action._id}: ${asDollars({ bigInt: estimatedCost, precision: 6 })} USDc`,
@@ -248,7 +249,7 @@ async function _ensureWithinBudget(
 	context?: MagicRockContext,
 ) {
 	//
-	const estimatedCost = await _estimateAndPersistCost(ctx, action, skill, context);
+	const estimatedCost = await _estimateAndPersistCost(ctx, action, task, skill, context);
 
 	if (estimatedCost > task.budgetUSDC.available) {
 		throw NotEnoughBudget(

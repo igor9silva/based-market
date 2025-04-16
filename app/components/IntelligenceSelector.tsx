@@ -137,7 +137,7 @@ function IntelligenceCombobox({
 									key={intelligence.key}
 									value={intelligence.key}
 									onSelect={handleSelect}
-									className={cn('py-2', selected === intelligence.key && 'bg-yellow-200')}
+									className={cn('py-2', selected === intelligence.key && 'bg-accent/75')}
 								>
 									<div className="flex flex-col w-full">
 										<div className="flex w-full justify-between items-center">

@@ -9,8 +9,9 @@ import { z } from 'zod';
 import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
 import type { ActionCtx, MutationCtx } from './_generated/server';
-import type { softSkillSchema } from './schemas/skillSchema';
+import type { modelsSchema, softSkillSchema } from './schemas/skillSchema';
 import type { AITool } from './schemas/toolSchema';
+import { modelFrom } from './skills/createAITool';
 import { _toolsForMagicRock } from './skills/tools';
 import { asDollars } from './utils/money';
 
@@ -39,7 +40,7 @@ export async function _prepareContext(
 	skill: z.infer<typeof softSkillSchema>,
 ): Promise<MagicRockContext> {
 	//
-	const model = languageModelFrom(skill);
+	const model = languageModelFrom(skill.config.model, task.preferredIntelligence);
 	const [history, tools, instructions] = await Promise.all([
 		renderHistory(ctx, task, action, skill),
 		loadTools(ctx, task, action, skill),
@@ -93,8 +94,13 @@ export async function _askMagicRock(args: MagicRockContext) {
 	return result;
 }
 
-function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageModel {
+function languageModelFrom(
+	skillModel: z.infer<typeof modelsSchema> | 'auto', //
+	taskPreferredIntelligence?: z.infer<typeof modelsSchema>,
+): LanguageModel {
 	//
+	const model = modelFrom(skillModel, taskPreferredIntelligence);
+
 	const openAIconfig = {
 		// TODO: in order to support performing actions in parallel, we first need a proper CoA with aggregated statuses
 		parallelToolCalls: false,
@@ -165,11 +171,9 @@ function languageModelFrom(skill: z.infer<typeof softSkillSchema>): LanguageMode
 		// 'together/llama-4-maverick': togetherai('meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8'),
 	};
 
-	if (skill.config.model in map) {
-		return map[skill.config.model];
-	}
+	if (model in map) return map[model];
 
-	throw new Error(`Unknown model: ${skill.config.model}`);
+	throw new Error(`Unknown model: ${model}`);
 
 	// EXPERIMENTS
 	// model: anthropic('claude-3-7-sonnet-20250219'), // <---- AGI
