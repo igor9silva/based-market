@@ -136,16 +136,18 @@ export function ActionComposer({
 				<div className="flex items-center gap-2">
 					{canStop && (
 						<span className="items-center text-xs text-muted-foreground gap-1.5 hidden md:flex">
-							<kbd className="inline-flex items-center rounded border bg-background px-1 font-mono text-xs">
-								<span className="mr-0.5">⌘</span>Backspace
+							<kbd className="inline-flex items-center rounded font-medium h-5 bg-background px-1 text-lg">
+								<span className="mr-0.5">⌘</span>
+								<span className="text-xl">⌫</span>
 							</kbd>
 							to stop
 						</span>
 					)}
 					{canApproveBlockingAction && (
 						<span className="items-center text-xs text-muted-foreground gap-1.5 hidden md:flex">
-							<kbd className="inline-flex items-center rounded border bg-background px-1 font-mono text-xs">
-								<span className="mr-0.5">⌘</span>Enter
+							<kbd className="inline-flex items-center rounded font-medium h-5 bg-background px-1 text-lg">
+								<span className="mr-0.5">⌘</span>
+								<span className="text-xl">⏎</span>
 							</kbd>
 							to authorize
 						</span>

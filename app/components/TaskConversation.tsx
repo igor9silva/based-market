@@ -227,10 +227,10 @@ function StickToBottomContent({
 	useEffect(() => {
 		//
 		if (isAtBottom && actions.length > 0) {
-			setTimeout(() => scrollToBottom(isLoaded ? 'smooth' : 'instant'), 100);
+			scrollToBottom(isLoaded ? 'smooth' : 'instant');
 		}
 		//
-	}, [actions.length, isAtBottom, isLoaded, scrollToBottom]);
+	}, [actions, isAtBottom, isLoaded, scrollToBottom]);
 
 	return (
 		<StickToBottom.Content className="relative h-full p-2">
@@ -240,7 +240,7 @@ function StickToBottomContent({
 						<Loading className="h-6 w-fit" />
 					</div>
 				)}
-				<div className="flex flex-col flex-grow justify-end gap-2">{children}</div>
+				<div className="flex flex-col flex-grow justify-end gap-1">{children}</div>
 				<div className="sticky bottom-2 flex flex-col">
 					<ScrollToBottom />
 				</div>
