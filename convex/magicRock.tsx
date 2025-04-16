@@ -108,30 +108,11 @@ function languageModelFrom(
 
 	const googleConfig = {
 		safetySettings: [
-			{
-				category: 'HARM_CATEGORY_UNSPECIFIED' as const,
-				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
-			},
-			{
-				category: 'HARM_CATEGORY_CIVIC_INTEGRITY' as const,
-				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
-			},
-			{
-				category: 'HARM_CATEGORY_HARASSMENT' as const,
-				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
-			},
-			{
-				category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as const,
-				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
-			},
-			{
-				category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as const,
-				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
-			},
-			{
-				category: 'HARM_CATEGORY_HATE_SPEECH' as const,
-				threshold: 'HARM_BLOCK_THRESHOLD_UNSPECIFIED' as const,
-			},
+			{ category: 'HARM_CATEGORY_CIVIC_INTEGRITY' as const, threshold: 'OFF' as const },
+			{ category: 'HARM_CATEGORY_HARASSMENT' as const, threshold: 'OFF' as const },
+			{ category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT' as const, threshold: 'OFF' as const },
+			{ category: 'HARM_CATEGORY_DANGEROUS_CONTENT' as const, threshold: 'OFF' as const },
+			{ category: 'HARM_CATEGORY_HATE_SPEECH' as const, threshold: 'OFF' as const },
 		],
 	};
 
@@ -149,7 +130,7 @@ function languageModelFrom(
 		'openai/gpt-4.1-nano': openai('gpt-4.1-nano', openAIconfig),
 
 		// Google
-		'google/gemini-2.5-pro': google('gemini-2.5-pro-exp-03-25', googleConfig), // TODO: experimental model
+		'google/gemini-2.5-pro': google('gemini-2.5-pro-preview-03-25', googleConfig), // TODO: experimental model
 		'google/gemini-2.0-flash': google('gemini-2.0-flash-exp', googleConfig), // TODO: experimental model
 		'google/gemini-2.0-flash-lite': google('gemini-2.0-flash-lite-preview-02-05', googleConfig), // TODO: experimental model
 
@@ -229,7 +210,7 @@ async function renderHistory(
 	//
 	const actions = await ctx.runQuery(internal.action.private._findLastActions, {
 		taskId: task._id,
-		amount: 25, // TODO: env
+		amount: 40, // TODO: env
 	});
 
 	// TODO: add the summary as a message?
