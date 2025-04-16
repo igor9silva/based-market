@@ -36,7 +36,7 @@ export const taskSchema = z
 		parentId: zid('tasks').optional().describe('The parent task ID of this task.'),
 		lastUpdatedAt: z.number().optional().describe('The last time the task instructions were reviewed/updated.'),
 		lastSummarizedAt: z.number().optional().describe('The last time the task activity was summarized.'),
-		lastReadAction: zid('actions').optional().describe('The last action that was "read" by the user.'),
+		// lastReadAction: zid('actions').optional().describe('The last action that was "read" by the user.'),
 		budgetUSDC: taskBudgetSchema,
 		embeddingId: zid('taskEmbeddings').optional(),
 		preferredIntelligence: modelsSchema.optional().describe('The preferred intelligence to use for this task.'),

@@ -178,7 +178,8 @@ export const _resolve = internalMutation({
 
 		const action = await ctx.db.get(actionId);
 		if (!action) throw new Error('Action not found');
-		if (action.result) throw new Error(`Action result already set for ${actionId}. Trying to set to ${result}`);
+		if (action.result)
+			throw new Error(`Action result already set for ${actionId}. Trying to set to ${JSON.stringify(result)}`);
 
 		if (!result) console.warn(`${action.skillKey} (${actionId}) ended with no result`);
 

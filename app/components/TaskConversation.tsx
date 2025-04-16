@@ -3,7 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
-import { usePaginatedQuery } from 'convex/react';
+import { useMutation, usePaginatedQuery } from 'convex/react';
 import { asBigInt } from 'convex/utils/money';
 import { Archive, Bug, CheckCircle, ChevronDown, RotateCcw } from 'lucide-react';
 import { type RefCallback, useEffect, useMemo, useState } from 'react';
@@ -77,6 +77,18 @@ export function TaskConversation({
 		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: selectedBudget }) });
 		navigate({ to: '.', search: (prev) => ({ ...prev, isBudgetDrawerOpen: undefined }) });
 	};
+
+	const markAsRead = useMutation(api.tasks.public.markAsRead);
+
+	// Mark task as read when it's unread or blocked
+	useEffect(() => {
+		//
+		if (task.status === 'unread' || task.status === 'blocked') {
+			console.debug('marking as read', task.status);
+			markAsRead({ taskId: task._id });
+		}
+		//
+	}, [task.status, markAsRead, task._id]);
 
 	if (status === 'LoadingFirstPage' && actions.length === 0) return <Loading />;
 

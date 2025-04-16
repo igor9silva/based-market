@@ -60,16 +60,32 @@ export function createAITool(
 				//
 				case 'tool-calls':
 					//
-					reactions.push(
-						...toolCalls.map((call) => ({
-							skillKey: call.toolName,
-							args: call.args,
-							taskId: task._id,
-							author: action._id,
-							owner: task.owner,
-							depth: action.depth + 1,
-						})),
-					);
+					if (toolCalls.length > 1) {
+						console.warn('Multiple tool calls', toolCalls);
+					}
+
+					if (toolCalls.length === 0) {
+						console.warn('No tool calls but finish reason is `tool-calls`');
+					}
+
+					// TODO: disabled multiple tool calls for now - we need to improve lifecyle first
+					// ...toolCalls.map((call) => ({
+					// 	skillKey: call.toolName,
+					// 	args: call.args,
+					// 	taskId: task._id,
+					// 	author: action._id,
+					// 	owner: task.owner,
+					// 	depth: action.depth + 1,
+					// })),
+
+					reactions.push({
+						skillKey: toolCalls[0].toolName,
+						args: toolCalls[0].args,
+						taskId: task._id,
+						author: action._id,
+						owner: task.owner,
+						depth: action.depth + 1,
+					});
 					break;
 
 				// prettier-ignore

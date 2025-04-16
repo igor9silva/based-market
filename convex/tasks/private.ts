@@ -323,13 +323,14 @@ export const _updateSummary = internalMutation({
 export const _markAsRead = internalMutation({
 	args: {
 		taskId: zid('tasks'),
-		actionId: zid('actions'),
 	},
-	handler: async (ctx, { taskId, actionId }) => {
+	handler: async (ctx, { taskId }) => {
 		//
-		return await ctx.db.patch(taskId, {
-			lastReadAction: actionId,
-		});
+		const task = await _findOne(ctx, { taskId });
+
+		if (task.status === 'unread' || task.status === 'blocked') {
+			await _setStatus(ctx, { taskId, newStatus: 'idle' });
+		}
 	},
 });
 

@@ -113,13 +113,12 @@ export const add = mutation({
 export const markAsRead = mutation({
 	args: {
 		taskId: zid('tasks'),
-		actionId: zid('actions'),
 	},
-	handler: async (ctx, { taskId, actionId }) => {
+	handler: async (ctx, { taskId }) => {
 		//
 		await ensureTaskOwner(ctx, { taskId });
 
-		return await _markAsRead(ctx, { taskId, actionId });
+		return await _markAsRead(ctx, { taskId });
 	},
 });
 
