@@ -70,9 +70,7 @@ export function TaskConversation({
 	// Mark task as read when it's unread or blocked
 	useEffect(() => {
 		//
-		if (task.status === 'unread' || task.status === 'blocked') {
-			markAsRead({ taskId: task._id });
-		}
+		if (task.status === 'unread') markAsRead({ taskId: task._id });
 		//
 	}, [task.status, markAsRead, task._id]);
 
