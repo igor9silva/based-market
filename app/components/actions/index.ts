@@ -11,6 +11,7 @@ import { UpdateInstructionsAction } from '~/components/actions/UpdateInstruction
 
 export default {
 	say: SayAction,
+	inferUserIntent: IterateAction,
 	requestBudget: RequestBudgetAction,
 	iterate: IterateAction,
 	increaseBudget: IncreaseBudgetAction,
