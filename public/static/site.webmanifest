@@ -3,13 +3,13 @@
   "short_name": "Meseeks",
   "description": "AI-powered engine.",
   "start_url": "/",
-  "id": "?pro.igorsilva.companion=v0",
+  "id": "?pro.igorsilva.meseeks=v0",
   "orientation": "any",
   "display": "fullscreen",
   "lang": "en",
   "dir": "auto",
-  "theme_color": "#000000",
-  "background_color": "#000000",
+  "theme_color": "#09090B",
+  "background_color": "#09090B",
   "icons": [
     {
       "src": "/static/logo-dark-512.png",
