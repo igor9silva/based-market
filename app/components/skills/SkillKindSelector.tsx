@@ -12,7 +12,7 @@ export function SkillKindSelector({ value = 'soft', onValueChange = () => {} }: 
 	//
 	return (
 		<div>
-			<LabelWithTooltip tooltip="Choose between a decision-making soft skill powered by AI, or a hard skill that connects to external services.">
+			<LabelWithTooltip tooltip="Choose between a soft skill (decision-making by AI), or a hard skill (that connects to external apps).">
 				What kind of skill?
 			</LabelWithTooltip>
 			<Tabs

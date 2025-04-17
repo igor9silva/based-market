@@ -1,3 +1,4 @@
+import { Doc } from 'convex/_generated/dataModel';
 import { useState } from 'react';
 import { Separator } from '~/components/ui/separator';
 import { BasicInfoFields } from './BasicInfoFields';
@@ -7,11 +8,11 @@ import { SkillKindSelector } from './SkillKindSelector';
 import { SoftSkillConfig } from './SoftSkillConfig';
 
 interface UnifiedSkillFormProps {
-	skillId?: string;
+	skill?: Doc<'skills'>;
 	isCloning?: boolean;
 }
 
-export function UnifiedSkillForm({ skillId, isCloning = false }: UnifiedSkillFormProps) {
+export function UnifiedSkillForm({ skill, isCloning = false }: UnifiedSkillFormProps) {
 	//
 	// We're only creating the UI shell for now - all state and logic will be added later
 	const [skillKind, setSkillKind] = useState<'soft' | 'hard'>('soft');
@@ -20,7 +21,7 @@ export function UnifiedSkillForm({ skillId, isCloning = false }: UnifiedSkillFor
 	return (
 		<form className="space-y-6">
 			{/* Skill Kind Selector - only shown when creating new skills */}
-			{!skillId && <SkillKindSelector value={skillKind} onValueChange={setSkillKind} />}
+			{!skill && <SkillKindSelector value={skillKind} onValueChange={setSkillKind} />}
 
 			{/* Basic Info Fields */}
 			<BasicInfoFields
@@ -35,7 +36,7 @@ export function UnifiedSkillForm({ skillId, isCloning = false }: UnifiedSkillFor
 			{skillKind === 'soft' ? <SoftSkillConfig /> : <HardSkillConfig />}
 
 			{/* Form Actions */}
-			<FormActions isEditing={Boolean(skillId)} isCloning={isCloning} />
+			<FormActions isEditing={Boolean(skill)} isCloning={isCloning} />
 		</form>
 	);
 }
