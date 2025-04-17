@@ -1,41 +1,51 @@
 import { InfoIcon } from 'lucide-react';
+import { useFormContext } from 'react-hook-form';
+import { FormControl, FormField, FormItem, FormMessage } from '~/components/ui/form';
 import { LabelWithTooltip } from '~/components/ui/form-tooltip';
 import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 
 interface SkillKindSelectorProps {
-	value?: 'soft' | 'hard';
-	onValueChange?: (value: 'soft' | 'hard') => void;
+	//
+	disabled?: boolean;
 }
 
-export function SkillKindSelector({ value = 'soft', onValueChange = () => {} }: SkillKindSelectorProps) {
+export function SkillKindSelector({ disabled = false }: SkillKindSelectorProps) {
 	//
+	const { control } = useFormContext();
+
 	return (
-		<div>
-			<LabelWithTooltip tooltip="Choose between a soft skill (decision-making by AI), or a hard skill (that connects to external apps).">
-				What kind of skill?
-			</LabelWithTooltip>
-			<Tabs
-				value={value}
-				onValueChange={(newValue) => onValueChange(newValue as 'soft' | 'hard')}
-				className="mt-2"
-			>
-				<TabsList>
-					<TabsTrigger value="soft" className="relative group">
-						Soft (decision-making)
-						<InfoTooltip>
-							AI-powered skills that make decisions, effectively controlling the reaction chain.
-						</InfoTooltip>
-					</TabsTrigger>
-					<TabsTrigger value="hard" className="relative group">
-						Hard (using other apps)
-						<InfoTooltip>
-							API-based skills that connect to external apps and execute specific actions.
-						</InfoTooltip>
-					</TabsTrigger>
-				</TabsList>
-			</Tabs>
-		</div>
+		<FormField
+			control={control}
+			name="kind"
+			render={({ field }) => (
+				<FormItem>
+					<LabelWithTooltip tooltip="Choose between a soft skill (decision-making by AI), or a hard skill (that connects to external apps).">
+						What kind of skill?
+					</LabelWithTooltip>
+					<FormControl>
+						<Tabs value={field.value} onValueChange={field.onChange} className="mt-2">
+							<TabsList>
+								<TabsTrigger value="soft" className="relative group" disabled={disabled}>
+									Soft (decision-making)
+									<InfoTooltip>
+										AI-powered skills that make decisions, effectively controlling the reaction
+										chain.
+									</InfoTooltip>
+								</TabsTrigger>
+								<TabsTrigger value="hard" className="relative group" disabled={disabled}>
+									Hard (using other apps)
+									<InfoTooltip>
+										API-based skills that connect to external apps and execute specific actions.
+									</InfoTooltip>
+								</TabsTrigger>
+							</TabsList>
+						</Tabs>
+					</FormControl>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
 	);
 }
 

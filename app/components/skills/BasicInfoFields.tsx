@@ -1,146 +1,191 @@
-// import { ZodEditor } from '~/components/skills/ZodEditor';
+import { asBigInt, asDollars, asNumber, MONEY_PRECISION } from 'convex/utils/money';
+import { useMemo } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { FormControl, FormField, FormItem, FormMessage } from '~/components/ui/form';
 import { LabelWithTooltip } from '~/components/ui/form-tooltip';
 import { Input } from '~/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
 import { Textarea } from '~/components/ui/textarea';
 
 interface BasicInfoFieldsProps {
-	keyValue?: string;
-	onKeyChange?: (value: string) => void;
-	description?: string;
-	onDescriptionChange?: (value: string) => void;
-	preApprovedCost?: string;
-	onPreApprovedCostChange?: (value: string) => void;
-	inputSchema?: string;
-	onInputSchemaChange?: (value: string) => void;
 	isHardSkill?: boolean;
+	isReadOnly?: boolean;
 }
 
-export function BasicInfoFields({
-	keyValue = '',
-	onKeyChange = () => {},
-	description = '',
-	onDescriptionChange = () => {},
-	preApprovedCost = 'none',
-	onPreApprovedCostChange = () => {},
-	inputSchema = 'z.object({})',
-	onInputSchemaChange = () => {},
-	isHardSkill = false,
-}: BasicInfoFieldsProps) {
+export function BasicInfoFields({ isHardSkill = false, isReadOnly = false }: BasicInfoFieldsProps) {
 	//
-	const isPreApproved = preApprovedCost !== 'none';
-
 	return (
 		<div className="space-y-4">
+			{/* */}
 			<div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-				<div className="space-y-2">
-					<LabelWithTooltip
-						htmlFor="key"
-						tooltip="A unique identifier for this skill. e.g. searchWeb, gmail_move, etc."
-					>
+				<KeyField disabled={isReadOnly} />
+				<AuthorizationField disabled={isReadOnly} />
+			</div>
+
+			<DescriptionField disabled={isReadOnly} />
+
+			{/* Input Schema is only for hard skills */}
+			{isHardSkill && <InputSchemaField disabled={isReadOnly} />}
+		</div>
+	);
+}
+
+function KeyField({ disabled }: { disabled?: boolean }) {
+	//
+	const { control } = useFormContext();
+
+	return (
+		<FormField
+			control={control}
+			name="key"
+			render={({ field }) => (
+				<FormItem>
+					<LabelWithTooltip tooltip="A unique identifier for this skill. e.g. searchWeb, email_move, etc.">
 						Key (unique identifier)
 					</LabelWithTooltip>
-					<Input
-						id="key"
-						name="key"
-						value={keyValue}
-						onChange={(e) => onKeyChange(e.target.value)}
-						placeholder="e.g., searchWeb, processImage"
-						required
-					/>
-				</div>
+					<FormControl>
+						<Input {...field} placeholder="e.g., searchWeb, email_move" disabled={disabled} />
+					</FormControl>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
+	);
+}
 
-				<div className="space-y-2">
-					<LabelWithTooltip
-						htmlFor="authorization"
-						tooltip="Controls when this skill requires human approval. You can allow it to be executed by Meseeks with no human approval up to a certain cost, but it'll still be subject to other limits, such as amount of consecutive actions."
-					>
+function AuthorizationField({ disabled }: { disabled?: boolean }) {
+	//
+	const { control, watch } = useFormContext();
+	const preApprovedCost = watch('preApprovedCost'); // || 'none';
+	const isPreApproved = preApprovedCost !== 'none';
+
+	const DEFAULT_COST = asBigInt({ dollars: 0.002 });
+
+	const displayValue = useMemo(() => {
+		//
+		if (preApprovedCost === 'none') return 'none';
+
+		return asNumber({ bigInt: preApprovedCost });
+		//
+	}, [preApprovedCost]);
+
+	return (
+		<FormField
+			control={control}
+			name="preApprovedCost"
+			render={({ field }) => (
+				<FormItem>
+					<LabelWithTooltip tooltip="Controls when this skill requires human approval. You can allow it to be executed by Meseeks with no human approval up to a certain cost, but it'll still be subject to other limits, such as amount of consecutive actions.">
 						Authorization
 					</LabelWithTooltip>
 					<div className="flex flex-row items-center gap-3 w-full">
 						<div className={`${!isPreApproved ? 'w-full' : 'w-2/3'}`}>
-							<Select
-								value={isPreApproved ? 'auto' : 'none'}
-								onValueChange={(value) => {
-									onPreApprovedCostChange(value === 'none' ? 'none' : '0.01');
-								}}
-							>
-								<SelectTrigger className="w-full">
-									<SelectValue placeholder="Select authorization type" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="none">Always require human authorization</SelectItem>
-									<SelectItem value="auto">Perform automatically up to</SelectItem>
-								</SelectContent>
-							</Select>
+							<FormControl>
+								<Select
+									value={field.value === 'none' ? 'none' : 'auto'}
+									onValueChange={(value) => {
+										if (value === 'none') {
+											field.onChange('none');
+										} else {
+											field.onChange(DEFAULT_COST);
+										}
+									}}
+									disabled={disabled}
+								>
+									<SelectTrigger className="w-full">
+										<SelectValue placeholder="Select authorization type" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="none">Always require human authorization</SelectItem>
+										<SelectItem value="auto">Perform automatically up to</SelectItem>
+									</SelectContent>
+								</Select>
+							</FormControl>
 						</div>
 
 						{isPreApproved && (
 							<div className="flex items-center gap-1 w-1/3">
-								<div className="relative flex-1">
-									<span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm font-medium text-gray-500">
-										$
-									</span>
-									<Input
-										id="preApprovedCostValue"
-										type="number"
-										min="0"
-										step="0.01"
-										placeholder="0.10"
-										value={preApprovedCost}
-										onChange={(e) => {
-											const value = e.target.value;
-											// Simple validation to ensure it's a valid positive number
-											const numValue = parseFloat(value);
-											if (!isNaN(numValue) && numValue >= 0) {
-												onPreApprovedCostChange(value);
-											}
-										}}
-										className="pl-6 w-full"
-									/>
-								</div>
+								<FormControl>
+									<div className="relative flex-1">
+										<span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm font-medium text-gray-500">
+											$
+										</span>
+										<Input
+											value={displayValue}
+											type="number"
+											min="0"
+											step={1 / MONEY_PRECISION}
+											placeholder={asDollars({ bigInt: DEFAULT_COST, precision: 10 })}
+											className="pl-6 w-full"
+											disabled={disabled}
+											onChange={(e) => {
+												const value = e.target.value;
+												if (value.length === 0) {
+													field.onChange('');
+												} else {
+													field.onChange(asBigInt({ dollars: parseFloat(value) }));
+												}
+											}}
+										/>
+									</div>
+								</FormControl>
 							</div>
 						)}
 					</div>
-				</div>
-			</div>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
+	);
+}
 
-			<div className="space-y-2">
-				<LabelWithTooltip
-					htmlFor="description"
-					tooltip="A clear description of what this skill does. This is visible to LLMs, so you must include instructions on how to use that skill, how to fill in input params, etc."
-				>
-					Description
-				</LabelWithTooltip>
-				<Textarea
-					id="description"
-					name="description"
-					value={description}
-					onChange={(e) => onDescriptionChange(e.target.value)}
-					placeholder="Describe what this skill does"
-					className="min-h-[100px]"
-					required
-				/>
-			</div>
+function DescriptionField({ disabled }: { disabled?: boolean }) {
+	//
+	const { control } = useFormContext();
 
-			{/* Input Schema - Only for hard skills */}
-			{isHardSkill && (
-				<div className="space-y-2">
-					<LabelWithTooltip
-						htmlFor="inputSchema"
-						tooltip="Define the expected input parameters using Zod schema"
-					>
+	return (
+		<FormField
+			control={control}
+			name="description"
+			render={({ field }) => (
+				<FormItem>
+					<LabelWithTooltip tooltip="A clear description of what this skill does. This is visible to LLMs, so you must include instructions on how to use that skill, how to fill in input params, etc.">
+						Description
+					</LabelWithTooltip>
+					<FormControl>
+						<Textarea
+							{...field}
+							placeholder="Describe what this skill does"
+							className="min-h-24"
+							disabled={disabled}
+						/>
+					</FormControl>
+					<FormMessage />
+				</FormItem>
+			)}
+		/>
+	);
+}
+
+function InputSchemaField({ disabled }: { disabled?: boolean }) {
+	//
+	const { control } = useFormContext();
+
+	return (
+		<FormField
+			control={control}
+			name="inputSchema"
+			render={({ field }) => (
+				<FormItem>
+					<LabelWithTooltip tooltip="Define the expected input parameters using Zod schema">
 						Input Schema
 					</LabelWithTooltip>
-					<Textarea
-						id="inputSchema"
-						name="inputSchema"
-						value={inputSchema}
-						onChange={(e) => onInputSchemaChange(e.target.value)}
-						placeholder="z.object({})"
-					/>
-				</div>
+					<FormControl>
+						<Textarea {...field} placeholder="z.object({})" disabled={disabled} />
+					</FormControl>
+					<FormMessage />
+				</FormItem>
 			)}
-		</div>
+		/>
 	);
 }
