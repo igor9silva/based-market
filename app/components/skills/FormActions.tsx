@@ -14,7 +14,7 @@ export function FormActions({
 	isSubmitting = false,
 }: FormActionsProps) {
 	//
-	const actionText = isEditing && !isCloning ? 'Update' : 'Create';
+	const actionText = isEditing && !isCloning ? 'Update' : 'Learn';
 
 	return (
 		<div className="flex justify-end gap-2">
@@ -22,7 +22,7 @@ export function FormActions({
 				Cancel
 			</Button>
 			<Button type="submit" disabled={isSubmitting}>
-				{isSubmitting ? 'Saving...' : `${actionText} Skill`}
+				{isSubmitting ? 'Saving...' : `${actionText} skill`}
 			</Button>
 		</div>
 	);

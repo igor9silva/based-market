@@ -23,37 +23,32 @@ export function SkillKindSelector({ value = 'soft', onValueChange = () => {} }: 
 				<TabsList>
 					<TabsTrigger value="soft" className="relative group">
 						Soft (decision-making)
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<InfoIcon className="h-4 w-4 inline-block ml-1" />
-								</TooltipTrigger>
-								<TooltipContent>
-									<p className="max-w-xs">
-										AI-powered skills that make decisions, effectively controlling the reaction
-										chain.
-									</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
+						<InfoTooltip>
+							AI-powered skills that make decisions, effectively controlling the reaction chain.
+						</InfoTooltip>
 					</TabsTrigger>
 					<TabsTrigger value="hard" className="relative group">
 						Hard (using other apps)
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<InfoIcon className="h-4 w-4 inline-block ml-1" />
-								</TooltipTrigger>
-								<TooltipContent>
-									<p className="max-w-xs">
-										API-based skills that connect to external apps and execute specific actions.
-									</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
+						<InfoTooltip>
+							API-based skills that connect to external apps and execute specific actions.
+						</InfoTooltip>
 					</TabsTrigger>
 				</TabsList>
 			</Tabs>
 		</div>
+	);
+}
+
+function InfoTooltip({ children }: { children: React.ReactNode }) {
+	//
+	return (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<InfoIcon className="h-4 w-4 inline-block ml-1" />
+				</TooltipTrigger>
+				<TooltipContent>{children}</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }
