@@ -1,4 +1,5 @@
 import { DoneAction } from '~/components/actions/DoneAction';
+import { IncreaseBudgetAction } from '~/components/actions/IncreaseBudgetAction';
 import { IterateAction } from '~/components/actions/IterateAction';
 import { ReasonAction } from '~/components/actions/ReasonAction';
 import { RequestBudgetAction } from '~/components/actions/RequestBudgetAction';
@@ -12,6 +13,7 @@ export default {
 	say: SayAction,
 	requestBudget: RequestBudgetAction,
 	iterate: IterateAction,
+	increaseBudget: IncreaseBudgetAction,
 	done: DoneAction,
 	askForClarification: SayAction,
 	searchWeb: SearchWebAction,

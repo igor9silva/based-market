@@ -150,6 +150,7 @@ export function CommandMenuDialog() {
 					</CommandItem>
 					{currentTaskId && <ResolveTaskCommandItem taskId={currentTaskId} />}
 					{currentTaskId && <DiscardTaskCommandItem taskId={currentTaskId} />}
+					{currentTaskId && <IncreaseBudgetCommandItem taskId={currentTaskId} />}
 					{currentTaskId && <ReopenTaskCommandItem taskId={currentTaskId} />}
 					{currentTaskId && <StopReactionsCommandItem taskId={currentTaskId} />}
 				</CommandGroup>
@@ -278,6 +279,28 @@ function StopReactionsCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 		<CommandItem keywords={['stop', 'reactions', 'reacting', 'current']} onSelect={handleSelect}>
 			<RotateCcw className="mr-2" />
 			Stop reacting
+		</CommandItem>
+	);
+}
+
+function IncreaseBudgetCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
+	//
+	const { close } = useCommandMenu();
+	const navigate = useNavigate();
+
+	const currentTask = useQuery(api.tasks.public.findOne, { taskId });
+	if (!currentTask || !currentTask.isActive) return null;
+
+	const handleSelect = () => {
+		//
+		navigate({ to: '.', search: (prev) => ({ ...prev, isBudgetDrawerOpen: true }) });
+		close();
+	};
+
+	return (
+		<CommandItem keywords={['budget', 'add', 'increase']} onSelect={handleSelect}>
+			<CircleCheckBig className="mr-2" />
+			Add budget
 		</CommandItem>
 	);
 }

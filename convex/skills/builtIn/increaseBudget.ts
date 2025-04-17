@@ -20,14 +20,20 @@ export const increaseBudget = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
-			await execution.ctx.runMutation(internal.tasks.private._increaseBudget, {
-				taskId: execution.task._id,
-				amount: args.amount,
-			});
+			try {
+				await execution.ctx.runMutation(internal.tasks.private._increaseBudget, {
+					taskId: execution.task._id,
+					amount: args.amount,
+				});
 
-			return {
-				text: `budget increased by ${asDollars({ bigInt: args.amount })}`,
-				reactions: execution.skill.knownReactions,
-			};
+				return {
+					text: `budget increased by ${asDollars({ bigInt: args.amount })}`,
+					reactions: execution.skill.knownReactions,
+				};
+				//
+			} catch (error) {
+				// perform() will resolve as failed with that message
+				throw new Error('Insufficient account funds to increase budget.');
+			}
 		},
 });
