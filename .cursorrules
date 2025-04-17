@@ -49,3 +49,5 @@ For form validation, we use TanStack.
 For toasts/notifications, we use sonner (already present).
 ------------------------------------
 all booleans should read like `isSomething` `hasSomething` `shouldDoShit`, like a yes/no question
+------------------------------------
+we use PascalCase for component files
