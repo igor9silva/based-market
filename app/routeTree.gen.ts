@@ -17,6 +17,7 @@ import { Route as BalanceImport } from './routes/balance'
 import { Route as SplatImport } from './routes/$'
 import { Route as TopUpIdImport } from './routes/top-up_.$id'
 import { Route as SkillsNewImport } from './routes/skills_.new'
+import { Route as SkillsIdImport } from './routes/skills_.$id'
 
 // Create/Update Routes
 
@@ -56,6 +57,12 @@ const SkillsNewRoute = SkillsNewImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const SkillsIdRoute = SkillsIdImport.update({
+  id: '/skills_/$id',
+  path: '/skills/$id',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -88,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TopUpImport
       parentRoute: typeof rootRoute
     }
+    '/skills_/$id': {
+      id: '/skills_/$id'
+      path: '/skills/$id'
+      fullPath: '/skills/$id'
+      preLoaderRoute: typeof SkillsIdImport
+      parentRoute: typeof rootRoute
+    }
     '/skills_/new': {
       id: '/skills_/new'
       path: '/skills/new'
@@ -112,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/balance': typeof BalanceRoute
   '/skills': typeof SkillsRoute
   '/top-up': typeof TopUpRoute
+  '/skills/$id': typeof SkillsIdRoute
   '/skills/new': typeof SkillsNewRoute
   '/top-up/$id': typeof TopUpIdRoute
 }
@@ -121,6 +136,7 @@ export interface FileRoutesByTo {
   '/balance': typeof BalanceRoute
   '/skills': typeof SkillsRoute
   '/top-up': typeof TopUpRoute
+  '/skills/$id': typeof SkillsIdRoute
   '/skills/new': typeof SkillsNewRoute
   '/top-up/$id': typeof TopUpIdRoute
 }
@@ -131,6 +147,7 @@ export interface FileRoutesById {
   '/balance': typeof BalanceRoute
   '/skills': typeof SkillsRoute
   '/top-up': typeof TopUpRoute
+  '/skills_/$id': typeof SkillsIdRoute
   '/skills_/new': typeof SkillsNewRoute
   '/top-up_/$id': typeof TopUpIdRoute
 }
@@ -142,16 +159,25 @@ export interface FileRouteTypes {
     | '/balance'
     | '/skills'
     | '/top-up'
+    | '/skills/$id'
     | '/skills/new'
     | '/top-up/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$' | '/balance' | '/skills' | '/top-up' | '/skills/new' | '/top-up/$id'
+  to:
+    | '/$'
+    | '/balance'
+    | '/skills'
+    | '/top-up'
+    | '/skills/$id'
+    | '/skills/new'
+    | '/top-up/$id'
   id:
     | '__root__'
     | '/$'
     | '/balance'
     | '/skills'
     | '/top-up'
+    | '/skills_/$id'
     | '/skills_/new'
     | '/top-up_/$id'
   fileRoutesById: FileRoutesById
@@ -162,6 +188,7 @@ export interface RootRouteChildren {
   BalanceRoute: typeof BalanceRoute
   SkillsRoute: typeof SkillsRoute
   TopUpRoute: typeof TopUpRoute
+  SkillsIdRoute: typeof SkillsIdRoute
   SkillsNewRoute: typeof SkillsNewRoute
   TopUpIdRoute: typeof TopUpIdRoute
 }
@@ -171,6 +198,7 @@ const rootRouteChildren: RootRouteChildren = {
   BalanceRoute: BalanceRoute,
   SkillsRoute: SkillsRoute,
   TopUpRoute: TopUpRoute,
+  SkillsIdRoute: SkillsIdRoute,
   SkillsNewRoute: SkillsNewRoute,
   TopUpIdRoute: TopUpIdRoute,
 }
@@ -189,6 +217,7 @@ export const routeTree = rootRoute
         "/balance",
         "/skills",
         "/top-up",
+        "/skills_/$id",
         "/skills_/new",
         "/top-up_/$id"
       ]
@@ -204,6 +233,9 @@ export const routeTree = rootRoute
     },
     "/top-up": {
       "filePath": "top-up.tsx"
+    },
+    "/skills_/$id": {
+      "filePath": "skills_.$id.tsx"
     },
     "/skills_/new": {
       "filePath": "skills_.new.tsx"

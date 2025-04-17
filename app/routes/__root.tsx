@@ -14,7 +14,6 @@ import { Loading } from '~/components/Loading';
 import { MainHeader } from '~/components/MainHeader';
 import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
-import { SidebarProvider } from '~/components/ui/sidebar';
 import { Toaster } from '~/components/ui/sonner';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 
@@ -96,7 +95,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	//
 	return (
-		<SidebarProvider open={false}>
+		<div>
 			<AuthLoading>
 				<Loading className="h-svh" />
 			</AuthLoading>
@@ -106,7 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 			<Authenticated>
 				<Main>{children}</Main>
 			</Authenticated>
-		</SidebarProvider>
+		</div>
 	);
 }
 

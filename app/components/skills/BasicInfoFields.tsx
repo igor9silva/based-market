@@ -1,4 +1,4 @@
-import { ZodEditor } from '~/components/skills/ZodEditor';
+// import { ZodEditor } from '~/components/skills/ZodEditor';
 import { LabelWithTooltip } from '~/components/ui/form-tooltip';
 import { Input } from '~/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select';
@@ -132,7 +132,13 @@ export function BasicInfoFields({
 					>
 						Input Schema
 					</LabelWithTooltip>
-					<ZodEditor value={inputSchema} onChange={onInputSchemaChange} />
+					<Textarea
+						id="inputSchema"
+						name="inputSchema"
+						value={inputSchema}
+						onChange={(e) => onInputSchemaChange(e.target.value)}
+						placeholder="z.object({})"
+					/>
 				</div>
 			)}
 		</div>

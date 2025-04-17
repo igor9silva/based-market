@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router';
 import { Doc } from 'convex/_generated/dataModel';
 import { pricingFor } from 'convex/skills/createAITool';
 import { asDollars } from 'convex/utils/money';
-import { useMemo } from 'react';
 import { Badge } from '~/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { SkillTooltip } from './SkillTooltip';
@@ -12,22 +11,6 @@ import { SkillTooltip } from './SkillTooltip';
  */
 export function SkillCard({ skill }: { skill: Doc<'skills'> }) {
 	//
-	const pricing = useMemo(() => {
-		//
-		if (skill.cost === 'dynamic') {
-			//
-			const price = pricingFor(skill.config.model);
-
-			return {
-				input: asDollars({ bigInt: price.inputToken * 1_000_000n }),
-				output: asDollars({ bigInt: price.outputToken * 1_000_000n }),
-			};
-		}
-
-		return asDollars({ bigInt: skill.cost, precision: 4 });
-		//
-	}, [skill]);
-
 	const availableSkills = skill.kind === 'soft' ? skill.config?.availableSkills ?? [] : [];
 	const knownReactions = skill.kind === 'hard' ? skill.knownReactions ?? [] : [];
 
@@ -75,20 +58,40 @@ export function SkillCard({ skill }: { skill: Doc<'skills'> }) {
 						</div>
 
 						<div className="mt-auto pt-2 border-t text-xs text-muted-foreground">
-							{typeof pricing === 'object' ? (
-								<div className="flex items-center justify-between">
-									<span>{pricing.input}$/M tokens in</span>
-									<span>{pricing.output}$/M tokens out</span>
-								</div>
-							) : (
-								<div className="flex items-center justify-center">
-									<span>{pricing}$ per use</span>
-								</div>
-							)}
+							<Pricing skill={skill} />
 						</div>
 					</div>
 				</CardContent>
 			</Card>
 		</Link>
+	);
+}
+
+function Pricing({ skill }: { skill: Doc<'skills'> }) {
+	//
+
+	if (skill.cost !== 'dynamic') {
+		return (
+			<div className="flex items-center justify-center">
+				<span>{asDollars({ bigInt: skill.cost, precision: 4 })}$ per use</span>
+			</div>
+		);
+	}
+
+	if (skill.config.model === 'auto') {
+		return (
+			<div className="flex items-center justify-center">
+				<span>Cost depends on selected task intelligence</span>
+			</div>
+		);
+	}
+
+	const price = pricingFor(skill.config.model);
+
+	return (
+		<div className="flex items-center justify-between">
+			<span>{asDollars({ bigInt: price.inputToken * 1_000_000n })}$/M tokens in</span>
+			<span>{asDollars({ bigInt: price.outputToken * 1_000_000n })}$/M tokens out</span>
+		</div>
 	);
 }
