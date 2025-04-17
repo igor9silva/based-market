@@ -1,5 +1,6 @@
 import { Button } from '~/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
+import { cn } from '~/lib/utils';
 
 interface ActionButtonProps {
 	//
@@ -8,6 +9,7 @@ interface ActionButtonProps {
 	disabled?: boolean;
 	tooltip?: string;
 	variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link';
+	className?: string;
 }
 
 export function ActionButton({
@@ -16,6 +18,7 @@ export function ActionButton({
 	disabled = false,
 	tooltip = '',
 	variant = 'default',
+	className = '',
 }: ActionButtonProps) {
 	//
 	return (
@@ -25,7 +28,7 @@ export function ActionButton({
 					type="button"
 					variant={variant}
 					size="icon"
-					className="h-8 w-8 rounded-full"
+					className={cn('h-8 w-8 rounded-full', className)}
 					onClick={onClick}
 					disabled={disabled}
 				>

@@ -16,6 +16,7 @@ import type * as components_private from "../components/private.js";
 import type * as components_public from "../components/public.js";
 import type * as http from "../http.js";
 import type * as lib from "../lib.js";
+import type * as magicRock_public from "../magicRock/public.js";
 import type * as magicRock from "../magicRock.js";
 import type * as migrations from "../migrations.js";
 import type * as schemas_actionSchema from "../schemas/actionSchema.js";
@@ -91,6 +92,7 @@ declare const fullApi: ApiFromModules<{
   "components/public": typeof components_public;
   http: typeof http;
   lib: typeof lib;
+  "magicRock/public": typeof magicRock_public;
   magicRock: typeof magicRock;
   migrations: typeof migrations;
   "schemas/actionSchema": typeof schemas_actionSchema;

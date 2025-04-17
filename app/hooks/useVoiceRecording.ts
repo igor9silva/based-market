@@ -1,5 +1,6 @@
+import { api } from 'convex/_generated/api';
+import { useAction } from 'convex/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { transcribeAudio } from '~/lib/transcription';
 
 type RecordingStatus = 'idle' | 'recording' | 'transcribing';
 
@@ -13,6 +14,7 @@ export function useVoiceRecording({ onTranscriptionComplete }: UseVoiceRecording
 	const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 	const audioChunksRef = useRef<Blob[]>([]);
 	const streamRef = useRef<MediaStream | null>(null);
+	const transcribe = useAction(api.magicRock.public.transcribeAudio);
 
 	const currentStatusRef = useRef<RecordingStatus>('idle');
 
@@ -23,14 +25,14 @@ export function useVoiceRecording({ onTranscriptionComplete }: UseVoiceRecording
 		//
 	}, []);
 
-	const handleAudioTranscription = async (audioBlob: Blob) => {
+	const handleAudioTranscription = async (blob: Blob) => {
 		//
 		if (currentStatusRef.current === 'idle') return;
 
 		updateRecordingStatus('transcribing');
 
 		try {
-			const text = await transcribeAudio(audioBlob);
+			const text = await transcribe({ audio: await blob.arrayBuffer() });
 
 			if (currentStatusRef.current === 'transcribing') {
 				onTranscriptionComplete(text);
@@ -77,10 +79,10 @@ export function useVoiceRecording({ onTranscriptionComplete }: UseVoiceRecording
 				if (currentStatusRef.current === 'idle') return;
 
 				// Combine chunks into a single blob
-				const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+				const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
 
 				// Process the audio
-				handleAudioTranscription(audioBlob);
+				handleAudioTranscription(blob);
 			});
 
 			mediaRecorderRef.current.addEventListener('error', (error) => {

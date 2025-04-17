@@ -14,7 +14,7 @@ export function useIsMobile() {
 // ... rest of the code ...
 ```
 ------------------------------------
-When using tailwind, NEVER use hardcoded values unless it's literally the only option. For example, instead of "min-w-[256px]", prefer to use tailwind conventions such as "min-w-64"
+When using tailwind, NEVER use hardcoded values unless it's literally the only option. For example, instead of "min-w-[256px]", prefer to use tailwind conventions such as "min-w-64" *ALWAYS*
 ------------------------------------
 Always prefer importing specific hooks from `React` over importing the entire library.
 e.g. `import { useEffect, useRef } from 'react'` instead of `import * as React from 'react'`
@@ -47,4 +47,5 @@ Project uses TanStack (NOT Next.js).
 Project uses Tailwind with shadcn-like components.
 For form validation, we use TanStack.
 For toasts/notifications, we use sonner (already present).
-
+------------------------------------
+all booleans should read like `isSomething` `hasSomething` `shouldDoShit`, like a yes/no question
