@@ -21,8 +21,8 @@ export function RequestBudgetAction(props: {
 		case 'running':
 			return null;
 
+		case 'succeeded': // should never as it throws
 		case 'pending authorization':
-		case 'failed':
 			return <GenericAction {...props} />;
 	}
 

@@ -64,7 +64,10 @@ function PromptInput({
 				<form
 					onSubmit={onSubmit}
 					onKeyDown={handleKeyDown}
-					className={cn('border-input bg-background rounded-3xl border p-2 shadow-xs', className)}
+					className={cn(
+						'border-input bg-background rounded-3xl border p-2 shadow-xs justify-between flex flex-col',
+						className,
+					)}
 				>
 					{children}
 				</form>
@@ -126,7 +129,7 @@ function PromptInputTextarea({
 			name="message"
 			ref={inputRef}
 			className={cn(
-				'text-primary min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
+				'text-primary min-h-11 w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
 				className,
 			)}
 			rows={1}

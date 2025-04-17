@@ -9,7 +9,7 @@ import { Archive, Bug, CheckCircle, ChevronDown, RotateCcw } from 'lucide-react'
 import { type RefCallback, useEffect, useMemo, useState } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { Action } from '~/components/Action';
-import { ActionComposer } from '~/components/ActionComposer';
+import { ActionComposer } from '~/components/ActionComposer/ActionComposer';
 import { AddBudgetButton } from '~/components/AddBudgetButton';
 import { DebugAction } from '~/components/DebugAction';
 import { Loading } from '~/components/Loading';
@@ -31,9 +31,11 @@ export function TaskConversation({
 	taskId: Id<'tasks'>;
 	className?: string;
 }) {
-	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
 	const navigate = useNavigate();
+
+	const taskQuery = convexQuery(api.tasks.public.findOne, { taskId });
 	const { data: task } = useSuspenseQuery(taskQuery);
+
 	const { debug, isBudgetDrawerOpen } = useSearch({ strict: false });
 	const { resolve, discard, increaseBudget, stop } = useTaskMutations();
 	const [selectedBudget, setSelectedBudget] = useState<BudgetStep>(0.2);
@@ -53,21 +55,6 @@ export function TaskConversation({
 	const reversedActions = useMemo(() => [...actions].reverse(), [actions]);
 	const initialRenderDate = useMemo(() => new Date(), []);
 
-	// Global keyboard shortcut for Cmd+Backspace to stop task
-	useEffect(() => {
-		//
-		const handleGlobalKeyDown = (e: KeyboardEvent) => {
-			if (e.key === 'Backspace' && (e.metaKey || e.ctrlKey)) {
-				e.preventDefault();
-				stop({ taskId: task._id });
-			}
-		};
-
-		document.addEventListener('keydown', handleGlobalKeyDown);
-		return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-		//
-	}, [task._id, task.status, stop]);
-
 	const handleReopenTask = () => {
 		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: 0.2 }) });
 	};
@@ -84,7 +71,6 @@ export function TaskConversation({
 	useEffect(() => {
 		//
 		if (task.status === 'unread' || task.status === 'blocked') {
-			console.debug('marking as read', task.status);
 			markAsRead({ taskId: task._id });
 		}
 		//
@@ -159,6 +145,7 @@ export function TaskConversation({
 					)}
 				</StickToBottomContent>
 			</StickToBottom>
+
 			<ActionComposer task={task} />
 
 			<Drawer

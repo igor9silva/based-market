@@ -15,9 +15,8 @@ export const requestBudget = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
-			return {
-				text: `This task needs more budget to continue. Estimated cost for \`${args.previousActionKey}\` is ${asDollars({ bigInt: args.estimatedCost })} USDc. <AddBudgetButton />`,
-				reactions: [],
-			};
+			throw new Error(
+				`This task needs more budget to continue. Estimated cost for \`${args.previousActionKey}\` is ${asDollars({ bigInt: args.estimatedCost })} USDc. <AddBudgetButton />`,
+			);
 		},
 });
