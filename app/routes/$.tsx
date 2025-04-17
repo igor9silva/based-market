@@ -33,5 +33,5 @@ export default function MDXPage() {
 	const taskId = params.taskId || page.defaultTaskId || 'inbox';
 	const body = `export const taskId = '${taskId}';\n\n${page.body}`;
 
-	return <MDX text={body} />;
+	return <MDX text={body} shouldRenderComponents={true} />;
 }

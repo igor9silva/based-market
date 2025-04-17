@@ -55,14 +55,16 @@ export default function MDX({
 	onClickFix,
 	errorFallback,
 	className,
+	shouldRenderComponents = false,
 }: {
 	text: string;
 	onClickFix?: (e: React.MouseEvent) => void;
 	errorFallback?: React.ReactNode;
 	className?: string;
+	shouldRenderComponents?: boolean;
 }) {
 	//
-	const { Component, error, isPending } = useMDX(text);
+	const { Component, error, isPending } = useMDX(text, shouldRenderComponents);
 
 	if (isPending) return <Loading />;
 	if (error) return errorFallback ?? <MDXError text={text} error={error} onClickFix={onClickFix} />;

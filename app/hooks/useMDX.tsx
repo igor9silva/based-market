@@ -4,9 +4,10 @@ import * as runtime from 'react/jsx-runtime';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 
-async function compileMDX(mdx: string) {
+async function compileMDX(mdx: string, shouldRenderComponents = false) {
 	return String(
 		await compile(mdx, {
+			format: shouldRenderComponents ? 'mdx' : 'md',
 			outputFormat: 'function-body',
 			remarkPlugins: [
 				remarkGfm, //
@@ -26,7 +27,7 @@ async function runMDX(code: string) {
 	return content;
 }
 
-export function useMDX(mdx: string) {
+export function useMDX(mdx: string, shouldRenderComponents = false) {
 	//
 	const {
 		data: Component,
@@ -36,7 +37,7 @@ export function useMDX(mdx: string) {
 		retry: false,
 		queryKey: ['mdx', mdx],
 		queryFn: async () => {
-			const code = await compileMDX(mdx);
+			const code = await compileMDX(mdx, shouldRenderComponents);
 			return await runMDX(code);
 		},
 		staleTime: Infinity,
