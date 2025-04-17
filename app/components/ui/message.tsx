@@ -45,12 +45,20 @@ export type MessageContentProps = {
 	text: string;
 	className?: string;
 	isMDX?: boolean;
+	shouldRenderComponents?: boolean;
 } & React.HTMLProps<HTMLDivElement>;
 
-const MessageContent = ({ text, className, isMDX = false, ...props }: MessageContentProps) => {
+const MessageContent = ({
+	text,
+	className,
+	isMDX = false,
+	shouldRenderComponents = false,
+	...props
+}: MessageContentProps) => {
 	//
 	return isMDX ? (
 		<MDX
+			shouldRenderComponents={shouldRenderComponents}
 			text={text}
 			className={cn('rounded-lg text-foreground prose break-words whitespace-normal', className)}
 			{...props}

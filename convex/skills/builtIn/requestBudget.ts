@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { asBigInt, asDollars } from '../../utils/money';
+import { asBigInt } from '../../utils/money';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const requestBudget = defineSkill({
@@ -15,8 +15,6 @@ export const requestBudget = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
-			throw new Error(
-				`This task needs more budget to continue. Estimated cost for \`${args.previousActionKey}\` is ${asDollars({ bigInt: args.estimatedCost })} USDc.\n\n<AddBudgetButton />`,
-			);
+			throw new Error(`This task needs more budget to continue. \n\n<AddBudgetButton />`);
 		},
 });

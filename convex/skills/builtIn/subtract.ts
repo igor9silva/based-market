@@ -3,9 +3,10 @@ import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const subtract = defineSkill({
 	preApprovedCost: 0n,
-	description: 'Subtract N numbers',
+	description: 'Subtract a number from another number',
 	parameters: z.object({
-		numbers: z.array(z.number()).describe('The numbers to subtract.'),
+		from: z.number().describe('The number to subtract from.'),
+		amount: z.number().describe('The amount to subtract.'),
 	}),
 	knownReactions: [
 		{
@@ -19,7 +20,7 @@ export const subtract = defineSkill({
 		async (args): Promise<ExecutionResult> => {
 			//
 			return {
-				text: args.numbers.reduce((acc, curr) => acc - curr, 0).toString(),
+				text: (args.from - args.amount).toString(),
 				reactions: execution.skill.knownReactions,
 			};
 		},
