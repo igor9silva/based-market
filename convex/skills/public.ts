@@ -1,9 +1,10 @@
 import { zid } from 'convex-helpers/server/zod';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx, QueryCtx } from '../_generated/server';
-import { query } from '../lib';
+import { mutation, query } from '../lib';
+import { newSkillSchema } from '../schemas/skillSchema';
 import { current as getCurrentUser } from '../users/public';
-import { _findAllByOwner } from './private';
+import { _create, _findAllByOwner, _update } from './private';
 
 export const findAllPublic = query({
 	handler: async (ctx) => {
@@ -106,115 +107,30 @@ export const availableIntelligences = query({
 	},
 });
 
-// export const create = mutation({
-// 	args: {
-// 		key: z.string(),
-// 		kind: z.enum(['hard', 'soft']),
-// 		description: z.string(),
-// 		inputSchema: z.string(),
-// 		preApprovedCost: z.union([z.literal('none'), z.bigint()]),
-// 		cost: z.union([z.bigint(), z.literal('dynamic')]),
-// 		config: z.record(z.any()),
-// 	},
-// 	handler: async (ctx, args) => {
-// 		//
-// 		const currentUser = await getCurrentUser(ctx, {});
+export const create = mutation({
+	args: {
+		skill: newSkillSchema,
+	},
+	handler: async (ctx, { skill }) => {
+		//
+		const currentUser = await getCurrentUser(ctx, {});
 
-// 		// Check if a skill with this key already exists
-// 		const existingSkill = await ctx.db
-// 			.query('skills')
-// 			.withIndex('by_owner_key', (q) => q.eq('owner', currentUser._id).eq('key', args.key))
-// 			.unique();
+		return await _create(ctx, { skill, userId: currentUser._id });
+	},
+});
 
-// 		if (existingSkill) {
-// 			throw new Error(`A skill with key '${args.key}' already exists`);
-// 		}
+export const update = mutation({
+	args: {
+		skillId: zid('skills'),
+		updatedSkill: newSkillSchema,
+	},
+	handler: async (ctx, { skillId, updatedSkill }) => {
+		//
+		const { currentUser } = await ensureSkillOwner(ctx, { skillId });
 
-// 		// Create the skill
-// 		const { kind, cost, config, ...rest } = args;
-
-// 		// Handle different skill types with appropriate schema validation
-// 		if (kind === 'soft') {
-// 			// For soft skills, validate against the decision config schema
-// 			const validatedConfig = decisionConfigSchema.parse(config);
-
-// 			return await ctx.db.insert('skills', {
-// 				...rest,
-// 				kind: 'soft',
-// 				cost: 'dynamic',
-// 				owner: currentUser._id,
-// 				author: currentUser._id,
-// 				config: validatedConfig,
-// 			});
-// 		} else {
-// 			// For hard skills, validate against the HTTP config schema
-// 			const validatedConfig = httpConfigSchema.parse(config);
-
-// 			return await ctx.db.insert('skills', {
-// 				...rest,
-// 				kind: 'hard',
-// 				cost: typeof cost === 'string' ? 0n : cost,
-// 				owner: currentUser._id,
-// 				author: currentUser._id,
-// 				config: validatedConfig,
-// 			});
-// 		}
-// 	},
-// });
-
-// export const update = mutation({
-// 	args: {
-// 		id: zid('skills'),
-// 		key: z.string(),
-// 		kind: z.enum(['hard', 'soft']),
-// 		description: z.string(),
-// 		inputSchema: z.string(),
-// 		preApprovedCost: z.union([z.literal('none'), z.bigint()]),
-// 		cost: z.union([z.bigint(), z.literal('dynamic')]),
-// 		config: z.record(z.any()),
-// 	},
-// 	handler: async (ctx, { id, kind, cost, config, ...updates }) => {
-// 		//
-// 		const currentUser = await getCurrentUser(ctx, {});
-
-// 		// Get the skill
-// 		const skill = await ctx.db.get(id);
-// 		if (!skill) throw new Error('Skill not found');
-
-// 		// Check if user owns this skill
-// 		if (skill.owner !== currentUser._id) {
-// 			throw new Error('Skill not found');
-// 		}
-
-// 		// Ensure we don't change the kind
-// 		if (skill.kind !== kind) {
-// 			throw new Error(`Cannot change skill kind from ${skill.kind} to ${kind}`);
-// 		}
-
-// 		// Validate and update the skill with appropriate config schema
-// 		if (kind === 'soft') {
-// 			// For soft skills, validate against the decision config schema
-// 			const validatedConfig = decisionConfigSchema.parse(config);
-
-// 			await ctx.db.patch(id, {
-// 				...updates,
-// 				cost: 'dynamic',
-// 				config: validatedConfig,
-// 			});
-// 		} else {
-// 			// For hard skills, validate against the HTTP config schema
-// 			const validatedConfig = httpConfigSchema.parse(config);
-
-// 			await ctx.db.patch(id, {
-// 				...updates,
-// 				cost: typeof cost === 'string' ? 0n : cost,
-// 				config: validatedConfig,
-// 			});
-// 		}
-
-// 		return id;
-// 	},
-// });
+		return await _update(ctx, { skillId, updatedSkill, userId: currentUser._id });
+	},
+});
 
 export const ensureSkillOwner = async (
 	ctx: QueryCtx | MutationCtx, //

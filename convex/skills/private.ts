@@ -1,7 +1,7 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { internalQuery } from '../lib';
-import { builtInSkillSchema, skillOwnerSchema } from '../schemas/skillSchema';
+import { internalMutation, internalQuery } from '../lib';
+import { builtInSkillSchema, newSkillSchema, skillOwnerSchema } from '../schemas/skillSchema';
 import { zodToString } from '../utils/zodToString';
 import { _builtInSkills } from './builtIn/index';
 
@@ -85,6 +85,15 @@ export const _findOne = internalQuery({
 	},
 });
 
+const _findById = internalQuery({
+	args: {
+		skillId: zid('skills'),
+	},
+	handler: async (ctx, { skillId }) => {
+		return await ctx.db.get(skillId);
+	},
+});
+
 export const _findOneByOwner = internalQuery({
 	args: {
 		key: z.string(),
@@ -95,5 +104,43 @@ export const _findOneByOwner = internalQuery({
 			.query('skills')
 			.withIndex('by_owner_key', (q) => q.eq('owner', owner).eq('key', key))
 			.unique();
+	},
+});
+
+export const _create = internalMutation({
+	args: {
+		skill: newSkillSchema,
+		userId: zid('users'),
+	},
+	handler: async (ctx, { skill, userId }) => {
+		//
+		const existing = await _findOne(ctx, { key: skill.key, owner: userId });
+		if (existing) throw new Error(`Skill key '${skill.key}' in use.`);
+
+		return await ctx.db.insert('skills', {
+			...skill,
+			owner: userId,
+			author: userId,
+		});
+	},
+});
+
+export const _update = internalMutation({
+	args: {
+		skillId: zid('skills'),
+		updatedSkill: newSkillSchema,
+		userId: zid('users'),
+	},
+	handler: async (ctx, { skillId, updatedSkill, userId }) => {
+		//
+		const existing = await _findById(ctx, { skillId });
+
+		if (!existing) throw new Error('Skill not found');
+		if (existing.owner !== userId) throw new Error('Skill not found');
+		if (existing.key !== updatedSkill.key) throw new Error('Skill key cannot be changed.');
+
+		return await ctx.db.patch(skillId, {
+			...updatedSkill,
+		});
 	},
 });

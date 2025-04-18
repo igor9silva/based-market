@@ -213,6 +213,11 @@ export const skillSchema = z
 		'A Skill is an external API call (service or LLM) that can be used by the user or Meseeks.', //
 	);
 
+export const newSkillSchema = z.union([
+	hardSkillSchema.omit({ author: true, owner: true }), //
+	softSkillSchema.omit({ author: true, owner: true }),
+]);
+
 // Instincts/built-in skills
 // speak()
 // createTask()

@@ -1,4 +1,5 @@
 import { askForClarification } from './askForClarification';
+import { createSkill } from './createSkill';
 import { discard } from './discard';
 import { divide } from './divide';
 import { done } from './done';
@@ -13,28 +14,36 @@ import { stop } from './stop';
 import { subtract } from './subtract';
 import { sum } from './sum';
 import { updateInstructions } from './updateInstructions';
+import { updateSkill } from './updateSkill';
 
 export const _builtInSkills = {
+	//
+	// loop entry
 	askForClarification,
 	updateInstructions,
-	// updateSummary,
-	// moveTask,
-	// createSubtask,
-	done,
-	say,
-	reason,
-	reopen,
-	increaseBudget,
-	resolve,
 
-	/* math */
+	// math
 	sum,
 	multiply,
 	divide,
 	subtract,
 
-	/* lifecycle */
+	// lifecycle
+	say,
+	done,
 	stop,
+	reason,
+	reopen,
+	increaseBudget,
+	resolve,
 	requestBudget,
 	discard,
+
+	// skills
+	createSkill,
+	updateSkill,
 };
+
+// updateSummary,
+// moveTask,
+// createSubtask,
