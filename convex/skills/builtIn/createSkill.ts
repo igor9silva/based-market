@@ -1,13 +1,20 @@
 import { z } from 'zod';
 import { internal } from '../../_generated/api';
-import { newSkillSchema } from '../../schemas/skillSchema';
+import {
+	decisionConfigSchema,
+	httpConfigSchema,
+	newSkillSchema,
+	simplifiedSkillSchema,
+} from '../../schemas/skillSchema';
+import { asBigInt } from '../../utils/money';
+import { stringToZod } from '../../utils/zodToString';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const createSkill = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Learn a new skill.',
 	parameters: z.object({
-		skill: newSkillSchema,
+		skill: simplifiedSkillSchema,
 	}),
 	knownReactions: [
 		{
@@ -20,10 +27,31 @@ export const createSkill = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
+			console.debug('learning skill', args.skill);
+			ensureInputSchemaIsValid(args.skill.inputSchema);
+
 			await execution.ctx.runMutation(internal.skills.private._create, {
-				skill: args.skill,
 				userId: execution.task.owner,
+				skill: newSkillSchema.parse({
+					key: args.skill.key,
+					description: args.skill.description,
+					kind: args.skill.kind,
+					inputSchema: args.skill.inputSchema,
+					preApprovedCost: args.skill.isSafe ? asBigInt({ dollars: 0.05 }) : 'none',
+					// TODO: make sure to add `iterate` to the knownReactions
+					knownReactions: args.skill.knownReactions?.map((key) => ({
+						skillKey: key,
+						args: {},
+						condition: 'any',
+					})),
+					config: createConfig(args.skill),
+					cost: args.skill.kind === 'hard' ? 0n : 'dynamic',
+					owner: execution.task.owner,
+					author: execution.action._id,
+				}),
 			});
+
+			console.debug('skill created', args.skill);
 
 			const kind = args.skill.kind === 'hard' ? 'Hard' : 'Soft';
 			return {
@@ -32,3 +60,37 @@ export const createSkill = defineSkill({
 			};
 		},
 });
+
+export function ensureInputSchemaIsValid(inputSchema: string) {
+	//
+	try {
+		stringToZod(inputSchema);
+		return true;
+	} catch (error) {
+		throw new Error('Invalid input schema');
+	}
+}
+
+export function createConfig(skill: z.infer<typeof simplifiedSkillSchema>) {
+	//
+	switch (skill.kind) {
+		//
+		case 'soft':
+			return decisionConfigSchema.parse({
+				model: 'auto',
+				instructions: skill.config.instructions,
+				temperature: skill.config.temperature,
+				availableSkills: skill.config.availableSkills,
+				historyMode: 'since last summarized',
+			});
+
+		case 'hard':
+			return httpConfigSchema.parse({
+				url: skill.config.url,
+				method: skill.config.method,
+				headers: skill.config.headers ?? {},
+				paramMappings: skill.config.paramMappings,
+				body: skill.config.body,
+			});
+	}
+}

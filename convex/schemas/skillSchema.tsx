@@ -40,13 +40,15 @@ export const httpConfigSchema = z.object({
 				'path',
 				'body',
 			]),
-			source: z.string().describe('original parameter name'),
-			target: z.string().describe('name on the URL, header, path, or body'),
+			source: z.string().describe('the parameter name on inputSchema'),
+			target: z
+				.string()
+				.describe('the parameter name on the URL, header, path, or body, depending on the selected type'),
 		}),
 	),
 	body: z
 		.object({
-			template: z.record(z.any()).describe('Base JSON object with pre-filled values'),
+			template: z.record(z.any()).describe('Base JSON object with pre-filled values').optional(),
 		})
 		.optional(),
 });
@@ -85,6 +87,27 @@ export const modelsSchema = z.enum([
 
 	// Together
 	// 'together/llama-4-maverick',
+]);
+
+export const instructionVariableSchema = z.union([
+	z.literal('task').describe('The full task structure, in a XML-like format'),
+	z.literal('task.id'),
+	z.literal('task.title'),
+	z.literal('task.status'),
+	z.literal('task.createdAt'),
+	z.literal('task.lastUpdatedAt'),
+	z.literal('task.lastSummarizedAt'),
+	z.literal('task.instructions'),
+	// z.literal('task.summary'),
+	z.literal('task.parent'),
+	z.literal('task.budgetUSDC').describe('The full task budget structure, in a XML-like format'),
+	z.literal('task.budgetUSDC.total'),
+	z.literal('task.budgetUSDC.spent'),
+	z.literal('task.budgetUSDC.available'),
+	z.literal('currentDate').describe('The current date and time in ISO 8601 format'),
+	z.literal('userInfo').describe('Information about the user, written by themself'),
+	z.literal('allSkills').describe('A list of all existing skills.'),
+	// z.literal('input.instructions'),
 ]);
 
 export const decisionConfigSchema = z.object({
@@ -233,3 +256,73 @@ export const newSkillSchema = z.union([
 
 // // managed by you
 // ...
+
+// ------------------------------------
+// ------------------------------------
+// ------------------------------------
+
+export const simplifiedSkillKindSchema = z.enum(['hard', 'soft']);
+
+export const simplifiedDecisionConfigSchema = z.object({
+	instructions: z.string().describe('Instructions for the decision-making process'),
+	temperature: z.number().min(0).max(2).describe('Temperature to use'),
+	availableSkills: z.array(z.string()).describe('Skills that can be used to make the decision'),
+});
+
+const simplifiedCoreSkillSchema = z.object({
+	key: z.string(),
+	description: z.string(),
+	inputSchema: z.string(), // TODO: enforce that this is a valid zod schema
+	isSafe: z.boolean(),
+	knownReactions: z
+		.array(z.string().describe('The key of the skill to use'))
+		.optional()
+		.describe('Pre-configured actions that will happen as a re-action to the use of this skill.'),
+	kind: simplifiedSkillKindSchema,
+});
+
+export const simplifiedHttpConfigSchema = z.object({
+	url: z.string(),
+	method: z.enum([
+		'GET', //
+		'POST',
+		'PUT',
+		'DELETE',
+		'PATCH',
+	]),
+	headers: z.record(z.string()).describe('HTTP headers to send with the request').optional(),
+	paramMappings: z.array(
+		z.object({
+			type: z.enum([
+				'search', //
+				'header',
+				'path',
+				'body',
+			]),
+			source: z.string().describe('the parameter name on inputSchema'),
+			target: z
+				.string()
+				.describe(
+					'the parameter name on the URL, header, path, or body, depending on the selected type. For `path` params, they should appear at the URL as `https://example.com/path/:param1/:param2`.',
+				),
+		}),
+	),
+	body: z
+		.object({
+			template: z.record(z.any()).describe('Base JSON object with pre-filled values').optional(),
+		})
+		.optional(),
+});
+
+export const simplifiedHardSkillSchema = simplifiedCoreSkillSchema.extend({
+	kind: z.literal('hard'),
+	config: simplifiedHttpConfigSchema,
+});
+
+export const simplifiedSoftSkillSchema = simplifiedCoreSkillSchema.extend({
+	kind: z.literal('soft'),
+	config: simplifiedDecisionConfigSchema,
+});
+
+// Simplified skill schema for the learnSkill() skill TODO: organize better
+export const simplifiedSkillSchema = z.union([simplifiedHardSkillSchema, simplifiedSoftSkillSchema]);

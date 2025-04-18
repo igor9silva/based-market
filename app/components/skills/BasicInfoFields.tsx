@@ -181,7 +181,7 @@ function InputSchemaField({ disabled }: { disabled?: boolean }) {
 						Input Schema
 					</LabelWithTooltip>
 					<FormControl>
-						<Textarea {...field} placeholder="z.object({})" disabled={disabled} />
+						<Textarea {...field} placeholder="z.object({})" disabled={disabled} className="min-h-40" />
 					</FormControl>
 					<FormMessage />
 				</FormItem>

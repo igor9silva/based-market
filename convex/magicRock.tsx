@@ -7,10 +7,10 @@ import { xai } from '@ai-sdk/xai';
 import { type CoreMessage, generateText, type LanguageModel } from 'ai';
 import { z } from 'zod';
 import { internal } from './_generated/api';
-import type { Doc } from './_generated/dataModel';
+import type { Doc, Id } from './_generated/dataModel';
 import type { ActionCtx, MutationCtx } from './_generated/server';
 import { env } from './schemas/envSchema';
-import type { modelsSchema, softSkillSchema } from './schemas/skillSchema';
+import type { instructionVariableSchema, modelsSchema, softSkillSchema } from './schemas/skillSchema';
 import type { AITool } from './schemas/toolSchema';
 import { modelFrom } from './skills/createAITool';
 import { _toolsForMagicRock } from './skills/tools';
@@ -45,7 +45,7 @@ export async function _prepareContext(
 	const [history, tools, instructions] = await Promise.all([
 		renderHistory(ctx, task, action, skill),
 		loadTools(ctx, task, action, skill),
-		renderInstructions(task, action, skill),
+		renderInstructions(ctx, task, action, skill),
 	]);
 
 	console.debug('model', model.modelId, model.provider);
@@ -199,6 +199,13 @@ async function loadTools(
 
 	console.debug('loaded tools', Object.keys(tools));
 
+	if (Object.keys(tools).length !== skill.config.availableSkills.length) {
+		console.warn(
+			'missing tools',
+			skill.config.availableSkills.filter((key) => !tools[key]),
+		);
+	}
+
 	return tools;
 }
 
@@ -271,6 +278,7 @@ function computeSince(
 }
 
 async function renderInstructions(
+	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>, //
 	action: Doc<'actions'>,
 	skill: z.infer<typeof softSkillSchema>,
@@ -278,6 +286,9 @@ async function renderInstructions(
 	//
 	let result = skill.config.instructions;
 	let prevResult = '';
+
+	// TODO: workaround because we needed an async
+	result = await replaceAllSkillsIfNeeded(ctx, task.owner, result);
 
 	// continue replacing until no more variables to replace
 	while (result !== prevResult) {
@@ -294,25 +305,22 @@ async function renderInstructions(
 	return result;
 }
 
-export const instructionVariableSchema = z.union([
-	z.literal('task').describe('The full task structure, in a XML-like format'),
-	z.literal('task.id'),
-	z.literal('task.title'),
-	z.literal('task.status'),
-	z.literal('task.createdAt'),
-	z.literal('task.lastUpdatedAt'),
-	z.literal('task.lastSummarizedAt'),
-	z.literal('task.instructions'),
-	// z.literal('task.summary'),
-	z.literal('task.parent'),
-	z.literal('task.budgetUSDC').describe('The full task budget structure, in a XML-like format'),
-	z.literal('task.budgetUSDC.total'),
-	z.literal('task.budgetUSDC.spent'),
-	z.literal('task.budgetUSDC.available'),
-	z.literal('currentDate').describe('The current date and time in ISO 8601 format'),
-	z.literal('userInfo').describe('Information about the user, written by themself'),
-	// z.literal('input.instructions'),
-]);
+async function replaceAllSkillsIfNeeded(
+	ctx: ActionCtx | MutationCtx, //
+	userId: Id<'users'>,
+	text: string,
+): Promise<string> {
+	//
+	if (!text.includes('{{allSkills}}')) return text;
+
+	const list = await ctx.runQuery(internal.skills.private._listAllKeys, {
+		userId,
+	});
+
+	const variable = list.map((i) => `- *${i.key}*: ${i.description}`).join('\n');
+
+	return text.replace('{{allSkills}}', variable);
+}
 
 function valueForVariable(
 	variable: z.infer<typeof instructionVariableSchema>, //
@@ -405,7 +413,8 @@ function valueForVariable(
 		// 	return action.args.instructions ?? '<system>no instructions</system>';
 
 		default:
-			throw new Error(`Unknown variable: ${variable}`);
+			console.warn(`Unknown variable: ${variable}`);
+			return variable;
 	}
 }
 

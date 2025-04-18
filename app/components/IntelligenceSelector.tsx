@@ -44,7 +44,7 @@ export function IntelligenceSelector({
 						</div>
 					</TooltipTrigger>
 					<TooltipContent side="bottom">
-						<p>Select the intelligence used on this task</p>
+						<p>The intelligence to power this task</p>
 					</TooltipContent>
 				</Tooltip>
 			</TooltipProvider>

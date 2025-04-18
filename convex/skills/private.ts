@@ -85,12 +85,42 @@ export const _findOne = internalQuery({
 	},
 });
 
-const _findById = internalQuery({
+export const _findOneSafe = internalQuery({
 	args: {
-		skillId: zid('skills'),
+		key: z.string(),
+		owner: zid('users'),
 	},
-	handler: async (ctx, { skillId }) => {
-		return await ctx.db.get(skillId);
+	handler: async (ctx, { key, owner }) => {
+		try {
+			return await _findOne(ctx, { key, owner });
+		} catch (error) {
+			if (error instanceof Error && error.message === `Unknown skill: ${key}`) {
+				return undefined;
+			}
+			throw error;
+		}
+	},
+});
+
+export const _listAllKeys = internalQuery({
+	args: {
+		userId: zid('users'),
+	},
+	handler: async (ctx, { userId }) => {
+		//
+		const dbList = await _findAll(ctx, { owner: userId }).then((list) =>
+			list.map((i) => ({
+				key: i.key,
+				description: i.description,
+			})),
+		);
+
+		const builtInList = Object.keys(_builtInSkills).map((key) => ({
+			key,
+			description: _builtInSkills[key as keyof typeof _builtInSkills].description,
+		}));
+
+		return dbList.concat(builtInList);
 	},
 });
 
@@ -114,7 +144,8 @@ export const _create = internalMutation({
 	},
 	handler: async (ctx, { skill, userId }) => {
 		//
-		const existing = await _findOne(ctx, { key: skill.key, owner: userId });
+		// TODO: bad logic, improve this
+		const existing = await _findOneSafe(ctx, { key: skill.key, owner: userId });
 		if (existing) throw new Error(`Skill key '${skill.key}' in use.`);
 
 		return await ctx.db.insert('skills', {
@@ -127,19 +158,18 @@ export const _create = internalMutation({
 
 export const _update = internalMutation({
 	args: {
-		skillId: zid('skills'),
 		updatedSkill: newSkillSchema,
 		userId: zid('users'),
 	},
-	handler: async (ctx, { skillId, updatedSkill, userId }) => {
+	handler: async (ctx, { updatedSkill, userId }) => {
 		//
-		const existing = await _findById(ctx, { skillId });
+		const existing = await _findOne(ctx, { key: updatedSkill.key, owner: userId });
 
 		if (!existing) throw new Error('Skill not found');
 		if (existing.owner !== userId) throw new Error('Skill not found');
-		if (existing.key !== updatedSkill.key) throw new Error('Skill key cannot be changed.');
+		if (!('_id' in existing)) throw new Error('Skill not found'); // built-in skills do not have an _id
 
-		return await ctx.db.patch(skillId, {
+		return await ctx.db.patch(existing._id, {
 			...updatedSkill,
 		});
 	},

@@ -1,15 +1,15 @@
-import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internal } from '../../_generated/api';
-import { newSkillSchema } from '../../schemas/skillSchema';
+import { newSkillSchema, simplifiedSkillSchema } from '../../schemas/skillSchema';
+import { asBigInt } from '../../utils/money';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
+import { createConfig, ensureInputSchemaIsValid } from './createSkill';
 
 export const updateSkill = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Update details of a skill we already know.',
 	parameters: z.object({
-		skillId: zid('skills'),
-		updatedSkill: newSkillSchema,
+		updatedSkill: simplifiedSkillSchema,
 	}),
 	knownReactions: [
 		{
@@ -22,11 +22,30 @@ export const updateSkill = defineSkill({
 		(execution: ToolExecution) =>
 		async (args): Promise<ExecutionResult> => {
 			//
+			console.debug('updating skill', args.updatedSkill);
+			ensureInputSchemaIsValid(args.updatedSkill.inputSchema);
+
 			await execution.ctx.runMutation(internal.skills.private._update, {
-				skillId: args.skillId,
-				updatedSkill: args.updatedSkill,
 				userId: execution.task.owner,
+				updatedSkill: newSkillSchema.parse({
+					key: args.updatedSkill.key,
+					description: args.updatedSkill.description,
+					kind: args.updatedSkill.kind,
+					inputSchema: args.updatedSkill.inputSchema,
+					preApprovedCost: args.updatedSkill.isSafe ? asBigInt({ dollars: 0.05 }) : 'none',
+					knownReactions: args.updatedSkill.knownReactions?.map((key) => ({
+						skillKey: key,
+						args: {},
+						condition: 'any',
+					})),
+					config: createConfig(args.updatedSkill),
+					cost: args.updatedSkill.kind === 'hard' ? 0n : 'dynamic',
+					owner: execution.task.owner,
+					author: execution.action._id,
+				}),
 			});
+
+			console.debug('skill updated', args.updatedSkill);
 
 			const kind = args.updatedSkill.kind === 'hard' ? 'Hard' : 'Soft';
 			return {

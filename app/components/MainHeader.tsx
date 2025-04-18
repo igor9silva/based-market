@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, useRouter } from '@tanstack/react-router';
-import { ArrowLeft, ArrowRight, Inbox, Share, SquarePen } from 'lucide-react';
+import { ArrowLeft, Inbox, Share, SquarePen } from 'lucide-react';
 import { Suspense } from 'react';
 import { cn } from '~/lib/utils';
 
@@ -75,7 +75,7 @@ export function MainHeader({ className }: { className?: string }) {
 					<TooltipButton className="p-2" variant="ghost" onClick={share} tooltipContent="Share this task">
 						<Share />
 					</TooltipButton>
-					{search.selectedSubtaskId && (
+					{/* {search.selectedSubtaskId && (
 						<TooltipButton
 							variant="ghost"
 							size="icon"
@@ -88,7 +88,7 @@ export function MainHeader({ className }: { className?: string }) {
 						>
 							<ArrowRight />
 						</TooltipButton>
-					)}
+					)} */}
 				</div>
 
 				<div className="flex gap-1">

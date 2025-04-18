@@ -121,14 +121,13 @@ export const create = mutation({
 
 export const update = mutation({
 	args: {
-		skillId: zid('skills'),
 		updatedSkill: newSkillSchema,
 	},
-	handler: async (ctx, { skillId, updatedSkill }) => {
+	handler: async (ctx, { updatedSkill }) => {
 		//
-		const { currentUser } = await ensureSkillOwner(ctx, { skillId });
+		const currentUser = await getCurrentUser(ctx, {});
 
-		return await _update(ctx, { skillId, updatedSkill, userId: currentUser._id });
+		return await _update(ctx, { updatedSkill, userId: currentUser._id });
 	},
 });
 
