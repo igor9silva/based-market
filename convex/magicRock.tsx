@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { internal } from './_generated/api';
 import type { Doc } from './_generated/dataModel';
 import type { ActionCtx, MutationCtx } from './_generated/server';
+import { env } from './schemas/envSchema';
 import type { modelsSchema, softSkillSchema } from './schemas/skillSchema';
 import type { AITool } from './schemas/toolSchema';
 import { modelFrom } from './skills/createAITool';
@@ -210,14 +211,14 @@ async function renderHistory(
 	//
 	const actions = await ctx.runQuery(internal.action.private._findLastActions, {
 		taskId: task._id,
-		amount: 40, // TODO: env
+		amount: env.DEFAULT_CONTEXT_SIZE,
 	});
 
 	// TODO: add the summary as a message?
 
 	const history = actions
 		// remove unfinished or skipped actions
-		// .filter((action) => ['succeeded', 'failed'].includes(action.status))
+		.filter((action) => ['succeeded', 'failed', 'pending authorization'].includes(action.status))
 		// remove the current action
 		.filter((a) => a._id !== action._id)
 		// render
@@ -245,7 +246,7 @@ function renderAction(
 			`<date>${new Date(action._creationTime).toISOString()}</date>`,
 			`<skill>${action.skillKey}</skill>`,
 			`<status>${action.status}</status>`,
-			`<result>${action.result?.text}</result>`,
+			action.result?.text ? `<result>${action.result?.text}</result>` : '',
 			// `<cost>${action.costs.reduce}</cost>`,
 		].join(''),
 	};

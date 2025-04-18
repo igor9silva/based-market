@@ -74,6 +74,13 @@ export const env = createEnv({
 			.pipe(z.number())
 			.describe('The maximum number of consecutive companion actions.')
 			.default('20'),
+
+		DEFAULT_CONTEXT_SIZE: z
+			.string()
+			.transform((s) => parseInt(s, 10))
+			.pipe(z.number())
+			.describe('The default context size.')
+			.default('40'),
 	},
 
 	/**
