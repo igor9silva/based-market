@@ -4,7 +4,7 @@ import { Message } from '~/components/ui/message';
 import { TextShimmer } from '~/components/ui/text-shimmer';
 import { GenericAction } from './GenericAction';
 
-export function IterateAction({
+export function ThinkingAction({
 	className, //
 	action,
 	initialRenderDate,
