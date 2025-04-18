@@ -9,7 +9,7 @@ export const say = defineSkill({
 	}),
 	knownReactions: [
 		{
-			skillKey: 'inferUserIntent',
+			skillKey: 'instruct',
 			args: {},
 			condition: 'owner',
 		},

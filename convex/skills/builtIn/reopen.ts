@@ -8,7 +8,7 @@ export const reopen = defineSkill({
 	parameters: z.object({}),
 	knownReactions: [
 		{
-			skillKey: 'inferUserIntent',
+			skillKey: 'instruct',
 			args: {},
 			condition: 'owner',
 		},
