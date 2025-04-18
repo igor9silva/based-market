@@ -5,7 +5,7 @@ import { api } from 'convex/_generated/api';
 import type { Doc, Id } from 'convex/_generated/dataModel';
 import { useMutation, usePaginatedQuery } from 'convex/react';
 import { asBigInt } from 'convex/utils/money';
-import { Archive, Bug, CheckCircle, ChevronDown, RotateCcw } from 'lucide-react';
+import { Archive, CheckCircle, ChevronDown, CodeXml, RotateCcw } from 'lucide-react';
 import { type RefCallback, useEffect, useMemo, useState } from 'react';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 import { Action } from '~/components/Action';
@@ -111,12 +111,12 @@ export function TaskConversation({
 				</div>
 				<Link to="/$" search={{ debug: debug ? undefined : true }} replace>
 					<Toggle
-						aria-label="Toggle debug mode"
+						aria-label="Toggle Dev Mode (former Debug)"
 						pressed={Boolean(debug)}
 						className="h-8 px-2 data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
 					>
-						<Bug className="h-4 w-4 mr-1" />
-						Debug
+						<CodeXml className="h-4 w-4 mr-1" />
+						Dev Mode
 					</Toggle>
 				</Link>
 			</div>
