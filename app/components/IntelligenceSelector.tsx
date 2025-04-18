@@ -1,7 +1,6 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
-import { Doc } from 'convex/_generated/dataModel';
 import { modelsSchema } from 'convex/schemas/skillSchema';
 import { Brain, ChevronsUpDown } from 'lucide-react';
 import { Suspense, useState } from 'react';
@@ -19,16 +18,19 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
-import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
 
 // TODO: display the model cost
 
+type IntelligenceKey = z.infer<typeof modelsSchema>;
+
 export function IntelligenceSelector({
-	task, //
+	value,
+	onChange,
 	className,
 }: {
-	task: Doc<'tasks'>;
+	value?: IntelligenceKey;
+	onChange: (value: IntelligenceKey) => void;
 	className?: string;
 }) {
 	//
@@ -47,7 +49,7 @@ export function IntelligenceSelector({
 				</Tooltip>
 			</TooltipProvider>
 			<Suspense fallback={<Skeleton className="w-60 h-8" />}>
-				<IntelligenceCombobox task={task} />
+				<IntelligenceCombobox value={value} onChange={onChange} />
 			</Suspense>
 		</div>
 	);
@@ -70,10 +72,12 @@ function hasDescription(intelligence: IntelligenceOption): intelligence is Recom
 }
 
 function IntelligenceCombobox({
-	task, //
+	value,
+	onChange,
 	className,
 }: {
-	task: Doc<'tasks'>;
+	value?: IntelligenceKey;
+	onChange: (value: IntelligenceKey) => void;
 	className?: string;
 }) {
 	//
@@ -81,17 +85,19 @@ function IntelligenceCombobox({
 	const { data: intelligences } = useSuspenseQuery(query);
 
 	const [open, setOpen] = useState(false);
-	const [selected, setSelected] = useState(task.preferredIntelligence ?? intelligences.default);
+	const [selected, setSelected] = useState(value ?? intelligences.default);
 
 	const selectedOption = [...intelligences.recommended, ...intelligences.all].find(
 		(intelligence) => intelligence.key === selected,
 	);
 
-	const { setPreferredIntelligence } = useTaskMutations();
 	const handleSelect = (key: string) => {
-		setOpen(false);
-		setSelected(key);
-		setPreferredIntelligence({ taskId: task._id, preferredIntelligence: key as z.infer<typeof modelsSchema> });
+		const parsed = modelsSchema.safeParse(key);
+		if (parsed.success) {
+			setOpen(false);
+			setSelected(parsed.data);
+			onChange(parsed.data);
+		}
 	};
 
 	return (

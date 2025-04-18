@@ -1,7 +1,10 @@
 import { Doc } from 'convex/_generated/dataModel';
+import { modelsSchema } from 'convex/schemas/skillSchema';
 import { ArrowUp, Mic } from 'lucide-react';
+import { z } from 'zod';
 import { IntelligenceSelector } from '~/components/IntelligenceSelector';
 import { ActionButton } from '~/components/ui/action-button';
+import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { KeyboardShortcutIndicator } from './KeyboardShortcutIndicator';
 
 interface IdleStateProps {
@@ -31,6 +34,11 @@ export function IdleState({
 	isComposing,
 }: IdleStateProps) {
 	//
+	const { setPreferredIntelligence } = useTaskMutations();
+	const handleIntelligenceChange = (key: z.infer<typeof modelsSchema>) => {
+		setPreferredIntelligence({ taskId: task._id, preferredIntelligence: key });
+	};
+
 	return (
 		<>
 			<div className="flex flex-grow items-center justify-center px-3">
@@ -45,7 +53,7 @@ export function IdleState({
 
 			<div className="flex items-center justify-between gap-2 px-3 pt-2">
 				<div className="flex-shrink-0">
-					<IntelligenceSelector task={task} />
+					<IntelligenceSelector value={task.preferredIntelligence} onChange={handleIntelligenceChange} />
 				</div>
 
 				<div className="flex items-center gap-2">

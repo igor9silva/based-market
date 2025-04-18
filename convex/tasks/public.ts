@@ -91,12 +91,13 @@ export const add = mutation({
 	args: {
 		message: z.string().optional(),
 		parentId: zid('tasks').optional(),
+		preferredIntelligence: modelsSchema.optional(),
 		initialFunds: z
 			.bigint()
 			.min(0n)
 			.max(asBigInt({ dollars: 100000 })),
 	},
-	handler: async (ctx, { message, parentId, initialFunds }) => {
+	handler: async (ctx, { message, parentId, initialFunds, preferredIntelligence }) => {
 		//
 		const currentUser = await getCurrentUser(ctx, {});
 
@@ -106,6 +107,7 @@ export const add = mutation({
 			message,
 			parentId,
 			initialFunds,
+			preferredIntelligence,
 		});
 	},
 });

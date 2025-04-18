@@ -89,13 +89,14 @@ export const _add = internalMutation({
 		owner: zid('users'),
 		message: z.string().optional(),
 		parentId: zid('tasks').optional(),
+		preferredIntelligence: modelsSchema.optional(),
 		initialFunds: z
 			.bigint()
 			.min(0n)
 			.max(asBigInt({ dollars: 100000 }))
 			.optional(),
 	},
-	handler: async (ctx, { author, owner, message, parentId, initialFunds }) => {
+	handler: async (ctx, { author, owner, message, parentId, initialFunds, preferredIntelligence }) => {
 		//
 		const taskId = await ctx.db.insert('tasks', {
 			author,
@@ -107,6 +108,7 @@ export const _add = internalMutation({
 				total: 0n,
 				available: 0n,
 			},
+			preferredIntelligence,
 		});
 
 		// TODO: receive actions instead of using hardcoded ones

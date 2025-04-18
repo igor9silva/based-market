@@ -2,12 +2,15 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
 import { asBigInt } from 'convex/utils/money';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { cn } from '~/lib/utils';
 
+import { modelsSchema } from 'convex/schemas/skillSchema';
 import { INSUFFICIENT_ACCOUNT_FUNDS_ERROR, isError } from 'convex/utils/errors';
+import { KeyboardShortcutIndicator } from '~/components/ActionComposer/KeyboardShortcutIndicator';
+import { IntelligenceSelector } from '~/components/IntelligenceSelector';
 import { BudgetSelector } from '~/components/ui/budget-selector';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -42,6 +45,7 @@ export function QuickAdd({ className }: { className?: string }) {
 				const taskId = await addTask({
 					message,
 					initialFunds: asBigInt({ dollars: initialFunds }),
+					preferredIntelligence: intelligence,
 				});
 
 				navigate({ to: '/$', params: { _splat: `/chat/${taskId}` } });
@@ -66,6 +70,8 @@ export function QuickAdd({ className }: { className?: string }) {
 	// confirm on CMD+Enter
 	const handleKeyDown = useSubmitHotkey();
 
+	const [intelligence, setIntelligence] = useState<z.infer<typeof modelsSchema> | undefined>(undefined);
+
 	return (
 		<Card className={cn('max-h-fit border-none rounded-none p-4', className)}>
 			<CardContent className="p-0">
@@ -80,12 +86,13 @@ export function QuickAdd({ className }: { className?: string }) {
 							className="min-h-32 resize-none text-base"
 						/>
 					</div>
-					<BudgetSelector name="initialFunds" />
+					<div className="flex flex-col md:flex-row gap-2 w-full">
+						<BudgetSelector name="initialFunds" className="flex-1" />
+						<IntelligenceSelector value={intelligence} onChange={setIntelligence} className="flex-1" />
+					</div>
 					<Button variant="default" type="submit" size="lg">
-						Seek it
-						<kbd className="hidden md:inline-flex h-5 items-center gap-1 rounded border px-2 font-mono text-xs ml-2">
-							<span className="text-base">⌘</span>Enter
-						</kbd>
+						Seek
+						<KeyboardShortcutIndicator keySymbol="⏎" className="bg-muted text-muted-foreground" />
 					</Button>
 				</form>
 			</CardContent>
