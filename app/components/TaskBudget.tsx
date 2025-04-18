@@ -63,7 +63,7 @@ export function TaskBudget({
 								Available <strong>{asDollars({ bigInt: available, precision: 6 })} USDc</strong>
 							</p>
 							<p>
-								Total commited <strong>{asDollars({ bigInt: total, precision: 6 })} USDc</strong>
+								Total added <strong>{asDollars({ bigInt: total, precision: 6 })} USDc</strong>
 							</p>
 						</div>
 					) : (

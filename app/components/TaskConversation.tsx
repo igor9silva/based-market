@@ -237,7 +237,7 @@ function StickToBottomContent({
 						<Loading className="h-6 w-fit" />
 					</div>
 				)}
-				<div className="flex flex-col flex-grow justify-end gap-1">{children}</div>
+				<div className="flex flex-col flex-grow justify-end gap-2">{children}</div>
 				<div className="sticky bottom-2 flex flex-col">
 					<ScrollToBottom />
 				</div>

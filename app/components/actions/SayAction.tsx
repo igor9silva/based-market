@@ -25,6 +25,7 @@ export function SayAction({
 				text={action.args['message']}
 				className={cn({
 					'bg-primary text-primary-foreground p-2': isAuthorCurrentUser,
+					'bg-secondary text-secondary-foreground p-2': !isAuthorCurrentUser,
 				})}
 			/>
 		</Message>

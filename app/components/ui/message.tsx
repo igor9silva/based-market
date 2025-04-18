@@ -134,7 +134,7 @@ const FailedMessage = ({
 				<MessageContent className="text-sm text-muted-foreground text-left" text={text} />
 			</CollapsibleTrigger>
 			<CollapsibleContent>
-				<pre className="text-sm text-muted-foreground text-left">{error}</pre>
+				<pre className="text-sm text-muted-foreground text-left whitespace-pre-wrap break-words">{error}</pre>
 			</CollapsibleContent>
 		</Collapsible>
 	</Message>
