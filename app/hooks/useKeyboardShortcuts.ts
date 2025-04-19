@@ -21,6 +21,8 @@ interface UseKeyboardShortcutProps {
 	targetRef?: RefObject<HTMLElement>;
 	/** If true, shortcut will work even if the target is not focused */
 	global?: boolean;
+	/** If true, the default event behavior will not be prevented */
+	skipPreventDefault?: boolean;
 }
 
 /**
@@ -43,7 +45,13 @@ interface UseKeyboardShortcutProps {
  * });
  * ```
  */
-export function useKeyboardShortcut({ combo, callback, targetRef, global = false }: UseKeyboardShortcutProps) {
+export function useKeyboardShortcut({
+	combo,
+	callback,
+	targetRef,
+	global = false,
+	skipPreventDefault = false,
+}: UseKeyboardShortcutProps) {
 	//
 	const handleKeyDown = useCallback(
 		(e: KeyboardEvent) => {
@@ -65,11 +73,11 @@ export function useKeyboardShortcut({ combo, callback, targetRef, global = false
 				(!combo.withAlt || altKeyPressed) &&
 				(!combo.withShift || shiftKeyPressed)
 			) {
-				e.preventDefault();
+				if (!skipPreventDefault) e.preventDefault();
 				callback(e);
 			}
 		},
-		[combo, callback, targetRef, global],
+		[combo, callback, targetRef, global, skipPreventDefault],
 	);
 
 	// Register keyboard shortcut

@@ -71,9 +71,11 @@ export function ActionComposer({
 	useKeyboardShortcut({
 		global: true,
 		combo: { withCommand: true, key: 'Backspace' },
-		callback: () => {
+		skipPreventDefault: true,
+		callback: (e) => {
 			if (task.status === 'acting') {
 				stop({ taskId: task._id });
+				e.preventDefault();
 			}
 		},
 	});

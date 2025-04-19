@@ -48,15 +48,15 @@ function SkillsLinkContent({ className }: { className?: string }) {
 					</Link>
 				</TooltipTrigger>
 				<TooltipContent className="p-2 max-w-xs">
-					<p className="font-semibold mb-1">Manage skills</p>
 					{enabledSkills.length > 0 ? (
 						<>
-							<p className="text-xs mb-1">enabled:</p>
+							<p className="font-semibold mb-1">Enabled skills</p>
 							<ul className="ml-4 list-disc text-xs">
 								{enabledSkills.map((skill, index) => (
 									<li key={index}>{skill}</li>
 								))}
 							</ul>
+							<p className="text-xs text-muted mt-2">click to manage</p>
 						</>
 					) : (
 						<p className="text-xs text-muted-foreground">No skills enabled</p>
