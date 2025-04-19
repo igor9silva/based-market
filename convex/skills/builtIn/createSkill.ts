@@ -10,6 +10,8 @@ import { asBigInt } from '../../utils/money';
 import { stringToZod } from '../../utils/zodToString';
 import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
+const DEFAULT_PRE_APPROVED_COST = asBigInt({ dollars: 0.2 });
+
 export const createSkill = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Learn a new skill.',
@@ -37,7 +39,7 @@ export const createSkill = defineSkill({
 					description: args.skill.description,
 					kind: args.skill.kind,
 					inputSchema: args.skill.inputSchema,
-					preApprovedCost: args.skill.isSafe ? asBigInt({ dollars: 0.05 }) : 'none',
+					preApprovedCost: args.skill.isSafe ? DEFAULT_PRE_APPROVED_COST : 'none',
 					// TODO: make sure to add `iterate` to the knownReactions
 					knownReactions: args.skill.knownReactions?.map((key) => ({
 						skillKey: key,

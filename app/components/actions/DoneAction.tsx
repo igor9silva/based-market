@@ -17,5 +17,10 @@ export function DoneAction({
 }) {
 	// const isNew = useIsNew(action._creationTime, initialRenderDate);
 
-	return <SimpleMessage text={`☑︎ ${action.args['message']}`} isAuthorCurrentUser={isAuthorCurrentUser} />;
+	return (
+		<SimpleMessage
+			text={`${action.args['reason'] === 'blocked' ? '🆘' : '☑︎'} ${action.args['message']}`}
+			isAuthorCurrentUser={isAuthorCurrentUser}
+		/>
+	);
 }

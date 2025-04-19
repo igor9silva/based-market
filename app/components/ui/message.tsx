@@ -60,7 +60,7 @@ const MessageContent = ({
 		<MDX
 			shouldRenderComponents={shouldRenderComponents}
 			text={text}
-			className={cn('rounded-lg text-foreground prose break-words whitespace-normal', className)}
+			className={cn('rounded-lg text-foreground prose max-w-[90%] break-words whitespace-normal', className)}
 			{...props}
 		/>
 	) : (

@@ -10,10 +10,16 @@ import { IdleState } from './IdleState';
 import { RecordingState } from './RecordingState';
 import { TranscribingState } from './TranscribingState';
 
-export function ActionComposer({ task, className }: { task: Doc<'tasks'>; className?: string }) {
-	//
+export function ActionComposer({
+	task,
+	onSubmit,
+	className,
+}: {
+	task: Doc<'tasks'>;
+	onSubmit?: (message: string) => void;
+	className?: string;
+}) {
 	const { say, stop, approveBlockingAction } = useTaskMutations();
-
 	const {
 		textareaRef,
 		value: message,
@@ -36,6 +42,7 @@ export function ActionComposer({ task, className }: { task: Doc<'tasks'>; classN
 
 		say({ message, taskId: task._id });
 		setMessage('');
+		onSubmit?.(message);
 	};
 
 	// global focus shortcut (CMD+I)

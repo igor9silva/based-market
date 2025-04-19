@@ -3,7 +3,8 @@ import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const reason = defineSkill({
 	preApprovedCost: 0n,
-	description: 'Reason (think out loud). Scientifically proven to increase the quality of the next action.',
+	description:
+		'Reason (think to yourself - *not visible to the user*). Scientifically proven to increase the quality of the next action.',
 	parameters: z.object({
 		reasoning: z.string().describe('The reasoning in MDX format.'),
 	}),
