@@ -53,6 +53,7 @@ function RouteComponent() {
 						}
 					/>
 				))}
+				{transactions.length === 0 && <div className="text-muted-foreground">No transactions yet.</div>}
 			</div>
 		</div>
 	);
