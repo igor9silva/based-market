@@ -47,7 +47,7 @@ export function RouteComponent({ className }: { className?: string }) {
 					{/* Header with Status */}
 					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
 						<div className="flex flex-col gap-1">
-							<h2 className="text-xl sm:text-2xl font-bold">TopUp Details</h2>
+							<h2 className="text-xl sm:text-2xl font-bold">Order details</h2>
 							<p className="text-xs sm:text-sm text-muted-foreground break-all">{topUp._id}</p>
 						</div>
 						<Badge

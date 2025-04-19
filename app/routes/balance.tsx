@@ -4,7 +4,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
 import { asDollars } from 'convex/utils/money';
-import { CircleDollarSign } from 'lucide-react';
+import { ArrowDown, ArrowUp, Clock, ExternalLink, RefreshCw, Wallet } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { TopUpCard } from '~/components/TopUpCard';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
@@ -30,31 +30,38 @@ function RouteComponent() {
 				<h1 className="text-2xl font-bold">Balance</h1>
 				<span className="text-sm">
 					Your current non-locked balance is{' '}
-					<span className="font-bold">{asDollars({ bigInt: user.balanceUSD ?? 0n, precision: 6 })}</span>{' '}
-					<DollarCreditsIcon />.
+					<span className="font-bold">
+						{asDollars({ bigInt: user.balanceUSD ?? 0n, precision: 6 })} <DollarCreditsIcon />
+					</span>
+					.
 				</span>
 				{lockedBalance > 0 && (
 					<span className="text-sm">
-						Other <span className="font-bold">{asDollars({ bigInt: lockedBalance, precision: 6 })}</span>{' '}
-						<DollarCreditsIcon /> are locked in active tasks.
+						Other{' '}
+						<span className="font-bold">
+							{asDollars({ bigInt: lockedBalance, precision: 6 })} <DollarCreditsIcon /> are locked
+						</span>{' '}
+						in active tasks.
 					</span>
 				)}
 				{(user.balanceUSD ?? 0n) < 1000n && <LowBalanceMessage />}
 			</div>
-			<div className="flex flex-col gap-2">
+			<div className="flex flex-col gap-2 mt-4">
 				<h2 className="text-lg font-bold">Transactions</h2>
-				{transactions.map((transaction) => (
-					<TransactionItem
-						key={transaction._id}
-						transaction={transaction}
-						taskId={
-							transaction.kind === 'fund task' || transaction.kind === 'refund from task'
-								? transaction.taskId
-								: undefined
-						}
-					/>
-				))}
-				{transactions.length === 0 && <div className="text-muted-foreground">No transactions yet.</div>}
+				<div className="space-y-2">
+					{transactions.map((transaction) => (
+						<TransactionItem
+							key={transaction._id}
+							transaction={transaction}
+							taskId={
+								transaction.kind === 'fund task' || transaction.kind === 'refund from task'
+									? transaction.taskId
+									: undefined
+							}
+						/>
+					))}
+					{transactions.length === 0 && <div className="text-muted-foreground">No transactions yet.</div>}
+				</div>
 			</div>
 		</div>
 	);
@@ -75,12 +82,8 @@ function DollarCreditsIcon() {
 	return (
 		<TooltipProvider>
 			<Tooltip>
-				<TooltipTrigger asChild>
-					<CircleDollarSign className="inline-block size-3 align-[-1px]" />
-				</TooltipTrigger>
-				<TooltipContent>
-					<p>US Dollar-equivalent credits</p>
-				</TooltipContent>
+				<TooltipTrigger>USDc</TooltipTrigger>
+				<TooltipContent>US Dollar-equivalent credits</TooltipContent>
 			</Tooltip>
 		</TooltipProvider>
 	);
@@ -95,29 +98,97 @@ function TransactionItem({
 }) {
 	//
 	return (
-		<div className="flex items-center justify-between rounded-lg border p-4">
-			<div className="flex flex-col gap-1">
-				<span className="text-sm text-gray-500">
-					<TimeAgo date={transaction._creationTime} />
-				</span>
-				<TransactionKind transaction={transaction} />
-				{taskId && (
-					<Link
-						to="/$"
-						params={{ _splat: `/chat/${taskId}` }}
-						className="text-xs text-muted-foreground hover:text-foreground"
-					>
-						{taskId}
-					</Link>
-				)}
+		<div className="flex items-center justify-between rounded-lg border bg-card p-4 transition-all hover:shadow-sm">
+			<div className="flex items-center gap-3">
+				<div
+					className={`flex h-10 w-10 items-center justify-center rounded-full ${getTransactionBgColor(transaction)}`}
+				>
+					<TransactionIcon transaction={transaction} />
+				</div>
+				<div className="flex flex-col gap-0.5">
+					<span className="text-sm text-muted-foreground">
+						<TimeAgo date={transaction._creationTime} />
+					</span>
+					<TransactionKind transaction={transaction} />
+				</div>
 			</div>
-			<span
-				className={`flex-shrink-0 font-medium ${transaction.value.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}
-			>
-				{asDollars({ bigInt: transaction.value.amount, precision: 6 })} USDc
-			</span>
+			<div className="flex flex-col items-end gap-1">
+				<span
+					className={`flex-shrink-0 font-medium ${transaction.value.amount >= 0 ? 'text-emerald-500' : 'text-gray-200'}`}
+				>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger>
+								{asDollars({ bigInt: transaction.value.amount })}
+								<span className="ml-1">USDc</span>
+							</TooltipTrigger>
+							<TooltipContent>
+								<span className="font-semibold">
+									{asDollars({ bigInt: transaction.value.amount, precision: 6 })}
+								</span>{' '}
+								US Dollar-equivalent credits
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				</span>
+
+				<div className="mt-1 flex items-center gap-2">
+					{taskId && (
+						<Link
+							to="/$"
+							params={{ _splat: `/chat/${taskId}` }}
+							className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+						>
+							See task
+							<ExternalLink className="size-3" />
+						</Link>
+					)}
+					{transaction.kind === 'top up' && transaction.topUpId && (
+						<Link
+							to="/$"
+							params={{ _splat: `/top-up/${transaction.topUpId}` }}
+							className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+						>
+							Transaction details
+							<ExternalLink className="size-3" />
+						</Link>
+					)}
+				</div>
+			</div>
 		</div>
 	);
+}
+
+function getTransactionBgColor(transaction: Doc<'transactions'>): string {
+	//
+	switch (transaction.kind) {
+		case 'free credits':
+			return 'bg-indigo-100 dark:bg-indigo-950/30';
+		case 'top up':
+			return 'bg-emerald-100 dark:bg-emerald-950/30';
+		case 'fund task':
+			return 'bg-gray-100 dark:bg-gray-950/30';
+		case 'refund from task':
+			return 'bg-emerald-100 dark:bg-teal-950/30';
+		default:
+			return 'bg-muted';
+	}
+}
+
+function TransactionIcon({ transaction }: { transaction: Doc<'transactions'> }) {
+	//
+	switch (transaction.kind) {
+		case 'free credits':
+			return <Wallet className="size-5 text-indigo-500" />;
+		case 'top up':
+			return <ArrowUp className="size-5 text-emerald-500" />;
+		case 'fund task':
+			return <ArrowDown className="size-5 text-gray-500" />;
+		case 'refund from task':
+			return <RefreshCw className="size-5 text-emerald-500" />;
+		default:
+			return <Clock className="size-5 text-gray-500" />;
+	}
 }
 
 function TransactionKind({
@@ -129,19 +200,19 @@ function TransactionKind({
 }) {
 	//
 	if (transaction.description) {
-		return <span className="font-medium">{transaction.description}</span>;
+		return <h3 className="font-medium">{transaction.description}</h3>;
 	}
 
 	switch (transaction.kind) {
 		case 'free credits':
-			return <span className="font-medium">Free Credits</span>;
+			return <h3 className="font-medium">Free credits 🎉</h3>;
 		case 'top up':
-			return <span className="font-medium">Top Up</span>;
+			return <h3 className="font-medium">Added funds to account</h3>;
 		case 'fund task':
-			return <span className="font-medium">Increase task budget</span>;
+			return <h3 className="font-medium">Added budget to task</h3>;
 		case 'refund from task':
-			return <span className="font-medium">Refund task budget</span>;
+			return <h3 className="font-medium">Refunded unused funds from task</h3>;
 		default:
-			return <span className="font-medium">Unknown</span>;
+			return <h3 className="font-medium">Unknown</h3>;
 	}
 }
