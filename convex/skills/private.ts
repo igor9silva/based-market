@@ -2,6 +2,7 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internalMutation, internalQuery } from '../lib';
 import { builtInSkillSchema, newSkillSchema, skillOwnerSchema } from '../schemas/skillSchema';
+import { _getUserPreferece } from '../users/preferences/private';
 import { zodToString } from '../utils/zodToString';
 import { _builtInSkills } from './builtIn/index';
 
@@ -121,6 +122,24 @@ export const _listAllKeys = internalQuery({
 		}));
 
 		return dbList.concat(builtInList);
+	},
+});
+
+export const _listEnabledKeys = internalQuery({
+	args: {
+		userId: zid('users'),
+	},
+	handler: async (ctx, { userId }) => {
+		//
+		const enabledSkills = await _getUserPreferece(ctx, {
+			key: 'enabledSkills',
+			userId,
+		});
+
+		const isString = (value: unknown): value is string => typeof value === 'string';
+		const list = Array.isArray(enabledSkills?.value) ? enabledSkills.value.filter(isString) : [];
+
+		return list;
 	},
 });
 

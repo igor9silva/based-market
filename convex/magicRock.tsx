@@ -189,20 +189,30 @@ async function loadTools(
 	skill: z.infer<typeof softSkillSchema>,
 ): Promise<Record<string, AITool>> {
 	//
-	console.debug('loading tools, config:', skill.config.availableSkills);
+	const availableSkills = skill.config.availableSkills;
+
+	// TODO: remove this once it gets dynamic
+	if (skill.key === 'iterate') {
+		//
+		const enabledSkills = await ctx.runQuery(internal.skills.private._listEnabledKeys, {
+			userId: task.owner,
+		});
+
+		availableSkills.push(...enabledSkills);
+	}
+
+	console.debug('loading tools, config:', availableSkills);
 
 	// TODO: optimize
 	const allTools = await _toolsForMagicRock(ctx, task, action);
-	const tools = Object.fromEntries(
-		Object.entries(allTools).filter(([key]) => skill.config.availableSkills.includes(key)),
-	);
+	const tools = Object.fromEntries(Object.entries(allTools).filter(([key]) => availableSkills.includes(key)));
 
 	console.debug('loaded tools', Object.keys(tools));
 
-	if (Object.keys(tools).length !== skill.config.availableSkills.length) {
+	if (Object.keys(tools).length !== availableSkills.length) {
 		console.warn(
 			'missing tools',
-			skill.config.availableSkills.filter((key) => !tools[key]),
+			availableSkills.filter((key) => !tools[key]),
 		);
 	}
 

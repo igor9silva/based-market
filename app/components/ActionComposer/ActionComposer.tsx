@@ -62,6 +62,8 @@ export function ActionComposer({
 			} else if (!isEmpty && recordingStatus === 'idle') {
 				handleSubmit();
 			}
+
+			// TODO: CMD+Enter when empty to iterate()
 		},
 	});
 

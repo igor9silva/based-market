@@ -149,7 +149,7 @@ export function estimateCostFor(
 	const inputLength = instructionsLength + toolsLength + historyLength;
 
 	const inputTokens = Math.ceil(inputLength / env.CHAR_PER_TOKEN);
-	const outputTokens = Math.min(8000, Math.ceil(inputTokens / 2)); // half as input, capped at 8000, TODO: improve
+	const outputTokens = Math.min(8000, Math.ceil(inputTokens / 4)); // 1/4 as input, capped at 8000, TODO: improve
 
 	// assume worst-cast scenario with no cached tokens
 	const providerCost = calculateProviderCost({
