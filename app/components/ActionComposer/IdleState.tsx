@@ -3,6 +3,7 @@ import { modelsSchema } from 'convex/schemas/skillSchema';
 import { ArrowUp, Mic } from 'lucide-react';
 import { z } from 'zod';
 import { IntelligenceSelector } from '~/components/IntelligenceSelector';
+import { SkillsLink } from '~/components/SkillsLink';
 import { ActionButton } from '~/components/ui/action-button';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { KeyboardShortcutIndicator } from './KeyboardShortcutIndicator';
@@ -52,8 +53,9 @@ export function IdleState({
 			</div>
 
 			<div className="flex items-center justify-between gap-2 px-3 pt-2">
-				<div className="flex-shrink-0">
+				<div className="flex items-center gap-2 flex-shrink-0">
 					<IntelligenceSelector value={task.preferredIntelligence} onChange={handleIntelligenceChange} />
+					<SkillsLink />
 				</div>
 
 				<div className="flex items-center gap-2">

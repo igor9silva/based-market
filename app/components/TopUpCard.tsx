@@ -34,15 +34,13 @@ export function TopUpCard() {
 	const handleKeyDown = useSubmitHotkey();
 
 	return (
-		<Card className="max-h-fit border-none rounded-none">
+		<Card className="max-h-fit border-none rounded-none prose">
 			<CardContent className="p-0">
-				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col gap-2">
-					<div className="flex flex-col gap-0.5">
-						<p className="font-semibold">USDc Amount</p>
-						<Input type="string" name="amount" placeholder="Amount" required defaultValue={0.2} />
-					</div>
+				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-row items-center gap-2">
+					<div className="font-semibold">$USD</div>
+					<Input type="string" name="amount" placeholder="Amount" required defaultValue={20} />
 					<Button variant="default" type="submit">
-						Top up
+						Top up $USD
 					</Button>
 				</form>
 			</CardContent>

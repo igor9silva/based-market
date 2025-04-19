@@ -6,6 +6,7 @@ import { Doc, Id } from 'convex/_generated/dataModel';
 import { asDollars } from 'convex/utils/money';
 import { CircleDollarSign } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
+import { TopUpCard } from '~/components/TopUpCard';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 
 export const Route = createFileRoute('/balance')({
@@ -37,6 +38,7 @@ function RouteComponent() {
 						<CircleDollarSign className="inline-block size-3 align-[-1px]" /> are locked in active tasks.
 					</span>
 				)}
+				{(user.balanceUSD ?? 0n) < 1000n && <LowBalanceMessage />}
 			</div>
 			<div className="flex flex-col gap-2">
 				<h2 className="text-lg font-bold">Transactions</h2>
@@ -52,6 +54,16 @@ function RouteComponent() {
 					/>
 				))}
 			</div>
+		</div>
+	);
+}
+
+function LowBalanceMessage() {
+	//
+	return (
+		<div className="my-3 text-orange-400">
+			Your funds are low. Top up below.
+			<TopUpCard />
 		</div>
 	);
 }

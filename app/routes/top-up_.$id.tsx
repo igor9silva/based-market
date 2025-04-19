@@ -69,18 +69,18 @@ export function RouteComponent({ className }: { className?: string }) {
 							<span className="text-lg sm:text-xl font-bold tabular-nums">
 								{asDollars({ bigInt: topUp.amount })}
 							</span>
-							<span className="font-medium capitalize break-all">{topUp.chain}</span>
+							{/* <span className="font-medium capitalize break-all">{topUp.chain}</span> */}
 						</div>
 					</div>
 
 					{/* TopUp Details */}
 					<div className="grid gap-4">
 						<div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-sm">
-							<span className="text-muted-foreground whitespace-nowrap">Chain</span>
+							{/* <span className="text-muted-foreground whitespace-nowrap">Chain</span>
 							<span className="font-medium capitalize break-all">{topUp.chain}</span>
 
 							<span className="text-muted-foreground whitespace-nowrap">Recipient</span>
-							<span className="font-medium break-all">{topUp.to}</span>
+							<span className="font-medium break-all">{topUp.to}</span> */}
 
 							<span className="text-muted-foreground whitespace-nowrap">Description</span>
 							<span className="font-medium break-all">{topUp.description}</span>

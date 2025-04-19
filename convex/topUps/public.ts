@@ -21,7 +21,7 @@ export const startTopUp = mutation({
 			author: currentUser._id,
 			owner: currentUser._id,
 			to: env.PAYMENT_ETH_ADDRESS_BASE_CHAIN,
-			description: description || 'Top up Meseeks Actions.',
+			description: description || 'Top up Meseeks USD credits.',
 			chain,
 			symbol,
 			amount,

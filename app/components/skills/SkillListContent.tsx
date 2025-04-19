@@ -3,7 +3,9 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { skillSchema } from 'convex/schemas/skillSchema';
+import { useCallback } from 'react';
 import { z } from 'zod';
+import { usePreferences } from '~/hooks/usePreferences';
 import { SkillCard } from './SkillCard';
 
 /**
@@ -20,6 +22,23 @@ export function SkillListContent({
 	//
 	const query = convexQuery(api.skills.public[filter === 'personal' ? 'findAllPersonal' : 'findAllPublic'], {});
 	const { data: skills } = useSuspenseQuery(query);
+
+	const { getEnabledSkills, setEnabledSkills } = usePreferences();
+
+	const enabledSkills = getEnabledSkills();
+	const onToggle = useCallback(
+		(skillKey: string, isEnabled: boolean) => {
+			//
+			if (isEnabled && !enabledSkills.includes(skillKey)) {
+				enabledSkills.push(skillKey);
+			} else if (!isEnabled && enabledSkills.includes(skillKey)) {
+				enabledSkills.splice(enabledSkills.indexOf(skillKey), 1);
+			}
+
+			setEnabledSkills(enabledSkills);
+		},
+		[setEnabledSkills],
+	);
 
 	// Filter skills based on search term
 	const filteredSkills = skills?.filter(
@@ -49,7 +68,14 @@ export function SkillListContent({
 
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-			{filteredSkills?.map((skill) => <SkillCard key={skill._id} skill={skill} />)}
+			{filteredSkills?.map((skill) => (
+				<SkillCard
+					key={skill._id}
+					skill={skill}
+					isEnabled={enabledSkills.includes(skill.key)}
+					onToggle={(isEnabled) => onToggle(skill.key, isEnabled)}
+				/>
+			))}
 		</div>
 	);
 }

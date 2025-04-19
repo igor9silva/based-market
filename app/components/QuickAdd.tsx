@@ -11,6 +11,7 @@ import { modelsSchema } from 'convex/schemas/skillSchema';
 import { INSUFFICIENT_ACCOUNT_FUNDS_ERROR, isError } from 'convex/utils/errors';
 import { KeyboardShortcutIndicator } from '~/components/ActionComposer/KeyboardShortcutIndicator';
 import { IntelligenceSelector } from '~/components/IntelligenceSelector';
+import { SkillsLink } from '~/components/SkillsLink';
 import { BudgetSelector } from '~/components/ui/budget-selector';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
@@ -88,7 +89,10 @@ export function QuickAdd({ className }: { className?: string }) {
 					</div>
 					<div className="flex flex-col md:flex-row gap-2 w-full">
 						<BudgetSelector name="initialFunds" className="flex-1" />
-						<IntelligenceSelector value={intelligence} onChange={setIntelligence} className="flex-1" />
+						<div className="flex items-center gap-2 flex-1">
+							<IntelligenceSelector value={intelligence} onChange={setIntelligence} className="flex-1" />
+							<SkillsLink />
+						</div>
 					</div>
 					<Button variant="default" type="submit" size="lg">
 						Seek

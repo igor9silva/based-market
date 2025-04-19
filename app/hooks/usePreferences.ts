@@ -3,7 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
 
-export function usePreferences({ defaultValue }: { defaultValue?: number } = {}) {
+export function usePreferences({ defaultValue }: { defaultValue?: any } = {}) {
 	//
 	const setPreference = useMutation(api.users.preferences.public.setPreference);
 	const getPreference = (key: string) => {
@@ -19,8 +19,11 @@ export function usePreferences({ defaultValue }: { defaultValue?: number } = {})
 	};
 
 	const getInboxWidthPercent = () => {
+		//
 		const preference = getPreference('inboxWidthPercent');
-		return typeof preference === 'number' ? preference : defaultValue ?? 50;
+		const fallback = typeof defaultValue === 'number' ? defaultValue : 50;
+
+		return typeof preference === 'number' ? preference : fallback;
 	};
 
 	const setTaskDetailWidthPercent = (widthPercent: number) => {
@@ -28,8 +31,30 @@ export function usePreferences({ defaultValue }: { defaultValue?: number } = {})
 	};
 
 	const getTaskDetailWidthPercent = () => {
+		//
 		const preference = getPreference('taskDetailWidthPercent');
-		return typeof preference === 'number' ? preference : defaultValue ?? 50;
+		const fallback = typeof defaultValue === 'number' ? defaultValue : 50;
+
+		return typeof preference === 'number' ? preference : fallback;
+	};
+
+	const setEnabledSkills = (enabledSkills: string[]) => {
+		//
+		return setPreference({ key: 'enabledSkills', value: enabledSkills });
+	};
+
+	const getEnabledSkills = (): string[] => {
+		//
+		const enabledSkills = getPreference('enabledSkills');
+		const defaultSkills = Array.isArray(defaultValue) ? defaultValue : [];
+
+		const isString = (value: unknown): value is string => typeof value === 'string';
+
+		if (Array.isArray(enabledSkills)) {
+			return enabledSkills.filter(isString);
+		}
+
+		return defaultSkills.filter(isString);
 	};
 
 	return {
@@ -37,5 +62,7 @@ export function usePreferences({ defaultValue }: { defaultValue?: number } = {})
 		getInboxWidthPercent,
 		setTaskDetailWidthPercent,
 		getTaskDetailWidthPercent,
+		setEnabledSkills,
+		getEnabledSkills,
 	};
 }
