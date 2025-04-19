@@ -7,6 +7,7 @@ import { asDollars } from 'convex/utils/money';
 import { CircleDollarSign } from 'lucide-react';
 import { TimeAgo } from '~/components/TimeAgo';
 import { TopUpCard } from '~/components/TopUpCard';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { useCurrentUser } from '~/hooks/useCurrentUser';
 
 export const Route = createFileRoute('/balance')({
@@ -30,12 +31,12 @@ function RouteComponent() {
 				<span className="text-sm">
 					Your current non-locked balance is{' '}
 					<span className="font-bold">{asDollars({ bigInt: user.balanceUSD ?? 0n, precision: 6 })}</span>{' '}
-					<CircleDollarSign className="inline-block size-3 align-[-1px]" />.
+					<DollarCreditsIcon />.
 				</span>
 				{lockedBalance > 0 && (
 					<span className="text-sm">
 						Other <span className="font-bold">{asDollars({ bigInt: lockedBalance, precision: 6 })}</span>{' '}
-						<CircleDollarSign className="inline-block size-3 align-[-1px]" /> are locked in active tasks.
+						<DollarCreditsIcon /> are locked in active tasks.
 					</span>
 				)}
 				{(user.balanceUSD ?? 0n) < 1000n && <LowBalanceMessage />}
@@ -66,6 +67,22 @@ function LowBalanceMessage() {
 			Your funds are low. Top up below.
 			<TopUpCard />
 		</div>
+	);
+}
+
+function DollarCreditsIcon() {
+	//
+	return (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<CircleDollarSign className="inline-block size-3 align-[-1px]" />
+				</TooltipTrigger>
+				<TooltipContent>
+					<p>US Dollar-equivalent credits</p>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }
 
