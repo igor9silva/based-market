@@ -3,7 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { useMutation } from 'convex/react';
 
-export function usePreferences() {
+export function usePreferences({ defaultValue }: { defaultValue?: number } = {}) {
 	//
 	const setPreference = useMutation(api.users.preferences.public.setPreference);
 	const getPreference = (key: string) => {
@@ -14,13 +14,13 @@ export function usePreferences() {
 		return preference?.value;
 	};
 
-	const setInboxDetailWidthPercent = (widthPercent: number) => {
-		return setPreference({ key: 'inboxDetailWidthPercent', value: widthPercent });
+	const setInboxWidthPercent = (widthPercent: number) => {
+		return setPreference({ key: 'inboxWidthPercent', value: widthPercent });
 	};
 
-	const getInboxDetailWidthPercent = () => {
-		const preference = getPreference('inboxDetailWidthPercent');
-		return typeof preference === 'number' ? preference : 70;
+	const getInboxWidthPercent = () => {
+		const preference = getPreference('inboxWidthPercent');
+		return typeof preference === 'number' ? preference : defaultValue ?? 50;
 	};
 
 	const setTaskDetailWidthPercent = (widthPercent: number) => {
@@ -29,12 +29,12 @@ export function usePreferences() {
 
 	const getTaskDetailWidthPercent = () => {
 		const preference = getPreference('taskDetailWidthPercent');
-		return typeof preference === 'number' ? preference : 70;
+		return typeof preference === 'number' ? preference : defaultValue ?? 50;
 	};
 
 	return {
-		setInboxDetailWidthPercent,
-		getInboxDetailWidthPercent,
+		setInboxWidthPercent,
+		getInboxWidthPercent,
 		setTaskDetailWidthPercent,
 		getTaskDetailWidthPercent,
 	};

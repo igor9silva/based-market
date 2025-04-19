@@ -3,7 +3,6 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
-import { useCallback } from 'react';
 import { cn } from '~/lib/utils';
 
 import { QuickAdd } from '~/components/QuickAdd';
@@ -12,9 +11,9 @@ import TaskDetail from '~/components/TaskDetail';
 import { TaskItem } from '~/components/TaskItem';
 import { TaskDetailAndConversation } from '~/components/layout/TaskDetailAndConversation';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '~/components/ui/resizable';
-import { useDebounce } from '~/hooks/useDebounce';
 import { useIsMobile } from '~/hooks/useIsMobile';
 import { usePreferences } from '~/hooks/usePreferences';
+import { useResizablePanelGroup } from '~/hooks/useResizablePanelGroup';
 
 export function TaskListAndDetail({
 	taskId, //
@@ -32,28 +31,26 @@ export function TaskListAndDetail({
 	const isMobile = useIsMobile();
 	const direction = isMobile ? 'vertical' : 'horizontal';
 
-	const { getInboxDetailWidthPercent, setInboxDetailWidthPercent } = usePreferences();
-	const preferredWidthPercent = getInboxDetailWidthPercent();
+	const { getInboxWidthPercent, setInboxWidthPercent } = usePreferences({ defaultValue: 30 });
 
-	const debouncedSetWidth = useDebounce((widthPercent: number) => {
-		if (!widthPercent) return;
-		setInboxDetailWidthPercent(widthPercent);
-	}, 500);
+	const { getPanelSize, handleLayout } = useResizablePanelGroup({
+		getValue: getInboxWidthPercent,
+		setValue: setInboxWidthPercent,
+		defaultValue: 30,
+	});
 
-	const handleLayoutChange = useCallback(
-		(sizes: number[]) => {
-			debouncedSetWidth(sizes[1]);
-		},
-		[debouncedSetWidth],
-	);
+	const preferredWidthPercent = getPanelSize();
+	console.log('preferredWidthPercent', preferredWidthPercent);
 
 	return (
 		<ResizablePanelGroup
 			direction={direction}
-			onLayout={handleLayoutChange}
+			onLayout={(sizes) => {
+				if (selectedSubtaskId) handleLayout(sizes);
+			}}
 			className={cn('overflow-hidden', className)}
 		>
-			<ResizablePanel id="list" order={0} defaultSize={100 - (selectedSubtaskId ? preferredWidthPercent : 0)}>
+			<ResizablePanel id="list" order={0} defaultSize={selectedSubtaskId ? preferredWidthPercent : 100}>
 				<div className="overflow-auto h-full">
 					{subtasks.length === 0 && <QuickAdd />}
 					{subtasks.map((task) => (
@@ -70,9 +67,8 @@ export function TaskListAndDetail({
 			</ResizablePanel>
 			{selectedSubtaskId && <ResizableHandle withHandle />}
 			{selectedSubtaskId && (
-				<ResizablePanel id="detail" order={1} defaultSize={preferredWidthPercent}>
+				<ResizablePanel id="detail" order={1} defaultSize={100 - preferredWidthPercent}>
 					<TaskDetailAndConversation
-						defaultListSize={50}
 						list={<TaskDetail taskId={selectedSubtaskId} />}
 						detail={<TaskConversation taskId={selectedSubtaskId} />}
 					/>
