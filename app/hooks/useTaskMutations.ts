@@ -9,7 +9,6 @@ export function useTaskMutations() {
 	const act = useMutation(api.action.public.act);
 	const authorize = useMutation(api.action.public.authorize);
 	const approveBlocking = useMutation(api.action.public.approveBlockingAction);
-	const updateInboxDetailWidthPercent = useMutation(api.users.preferences.public.updateInboxDetailWidthPercent);
 	const setPreferredIntelligenceMutation = useMutation(api.tasks.public.setPreferredIntelligence);
 
 	const say = ({
@@ -135,14 +134,6 @@ export function useTaskMutations() {
 		});
 	};
 
-	const setInboxDetailWidthPercent = ({
-		widthPercent, //
-	}: {
-		widthPercent: number;
-	}) => {
-		return updateInboxDetailWidthPercent({ widthPercent });
-	};
-
 	const approveBlockingAction = ({
 		taskId, //
 	}: {
@@ -173,7 +164,6 @@ export function useTaskMutations() {
 		increaseBudget,
 		approveAction,
 		rejectAction,
-		setInboxDetailWidthPercent,
 		approveBlockingAction,
 		setPreferredIntelligence,
 	};

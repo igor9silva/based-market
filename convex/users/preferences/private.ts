@@ -2,56 +2,36 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internalMutation, internalQuery } from '../../lib';
 
-// TODO: create preemptively when onboarding user
-export const _createPreferences = internalMutation({
+export const _getUserPreferece = internalQuery({
 	args: {
 		userId: zid('users'),
+		key: z.string(),
 	},
-	handler: async (ctx, { userId }) => {
+	handler: async (ctx, { userId, key }) => {
 		//
-		return await ctx.db.insert('user_preferences', { owner: userId });
-	},
-});
-
-export const _preferencesForUser = internalQuery({
-	args: {
-		userId: zid('users'),
-	},
-	handler: async (ctx, { userId }) => {
-		//
-		const preferences = await ctx.db
+		const preference = await ctx.db
 			.query('user_preferences')
-			.withIndex('by_owner', (q) => q.eq('owner', userId))
-			.first();
+			.withIndex('by_owner_key', (q) => q.eq('owner', userId).eq('key', key))
+			.unique();
 
-		if (!preferences) throw new Error('Preferences not found');
-
-		return preferences;
+		return preference;
 	},
 });
 
-export const _updateUserInstructions = internalMutation({
+export const _setUserPreference = internalMutation({
 	args: {
 		userId: zid('users'),
-		instructions: z.string(),
+		key: z.string(),
+		value: z.any(),
 	},
-	handler: async (ctx, { userId, instructions }) => {
+	handler: async (ctx, { userId, key, value }) => {
 		//
-		const existing = await _preferencesForUser(ctx, { userId });
+		const preference = await _getUserPreferece(ctx, { userId, key });
 
-		await ctx.db.patch(existing._id, { instructions });
-	},
-});
-
-export const _updateInboxDetailWidthPercent = internalMutation({
-	args: {
-		userId: zid('users'),
-		widthPercent: z.number().min(0).max(100),
-	},
-	handler: async (ctx, { userId, widthPercent }) => {
-		//
-		const existing = await _preferencesForUser(ctx, { userId });
-
-		await ctx.db.patch(existing._id, { inboxDetailWidthPercent: widthPercent });
+		if (!preference) {
+			await ctx.db.insert('user_preferences', { owner: userId, key, value });
+		} else {
+			await ctx.db.patch(preference._id, { value });
+		}
 	},
 });

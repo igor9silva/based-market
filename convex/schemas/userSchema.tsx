@@ -18,6 +18,6 @@ export const userSchema = z.object({
 
 export const userPreferencesSchema = z.object({
 	owner: zid('users'),
-	instructions: z.string().optional().describe('The instructions for the user'),
-	inboxDetailWidthPercent: z.number().min(0).max(100).optional().describe('The width of the inbox detail panel'),
+	key: z.string(),
+	value: z.any(),
 });

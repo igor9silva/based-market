@@ -1,26 +1,29 @@
 import { z } from 'zod';
 import { mutation, query } from '../../lib';
 import { current as getCurrentUser } from '../public';
-import { _preferencesForUser, _updateInboxDetailWidthPercent } from './private';
+import { _getUserPreferece, _setUserPreference } from './private';
 
-export const getPreferences = query({
-	args: {},
-	handler: async (ctx) => {
+export const getPreference = query({
+	args: {
+		key: z.string(),
+	},
+	handler: async (ctx, { key }) => {
 		//
 		const user = await getCurrentUser(ctx, {});
 
-		return await _preferencesForUser(ctx, { userId: user._id });
+		return await _getUserPreferece(ctx, { userId: user._id, key });
 	},
 });
 
-export const updateInboxDetailWidthPercent = mutation({
+export const setPreference = mutation({
 	args: {
-		widthPercent: z.number().min(0).max(100),
+		key: z.string(),
+		value: z.any(),
 	},
-	handler: async (ctx, { widthPercent }) => {
+	handler: async (ctx, { key, value }) => {
 		//
 		const user = await getCurrentUser(ctx, {});
 
-		return await _updateInboxDetailWidthPercent(ctx, { userId: user._id, widthPercent });
+		return await _setUserPreference(ctx, { userId: user._id, key, value });
 	},
 });

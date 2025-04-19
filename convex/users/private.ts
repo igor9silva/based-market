@@ -6,7 +6,6 @@ import { MutationCtx } from '../_generated/server';
 import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/topUpSchema';
-import { _createPreferences } from './preferences/private';
 
 export const _seedIfNeeded = async (
 	ctx: MutationCtx, //
@@ -31,8 +30,6 @@ export const _seedIfNeeded = async (
 	// 	author: userId,
 	// 	owner: userId,
 	// });
-
-	await _createPreferences(ctx, { userId });
 
 	const markAreReady = () => {
 		// adding a fake delay for fun

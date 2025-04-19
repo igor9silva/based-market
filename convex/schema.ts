@@ -27,7 +27,7 @@ export default defineSchema({
 	user_preferences: defineTable(
 		zodToConvex(userPreferencesSchema),
 	).index(
-		'by_owner', ['owner'],
+		'by_owner_key', ['owner', 'key'],
 	),
 
 	tasks: defineTable(
