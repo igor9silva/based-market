@@ -17,6 +17,7 @@ import {
 	LogOut,
 	RefreshCcw,
 	RotateCcw,
+	Sparkles,
 	SquarePen,
 	Wallet,
 } from 'lucide-react';
@@ -143,6 +144,10 @@ export function CommandMenuDialog() {
 					<CommandItem value="/balance" keywords={['balance']} onSelect={onSelect}>
 						<Wallet className="mr-2" />
 						Balance
+					</CommandItem>
+					<CommandItem value="/skills" keywords={['skills', 'manage']} onSelect={onSelect}>
+						<Sparkles className="mr-2" />
+						Manage skills
 					</CommandItem>
 					<CommandItem value="signout" keywords={['sign', 'out']} onSelect={() => signOut()}>
 						<LogOut className="mr-2" />
