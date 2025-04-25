@@ -5,6 +5,7 @@ import { asDollars } from 'convex/utils/money';
 import { Badge } from '~/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Switch } from '~/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { cn } from '~/lib/utils';
 import { SkillTooltip } from './SkillTooltip';
 
@@ -46,10 +47,10 @@ export function SkillCard({
 							{skill.description}
 						</CardDescription>
 					</div>
-					<Switch
+					<ToggleSwitch
 						checked={isEnabled}
-						onCheckedChange={() => {}}
 						onClick={handleToggle}
+						tooltip={`${isEnabled ? 'Disable' : 'Enable'} skill (must be enabled to use)`}
 						aria-label={`${isEnabled ? 'Disable' : 'Enable'} ${skill.key} skill`}
 					/>
 				</div>
@@ -108,6 +109,33 @@ export function SkillCard({
 		>
 			<CardWrapper>{cardContent}</CardWrapper>
 		</Link>
+	);
+}
+
+function ToggleSwitch({
+	checked,
+	onClick,
+	tooltip,
+	...props
+}: {
+	checked: boolean;
+	onClick: (event: React.MouseEvent) => void;
+	tooltip?: string;
+} & React.ComponentPropsWithoutRef<typeof Switch>) {
+	//
+	const switchComponent = <Switch checked={checked} onClick={onClick} {...props} />;
+
+	if (!tooltip) return switchComponent;
+
+	return (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<div className="cursor-pointer">{switchComponent}</div>
+				</TooltipTrigger>
+				<TooltipContent>{tooltip}</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }
 
