@@ -22,12 +22,11 @@ export const startTopUp = action({
 	handler: async (ctx, { chain, symbol, amount, description }): Promise<Id<'topUps'>> => {
 		//
 		const currentUser = await ctx.runQuery(api.users.public.current, {});
-		const server = env.NODE_ENV === 'development' ? 'sandbox' : 'production';
 
-		console.debug(`Starting top up at Polar '${server}' environment.`);
+		console.debug(`Starting top up at Polar '${env.POLAR_SERVER}' environment.`);
 
 		const polar = new Polar({
-			server,
+			server: env.POLAR_SERVER,
 			accessToken: env.POLAR_ACCESS_TOKEN,
 		});
 

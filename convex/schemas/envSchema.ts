@@ -9,6 +9,7 @@ export const env = createEnv({
 		//
 		SITE_URL: z.string().min(1).describe('The app public URL.'),
 
+		POLAR_SERVER: z.enum(['sandbox', 'production']).default('sandbox').describe('Polar server.'),
 		POLAR_ACCESS_TOKEN: z.string().min(1).describe('Polar Access Token for payment processing.'),
 		POLAR_WEBHOOK_SECRET: z.string().min(1).describe('Polar webhook secret for payment verification.'),
 		POLAR_SUBSCRIPTION_ID: z.string().min(1).describe('Pro subscription product ID.'),
