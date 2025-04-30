@@ -15,9 +15,12 @@ import { Route as TopUpImport } from './routes/top-up'
 import { Route as SkillsImport } from './routes/skills'
 import { Route as BalanceImport } from './routes/balance'
 import { Route as SplatImport } from './routes/$'
+import { Route as PolarRouteImport } from './routes/polar/route'
 import { Route as TopUpIdImport } from './routes/top-up_.$id'
 import { Route as SkillsNewImport } from './routes/skills_.new'
 import { Route as SkillsIdImport } from './routes/skills_.$id'
+import { Route as PolarToppedImport } from './routes/polar/topped'
+import { Route as PolarSubscribedImport } from './routes/polar/subscribed'
 
 // Create/Update Routes
 
@@ -45,6 +48,12 @@ const SplatRoute = SplatImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const PolarRouteRoute = PolarRouteImport.update({
+  id: '/polar',
+  path: '/polar',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TopUpIdRoute = TopUpIdImport.update({
   id: '/top-up_/$id',
   path: '/top-up/$id',
@@ -63,10 +72,29 @@ const SkillsIdRoute = SkillsIdImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const PolarToppedRoute = PolarToppedImport.update({
+  id: '/topped',
+  path: '/topped',
+  getParentRoute: () => PolarRouteRoute,
+} as any)
+
+const PolarSubscribedRoute = PolarSubscribedImport.update({
+  id: '/subscribed',
+  path: '/subscribed',
+  getParentRoute: () => PolarRouteRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/polar': {
+      id: '/polar'
+      path: '/polar'
+      fullPath: '/polar'
+      preLoaderRoute: typeof PolarRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/$': {
       id: '/$'
       path: '/$'
@@ -95,6 +123,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TopUpImport
       parentRoute: typeof rootRoute
     }
+    '/polar/subscribed': {
+      id: '/polar/subscribed'
+      path: '/subscribed'
+      fullPath: '/polar/subscribed'
+      preLoaderRoute: typeof PolarSubscribedImport
+      parentRoute: typeof PolarRouteImport
+    }
+    '/polar/topped': {
+      id: '/polar/topped'
+      path: '/topped'
+      fullPath: '/polar/topped'
+      preLoaderRoute: typeof PolarToppedImport
+      parentRoute: typeof PolarRouteImport
+    }
     '/skills_/$id': {
       id: '/skills_/$id'
       path: '/skills/$id'
@@ -121,21 +163,41 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface PolarRouteRouteChildren {
+  PolarSubscribedRoute: typeof PolarSubscribedRoute
+  PolarToppedRoute: typeof PolarToppedRoute
+}
+
+const PolarRouteRouteChildren: PolarRouteRouteChildren = {
+  PolarSubscribedRoute: PolarSubscribedRoute,
+  PolarToppedRoute: PolarToppedRoute,
+}
+
+const PolarRouteRouteWithChildren = PolarRouteRoute._addFileChildren(
+  PolarRouteRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
+  '/polar': typeof PolarRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/balance': typeof BalanceRoute
   '/skills': typeof SkillsRoute
   '/top-up': typeof TopUpRoute
+  '/polar/subscribed': typeof PolarSubscribedRoute
+  '/polar/topped': typeof PolarToppedRoute
   '/skills/$id': typeof SkillsIdRoute
   '/skills/new': typeof SkillsNewRoute
   '/top-up/$id': typeof TopUpIdRoute
 }
 
 export interface FileRoutesByTo {
+  '/polar': typeof PolarRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/balance': typeof BalanceRoute
   '/skills': typeof SkillsRoute
   '/top-up': typeof TopUpRoute
+  '/polar/subscribed': typeof PolarSubscribedRoute
+  '/polar/topped': typeof PolarToppedRoute
   '/skills/$id': typeof SkillsIdRoute
   '/skills/new': typeof SkillsNewRoute
   '/top-up/$id': typeof TopUpIdRoute
@@ -143,10 +205,13 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/polar': typeof PolarRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/balance': typeof BalanceRoute
   '/skills': typeof SkillsRoute
   '/top-up': typeof TopUpRoute
+  '/polar/subscribed': typeof PolarSubscribedRoute
+  '/polar/topped': typeof PolarToppedRoute
   '/skills_/$id': typeof SkillsIdRoute
   '/skills_/new': typeof SkillsNewRoute
   '/top-up_/$id': typeof TopUpIdRoute
@@ -155,28 +220,37 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/polar'
     | '/$'
     | '/balance'
     | '/skills'
     | '/top-up'
+    | '/polar/subscribed'
+    | '/polar/topped'
     | '/skills/$id'
     | '/skills/new'
     | '/top-up/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/polar'
     | '/$'
     | '/balance'
     | '/skills'
     | '/top-up'
+    | '/polar/subscribed'
+    | '/polar/topped'
     | '/skills/$id'
     | '/skills/new'
     | '/top-up/$id'
   id:
     | '__root__'
+    | '/polar'
     | '/$'
     | '/balance'
     | '/skills'
     | '/top-up'
+    | '/polar/subscribed'
+    | '/polar/topped'
     | '/skills_/$id'
     | '/skills_/new'
     | '/top-up_/$id'
@@ -184,6 +258,7 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
+  PolarRouteRoute: typeof PolarRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
   BalanceRoute: typeof BalanceRoute
   SkillsRoute: typeof SkillsRoute
@@ -194,6 +269,7 @@ export interface RootRouteChildren {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  PolarRouteRoute: PolarRouteRouteWithChildren,
   SplatRoute: SplatRoute,
   BalanceRoute: BalanceRoute,
   SkillsRoute: SkillsRoute,
@@ -213,6 +289,7 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/polar",
         "/$",
         "/balance",
         "/skills",
@@ -220,6 +297,13 @@ export const routeTree = rootRoute
         "/skills_/$id",
         "/skills_/new",
         "/top-up_/$id"
+      ]
+    },
+    "/polar": {
+      "filePath": "polar/route.tsx",
+      "children": [
+        "/polar/subscribed",
+        "/polar/topped"
       ]
     },
     "/$": {
@@ -233,6 +317,14 @@ export const routeTree = rootRoute
     },
     "/top-up": {
       "filePath": "top-up.tsx"
+    },
+    "/polar/subscribed": {
+      "filePath": "polar/subscribed.tsx",
+      "parent": "/polar"
+    },
+    "/polar/topped": {
+      "filePath": "polar/topped.tsx",
+      "parent": "/polar"
     },
     "/skills_/$id": {
       "filePath": "skills_.$id.tsx"

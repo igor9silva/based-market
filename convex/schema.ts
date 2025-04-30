@@ -3,6 +3,7 @@ import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
 import { actionSchema } from './schemas/actionSchema';
 import { componentSchema } from './schemas/componentSchema';
+import { polarEventSchema } from './schemas/polarEventSchema';
 import { skillSchema } from './schemas/skillSchema';
 import { taskSchema } from './schemas/taskSchema';
 import { topUpSchema } from './schemas/topUpSchema';
@@ -85,5 +86,11 @@ export default defineSchema({
 		zodToConvex(topUpSchema),
 	).index(
 		'by_status_owner', ['status', 'owner'],
+	).index(
+		'by_paymentId', ['paymentId'],
+	),
+
+	polarEvents: defineTable(
+		zodToConvex(polarEventSchema),
 	),
 });

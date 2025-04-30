@@ -1,8 +1,10 @@
 import { useNavigate } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
-import { useMutation } from 'convex/react';
+import { useAction } from 'convex/react';
 import { asBigInt } from 'convex/utils/money';
+import { toast } from 'sonner';
 import { z } from 'zod';
+import { DollarCredits } from '~/components/DollarCredits';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
@@ -12,21 +14,27 @@ import { useSubmitHotkey } from '~/hooks/useSubmitHotkey';
 export function TopUpCard() {
 	//
 	const navigate = useNavigate();
-	const startTopUp = useMutation(api.topUps.public.startTopUp);
+	const startTopUp = useAction(api.topUps.public.startTopUp);
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
-			amount: z.string(),
+			amount: z.string().pipe(z.coerce.number()),
 		}),
 		handler: async ({ amount }) => {
 			//
-			const topUpId = await startTopUp({
-				symbol: 'USD',
-				amount: asBigInt({ dollars: Number(amount) }),
-				chain: 'base',
-			});
+			try {
+				const topUpId = await startTopUp({
+					symbol: 'USD',
+					amount: asBigInt({ dollars: amount }),
+					chain: 'base',
+				});
 
-			navigate({ to: '/top-up/$id', params: { id: topUpId } });
+				navigate({ to: '/top-up/$id', params: { id: topUpId } });
+				//
+			} catch (error) {
+				console.error(error);
+				toast.error('Failed to start top up. We are working on fixing this.');
+			}
 		},
 	});
 
@@ -37,10 +45,10 @@ export function TopUpCard() {
 		<Card className="max-h-fit border-none rounded-none prose">
 			<CardContent className="p-0">
 				<form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-row items-center gap-2">
-					<div className="font-semibold">$USD</div>
-					<Input type="string" name="amount" placeholder="Amount" required defaultValue={20} />
+					<DollarCredits className="font-semibold" />
+					<Input type="string" name="amount" placeholder="Amount" required defaultValue={50} />
 					<Button variant="default" type="submit">
-						Top up $USD
+						Top up
 					</Button>
 				</form>
 			</CardContent>

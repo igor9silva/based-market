@@ -15,7 +15,7 @@ export const usePayment = (topUp: Doc<'topUps'>) => {
 	const { mutate, isPending, error } = useMutation({
 		mutationFn: async () => {
 			//
-			throw new Error('Payments are not yet available.');
+			location.href = topUp.paymentUrl;
 		},
 	});
 

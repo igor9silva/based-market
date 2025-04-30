@@ -3,8 +3,9 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Doc, Id } from 'convex/_generated/dataModel';
-import { asDollars } from 'convex/utils/money';
+import { asBigInt, asDollars } from 'convex/utils/money';
 import { ArrowDown, ArrowUp, Clock, ExternalLink, RefreshCw, Wallet } from 'lucide-react';
+import { DollarCredits } from '~/components/DollarCredits';
 import { TimeAgo } from '~/components/TimeAgo';
 import { TopUpCard } from '~/components/TopUpCard';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
@@ -31,7 +32,7 @@ function RouteComponent() {
 				<span className="text-sm">
 					Your current non-locked balance is{' '}
 					<span className="font-bold">
-						{asDollars({ bigInt: user.balanceUSD ?? 0n, precision: 6 })} <DollarCreditsIcon />
+						{asDollars({ bigInt: user.balanceUSD ?? 0n, precision: 6 })} <DollarCredits />
 					</span>
 					.
 				</span>
@@ -39,12 +40,12 @@ function RouteComponent() {
 					<span className="text-sm">
 						Other{' '}
 						<span className="font-bold">
-							{asDollars({ bigInt: lockedBalance, precision: 6 })} <DollarCreditsIcon /> are locked
+							{asDollars({ bigInt: lockedBalance, precision: 6 })} <DollarCredits /> are locked
 						</span>{' '}
 						in active tasks.
 					</span>
 				)}
-				{(user.balanceUSD ?? 0n) < 1000n && <LowBalanceMessage />}
+				<LowBalanceMessage balance={user.balanceUSD ?? 0n} />
 			</div>
 			<div className="flex flex-col gap-2 mt-4">
 				<h2 className="text-lg font-bold">Transactions</h2>
@@ -67,25 +68,15 @@ function RouteComponent() {
 	);
 }
 
-function LowBalanceMessage() {
+function LowBalanceMessage({ balance }: { balance: bigint }) {
 	//
+	const MIN_SAFE_BALANCE = asBigInt({ dollars: 1 });
+
 	return (
 		<div className="my-3 text-orange-400">
-			Your funds are low. Top up below.
+			{balance < MIN_SAFE_BALANCE && <p>Your funds are low. Top up below.</p>}
 			<TopUpCard />
 		</div>
-	);
-}
-
-function DollarCreditsIcon() {
-	//
-	return (
-		<TooltipProvider>
-			<Tooltip>
-				<TooltipTrigger>USDc</TooltipTrigger>
-				<TooltipContent>US Dollar-equivalent credits</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
 	);
 }
 

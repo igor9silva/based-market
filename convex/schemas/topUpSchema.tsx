@@ -16,7 +16,6 @@ export const tokenSchema = z.enum([
 
 export const topUpStatusSchema = z.enum([
 	'waiting', //
-	'pending',
 	'confirmed',
 	'failed',
 	'discarded by user',
@@ -26,7 +25,7 @@ export const walletAddressSchema = z.string().describe('The address of the recip
 
 export const topUpAmountSchema = z
 	.bigint()
-	.min(asBigInt({ dollars: 0.1 }), 'Minimum amount is $0.1')
+	.min(asBigInt({ dollars: 10 }), 'Minimum amount is 10 USD')
 	.max(asBigInt({ dollars: 100000 }), 'That much? Are you sure?');
 
 export const topUpSchema = z
@@ -39,5 +38,7 @@ export const topUpSchema = z
 		status: topUpStatusSchema,
 		owner: zid('users'),
 		author: authorSchema,
+		paymentUrl: z.string().url().describe('The URL the user will be redirected to pay.'),
+		paymentId: z.string().describe('The ID of the Polar checkout.'),
 	})
 	.describe('A topUp to be executed on the blockchain.');

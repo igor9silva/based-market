@@ -74,7 +74,7 @@ export const _perform = internalAction({
 			//
 		} catch (error) {
 			//
-			console.error(`action ${actionId} execution failed: ${error}`); // TODO: notify, monitor error() and warn()
+			console.info(`action ${actionId} execution failed: ${error}`);
 
 			// TODO: with the new flow we lost the ability to fix itself on errors
 
