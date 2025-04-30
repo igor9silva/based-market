@@ -41,8 +41,9 @@ export const _add = internalMutation({
 export const _finish = internalMutation({
 	args: {
 		checkoutId: z.string(),
+		amount: z.bigint(),
 	},
-	handler: async (ctx, { checkoutId }) => {
+	handler: async (ctx, { checkoutId, amount }) => {
 		//
 		const topUp = await _findOneByPaymentId(ctx, { paymentId: checkoutId });
 		if (!topUp) throw NotFound();
@@ -56,7 +57,7 @@ export const _finish = internalMutation({
 			owner: topUp.owner,
 			value: {
 				symbol: topUp.symbol,
-				amount: topUp.amount,
+				amount,
 			},
 		});
 	},

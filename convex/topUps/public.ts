@@ -9,7 +9,7 @@ import { action, mutation, query } from '../lib';
 import { env } from '../schemas/envSchema';
 import { blockchainSchema, tokenSchema, topUpAmountSchema } from '../schemas/topUpSchema';
 import { current as getCurrentUser } from '../users/public';
-import { asDollars, asNumber } from '../utils/money';
+import { asBigInt, asDollars, asNumber } from '../utils/money';
 import { _findAllByStatus, _findAllWaiting, _findOne } from './private';
 
 export const startTopUp = action({
@@ -139,6 +139,7 @@ export const polarWebhook = httpAction(async (ctx, request) => {
 				const paidPayload = webhookPayloadSchema.parse(json);
 				await ctx.runMutation(internal.topUps.private._finish, {
 					checkoutId: paidPayload.data.checkout_id,
+					amount: asBigInt({ dollars: paidPayload.data.net_amount / 100 }), // Polar returns cents
 				});
 				break;
 			case 'order.refunded':
@@ -196,6 +197,7 @@ const webhookPayloadSchema = z.object({
 	]),
 	data: z.object({
 		id: z.string(),
+		net_amount: z.number().describe('Amount in cents, after discounts but before taxes.'),
 		status: z.enum([
 			'pending', //
 			'paid',
