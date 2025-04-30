@@ -324,5 +324,5 @@ export const simplifiedSoftSkillSchema = simplifiedCoreSkillSchema.extend({
 	config: simplifiedDecisionConfigSchema,
 });
 
-// Simplified skill schema for the learnSkill() skill TODO: organize better
+// Simplified skill schema for the learn() skill TODO: organize better
 export const simplifiedSkillSchema = z.union([simplifiedHardSkillSchema, simplifiedSoftSkillSchema]);

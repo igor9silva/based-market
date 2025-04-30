@@ -109,7 +109,7 @@ export function TaskConversation({
 						</Button>
 					)}
 				</div>
-				<Link to="/$" search={{ debug: debug ? undefined : true }} replace>
+				<Link to="/$" search={{ debug: debug ? undefined : true }} replace className="hidden md:block">
 					<Toggle
 						aria-label="Toggle Dev Mode (former Debug)"
 						pressed={Boolean(debug)}

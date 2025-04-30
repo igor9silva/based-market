@@ -20,7 +20,7 @@ export const createSkill = defineSkill({
 	}),
 	knownReactions: [
 		{
-			skillKey: 'learnSkill',
+			skillKey: 'learn',
 			args: {},
 			condition: 'companion',
 		},
