@@ -215,7 +215,7 @@ function ResolveTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 	};
 
 	return (
-		<CommandItem keywords={['resolve', 'done', 'current']} onSelect={handleSelect}>
+		<CommandItem keywords={['done', 'resolve', 'current']} onSelect={handleSelect}>
 			<CircleCheckBig className="mr-2" />
 			Resolve current task
 		</CommandItem>
@@ -237,7 +237,7 @@ function DiscardTaskCommandItem({ taskId }: { taskId: Id<'tasks'> }) {
 	};
 
 	return (
-		<CommandItem keywords={['discard', 'done', 'current']} onSelect={handleSelect}>
+		<CommandItem keywords={['discard', 'trash', 'archive', 'current']} onSelect={handleSelect}>
 			<CircleX className="mr-2" />
 			Discard current task
 		</CommandItem>
