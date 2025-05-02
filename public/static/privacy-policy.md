@@ -1,7 +1,8 @@
-
 # Privacy Policy for Meseeks
 
-Meseeks ("we", "us", "our") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application "Meseeks" (the "App"). This policy is required by Google and applies to all users of the App.
+Last Updated: May 2, 2025
+
+Meseeks, a product of **IgorSilvaPro OÜ**, headquartered in Tallinn, Estonia (“we”, “us”, “our”), respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application “Meseeks” (the “App”). This policy is required by Google and applies to all users of the App.
 
 ## Research Preview and Limited Liability
 
