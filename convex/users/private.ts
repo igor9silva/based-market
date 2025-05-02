@@ -15,6 +15,8 @@ export const _seedIfNeeded = async (
 	const user = await _findOne(ctx, { userId });
 	if (user?.isReady) return;
 
+	console.info('new user!', userId);
+
 	// const isVerified = user?.verificationLevel === 'orb';
 
 	// await _addFreeCredits(ctx, {
