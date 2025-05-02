@@ -69,7 +69,7 @@ const ScrapeResultSchema = z.object({
 function Error({ action, isAuthorCurrentUser }: { action: Doc<'actions'>; isAuthorCurrentUser: boolean }) {
 	return (
 		<FailedMessage
-			text={`🚫 Failed to scrape "${action.args['url']}"`}
+			text={`🚫 Failed to read "${action.args['url']}"`}
 			error={action.result?.text ?? ''}
 			isAuthorCurrentUser={isAuthorCurrentUser}
 		/>
@@ -94,7 +94,7 @@ function Success({ action, isAuthorCurrentUser }: { action: Doc<'actions'>; isAu
 				<CollapsibleTrigger className="flex gap-0 items-center">
 					<MessageContent
 						className="text-sm text-muted-foreground text-left"
-						text={`🧵 Scraped "${action.args['url']}"`}
+						text={`🧵 Read "${action.args['url']}"`}
 					/>
 					<Button
 						variant="link"
