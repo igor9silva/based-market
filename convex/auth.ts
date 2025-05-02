@@ -15,7 +15,7 @@ export const { auth, signIn, signOut, store } = convexAuth({
 	},
 	callbacks: {
 		async afterUserCreatedOrUpdated(ctx, args) {
-			console.debug('afterUserCreatedOrUpdated', ctx, args);
+			console.debug('afterUserCreatedOrUpdated', args);
 			await _seedIfNeeded(ctx, args.userId);
 		},
 	},

@@ -5,7 +5,7 @@ export const done = defineSkill({
 	preApprovedCost: 0n,
 	description: 'Stop iterating.',
 	parameters: z.object({
-		message: z.string().optional().describe('An optional (final) message to the user.'),
+		message: z.string().optional().describe('An optional (final) message to the user. Max 100 characters.'),
 		reason: z.enum([
 			'resolved', //
 			// 'running out of budget',
