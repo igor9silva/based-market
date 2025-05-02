@@ -34,7 +34,7 @@ export function ScrapeLinkAction(props: {
 			return (
 				<SimpleMessage
 					running
-					text={`🧵 Scraping "${action.args['url']}"`}
+					text={`🧵 Reading "${action.args['url']}"`}
 					isAuthorCurrentUser={isAuthorCurrentUser}
 				/>
 			);
