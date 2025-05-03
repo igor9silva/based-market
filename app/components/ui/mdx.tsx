@@ -72,7 +72,7 @@ export default function MDX({
 	if (!Component) throw new Error('No component found');
 
 	return (
-		<div className={cn('whitespace-normal [&>*]:break-all h-full', className)}>
+		<div className={cn('whitespace-normal [&>*]:break-normal [&>*]:hyphens-auto h-full', className)}>
 			<Component
 				components={{
 					a: ({ children, href }) => (

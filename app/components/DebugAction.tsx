@@ -13,7 +13,7 @@ function StructuredValue({ value, depth = 0 }: { value: any; depth?: number }) {
 	if (value === undefined) return <span className="text-muted-foreground">undefined</span>;
 
 	if (typeof value === 'string')
-		return <span className="text-green-400 whitespace-pre-wrap break-words">"{value}"</span>;
+		return <span className="text-green-400 whitespace-pre-wrap break-normal hyphens-auto">"{value}"</span>;
 	if (typeof value === 'number') return <span className="text-amber-400">{value}</span>;
 	if (typeof value === 'boolean') return <span className="text-purple-400">{value ? 'true' : 'false'}</span>;
 
