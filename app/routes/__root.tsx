@@ -120,7 +120,7 @@ function Main({ children }: { children: React.ReactNode }) {
 			{/* <div className="hidden md:block">
 				<MainSidebar />
 			</div> */}
-			<main className="flex-1 flex flex-col-reverse md:flex-col overflow-hidden p-4 md:p-0">
+			<main className="flex-1 flex flex-col-reverse md:flex-col overflow-hidden p-1 md:p-0">
 				<MainHeader className="mt-0" />
 				<div className="flex-1 overflow-auto">{children}</div>
 			</main>
