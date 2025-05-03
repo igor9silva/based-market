@@ -137,6 +137,16 @@ function AccessDenied() {
 	return (
 		<div className="h-screen w-full flex flex-col items-center justify-center gap-4">
 			<Button onClick={() => signIn('google', { redirectTo: location.href })}>Continue with Google</Button>
+			<footer className="absolute bottom-4 text-sm text-muted-foreground">
+				<a
+					href="/static/privacy-policy.md"
+					className="hover:underline"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					Privacy Policy
+				</a>
+			</footer>
 		</div>
 	);
 }
