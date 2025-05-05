@@ -1,10 +1,12 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Doc } from 'convex/_generated/dataModel';
 import { ArrowRight } from 'lucide-react';
+import { TaskBudget } from '~/components/TaskBudget';
 import { TaskStatusIndicator } from '~/components/TaskStatusIndicator';
 import { TimeAgo } from '~/components/TimeAgo';
 import { Button } from '~/components/ui/button';
 import { Checkbox } from '~/components/ui/checkbox';
+import { Separator } from '~/components/ui/separator';
 import { useOptimisticTaskUpdate } from '~/hooks/useOptimisticTaskUpdate';
 import { useTaskMutations } from '~/hooks/useTaskMutations';
 import { cn } from '~/lib/utils';
@@ -59,13 +61,22 @@ export function TaskItem({
 						</h3>
 						<TaskStatusIndicator task={task} />
 					</div>
-					<TimeAgo date={task._creationTime} className="text-sm text-muted-foreground" />
+					<div className="flex items-center gap-2">
+						<TimeAgo date={task._creationTime} suffix="old" className="text-sm text-muted-foreground" />
+						<Separator orientation="vertical" className="h-4 bg-primary" />
+						<TaskBudget
+							task={task}
+							precision={2}
+							showColors={false}
+							className="text-sm text-muted-foreground"
+						/>
+					</div>
 				</div>
 			</div>
 			<Button
 				variant="ghost"
 				size="icon"
-				className="justify-end [&_svg]:size-5 flex-shrink-0"
+				className="justify-end [&_svg]:size-5 flex-shrink-0 hover:bg-transparent"
 				onClick={(e) => {
 					e.preventDefault();
 					navigate({ to: '/$', params: { _splat: `/chat/${task._id}` } });

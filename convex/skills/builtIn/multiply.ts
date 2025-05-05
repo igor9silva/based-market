@@ -3,7 +3,7 @@ import { defineSkill, ExecutionResult, ToolExecution } from '../defineSkill';
 
 export const multiply = defineSkill({
 	preApprovedCost: 0n,
-	description: 'Multiply N numbers',
+	description: 'Multiply N numbers. ***NOTE: the numbers must be passed as a NUMBER ARRAY - DO NOT USE STRINGS***',
 	parameters: z.object({
 		numbers: z.array(z.number()).describe('The numbers to multiply.'),
 	}),

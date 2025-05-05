@@ -7,9 +7,13 @@ import { cn } from '~/lib/utils';
 export function TaskBudget({
 	task, //
 	className,
+	precision = 3,
+	showColors = true,
 }: {
 	task: Doc<'tasks'>;
 	className?: string;
+	precision?: number;
+	showColors?: boolean;
 }) {
 	//
 	const available = task.budgetUSDC.available;
@@ -21,11 +25,16 @@ export function TaskBudget({
 		<TooltipProvider>
 			<Tooltip>
 				<TooltipTrigger asChild>
-					<div className={cn('flex flex-col items-end text-right whitespace-nowrap', className)}>
+					<div className={cn('flex flex-col items-end text-right whitespace-nowrap text-sm', className)}>
 						{task.isActive ? (
-							<TriggerActive available={available} total={total} percentSpent={percentSpent} />
+							<TriggerActive
+								available={available}
+								percentSpent={percentSpent}
+								precision={precision}
+								showColors={showColors}
+							/>
 						) : (
-							<TriggerClosed spent={spent} />
+							<TriggerClosed spent={spent} precision={precision} />
 						)}
 					</div>
 				</TooltipTrigger>
@@ -41,12 +50,14 @@ export function TaskBudget({
 	);
 }
 
-function TriggerActive(props: { available: bigint; total: bigint; percentSpent: number }) {
+function TriggerActive(props: { available: bigint; percentSpent: number; precision: number; showColors: boolean }) {
 	//
-	const { available, total, percentSpent } = props;
+	const { available, percentSpent, showColors, precision } = props;
 
 	const color = useMemo(() => {
 		//
+		if (!showColors) return undefined;
+
 		// Normalize percentage to 0-1 range, capped at 0.9 (90%)
 		const normalizedPercent = Math.min(percentSpent / 90, 1);
 
@@ -57,20 +68,19 @@ function TriggerActive(props: { available: bigint; total: bigint; percentSpent: 
 
 		return `rgb(${r}, ${g}, ${b})`;
 		//
-	}, [percentSpent]);
+	}, [percentSpent, showColors]);
 
 	return (
 		<div className="flex flex-col">
-			<div className="text-sm font-medium" style={{ color }}>
-				${asDollars({ bigInt: available, precision: 3 })}
+			<div className="font-medium" style={{ color }}>
+				${asDollars({ bigInt: available, precision })}
 			</div>
-			<div className="text-xs text-muted-foreground">${asDollars({ bigInt: total, precision: 3 })}</div>
 		</div>
 	);
 }
 
-function TriggerClosed({ spent }: { spent: bigint }) {
-	return <div className="text-sm font-medium">${asDollars({ bigInt: spent, precision: 3 })}</div>;
+function TriggerClosed({ spent, precision }: { spent: bigint; precision: number }) {
+	return <div className="text-muted-foreground font-medium">${asDollars({ bigInt: spent, precision })}</div>;
 }
 
 function TooltipActive(props: {
@@ -84,11 +94,11 @@ function TooltipActive(props: {
 	return (
 		<div className="text-base space-y-1">
 			<p>
-				Spent <strong>{asDollars({ bigInt: spent, precision: 6 })} USDc</strong> ({percentSpent.toFixed(1)}
-				%)
+				Available <strong>{asDollars({ bigInt: available, precision: 6 })} USDc</strong>
 			</p>
 			<p>
-				Available <strong>{asDollars({ bigInt: available, precision: 6 })} USDc</strong>
+				Spent <strong>{asDollars({ bigInt: spent, precision: 6 })} USDc</strong> ({percentSpent.toFixed(1)}
+				%)
 			</p>
 			<p>
 				Total added <strong>{asDollars({ bigInt: total, precision: 6 })} USDc</strong>
