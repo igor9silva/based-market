@@ -48,7 +48,7 @@ export function ActionIsland({
 		<motion.div
 			ref={ref}
 			className={cn(
-				'z-100 text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[90%]',
+				'z-100 text-secondary-foreground rounded-lg cursor-pointer overflow-hidden max-w-[95%]',
 				className,
 			)}
 			transition={TRANSITION}

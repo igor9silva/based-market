@@ -61,7 +61,7 @@ const MessageContent = ({
 			shouldRenderComponents={shouldRenderComponents}
 			text={text}
 			className={cn(
-				'rounded-lg text-foreground max-w-full md:max-w-[90%] break-normal hyphens-auto whitespace-normal',
+				'rounded-lg text-foreground max-w-full md:max-w-[95%] break-normal hyphens-auto whitespace-normal',
 				className,
 			)}
 			{...props}
