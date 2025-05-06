@@ -18,7 +18,7 @@ export function TopUpCard() {
 
 	const handleSubmit = useHandleSubmit({
 		schema: z.object({
-			amount: z.string().pipe(z.coerce.number()),
+			amount: z.string().pipe(z.coerce.number().min(10)),
 		}),
 		handler: async ({ amount }) => {
 			//
@@ -35,6 +35,9 @@ export function TopUpCard() {
 				console.error(error);
 				toast.error('Failed to start top up. We are working on fixing this.');
 			}
+		},
+		onParseError: (error) => {
+			toast.error('Minimum top up amount is $10.');
 		},
 	});
 
