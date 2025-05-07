@@ -1,6 +1,7 @@
 import { DiscardAction } from '~/components/actions/DiscardAction';
 import { DoneAction } from '~/components/actions/DoneAction';
 import { IncreaseBudgetAction } from '~/components/actions/IncreaseBudgetAction';
+import { LearnAction } from '~/components/actions/LearnAction';
 import { ReasonAction } from '~/components/actions/ReasonAction';
 import { RequestBudgetAction } from '~/components/actions/RequestBudgetAction';
 import { ResolveAction } from '~/components/actions/ResolveAction';
@@ -26,4 +27,8 @@ export default {
 	scrapeLink: ScrapeLinkAction,
 	searchPlaces: SearchPlacesAction,
 	reason: ReasonAction,
+	//
+	createSkill: LearnAction,
+	updateSkill: LearnAction,
+	learn: LearnAction,
 };
