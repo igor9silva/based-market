@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
+import { BasicError } from '~/components/BasicError';
 import { UnifiedSkillForm } from '~/components/skills/UnifiedSkillForm';
 import { CardDescription, CardTitle } from '~/components/ui/card';
 import { Skeleton } from '~/components/ui/skeleton';
@@ -10,6 +11,7 @@ import { Skeleton } from '~/components/ui/skeleton';
 export const Route = createFileRoute('/skills_/$id')({
 	component: RouteComponent,
 	pendingComponent: Pending,
+	errorComponent: () => <BasicError text="Not found (or something else went wrong)." />,
 });
 
 export default function RouteComponent() {
