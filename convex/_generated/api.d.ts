@@ -69,6 +69,8 @@ import type * as users_preferences_private from "../users/preferences/private.js
 import type * as users_preferences_public from "../users/preferences/public.js";
 import type * as users_private from "../users/private.js";
 import type * as users_public from "../users/public.js";
+import type * as users_requests_private from "../users/requests/private.js";
+import type * as users_requests_public from "../users/requests/public.js";
 import type * as utils_errors from "../utils/errors.js";
 import type * as utils_money from "../utils/money.js";
 import type * as utils_zodToString from "../utils/zodToString.js";
@@ -148,6 +150,8 @@ declare const fullApi: ApiFromModules<{
   "users/preferences/public": typeof users_preferences_public;
   "users/private": typeof users_private;
   "users/public": typeof users_public;
+  "users/requests/private": typeof users_requests_private;
+  "users/requests/public": typeof users_requests_public;
   "utils/errors": typeof utils_errors;
   "utils/money": typeof utils_money;
   "utils/zodToString": typeof utils_zodToString;

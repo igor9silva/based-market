@@ -2,7 +2,9 @@ import { Link } from '@tanstack/react-router';
 import { Doc } from 'convex/_generated/dataModel';
 import { pricingFor } from 'convex/skills/createAITool';
 import { asDollars } from 'convex/utils/money';
+import { Share } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { Switch } from '~/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
@@ -16,10 +18,12 @@ export function SkillCard({
 	skill,
 	isEnabled,
 	onToggle,
+	onShareSkill,
 }: {
 	skill: Doc<'skills'>;
 	isEnabled: boolean;
 	onToggle: (isEnabled: boolean) => void;
+	onShareSkill?: (skill: Doc<'skills'>) => void;
 }) {
 	//
 	const availableSkills = skill.kind === 'soft' ? skill.config?.availableSkills ?? [] : [];
@@ -83,9 +87,7 @@ export function SkillCard({
 						)}
 					</div>
 
-					<div className="mt-auto pt-2 border-t text-xs text-muted-foreground">
-						<Pricing skill={skill} />
-					</div>
+					<CardFooter skill={skill} onShareSkill={onShareSkill} />
 				</div>
 			</CardContent>
 		</>
@@ -109,6 +111,43 @@ export function SkillCard({
 		>
 			<CardWrapper>{cardContent}</CardWrapper>
 		</Link>
+	);
+}
+
+function CardFooter({ skill, onShareSkill }: { skill: Doc<'skills'>; onShareSkill?: (skill: Doc<'skills'>) => void }) {
+	//
+	const isUserOwnedSkill = skill.owner !== 'isPro' && skill.owner !== 'built-in';
+
+	const handleShareClick = (event: React.MouseEvent) => {
+		//
+		event.preventDefault();
+		event.stopPropagation();
+		if (onShareSkill) onShareSkill(skill);
+	};
+
+	return (
+		<div className="mt-auto pt-2 border-t text-xs text-muted-foreground">
+			<div className={cn('flex items-center', isUserOwnedSkill ? 'justify-between' : 'justify-center')}>
+				<Pricing skill={skill} />
+				{isUserOwnedSkill && onShareSkill && <ShareButton onClick={handleShareClick} />}
+			</div>
+		</div>
+	);
+}
+
+function ShareButton({ onClick }: { onClick: (event: React.MouseEvent) => void }) {
+	//
+	return (
+		<TooltipProvider>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button variant="ghost" size="icon" onClick={onClick} className="h-6 w-6">
+						<Share className="h-3 w-3" />
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>Share</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }
 

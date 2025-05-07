@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router';
+import { Doc } from 'convex/_generated/dataModel';
 import { PlusCircle } from 'lucide-react';
 import { Suspense, useState } from 'react';
 import { Button } from '~/components/ui/button';
@@ -15,9 +16,11 @@ import { SkillListContent } from './SkillListContent';
 export function SkillList({
 	filter, //
 	shouldShowLearnButton = false,
+	onShareSkill,
 }: {
 	filter: 'personal' | 'public';
 	shouldShowLearnButton?: boolean;
+	onShareSkill?: (skill: Doc<'skills'>) => void;
 }) {
 	//
 	const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +52,7 @@ export function SkillList({
 					</div>
 				}
 			>
-				<SkillListContent filter={filter} searchTerm={searchTerm} />
+				<SkillListContent filter={filter} searchTerm={searchTerm} onShareSkill={onShareSkill} />
 			</Suspense>
 		</div>
 	);

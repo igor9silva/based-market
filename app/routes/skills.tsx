@@ -1,4 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { Doc } from 'convex/_generated/dataModel';
+import { useState } from 'react';
+import { ShareSkillRequestDialog } from '~/components/skills/ShareSkillRequestDialog';
 import { SkillList } from '~/components/skills/SkillList';
 import { CardDescription, CardTitle } from '~/components/ui/card';
 import { Separator } from '~/components/ui/separator';
@@ -9,6 +12,10 @@ export const Route = createFileRoute('/skills')({
 
 export default function RouteComponent() {
 	//
+	const [selectedSkill, setSelectedSkill] = useState<Doc<'skills'> | null>(null);
+
+	const handleShareSkill = (skill: Doc<'skills'>) => setSelectedSkill(skill);
+
 	return (
 		<div className="m-6">
 			<div className="flex flex-row items-center justify-between my-4 gap-2">
@@ -22,7 +29,7 @@ export default function RouteComponent() {
 					<h2 className="text-lg font-semibold">Managed by you</h2>
 					<CardDescription>Skills you taught Meseeks yourself.</CardDescription>
 					<Separator className="mt-2 mb-4" />
-					<SkillList filter={'personal'} shouldShowLearnButton={true} />
+					<SkillList filter={'personal'} shouldShowLearnButton onShareSkill={handleShareSkill} />
 				</div>
 
 				<div>
@@ -31,9 +38,16 @@ export default function RouteComponent() {
 						Skills taught to Meseeks by <strong>isPro</strong> (the Meseeks team).
 					</CardDescription>
 					<Separator className="my-4" />
-					<SkillList filter={'public'} />
+					<SkillList filter={'public'} onShareSkill={handleShareSkill} />
 				</div>
 			</div>
+			<ShareSkillRequestDialog
+				skill={selectedSkill}
+				open={selectedSkill !== null}
+				onOpenChange={(isOpen) => {
+					if (!isOpen) setSelectedSkill(null);
+				}}
+			/>
 		</div>
 	);
 }

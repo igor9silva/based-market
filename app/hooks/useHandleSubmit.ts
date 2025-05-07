@@ -15,7 +15,8 @@ export function useHandleSubmit<T extends z.ZodType>({
 	return async (e: FormEvent<HTMLFormElement>) => {
 		//
 		e.preventDefault();
-		const formData = new FormData(e.currentTarget);
+		const target = e.currentTarget;
+		const formData = new FormData(target);
 
 		// Convert FormData to a plain object
 		const rawData = Object.fromEntries(formData);
@@ -29,8 +30,8 @@ export function useHandleSubmit<T extends z.ZodType>({
 		}
 
 		// Reset the form
-		if (shouldAlwaysClearForm) e.currentTarget.reset();
+		if (shouldAlwaysClearForm) target.reset();
 
-		await handler(parsed.data, () => e.currentTarget.reset());
+		await handler(parsed.data, () => target.reset());
 	};
 }

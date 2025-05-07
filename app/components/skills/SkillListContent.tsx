@@ -2,6 +2,7 @@ import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
+import { Doc } from 'convex/_generated/dataModel';
 import { skillSchema } from 'convex/schemas/skillSchema';
 import { useCallback } from 'react';
 import { z } from 'zod';
@@ -15,9 +16,11 @@ import { SkillCard } from './SkillCard';
 export function SkillListContent({
 	filter, //
 	searchTerm,
+	onShareSkill,
 }: {
 	filter: 'personal' | 'public';
 	searchTerm: string;
+	onShareSkill?: (skill: Doc<'skills'>) => void;
 }) {
 	//
 	const query = convexQuery(api.skills.public[filter === 'personal' ? 'findAllPersonal' : 'findAllPublic'], {});
@@ -74,6 +77,7 @@ export function SkillListContent({
 					skill={skill}
 					isEnabled={enabledSkills.includes(skill.key)}
 					onToggle={(isEnabled) => onToggle(skill.key, isEnabled)}
+					onShareSkill={onShareSkill}
 				/>
 			))}
 		</div>

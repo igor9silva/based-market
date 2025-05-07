@@ -53,5 +53,6 @@ all booleans should read like `isSomething` `hasSomething` `shouldDoShit`, like 
 we use PascalCase for component files
 ------------------------------------
 when doing multiple react Components on the same file, make sure the main Component is the first one on the file
+smaller components should be AFTER the main component
 ------------------------------------
 prefer array.concat() over [...spread] for performance reasons
