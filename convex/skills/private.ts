@@ -2,7 +2,7 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { internalMutation, internalQuery } from '../lib';
 import { builtInSkillSchema, newSkillSchema, skillOwnerSchema } from '../schemas/skillSchema';
-import { _getUserPreferece } from '../users/preferences/private';
+import { _getUserPreferece, _setUserPreference } from '../users/preferences/private';
 import { zodToString } from '../utils/zodToString';
 import { _builtInSkills } from './builtIn/index';
 
@@ -190,6 +190,29 @@ export const _update = internalMutation({
 
 		return await ctx.db.patch(existing._id, {
 			...updatedSkill,
+		});
+	},
+});
+
+export const _enableSkill = internalMutation({
+	args: {
+		userId: zid('users'),
+		skillKey: z.string(),
+	},
+	handler: async (ctx, { userId, skillKey }) => {
+		//
+		const enabledSkills = await _getUserPreferece(ctx, {
+			userId,
+			key: 'enabledSkills',
+		});
+
+		const currentSkills = (enabledSkills?.value as string[]) ?? [];
+		if (currentSkills.includes(skillKey)) return;
+
+		await _setUserPreference(ctx, {
+			userId,
+			key: 'enabledSkills',
+			value: currentSkills.concat(skillKey),
 		});
 	},
 });

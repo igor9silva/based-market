@@ -49,6 +49,12 @@ export const createSkill = defineSkill({
 				}),
 			});
 
+			// enable the newly created skill
+			await execution.ctx.runMutation(internal.skills.private._enableSkill, {
+				userId: execution.task.owner,
+				skillKey: args.skill.key,
+			});
+
 			console.debug('skill created', args.skill);
 
 			const kind = args.skill.kind === 'hard' ? 'Hard' : 'Soft';
