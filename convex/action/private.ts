@@ -48,7 +48,7 @@ export const _addMany = internalMutation({
 
 		// skip all pending reactions if adding human actions
 		if (author === owner) {
-			await _skipAllPendingReactions(ctx, { taskId, owner });
+			await _skipAllPendingReactions(ctx, { taskId, owner, shouldSkipRunning: true });
 		}
 
 		// reopen if needed and requested
@@ -253,8 +253,9 @@ export const _skipAllPendingReactions = internalMutation({
 	args: {
 		taskId: zid('tasks'),
 		owner: zid('users'),
+		shouldSkipRunning: z.boolean().optional().default(false),
 	},
-	handler: async (ctx, { taskId, owner }) => {
+	handler: async (ctx, { taskId, owner, shouldSkipRunning }) => {
 		//
 		console.debug('skipping all pending reactions taskId', taskId, 'owner', owner);
 
@@ -278,6 +279,34 @@ export const _skipAllPendingReactions = internalMutation({
 				}),
 			),
 		);
+
+		if (shouldSkipRunning) {
+			await _stop(ctx, { taskId, author: owner, authorIsOwner: true });
+		}
+	},
+});
+
+export const _stop = internalMutation({
+	args: {
+		taskId: zid('tasks'),
+		author: authorSchema,
+		authorIsOwner: z.boolean(),
+	},
+	handler: async (ctx, { taskId, author, authorIsOwner }) => {
+		//
+		const action = await _findRunning(ctx, { taskId });
+		if (!action) return;
+
+		await ctx.db.patch(action._id, {
+			status: 'skipped' as const,
+			costs: [
+				// unlimited interruption costs are covered under the Pro subscription
+			],
+			result: {
+				text: `stopped by ${authorIsOwner ? 'human' : author}`,
+				reactions: [],
+			},
+		});
 	},
 });
 

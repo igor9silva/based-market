@@ -178,8 +178,21 @@ export const _resolve = internalMutation({
 
 		const action = await ctx.db.get(actionId);
 		if (!action) throw new Error('Action not found');
-		if (action.result)
+
+		if (action.status === 'skipped') {
+			//
+			console.info(
+				'INTERRUPTION',
+				`_resolve(${actionId}, ${status}) result was ignored because status === 'skipped'. This should only happen as a consequence of an user stop() action.`,
+				`skill key: ${action.skillKey}`,
+			);
+
+			return;
+		}
+
+		if (action.result) {
 			throw new Error(`Action result already set for ${actionId}. Trying to set to ${JSON.stringify(result)}`);
+		}
 
 		if (!result) console.warn(`${action.skillKey} (${actionId}) ended with no result`);
 
