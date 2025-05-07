@@ -31,4 +31,6 @@ export default {
 	createSkill: LearnAction,
 	updateSkill: LearnAction,
 	learn: LearnAction,
+	// hidden
+	requestIteration: null,
 };

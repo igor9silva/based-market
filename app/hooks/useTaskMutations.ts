@@ -106,6 +106,18 @@ export function useTaskMutations() {
 		});
 	};
 
+	const requestIteration = ({
+		taskId, //
+	}: {
+		taskId: Id<'tasks'>;
+	}) => {
+		return act({
+			taskId,
+			skillKey: 'requestIteration',
+			args: {},
+		});
+	};
+
 	const approveAction = ({
 		taskId, //
 		actionId,
@@ -162,6 +174,7 @@ export function useTaskMutations() {
 		discard,
 		reopen,
 		increaseBudget,
+		requestIteration,
 		approveAction,
 		rejectAction,
 		approveBlockingAction,

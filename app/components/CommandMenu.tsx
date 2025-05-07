@@ -133,6 +133,10 @@ export function CommandMenuDialog() {
 				{/* Quick actions */}
 				<CommandGroup heading="Quick actions">
 					<NewTaskCommandItem shouldUseSearch={shouldFilter} />
+					<CommandItem value="/" keywords={['inbox', 'index', 'home']} onSelect={onSelect}>
+						<Inbox className="mr-2" />
+						Go to Inbox
+					</CommandItem>
 					<CommandItem value="/top-up" keywords={['top', 'up']} onSelect={onSelect}>
 						<BadgeCent className="mr-2" />
 						Top up account
@@ -161,10 +165,10 @@ export function CommandMenuDialog() {
 				</CommandGroup>
 
 				{/* Pinned tasks */}
-				<CommandGroup heading="Pinned tasks">
-					<CommandItem value="/" keywords={['inbox']} onSelect={onSelect}>
+				{/* <CommandGroup heading="Pinned tasks">
+					<CommandItem value="/" keywords={['inbox', 'index', 'home']} onSelect={onSelect}>
 						<Inbox className="mr-2" />
-						Inbox
+						Go to Inbox
 					</CommandItem>
 					{/* <CommandItem
 						value="/list/kh70vk1fpyg3mkf0jg1wmeerg9768ngv"
@@ -173,11 +177,11 @@ export function CommandMenuDialog() {
 					>
 						<DollarSign className="mr-2" />
 						Finances
-					</CommandItem> */}
-				</CommandGroup>
+					</CommandItem>
+				</CommandGroup> */}
 
 				{/* All tasks */}
-				<CommandGroup heading="All tasks">
+				<CommandGroup heading="Tasks">
 					{!tasks && <CommandLoading>Fetching tasks</CommandLoading>}
 					{tasks?.map((task) => {
 						return (

@@ -8,6 +8,7 @@ import { multiply } from './multiply';
 import { reason } from './reason';
 import { reopen } from './reopen';
 import { requestBudget } from './requestBudget';
+import { requestIteration } from './requestIteration';
 import { resolve } from './resolve';
 import { say } from './say';
 import { stop } from './stop';
@@ -38,6 +39,7 @@ export const _builtInSkills = {
 	resolve,
 	requestBudget,
 	discard,
+	requestIteration,
 
 	// skills
 	createSkill,

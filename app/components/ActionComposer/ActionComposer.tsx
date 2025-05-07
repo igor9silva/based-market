@@ -19,7 +19,7 @@ export function ActionComposer({
 	onSubmit?: (message: string) => void;
 	className?: string;
 }) {
-	const { say, stop, approveBlockingAction } = useTaskMutations();
+	const { say, stop, requestIteration, approveBlockingAction } = useTaskMutations();
 	const {
 		textareaRef,
 		value: message,
@@ -59,11 +59,13 @@ export function ActionComposer({
 		callback: () => {
 			if (isBlocked) {
 				approveBlockingAction({ taskId: task._id });
-			} else if (!isEmpty && recordingStatus === 'idle') {
-				handleSubmit();
+			} else if (recordingStatus === 'idle') {
+				if (isEmpty) {
+					requestIteration({ taskId: task._id });
+				} else {
+					handleSubmit();
+				}
 			}
-
-			// TODO: CMD+Enter when empty to iterate()
 		},
 	});
 
