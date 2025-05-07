@@ -37,6 +37,7 @@ export const _seedIfNeeded = async (
 		// adding a fake delay for fun
 		const delay = 10000; // ms
 		ctx.scheduler.runAfter(delay, internal.users.private._markAreReady, { userId });
+		// TODO: at somepoint, we'd like users to spawn their own Convex instance for full isolation and control
 	};
 
 	if (!env.REF_USER_ID) {
