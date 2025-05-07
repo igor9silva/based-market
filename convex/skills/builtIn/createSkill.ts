@@ -41,11 +41,7 @@ export const createSkill = defineSkill({
 					inputSchema: args.skill.inputSchema,
 					preApprovedCost: args.skill.isSafe ? DEFAULT_PRE_APPROVED_COST : 'none',
 					// TODO: make sure to add `iterate` to the knownReactions
-					knownReactions: args.skill.knownReactions?.map((key) => ({
-						skillKey: key,
-						args: {},
-						condition: 'any',
-					})),
+					knownReactions: createKnownReactions(args.skill.knownReactions),
 					config: createConfig(args.skill),
 					cost: args.skill.kind === 'hard' ? 0n : 'dynamic',
 					owner: execution.task.owner,
@@ -71,6 +67,22 @@ export function ensureInputSchemaIsValid(inputSchema: string) {
 	} catch (error) {
 		throw new Error('Invalid input schema');
 	}
+}
+
+export function createKnownReactions(skillReactions?: string[]) {
+	//
+	const baseReactions =
+		skillReactions?.map((key) => ({
+			skillKey: key,
+			args: {},
+			condition: 'any',
+		})) ?? [];
+
+	return baseReactions.concat({
+		skillKey: 'iterate',
+		args: {},
+		condition: 'companion',
+	});
 }
 
 export function createConfig(skill: z.infer<typeof simplifiedSkillSchema>) {
