@@ -135,8 +135,6 @@ function Result({
 	className?: string;
 	status: 'failed' | 'succeeded' | 'skipped';
 }) {
-	const mdx = <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
-
 	if (status === 'failed') {
 		return (
 			<FailedMessage
@@ -146,6 +144,8 @@ function Result({
 			/>
 		);
 	}
+
+	const mdx = () => <MDX text={result} errorFallback={<pre className="whitespace-pre-wrap">{result}</pre>} />;
 
 	return (
 		<Collapsible className={cn('text-sm', className)}>
@@ -158,15 +158,8 @@ function Result({
 				<p>
 					args: <code>{JSON.stringify(args)}</code>
 				</p>
-				<p>costs:</p>
-				<ul>
-					{costs.map((cost) => (
-						<li key={cost.symbol}>
-							{cost.symbol} {asDollars({ bigInt: cost.amount })} ({cost.description})
-						</li>
-					))}
-				</ul>
-				<p>result: {mdx}</p>
+				<p>cost: {asDollars({ bigInt: costs.reduce((acc, cost) => acc + cost.amount, 0n) })}</p>
+				<p>result: {result.length < 280 ? mdx() : 'Too big to display. Use Dev Mode.'}</p>
 			</CollapsibleContent>
 		</Collapsible>
 	);
