@@ -306,6 +306,7 @@ async function _tryAutoApprove(
 	return _autoApprove(ctx, task, action);
 }
 
+// ¡¡¡do not remove — this prevents machines from taking over!!!
 async function _hasReachedMaxConsecutiveCompanionActions(
 	ctx: ActionCtx | MutationCtx, //
 	task: Doc<'tasks'>,
