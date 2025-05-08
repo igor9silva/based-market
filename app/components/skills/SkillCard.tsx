@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Doc } from 'convex/_generated/dataModel';
-import { pricingFor } from 'convex/skills/createAITool';
+import { pricingFor } from 'convex/schemas/skillSchema';
 import { asDollars } from 'convex/utils/money';
 import { Share } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
@@ -93,16 +93,6 @@ export function SkillCard({
 		</>
 	);
 
-	// If disabled, render just the card without the Link
-	if (!isEnabled) {
-		return (
-			<div className="block">
-				<CardWrapper>{cardContent}</CardWrapper>
-			</div>
-		);
-	}
-
-	// If enabled, wrap in Link for navigation
 	return (
 		<Link
 			to="/skills/$id"

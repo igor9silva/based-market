@@ -89,6 +89,74 @@ export const modelsSchema = z.enum([
 	// 'together/llama-4-maverick',
 ]);
 
+function pricePerMillionTokens({ input, output }: { input: number; output: number }) {
+	return {
+		inputToken: asBigInt({ dollars: input }) / 1_000_000n,
+		outputToken: asBigInt({ dollars: output }) / 1_000_000n,
+	};
+}
+
+export function pricingFor(model: z.infer<typeof modelsSchema>): {
+	inputToken: bigint;
+	outputToken: bigint;
+} {
+	switch (model) {
+		//
+		// Anthropic
+		case 'anthropic/claude-3.7-sonnet':
+			return pricePerMillionTokens({ input: 3, output: 15 });
+		case 'anthropic/claude-3.5-haiku':
+			return pricePerMillionTokens({ input: 0.8, output: 4 });
+
+		// OpenAI
+		// case 'openai/gpt-4o':
+		// 	return pricePerMillionTokens({ input: 2.5, output: 10 });
+		// case 'openai/gpt-4o-mini':
+		// 	return pricePerMillionTokens({ input: 0.15, output: 0.6 });
+		case 'openai/gpt-4.1':
+			return pricePerMillionTokens({ input: 2.0, output: 8.0 });
+		case 'openai/gpt-4.1-mini':
+			return pricePerMillionTokens({ input: 0.4, output: 1.6 });
+		case 'openai/gpt-4.1-nano':
+			return pricePerMillionTokens({ input: 0.1, output: 0.4 });
+
+		// Google
+		case 'google/gemini-2.5-pro':
+			return pricePerMillionTokens({ input: 2.5, output: 15 });
+		case 'google/gemini-2.0-flash':
+			return pricePerMillionTokens({ input: 0.1, output: 0.4 });
+		case 'google/gemini-2.0-flash-lite':
+			return pricePerMillionTokens({ input: 0.075, output: 0.3 });
+
+		// xAI
+		case 'xai/grok-3':
+			return pricePerMillionTokens({ input: 3, output: 15 });
+		case 'xai/grok-3-mini':
+			return pricePerMillionTokens({ input: 0.3, output: 0.5 });
+
+		// Groq
+		case 'groq/llama-4-scout':
+			return pricePerMillionTokens({ input: 0.11, output: 0.34 });
+		case 'groq/llama-4-maverick':
+			return pricePerMillionTokens({ input: 0.2, output: 0.6 });
+
+		// DeepSeek
+		case 'deepseek/deepseek-v3':
+			return pricePerMillionTokens({ input: 0.27, output: 1.1 });
+
+		// DeepInfra
+		// case 'deepinfra/deepseek-v3':
+		// 	return pricePerMillionTokens({ input: 0.4, output: 0.89 });
+
+		// Together
+		// case 'together/llama-4-maverick':
+		// 	return pricePerMillionTokens({ inputPrice: 0.27, outputPrice: 0.85 });
+
+		default:
+			throw new Error(`Unknown model: ${model}`);
+	}
+}
+
 export const instructionVariableSchema = z.union([
 	z.literal('task').describe('The full task structure, in a XML-like format'),
 	z.literal('task.id'),
