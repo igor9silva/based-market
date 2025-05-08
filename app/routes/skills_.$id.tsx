@@ -5,7 +5,7 @@ import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { BasicError } from '~/components/BasicError';
 import { UnifiedSkillForm } from '~/components/skills/UnifiedSkillForm';
-import { CardDescription, CardTitle } from '~/components/ui/card';
+import { CardTitle } from '~/components/ui/card';
 import { Skeleton } from '~/components/ui/skeleton';
 
 export const Route = createFileRoute('/skills_/$id')({
@@ -25,7 +25,7 @@ export default function RouteComponent() {
 			<div className="flex flex-row items-center justify-between my-4">
 				<div>
 					<CardTitle className="text-2xl">{skill.key}</CardTitle>
-					<CardDescription>{skill.description}</CardDescription>
+					{/* <CardDescription>{skill.description}</CardDescription> */}
 				</div>
 			</div>
 			<div>

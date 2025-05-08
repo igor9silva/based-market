@@ -40,11 +40,11 @@ function KeyField({ disabled }: { disabled?: boolean }) {
 			name="key"
 			render={({ field }) => (
 				<FormItem>
-					<LabelWithTooltip tooltip="A unique identifier for this skill. e.g. searchWeb, email_move, etc.">
+					<LabelWithTooltip tooltip="A unique identifier for this skill. e.g. google_search, twitter_post, etc.">
 						Key (unique identifier)
 					</LabelWithTooltip>
 					<FormControl>
-						<Input {...field} placeholder="e.g., searchWeb, email_move" disabled={disabled} />
+						<Input {...field} placeholder="e.g., google_search, twitter_post" disabled={disabled} />
 					</FormControl>
 					<FormMessage />
 				</FormItem>
@@ -75,7 +75,7 @@ function AuthorizationField({ disabled }: { disabled?: boolean }) {
 			name="preApprovedCost"
 			render={({ field }) => (
 				<FormItem>
-					<LabelWithTooltip tooltip="Controls when this skill requires human approval. You can allow it to be executed by Meseeks with no human approval up to a certain cost, but it'll still be subject to other limits, such as amount of consecutive actions.">
+					<LabelWithTooltip tooltip="Controls when this skill requires human approval. You can allow it to be executed by Meseeks with no human approval (up to a certain cost), but it'll still be subject to other limits, such as maximum amount of consecutive actions.">
 						Authorization
 					</LabelWithTooltip>
 					<div className="flex flex-row items-center gap-3 w-full">
@@ -149,7 +149,7 @@ function DescriptionField({ disabled }: { disabled?: boolean }) {
 			name="description"
 			render={({ field }) => (
 				<FormItem>
-					<LabelWithTooltip tooltip="A clear description of what this skill does. This is visible to LLMs, so you must include instructions on how to use that skill, how to fill in input params, etc.">
+					<LabelWithTooltip tooltip="A clear description of what this skill does. This is visible to Meseeks, so it must include instructions on how to use that skill, how to fill in input params, etc.">
 						Description
 					</LabelWithTooltip>
 					<FormControl>
@@ -177,7 +177,7 @@ function InputSchemaField({ disabled }: { disabled?: boolean }) {
 			name="inputSchema"
 			render={({ field }) => (
 				<FormItem>
-					<LabelWithTooltip tooltip="Define the expected input parameters using Zod schema">
+					<LabelWithTooltip tooltip="Define the expected input parameters using a Zod schema. This is usually written by Meseeks as part of a task. We do not recommend manually editing this unless you are familiar with Zod.">
 						Input Schema
 					</LabelWithTooltip>
 					<FormControl>

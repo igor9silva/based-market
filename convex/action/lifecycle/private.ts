@@ -187,6 +187,8 @@ export const _resolve = internalMutation({
 				`skill key: ${action.skillKey}`,
 			);
 
+			// TODO: keep track of interruption costs
+
 			return;
 		}
 
