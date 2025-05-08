@@ -73,14 +73,14 @@ function TriggerActive(props: { available: bigint; percentSpent: number; precisi
 	return (
 		<div className="flex flex-col">
 			<div className="font-medium" style={{ color }}>
-				${asDollars({ bigInt: available, precision })}
+				${asDollars({ bigInt: available, precision })} remaining
 			</div>
 		</div>
 	);
 }
 
 function TriggerClosed({ spent, precision }: { spent: bigint; precision: number }) {
-	return <div className="text-muted-foreground font-medium">${asDollars({ bigInt: spent, precision })}</div>;
+	return <div className="text-muted-foreground font-medium">${asDollars({ bigInt: spent, precision })} spent</div>;
 }
 
 function TooltipActive(props: {

@@ -40,7 +40,6 @@ export function TaskListAndDetail({
 	});
 
 	const preferredWidthPercent = getPanelSize();
-	console.log('preferredWidthPercent', preferredWidthPercent);
 
 	return (
 		<ResizablePanelGroup
