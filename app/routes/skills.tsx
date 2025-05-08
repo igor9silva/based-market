@@ -17,7 +17,7 @@ export default function RouteComponent() {
 	const handleShareSkill = (skill: Doc<'skills'>) => setSelectedSkill(skill);
 
 	return (
-		<div className="m-6">
+		<div className="m-4">
 			<div className="flex flex-row items-center justify-between my-4 gap-2">
 				<div>
 					<CardTitle className="text-2xl">Skills</CardTitle>

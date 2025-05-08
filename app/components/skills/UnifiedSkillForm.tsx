@@ -28,10 +28,10 @@ type SkillFormValues = z.infer<typeof skillFormSchema>;
 
 interface UnifiedSkillFormProps {
 	skill?: Doc<'skills'>;
-	isReadOnly?: boolean;
+	isEditable?: boolean;
 }
 
-export function UnifiedSkillForm({ skill, isReadOnly = false }: UnifiedSkillFormProps) {
+export function UnifiedSkillForm({ skill, isEditable = true }: UnifiedSkillFormProps) {
 	//
 	if (skill?.kind === 'built-in') return <div>🚫</div>;
 
@@ -63,10 +63,10 @@ export function UnifiedSkillForm({ skill, isReadOnly = false }: UnifiedSkillForm
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
 				{/*  */}
-				<SkillKindSelector disabled={isReadOnly} />
+				<SkillKindSelector disabled={!isEditable} />
 
 				{/* Basic Info Fields */}
-				<BasicInfoFields isHardSkill={isHardSkill} isReadOnly={isReadOnly} />
+				<BasicInfoFields isHardSkill={isHardSkill} isEditable={isEditable} />
 
 				<Separator />
 
@@ -77,7 +77,7 @@ export function UnifiedSkillForm({ skill, isReadOnly = false }: UnifiedSkillForm
 				{/* <FormActions isEditing={Boolean(skill)} /> */}
 
 				<div className="flex justify-end">
-					<Button type="submit" disabled={isReadOnly}>
+					<Button type="submit" disabled={!isEditable}>
 						{skill ? 'Save' : 'Learn skill'}
 					</Button>
 				</div>

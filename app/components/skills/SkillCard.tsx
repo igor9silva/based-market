@@ -174,7 +174,11 @@ function Pricing({ skill }: { skill: Doc<'skills'> }) {
 	if (skill.cost !== 'dynamic') {
 		return (
 			<div className="flex items-center justify-center">
-				<span>{asDollars({ bigInt: skill.cost, precision: 4 })}$ per use</span>
+				{skill.cost === 0n ? (
+					<span>Free</span>
+				) : (
+					<span>{asDollars({ bigInt: skill.cost, precision: 4 })}$ per use</span>
+				)}
 			</div>
 		);
 	}
@@ -190,9 +194,9 @@ function Pricing({ skill }: { skill: Doc<'skills'> }) {
 	const price = pricingFor(skill.config.model);
 
 	return (
-		<div className="flex items-center justify-between">
-			<span>{asDollars({ bigInt: price.inputToken * 1_000_000n })}$/M tokens in</span>
-			<span>{asDollars({ bigInt: price.outputToken * 1_000_000n })}$/M tokens out</span>
+		<div className="flex items-center justify-between w-full">
+			<span>{asDollars({ bigInt: price.inputToken * 1_000_000n })}$/million tokens in</span>
+			<span>{asDollars({ bigInt: price.outputToken * 1_000_000n })}$/million tokens out</span>
 		</div>
 	);
 }

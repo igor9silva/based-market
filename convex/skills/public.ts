@@ -25,9 +25,20 @@ export const findOne = query({
 	},
 	handler: async (ctx, { skillId }) => {
 		//
-		const { skill } = await ensureSkillOwner(ctx, { skillId });
+		const currentUser = await getCurrentUser(ctx, {});
+		const skill = await ctx.db.get(skillId);
 
-		return skill;
+		if (!skill) throw new Error('Skill not found');
+
+		if (skill.owner !== currentUser._id && skill.owner !== 'isPro') {
+			// purposefully do not mention authorization
+			throw new Error('Skill not found');
+		}
+
+		return {
+			...skill,
+			isEditable: skill.owner === currentUser._id,
+		};
 	},
 });
 

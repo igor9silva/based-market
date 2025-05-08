@@ -5,7 +5,7 @@ import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { BasicError } from '~/components/BasicError';
 import { UnifiedSkillForm } from '~/components/skills/UnifiedSkillForm';
-import { CardTitle } from '~/components/ui/card';
+import { CardDescription, CardTitle } from '~/components/ui/card';
 import { Skeleton } from '~/components/ui/skeleton';
 
 export const Route = createFileRoute('/skills_/$id')({
@@ -21,15 +21,20 @@ export default function RouteComponent() {
 	const { data: skill } = useSuspenseQuery(query);
 
 	return (
-		<div className="m-6">
+		<div className="m-4">
 			<div className="flex flex-row items-center justify-between my-4">
 				<div>
 					<CardTitle className="text-2xl">{skill.key}</CardTitle>
-					{/* <CardDescription>{skill.description}</CardDescription> */}
+					{!skill.isEditable && (
+						<CardDescription>
+							This skill is managed by <span className="font-semibold">isPro</span> (the Meseeks team),
+							and therefore cannot be edited.
+						</CardDescription>
+					)}
 				</div>
 			</div>
 			<div>
-				<UnifiedSkillForm skill={skill} />
+				<UnifiedSkillForm skill={skill} isEditable={skill.isEditable} />
 			</div>
 		</div>
 	);

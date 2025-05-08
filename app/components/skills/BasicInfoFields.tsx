@@ -9,23 +9,23 @@ import { Textarea } from '~/components/ui/textarea';
 
 interface BasicInfoFieldsProps {
 	isHardSkill?: boolean;
-	isReadOnly?: boolean;
+	isEditable?: boolean;
 }
 
-export function BasicInfoFields({ isHardSkill = false, isReadOnly = false }: BasicInfoFieldsProps) {
+export function BasicInfoFields({ isHardSkill = false, isEditable = true }: BasicInfoFieldsProps) {
 	//
 	return (
 		<div className="space-y-4">
 			{/* */}
 			<div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-				<KeyField disabled={isReadOnly} />
-				<AuthorizationField disabled={isReadOnly} />
+				<KeyField disabled={!isEditable} />
+				<AuthorizationField disabled={!isEditable} />
 			</div>
 
-			<DescriptionField disabled={isReadOnly} />
+			<DescriptionField disabled={!isEditable} />
 
 			{/* Input Schema is only for hard skills */}
-			{isHardSkill && <InputSchemaField disabled={isReadOnly} />}
+			{isHardSkill && <InputSchemaField disabled={!isEditable} />}
 		</div>
 	);
 }
