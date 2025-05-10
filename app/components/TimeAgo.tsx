@@ -15,7 +15,7 @@ export function TimeAgo({
 	className?: string;
 }) {
 	return (
-		<span className={cn('', className)}>
+		<span className={cn('', className)} title={new Date(date).toISOString()}>
 			{prefix && prefix + ' '}
 			{formatDistanceToNow(new Date(date), { addSuffix: withSuffix && suffix === 'ago' })}
 			{suffix && suffix !== 'ago' && ' ' + suffix}
