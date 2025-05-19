@@ -6,6 +6,8 @@ import { MutationCtx } from '../_generated/server';
 import { internalMutation, internalQuery } from '../lib';
 import { env } from '../schemas/envSchema';
 import { tokenSchema } from '../schemas/topUpSchema';
+import { _addFreeCredits } from '../transactions/private';
+import { asBigInt } from '../utils/money';
 
 export const _seedIfNeeded = async (
 	ctx: MutationCtx, //
@@ -19,14 +21,14 @@ export const _seedIfNeeded = async (
 
 	// const isVerified = user?.verificationLevel === 'orb';
 
-	// await _addFreeCredits(ctx, {
-	// 	owner: userId,
-	// 	value: {
-	// 		symbol: 'USD',
-	// 		amount: isVerified ? asBigInt({ dollars: 5 }) : asBigInt({ dollars: 1 }),
-	// 	},
-	// 	description: isVerified ? 'Free 500 actions for verified users!' : 'Free 100 actions for non-verified users',
-	// });
+	await _addFreeCredits(ctx, {
+		owner: userId,
+		value: {
+			symbol: 'USD',
+			amount: asBigInt({ dollars: 5 }),
+		},
+		description: 'Welcome $5 for researchers',
+	});
 
 	// const inboxTaskId = await _addInboxTask(ctx, {
 	// 	author: userId,
