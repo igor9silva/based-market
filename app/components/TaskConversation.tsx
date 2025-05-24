@@ -55,8 +55,8 @@ export function TaskConversation({
 	const reversedActions = useMemo(() => [...actions].reverse(), [actions]);
 	const initialRenderDate = useMemo(() => new Date(), []);
 
-	const handleReopenTask = () => {
-		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: 0.2 }) });
+	const handleReopenTask = (amount: number) => {
+		increaseBudget({ taskId: task._id, amount: asBigInt({ dollars: amount }) });
 	};
 
 	const handleBudgetConfirm = () => {
@@ -103,10 +103,30 @@ export function TaskConversation({
 							<AddBudgetButton variant="ghost" />
 						</>
 					) : (
-						<Button size="sm" onClick={handleReopenTask} className="flex items-center gap-1">
-							<RotateCcw className="h-4 w-4" />
-							Reopen with $0.20
-						</Button>
+						<>
+							<Button size="sm" onClick={() => handleReopenTask(0.2)} className="flex items-center gap-1">
+								<RotateCcw className="h-4 w-4" />
+								Reopen with $0.20
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => handleReopenTask(1)}
+								className="flex items-center gap-1"
+							>
+								<RotateCcw className="h-4 w-4" />
+								Reopen with $1.00
+							</Button>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => handleReopenTask(5)}
+								className="flex items-center gap-1"
+							>
+								<RotateCcw className="h-4 w-4" />
+								Reopen with $5.00
+							</Button>
+						</>
 					)}
 				</div>
 				<Link
