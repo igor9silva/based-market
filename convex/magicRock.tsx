@@ -122,6 +122,7 @@ function languageModelFrom(
 		// Anthropic
 		'anthropic/claude-4-opus': anthropic('claude-4-opus-20250514'),
 		'anthropic/claude-4-sonnet': anthropic('claude-4-sonnet-20250514'),
+		'anthropic/claude-3.7-sonnet': anthropic('claude-4-sonnet-20250514'), // 3.7 kept for retro-compatibility
 		'anthropic/claude-3.5-haiku': anthropic('claude-3-5-haiku-latest'),
 
 		// OpenAI

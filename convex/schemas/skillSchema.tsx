@@ -57,6 +57,7 @@ export const modelsSchema = z.enum([
 	//
 	// Anthropic
 	'anthropic/claude-4-opus',
+	'anthropic/claude-3.7-sonnet',
 	'anthropic/claude-4-sonnet',
 	'anthropic/claude-3.5-haiku',
 
@@ -107,6 +108,7 @@ export function pricingFor(model: z.infer<typeof modelsSchema>): {
 		case 'anthropic/claude-4-opus':
 			return pricePerMillionTokens({ input: 15, output: 75 });
 		case 'anthropic/claude-4-sonnet':
+		case 'anthropic/claude-3.7-sonnet':
 			return pricePerMillionTokens({ input: 3, output: 15 });
 		case 'anthropic/claude-3.5-haiku':
 			return pricePerMillionTokens({ input: 0.8, output: 4 });
