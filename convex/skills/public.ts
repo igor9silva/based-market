@@ -2,8 +2,10 @@ import { zid } from 'convex-helpers/server/zod';
 import { Id } from '../_generated/dataModel';
 import { MutationCtx, QueryCtx } from '../_generated/server';
 import { mutation, query } from '../lib';
-import { newSkillSchema } from '../schemas/skillSchema';
+import { builtInSkillSchema, newSkillSchema } from '../schemas/skillSchema';
 import { current as getCurrentUser } from '../users/public';
+import { zodToString } from '../utils/zodToString';
+import { _builtInSkills } from './builtIn';
 import { _create, _findAllByOwner, _update } from './private';
 
 export const findAllPublic = query({
@@ -16,6 +18,34 @@ export const findAllPersonal = query({
 	handler: async (ctx) => {
 		const currentUser = await getCurrentUser(ctx, {});
 		return await _findAllByOwner(ctx, { owner: currentUser._id });
+	},
+});
+
+export const findAllInnate = query({
+	handler: async (ctx) => {
+		//
+		const innateSkills = [];
+
+		for (const key in _builtInSkills) {
+			//
+			const builtInTool = _builtInSkills[key as keyof typeof _builtInSkills];
+
+			innateSkills.push(
+				builtInSkillSchema.parse({
+					key,
+					description: builtInTool.description,
+					inputSchema: zodToString(builtInTool.parameters),
+					preApprovedCost: builtInTool.preApprovedCost,
+					knownReactions: builtInTool.knownReactions,
+					kind: 'built-in',
+					owner: 'built-in',
+					author: 'built-in',
+					cost: 0n,
+				}),
+			);
+		}
+
+		return innateSkills;
 	},
 });
 
@@ -46,36 +76,41 @@ export const availableIntelligences = query({
 	handler: async (ctx) => {
 		// TODO: make this list dynamic
 		return {
-			default: 'anthropic/claude-3.5-haiku',
+			default: 'grok/grok-3-mini',
 			recommended: [
 				{
-					key: 'anthropic/claude-3.7-sonnet',
-					name: 'Claude 3.7 Sonnet',
+					key: 'anthropic/claude-4-sonnet',
+					name: 'Claude 4 Sonnet',
 					provider: 'Anthropic',
 					description: 'Best overall',
+				},
+				{
+					key: 'grok/grok-3-mini',
+					name: 'Grok 3 Mini',
+					provider: 'xAI',
+					description: 'Best value (recommended for most tasks)',
 				},
 				{
 					key: 'anthropic/claude-3.5-haiku',
 					name: 'Claude 3.5 Haiku',
 					provider: 'Anthropic',
-					description: 'Best value (recommended for most tasks)',
-				},
-				{
-					key: 'groq/llama-4-maverick',
-					name: 'Llama 4 Maverick',
-					provider: 'Groq',
-					description: 'Fastest and cheapest, but not that smart',
+					description: 'Grok 3 mini alternative',
 				},
 			],
 			all: [
+				{
+					key: 'anthropic/claude-4-opus',
+					name: 'Claude 4 Opus',
+					provider: 'Anthropic',
+				},
 				{
 					key: 'google/gemini-2.5-pro',
 					name: 'Gemini 2.5 Pro',
 					provider: 'Google',
 				},
 				{
-					key: 'google/gemini-2.0-flash',
-					name: 'Gemini 2.0 Flash',
+					key: 'google/gemini-2.5-flash',
+					name: 'Gemini 2.5 Flash',
 					provider: 'Google',
 				},
 				{

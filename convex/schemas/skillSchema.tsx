@@ -56,7 +56,8 @@ export const httpConfigSchema = z.object({
 export const modelsSchema = z.enum([
 	//
 	// Anthropic
-	'anthropic/claude-3.7-sonnet',
+	'anthropic/claude-4-opus',
+	'anthropic/claude-4-sonnet',
 	'anthropic/claude-3.5-haiku',
 
 	// OpenAI
@@ -68,7 +69,7 @@ export const modelsSchema = z.enum([
 
 	// Google
 	'google/gemini-2.5-pro',
-	'google/gemini-2.0-flash',
+	'google/gemini-2.5-flash',
 	'google/gemini-2.0-flash-lite',
 
 	// xAI
@@ -103,7 +104,9 @@ export function pricingFor(model: z.infer<typeof modelsSchema>): {
 	switch (model) {
 		//
 		// Anthropic
-		case 'anthropic/claude-3.7-sonnet':
+		case 'anthropic/claude-4-opus':
+			return pricePerMillionTokens({ input: 15, output: 75 });
+		case 'anthropic/claude-4-sonnet':
 			return pricePerMillionTokens({ input: 3, output: 15 });
 		case 'anthropic/claude-3.5-haiku':
 			return pricePerMillionTokens({ input: 0.8, output: 4 });
@@ -123,8 +126,8 @@ export function pricingFor(model: z.infer<typeof modelsSchema>): {
 		// Google
 		case 'google/gemini-2.5-pro':
 			return pricePerMillionTokens({ input: 2.5, output: 15 });
-		case 'google/gemini-2.0-flash':
-			return pricePerMillionTokens({ input: 0.1, output: 0.4 });
+		case 'google/gemini-2.5-flash':
+			return pricePerMillionTokens({ input: 0.1, output: 0.6 });
 		case 'google/gemini-2.0-flash-lite':
 			return pricePerMillionTokens({ input: 0.075, output: 0.3 });
 
