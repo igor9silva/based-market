@@ -70,6 +70,23 @@ export default function OrbitalFlux() {
 		activeEffects: [],
 	});
 
+	// generate a random direction that's not a right angle
+	const generateNonRightAngleDirection = (speed: number) => {
+		let angle;
+		do {
+			angle = Math.random() * 2 * Math.PI;
+		} while (
+			// avoid angles close to 0°, 90°, 180°, 270° (±15° tolerance)
+			Math.abs(angle % (Math.PI / 2)) < Math.PI / 12 ||
+			Math.abs(angle % (Math.PI / 2)) > Math.PI / 2 - Math.PI / 12
+		);
+
+		return {
+			vx: Math.cos(angle) * speed,
+			vy: Math.sin(angle) * speed,
+		};
+	};
+
 	// Initialize the game board
 	const initializeGame = useCallback(() => {
 		const { gridWidth, gridHeight, orbSpeed, blockSize } = config;
@@ -85,35 +102,26 @@ export default function OrbitalFlux() {
 			}
 		}
 
-		// Create orbs with random initial directions
+		// Create orbs with non-right-angle initial directions
+		const whiteDirection = generateNonRightAngleDirection(orbSpeed);
 		const whiteOrb: Orb = {
 			x: (splitPoint / 2) * blockSize + blockSize / 2,
 			y: (gridHeight / 2) * blockSize + blockSize / 2,
-			vx: (Math.random() - 0.5) * orbSpeed * 2,
-			vy: (Math.random() - 0.5) * orbSpeed * 2,
+			vx: whiteDirection.vx,
+			vy: whiteDirection.vy,
 			color: 'white',
 			radius: blockSize * 0.4,
 		};
 
+		const blackDirection = generateNonRightAngleDirection(orbSpeed);
 		const blackOrb: Orb = {
 			x: (splitPoint + (gridWidth - splitPoint) / 2) * blockSize + blockSize / 2,
 			y: (gridHeight / 2) * blockSize + blockSize / 2,
-			vx: (Math.random() - 0.5) * orbSpeed * 2,
-			vy: (Math.random() - 0.5) * orbSpeed * 2,
+			vx: blackDirection.vx,
+			vy: blackDirection.vy,
 			color: 'black',
 			radius: blockSize * 0.4,
 		};
-
-		// Ensure orbs have minimum speed
-		const minSpeed = orbSpeed * 0.5;
-		if (Math.abs(whiteOrb.vx) + Math.abs(whiteOrb.vy) < minSpeed) {
-			whiteOrb.vx = orbSpeed;
-			whiteOrb.vy = 0;
-		}
-		if (Math.abs(blackOrb.vx) + Math.abs(blackOrb.vy) < minSpeed) {
-			blackOrb.vx = -orbSpeed;
-			blackOrb.vy = 0;
-		}
 
 		const blackCount = grid.flat().filter((cell) => cell === 'black').length;
 		const whiteCount = grid.flat().filter((cell) => cell === 'white').length;
@@ -163,7 +171,6 @@ export default function OrbitalFlux() {
 			// Apply immediate effect
 			if (effectType === 'extra-orb') {
 				const { gridWidth, gridHeight, blockSize, orbSpeed } = config;
-				const isBlack = side === 'black';
 
 				// Find a random position in the team's territory
 				const teamBlocks = [];
@@ -177,33 +184,30 @@ export default function OrbitalFlux() {
 
 				if (teamBlocks.length > 0) {
 					const randomBlock = teamBlocks[Math.floor(Math.random() * teamBlocks.length)];
+					const direction = generateNonRightAngleDirection(orbSpeed);
 					const tempOrb: TempOrb = {
 						x: randomBlock.x * blockSize + blockSize / 2,
 						y: randomBlock.y * blockSize + blockSize / 2,
-						vx: (Math.random() - 0.5) * orbSpeed * 2,
-						vy: (Math.random() - 0.5) * orbSpeed * 2,
+						vx: direction.vx,
+						vy: direction.vy,
 						color: side,
 						radius: blockSize * 0.35,
 						isTemporary: true,
 						endTime: now + duration,
 					};
 
-					// Ensure minimum speed
-					const minSpeed = orbSpeed * 0.5;
-					if (Math.abs(tempOrb.vx) + Math.abs(tempOrb.vy) < minSpeed) {
-						tempOrb.vx = isBlack ? -orbSpeed : orbSpeed;
-						tempOrb.vy = 0;
-					}
-
 					newState.orbs = [...newState.orbs, tempOrb];
 				}
 			} else if (effectType === 'chaos-mode') {
-				// Randomize all orb directions
-				newState.orbs = newState.orbs.map((orb) => ({
-					...orb,
-					vx: (Math.random() - 0.5) * config.orbSpeed * 3,
-					vy: (Math.random() - 0.5) * config.orbSpeed * 3,
-				}));
+				// Randomize all orb directions with non-right angles
+				newState.orbs = newState.orbs.map((orb) => {
+					const direction = generateNonRightAngleDirection(config.orbSpeed * 1.5);
+					return {
+						...orb,
+						vx: direction.vx,
+						vy: direction.vy,
+					};
+				});
 			}
 
 			return newState;
@@ -446,14 +450,28 @@ export default function OrbitalFlux() {
 		// Clear canvas
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+		// Get theme colors
+		const isDark = document.documentElement.classList.contains('dark');
+
+		// Theme-aware colors
+		const colors = {
+			white: isDark ? '#ffffff' : '#ffffff',
+			black: isDark ? '#000000' : '#000000',
+			neutral: isDark ? '#666666' : '#999999',
+			gridLine: isDark ? 'hsl(240 3.7% 15.9%)' : 'hsl(240 5.9% 90%)',
+			speedBoost: '#ff6b35',
+			frozen: '#00bcd4',
+			temporary: '#ffd700',
+		};
+
 		// Draw grid
 		gameState.grid.forEach((row, y) => {
 			row.forEach((cell, x) => {
-				ctx.fillStyle = cell === 'black' ? '#000000' : '#ffffff';
+				ctx.fillStyle = colors[cell as keyof typeof colors];
 				ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
 
 				// Draw grid lines
-				ctx.strokeStyle = '#666666';
+				ctx.strokeStyle = colors.gridLine;
 				ctx.lineWidth = 0.5;
 				ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
 			});
@@ -464,32 +482,33 @@ export default function OrbitalFlux() {
 			// Draw orb
 			ctx.beginPath();
 			ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
-			ctx.fillStyle = orb.color === 'black' ? '#000000' : '#ffffff';
+			ctx.fillStyle = colors[orb.color as keyof typeof colors];
 			ctx.fill();
 
 			// Check for active effects
+			const now = Date.now();
 			const hasSpeedBoost = gameState.activeEffects.some(
-				(effect) => effect.type === 'speed-boost' && effect.side === orb.color && effect.endTime > Date.now(),
+				(effect) => effect.type === 'speed-boost' && effect.side === orb.color && effect.endTime > now,
 			);
 			const isFrozen = gameState.activeEffects.some(
 				(effect) =>
 					effect.type === 'freeze-opponent' &&
 					((effect.side === 'white' && orb.color === 'black') ||
 						(effect.side === 'black' && orb.color === 'white')) &&
-					effect.endTime > Date.now(),
+					effect.endTime > now,
 			);
 
 			// Draw effect indicators
 			if (hasSpeedBoost) {
-				ctx.strokeStyle = '#ff6b35';
+				ctx.strokeStyle = colors.speedBoost;
 				ctx.lineWidth = 3;
 				ctx.setLineDash([5, 5]);
 			} else if (isFrozen) {
-				ctx.strokeStyle = '#00bcd4';
+				ctx.strokeStyle = colors.frozen;
 				ctx.lineWidth = 3;
 				ctx.setLineDash([2, 2]);
 			} else {
-				ctx.strokeStyle = orb.color === 'black' ? '#ffffff' : '#000000';
+				ctx.strokeStyle = orb.color === 'black' ? colors.white : colors.black;
 				ctx.lineWidth = 2;
 				ctx.setLineDash([]);
 			}
@@ -500,7 +519,7 @@ export default function OrbitalFlux() {
 			if (orb.isTemporary) {
 				ctx.beginPath();
 				ctx.arc(orb.x, orb.y, orb.radius + 3, 0, Math.PI * 2);
-				ctx.strokeStyle = '#ffd700';
+				ctx.strokeStyle = colors.temporary;
 				ctx.lineWidth = 2;
 				ctx.setLineDash([3, 3]);
 				ctx.stroke();
@@ -556,11 +575,11 @@ export default function OrbitalFlux() {
 	const whitePercentage = totalBlocks > 0 ? (gameState.whiteCount / totalBlocks) * 100 : 0;
 
 	return (
-		<div className="min-h-screen bg-gray-100 p-4">
+		<div className="min-h-screen bg-background p-4">
 			<div className="max-w-6xl mx-auto">
 				<div className="text-center mb-6">
-					<h1 className="text-4xl font-bold text-gray-800 mb-2">Orbital Flux</h1>
-					<p className="text-gray-600">Autonomous territorial simulation with dynamic orb physics</p>
+					<h1 className="text-4xl font-bold text-foreground mb-2">Orbital Flux</h1>
+					<p className="text-muted-foreground">Autonomous territorial simulation with dynamic orb physics</p>
 				</div>
 
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -596,13 +615,13 @@ export default function OrbitalFlux() {
 										ref={canvasRef}
 										width={config.gridWidth * config.blockSize}
 										height={config.gridHeight * config.blockSize}
-										className="border border-gray-300 bg-white"
+										className="border border-border bg-card rounded-md"
 									/>
 								</div>
 
 								{gameState.winner && (
-									<div className="mt-4 p-4 bg-yellow-100 border border-yellow-300 rounded-lg text-center">
-										<h3 className="text-lg font-bold text-yellow-800">{gameState.winner}</h3>
+									<div className="mt-4 p-4 bg-accent border border-border rounded-lg text-center">
+										<h3 className="text-lg font-bold text-accent-foreground">{gameState.winner}</h3>
 									</div>
 								)}
 							</CardContent>
@@ -620,14 +639,14 @@ export default function OrbitalFlux() {
 								<div className="space-y-2">
 									<div className="flex justify-between items-center">
 										<span className="flex items-center gap-2">
-											<div className="w-4 h-4 bg-white border border-black"></div>
+											<div className="w-4 h-4 bg-white border border-border rounded-sm"></div>
 											White
 										</span>
-										<span className="font-mono">{whitePercentage.toFixed(1)}%</span>
+										<span className="font-mono text-sm">{whitePercentage.toFixed(1)}%</span>
 									</div>
-									<div className="w-full bg-gray-200 rounded-full h-3">
+									<div className="w-full bg-muted rounded-full h-3">
 										<div
-											className="bg-white border border-gray-400 h-3 rounded-full transition-all duration-300"
+											className="bg-white border border-border h-3 rounded-full transition-all duration-300"
 											style={{ width: `${whitePercentage}%` }}
 										></div>
 									</div>
@@ -636,12 +655,12 @@ export default function OrbitalFlux() {
 								<div className="space-y-2">
 									<div className="flex justify-between items-center">
 										<span className="flex items-center gap-2">
-											<div className="w-4 h-4 bg-black"></div>
+											<div className="w-4 h-4 bg-black rounded-sm"></div>
 											Black
 										</span>
-										<span className="font-mono">{blackPercentage.toFixed(1)}%</span>
+										<span className="font-mono text-sm">{blackPercentage.toFixed(1)}%</span>
 									</div>
-									<div className="w-full bg-gray-200 rounded-full h-3">
+									<div className="w-full bg-muted rounded-full h-3">
 										<div
 											className="bg-black h-3 rounded-full transition-all duration-300"
 											style={{ width: `${blackPercentage}%` }}
@@ -658,7 +677,7 @@ export default function OrbitalFlux() {
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="space-y-2">
-									<h4 className="font-semibold text-sm">White Team</h4>
+									<h4 className="font-semibold text-sm text-muted-foreground">White Team</h4>
 									<div className="grid grid-cols-1 gap-2">
 										<Button
 											onClick={() => activateEffect('extra-orb', 'white')}
@@ -698,7 +717,7 @@ export default function OrbitalFlux() {
 								</div>
 
 								<div className="space-y-2">
-									<h4 className="font-semibold text-sm">Black Team</h4>
+									<h4 className="font-semibold text-sm text-muted-foreground">Black Team</h4>
 									<div className="grid grid-cols-1 gap-2">
 										<Button
 											onClick={() => activateEffect('extra-orb', 'black')}
@@ -748,10 +767,12 @@ export default function OrbitalFlux() {
 								</Button>
 
 								{gameState.activeEffects.length > 0 && (
-									<div className="mt-4 p-3 bg-blue-50 rounded-lg">
-										<h5 className="font-semibold text-sm mb-2">Active Effects:</h5>
+									<div className="mt-4 p-3 bg-accent/50 border border-border rounded-lg">
+										<h5 className="font-semibold text-sm mb-2 text-accent-foreground">
+											Active Effects:
+										</h5>
 										{gameState.activeEffects.map((effect) => (
-											<div key={effect.id} className="text-xs text-blue-700">
+											<div key={effect.id} className="text-xs text-muted-foreground">
 												{effect.side !== 'neutral' ? `${effect.side.toUpperCase()}: ` : ''}
 												{effect.type.replace('-', ' ').toUpperCase()}(
 												{Math.max(0, Math.ceil((effect.endTime - Date.now()) / 1000))}s)
@@ -834,20 +855,20 @@ export default function OrbitalFlux() {
 							<CardContent className="space-y-2">
 								<div className="flex justify-between">
 									<span>Total Blocks:</span>
-									<span className="font-mono">{totalBlocks}</span>
+									<span className="font-mono text-sm">{totalBlocks}</span>
 								</div>
 								<div className="flex justify-between">
 									<span>White Blocks:</span>
-									<span className="font-mono">{gameState.whiteCount}</span>
+									<span className="font-mono text-sm">{gameState.whiteCount}</span>
 								</div>
 								<div className="flex justify-between">
 									<span>Black Blocks:</span>
-									<span className="font-mono">{gameState.blackCount}</span>
+									<span className="font-mono text-sm">{gameState.blackCount}</span>
 								</div>
 								<div className="flex justify-between">
 									<span>Status:</span>
 									<span
-										className={`font-mono ${gameState.isRunning ? 'text-green-600' : 'text-red-600'}`}
+										className={`font-mono text-sm ${gameState.isRunning ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
 									>
 										{gameState.isRunning ? 'Running' : 'Stopped'}
 									</span>
