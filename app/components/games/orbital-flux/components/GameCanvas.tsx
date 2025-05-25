@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { GameConfig, GameState } from '../types';
-import { hasSpeedBoost, isOrbFrozen } from '../utils';
+import { hasChaosMode, hasSpeedBoost, isOrbFrozen } from '../utils';
 
 interface GameCanvasProps {
 	gameState: GameState;
@@ -140,6 +140,7 @@ function getThemeColors() {
 		frozen: '#00bcd4',
 		temporary: '#ffd700',
 		unbreakable: '#9c27b0',
+		chaos: '#e91e63',
 	};
 }
 
@@ -181,9 +182,13 @@ function renderOrbs(ctx: CanvasRenderingContext2D, orbs: any[], activeEffects: a
 		const now = Date.now();
 		const orbHasSpeedBoost = hasSpeedBoost(orb, activeEffects);
 		const orbIsFrozen = isOrbFrozen(orb, activeEffects);
+		const orbInChaosMode = hasChaosMode(activeEffects);
 
 		// draw effect indicators as colored outlines
-		if (orbHasSpeedBoost) {
+		if (orbInChaosMode) {
+			//
+			drawEffectOutline(ctx, orb, colors.chaos, [8, 4], 3);
+		} else if (orbHasSpeedBoost) {
 			//
 			drawEffectOutline(ctx, orb, colors.speedBoost, [5, 5], 3);
 		} else if (orbIsFrozen) {
@@ -192,8 +197,7 @@ function renderOrbs(ctx: CanvasRenderingContext2D, orbs: any[], activeEffects: a
 		} else {
 			//
 			// default outline
-			const outlineColor = orb.color === 'black' ? colors.white : colors.black;
-			drawEffectOutline(ctx, orb, outlineColor, [], 2);
+			drawEffectOutline(ctx, orb, colors.neutral, [], 2);
 		}
 
 		// draw temporary orb indicator

@@ -124,16 +124,37 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 					}
 				} else if (effectType === 'chaos-mode') {
 					//
-					// randomize all orb directions with non-right angles
+					// randomize all orb directions with non-right angles, keeping original speed
 					newState.orbs = newState.orbs.map((orb) => {
 						//
-						const direction = generateNonRightAngleDirection(config.orbSpeed * 1.5);
+						const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
+						const direction = generateNonRightAngleDirection(currentSpeed);
 						return {
 							...orb,
 							vx: direction.vx,
 							vy: direction.vy,
 						};
 					});
+
+					// add 3 extra temporary orbs for each side
+					const chaosOrbs: TempOrb[] = [];
+
+					// create 3 white chaos orbs
+					for (let i = 0; i < 3; i++) {
+						//
+						const whiteOrb = createExtraOrb('white', newState.grid, config, now + duration);
+						if (whiteOrb) chaosOrbs.push(whiteOrb);
+					}
+
+					// create 3 black chaos orbs
+					for (let i = 0; i < 3; i++) {
+						//
+						const blackOrb = createExtraOrb('black', newState.grid, config, now + duration);
+						if (blackOrb) chaosOrbs.push(blackOrb);
+					}
+
+					// add all chaos orbs to the game
+					newState.orbs = [...newState.orbs, ...chaosOrbs];
 				}
 
 				return newState;

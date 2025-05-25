@@ -33,5 +33,5 @@ export const RIGHT_ANGLE_TOLERANCE = Math.PI / 12; // 15 degrees
 export const SPEED_MULTIPLIERS = {
 	normal: 1,
 	speedBoost: 2,
-	chaosMode: 1.5,
+	chaosMode: 2,
 } as const;

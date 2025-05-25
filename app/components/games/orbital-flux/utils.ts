@@ -259,10 +259,22 @@ export function hasSpeedBoost(orb: TempOrb, activeEffects: ActiveEffect[]): bool
 }
 
 /**
+ * checks if chaos mode is currently active
+ */
+export function hasChaosMode(activeEffects: ActiveEffect[]): boolean {
+	//
+	const now = Date.now();
+	return activeEffects.some((effect) => effect.type === 'chaos-mode' && effect.endTime > now);
+}
+
+/**
  * gets the appropriate speed multiplier for an orb based on active effects
  */
 export function getSpeedMultiplier(orb: TempOrb, activeEffects: ActiveEffect[]): number {
 	//
+	if (hasChaosMode(activeEffects)) {
+		return SPEED_MULTIPLIERS.chaosMode;
+	}
 	if (hasSpeedBoost(orb, activeEffects)) {
 		return SPEED_MULTIPLIERS.speedBoost;
 	}
