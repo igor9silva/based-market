@@ -43,7 +43,7 @@ export default function OrbitalFlux({
 
 	// sidebar visibility from URL params
 	const navigate = useNavigate();
-	const search = useSearch({ from: '/' });
+	const search = useSearch({ from: '/games/orbital-flux' });
 	const isSidebarOpen = !search.isExpanded; // isExpanded means sidebar is closed
 
 	const toggleSidebar = () => {

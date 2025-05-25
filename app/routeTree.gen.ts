@@ -12,12 +12,26 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as GamesIndexImport } from './routes/games.index'
+import { Route as GamesOrbitalFluxImport } from './routes/games.orbital-flux'
 
 // Create/Update Routes
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const GamesIndexRoute = GamesIndexImport.update({
+  id: '/games/',
+  path: '/games/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const GamesOrbitalFluxRoute = GamesOrbitalFluxImport.update({
+  id: '/games/orbital-flux',
+  path: '/games/orbital-flux',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -32,6 +46,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/games/orbital-flux': {
+      id: '/games/orbital-flux'
+      path: '/games/orbital-flux'
+      fullPath: '/games/orbital-flux'
+      preLoaderRoute: typeof GamesOrbitalFluxImport
+      parentRoute: typeof rootRoute
+    }
+    '/games/': {
+      id: '/games/'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -39,32 +67,42 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/games/orbital-flux': typeof GamesOrbitalFluxRoute
+  '/games': typeof GamesIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/games/orbital-flux': typeof GamesOrbitalFluxRoute
+  '/games': typeof GamesIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/games/orbital-flux': typeof GamesOrbitalFluxRoute
+  '/games/': typeof GamesIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/games/orbital-flux' | '/games'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/games/orbital-flux' | '/games'
+  id: '__root__' | '/' | '/games/orbital-flux' | '/games/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GamesOrbitalFluxRoute: typeof GamesOrbitalFluxRoute
+  GamesIndexRoute: typeof GamesIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GamesOrbitalFluxRoute: GamesOrbitalFluxRoute,
+  GamesIndexRoute: GamesIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -77,11 +115,19 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/games/orbital-flux",
+        "/games/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/games/orbital-flux": {
+      "filePath": "games.orbital-flux.tsx"
+    },
+    "/games/": {
+      "filePath": "games.index.tsx"
     }
   }
 }

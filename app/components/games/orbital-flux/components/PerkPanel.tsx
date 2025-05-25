@@ -54,7 +54,7 @@ export function PerkPanel({
 						disabled={!isRunning || !canActivateEffect('chaos-mode', 'neutral')}
 						className="w-full px-3 py-2 text-sm bg-destructive hover:bg-destructive/80 disabled:bg-muted disabled:text-muted-foreground text-destructive-foreground border border-border rounded transition-colors"
 					>
-						🌪️ Chaos Mode (6s)
+						🌪️ CHAOS 🌪️ (6s)
 					</button>
 				</div>
 
