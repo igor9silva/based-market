@@ -45,6 +45,8 @@ export default function OrbitalFlux({
 		gameState,
 		initializeGame,
 		hasActiveEffect,
+		canActivateEffect,
+		countActiveEffects,
 		activateEffect,
 		updateGameState,
 		startGame,
@@ -174,6 +176,8 @@ export default function OrbitalFlux({
 								isRunning={gameState.isRunning}
 								activeEffects={gameState.activeEffects}
 								hasActiveEffect={hasActiveEffect}
+								canActivateEffect={canActivateEffect}
+								countActiveEffects={countActiveEffects}
 								onActivateEffect={activateEffect}
 							/>
 						)}

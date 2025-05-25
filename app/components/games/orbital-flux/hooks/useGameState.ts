@@ -91,12 +91,59 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 	);
 
 	/**
+	 * counts active effects for a specific side
+	 */
+	const countActiveEffects = useCallback(
+		(side: string) => {
+			//
+			const now = Date.now();
+			return gameState.activeEffects.filter((effect) => effect.side === side && effect.endTime > now).length;
+		},
+		[gameState.activeEffects],
+	);
+
+	/**
+	 * checks if a side can activate more effects (max 5 per side, chaos counts for both)
+	 */
+	const canActivateEffect = useCallback(
+		(effectType: EffectType, side: Color) => {
+			//
+			if (effectType === 'chaos-mode') {
+				// chaos mode counts against both sides' limits and cannot stack
+				const whiteCount = countActiveEffects('white');
+				const blackCount = countActiveEffects('black');
+				const chaosCount = countActiveEffects('neutral');
+
+				// cannot activate if chaos is already active or if either side is at limit
+				return chaosCount === 0 && whiteCount + chaosCount < 5 && blackCount + chaosCount < 5;
+			} else if (effectType === 'extra-orb') {
+				// extra orbs can stack - just check slot availability
+				const sideCount = countActiveEffects(side);
+				const chaosCount = countActiveEffects('neutral');
+
+				// can activate if this side has room (considering chaos effects)
+				return sideCount + chaosCount < 5;
+			} else {
+				// other effects cannot stack - check if already active
+				const sideCount = countActiveEffects(side);
+				const chaosCount = countActiveEffects('neutral');
+				const hasThisEffect = hasActiveEffect(effectType, side);
+
+				// can activate if not already active and has room
+				return !hasThisEffect && sideCount + chaosCount < 5;
+			}
+		},
+		[countActiveEffects, hasActiveEffect],
+	);
+
+	/**
 	 * activates a perk effect for a specific team
 	 */
 	const activateEffect = useCallback(
 		(effectType: EffectType, side: Color) => {
 			//
 			if (!gameState.isRunning) return;
+			if (!canActivateEffect(effectType, side)) return;
 
 			const now = Date.now();
 			const duration = getDurationForEffect(effectType, perkConfig);
@@ -160,7 +207,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 				return newState;
 			});
 		},
-		[gameState.isRunning, config, perkConfig],
+		[gameState.isRunning, config, perkConfig, canActivateEffect],
 	);
 
 	/**
@@ -196,8 +243,62 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 	 */
 	const startGame = useCallback(() => {
 		//
-		setGameState((prev) => ({ ...prev, isRunning: true, winner: null }));
-	}, []);
+		setGameState((prev) => {
+			// if there was a winner, reset the game completely
+			if (prev.winner) {
+				// reset to fresh game state and start immediately
+				const { gridWidth, gridHeight, orbSpeed, blockSize } = config;
+
+				// create initial grid with 50/50 split (left white, right black)
+				const grid: Color[][] = [];
+				const splitPoint = Math.floor(gridWidth / 2);
+
+				for (let y = 0; y < gridHeight; y++) {
+					//
+					grid[y] = [];
+					for (let x = 0; x < gridWidth; x++) {
+						grid[y][x] = x < splitPoint ? 'white' : 'black';
+					}
+				}
+
+				// create orbs with non-right-angle initial directions
+				const whiteDirection = generateNonRightAngleDirection(orbSpeed);
+				const whiteOrb: TempOrb = {
+					x: (splitPoint / 2) * blockSize + blockSize / 2,
+					y: (gridHeight / 2) * blockSize + blockSize / 2,
+					vx: whiteDirection.vx,
+					vy: whiteDirection.vy,
+					color: 'white',
+					radius: blockSize * 0.4,
+				};
+
+				const blackDirection = generateNonRightAngleDirection(orbSpeed);
+				const blackOrb: TempOrb = {
+					x: (splitPoint + (gridWidth - splitPoint) / 2) * blockSize + blockSize / 2,
+					y: (gridHeight / 2) * blockSize + blockSize / 2,
+					vx: blackDirection.vx,
+					vy: blackDirection.vy,
+					color: 'black',
+					radius: blockSize * 0.4,
+				};
+
+				const stats = calculateTerritoryStats(grid);
+
+				return {
+					grid,
+					orbs: [whiteOrb, blackOrb],
+					blackCount: stats.blackCount,
+					whiteCount: stats.whiteCount,
+					isRunning: true,
+					winner: null,
+					animationId: null,
+					activeEffects: [],
+				};
+			}
+			// otherwise just start the current game
+			return { ...prev, isRunning: true, winner: null };
+		});
+	}, [config]);
 
 	/**
 	 * stops the game simulation
@@ -219,6 +320,8 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 		gameState,
 		initializeGame,
 		hasActiveEffect,
+		canActivateEffect,
+		countActiveEffects,
 		activateEffect,
 		updateGameState,
 		startGame,

@@ -4,10 +4,19 @@ interface PerkPanelProps {
 	isRunning: boolean;
 	activeEffects: ActiveEffect[];
 	hasActiveEffect: (effectType: string, side: string) => boolean;
+	canActivateEffect: (effectType: EffectType, side: Color) => boolean;
+	countActiveEffects: (side: string) => number;
 	onActivateEffect: (effectType: EffectType, side: Color) => void;
 }
 
-export function PerkPanel({ isRunning, activeEffects, hasActiveEffect, onActivateEffect }: PerkPanelProps) {
+export function PerkPanel({
+	isRunning,
+	activeEffects,
+	hasActiveEffect,
+	canActivateEffect,
+	countActiveEffects,
+	onActivateEffect,
+}: PerkPanelProps) {
 	//
 	return (
 		<div className="bg-card border border-border rounded-lg">
@@ -21,6 +30,8 @@ export function PerkPanel({ isRunning, activeEffects, hasActiveEffect, onActivat
 					teamColor="white"
 					isRunning={isRunning}
 					hasActiveEffect={hasActiveEffect}
+					canActivateEffect={canActivateEffect}
+					countActiveEffects={countActiveEffects}
 					onActivateEffect={onActivateEffect}
 				/>
 
@@ -30,6 +41,8 @@ export function PerkPanel({ isRunning, activeEffects, hasActiveEffect, onActivat
 					teamColor="black"
 					isRunning={isRunning}
 					hasActiveEffect={hasActiveEffect}
+					canActivateEffect={canActivateEffect}
+					countActiveEffects={countActiveEffects}
 					onActivateEffect={onActivateEffect}
 				/>
 
@@ -38,7 +51,7 @@ export function PerkPanel({ isRunning, activeEffects, hasActiveEffect, onActivat
 					<h4 className="font-semibold text-sm text-muted-foreground">Chaos</h4>
 					<button
 						onClick={() => onActivateEffect('chaos-mode', 'neutral')}
-						disabled={!isRunning || hasActiveEffect('chaos-mode', 'neutral')}
+						disabled={!isRunning || !canActivateEffect('chaos-mode', 'neutral')}
 						className="w-full px-3 py-2 text-sm bg-destructive hover:bg-destructive/80 disabled:bg-muted disabled:text-muted-foreground text-destructive-foreground border border-border rounded transition-colors"
 					>
 						🌪️ Chaos Mode (6s)
@@ -57,10 +70,20 @@ interface TeamPerksProps {
 	teamColor: Color;
 	isRunning: boolean;
 	hasActiveEffect: (effectType: string, side: string) => boolean;
+	canActivateEffect: (effectType: EffectType, side: Color) => boolean;
+	countActiveEffects: (side: string) => number;
 	onActivateEffect: (effectType: EffectType, side: Color) => void;
 }
 
-function TeamPerks({ teamName, teamColor, isRunning, hasActiveEffect, onActivateEffect }: TeamPerksProps) {
+function TeamPerks({
+	teamName,
+	teamColor,
+	isRunning,
+	hasActiveEffect,
+	canActivateEffect,
+	countActiveEffects,
+	onActivateEffect,
+}: TeamPerksProps) {
 	//
 	const perks = [
 		{ type: 'extra-orb' as EffectType, label: 'Extra Orb (10s)' },
@@ -72,15 +95,21 @@ function TeamPerks({ teamName, teamColor, isRunning, hasActiveEffect, onActivate
 		},
 	];
 
+	const effectCount = countActiveEffects(teamColor);
+	const chaosCount = countActiveEffects('neutral');
+	const totalEffects = effectCount + chaosCount;
+
 	return (
 		<div className="space-y-2">
-			<h4 className="font-semibold text-sm text-muted-foreground">{teamName} Team</h4>
+			<h4 className="font-semibold text-sm text-muted-foreground">
+				{teamName} Team ({totalEffects}/5)
+			</h4>
 			<div className="grid grid-cols-1 gap-2">
 				{perks.map((perk) => (
 					<button
 						key={perk.type}
 						onClick={() => onActivateEffect(perk.type, teamColor)}
-						disabled={!isRunning || hasActiveEffect(perk.type, teamColor)}
+						disabled={!isRunning || !canActivateEffect(perk.type, teamColor)}
 						className="px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 disabled:bg-muted disabled:text-muted-foreground text-secondary-foreground border border-border rounded transition-colors"
 					>
 						{perk.label}
