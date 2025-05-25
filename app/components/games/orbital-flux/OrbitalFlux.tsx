@@ -1,4 +1,6 @@
+import { Square } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { Button } from '~/components/ui/button';
 import { DEFAULT_GAME_CONFIG, DEFAULT_PERK_CONFIG } from './constants';
 import { useGameAnimation } from './hooks/useGameAnimation';
 import { useGameState } from './hooks/useGameState';
@@ -8,12 +10,8 @@ import { calculateTerritoryStats } from './utils';
 // components
 import { ConfigPanel } from './components/ConfigPanel';
 import { GameCanvas } from './components/GameCanvas';
-import { GameControls } from './components/GameControls';
 import { PerkPanel } from './components/PerkPanel';
-import { StatsPanel } from './components/StatsPanel';
-import { TerritoryDisplay } from './components/TerritoryDisplay';
-
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { TerritoryStatsBar } from './components/TerritoryStatsBar';
 
 export default function OrbitalFlux({
 	// initial configuration
@@ -118,47 +116,59 @@ export default function OrbitalFlux({
 	}, [initializeGame]);
 
 	return (
-		<div className="min-h-screen bg-background p-4">
-			<div className="max-w-6xl mx-auto">
-				{/* header */}
-				<div className="text-center mb-6">
-					<h1 className="text-4xl font-bold text-foreground mb-2">Orbital Flux</h1>
-					<p className="text-muted-foreground">Autonomous territorial simulation with dynamic orb physics</p>
-				</div>
-
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-					{/* game canvas section */}
-					<div className="lg:col-span-2">
-						<Card>
-							<CardHeader>
-								<CardTitle className="flex items-center justify-between">
-									<span>Simulation Arena</span>
-									<GameControls
-										isRunning={gameState.isRunning}
-										onStart={handleStart}
-										onStop={handleStop}
-										onReset={handleReset}
-									/>
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="flex justify-center">
-									<GameCanvas
-										gameState={gameState}
-										config={config}
-										className="border border-border bg-card rounded-md"
-									/>
-								</div>
-							</CardContent>
-						</Card>
+		<div className="h-screen bg-background text-foreground overflow-hidden">
+			<div className="h-full flex">
+				{/* main arena - takes most of the screen */}
+				<div className="flex-1 flex flex-col p-4">
+					{/* territory stats bar - above canvas */}
+					<div className="mb-4">
+						<TerritoryStatsBar
+							stats={currentStats}
+							winner={gameState.winner}
+							showStats={showStats}
+							winThreshold={config.winThreshold}
+						/>
 					</div>
 
-					{/* controls and information panels */}
-					<div className="space-y-6">
-						{/* territory control display */}
-						<TerritoryDisplay stats={currentStats} winner={gameState.winner} />
+					{/* game canvas - uses all remaining space */}
+					<div className="flex-1 min-h-0">
+						<GameCanvas
+							gameState={gameState}
+							config={config}
+							className="border-2 border-border bg-card rounded-lg shadow-2xl"
+						/>
+					</div>
+				</div>
 
-						{/* perk controls (optional) */}
+				{/* right sidebar - controls and config */}
+				<div className="w-80 bg-card border-l border-border flex flex-col">
+					{/* header with title and stop button */}
+					<div className="p-4 border-b border-border">
+						<div className="flex items-center justify-between">
+							<h1 className="text-xl font-bold text-foreground">Orbital Flux</h1>
+							{gameState.isRunning && (
+								<Button onClick={handleStop} variant="destructive" size="sm">
+									<Square className="w-4 h-4" />
+									Stop
+								</Button>
+							)}
+						</div>
+					</div>
+
+					{/* configuration section - only show when not running */}
+					{enableConfigControls && !gameState.isRunning && (
+						<div className="p-4 border-b border-border">
+							<ConfigPanel
+								config={config}
+								isRunning={gameState.isRunning}
+								onConfigChange={handleConfigChange}
+								onStart={handleStart}
+							/>
+						</div>
+					)}
+
+					{/* perks section */}
+					<div className="flex-1 overflow-y-auto">
 						{enablePerks && (
 							<PerkPanel
 								isRunning={gameState.isRunning}
@@ -167,18 +177,6 @@ export default function OrbitalFlux({
 								onActivateEffect={activateEffect}
 							/>
 						)}
-
-						{/* configuration controls (optional) */}
-						{enableConfigControls && (
-							<ConfigPanel
-								config={config}
-								isRunning={gameState.isRunning}
-								onConfigChange={handleConfigChange}
-							/>
-						)}
-
-						{/* statistics panel (optional) */}
-						{showStats && <StatsPanel stats={currentStats} isRunning={gameState.isRunning} />}
 					</div>
 				</div>
 			</div>

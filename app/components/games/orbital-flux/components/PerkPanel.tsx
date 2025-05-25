@@ -1,5 +1,3 @@
-import { Button } from '~/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import type { ActiveEffect, Color, EffectType } from '../types';
 
 interface PerkPanelProps {
@@ -12,11 +10,11 @@ interface PerkPanelProps {
 export function PerkPanel({ isRunning, activeEffects, hasActiveEffect, onActivateEffect }: PerkPanelProps) {
 	//
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Perk Actions</CardTitle>
-			</CardHeader>
-			<CardContent className="space-y-4">
+		<div className="bg-card border border-border rounded-lg">
+			<div className="p-4">
+				<h2 className="text-lg font-bold text-card-foreground">Perks</h2>
+			</div>
+			<div className="p-4">
 				{/* white team perks */}
 				<TeamPerks
 					teamName="White"
@@ -35,21 +33,22 @@ export function PerkPanel({ isRunning, activeEffects, hasActiveEffect, onActivat
 					onActivateEffect={onActivateEffect}
 				/>
 
-				{/* neutral chaos mode */}
-				<Button
-					onClick={() => onActivateEffect('chaos-mode', 'neutral')}
-					disabled={!isRunning || hasActiveEffect('chaos-mode', 'neutral')}
-					size="sm"
-					variant="destructive"
-					className="w-full"
-				>
-					🌪️ Chaos Mode (6s)
-				</Button>
+				{/* chaos mode section */}
+				<div className="space-y-2">
+					<h4 className="font-semibold text-sm text-muted-foreground">Chaos</h4>
+					<button
+						onClick={() => onActivateEffect('chaos-mode', 'neutral')}
+						disabled={!isRunning || hasActiveEffect('chaos-mode', 'neutral')}
+						className="w-full px-3 py-2 text-sm bg-destructive hover:bg-destructive/80 disabled:bg-muted disabled:text-muted-foreground text-destructive-foreground border border-border rounded transition-colors"
+					>
+						🌪️ Chaos Mode (6s)
+					</button>
+				</div>
 
 				{/* active effects display */}
 				{activeEffects.length > 0 && <ActiveEffectsDisplay activeEffects={activeEffects} />}
-			</CardContent>
-		</Card>
+			</div>
+		</div>
 	);
 }
 
@@ -78,15 +77,14 @@ function TeamPerks({ teamName, teamColor, isRunning, hasActiveEffect, onActivate
 			<h4 className="font-semibold text-sm text-muted-foreground">{teamName} Team</h4>
 			<div className="grid grid-cols-1 gap-2">
 				{perks.map((perk) => (
-					<Button
+					<button
 						key={perk.type}
 						onClick={() => onActivateEffect(perk.type, teamColor)}
 						disabled={!isRunning || hasActiveEffect(perk.type, teamColor)}
-						size="sm"
-						variant="outline"
+						className="px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 disabled:bg-muted disabled:text-muted-foreground text-secondary-foreground border border-border rounded transition-colors"
 					>
 						{perk.label}
-					</Button>
+					</button>
 				))}
 			</div>
 		</div>
@@ -100,7 +98,7 @@ interface ActiveEffectsDisplayProps {
 function ActiveEffectsDisplay({ activeEffects }: ActiveEffectsDisplayProps) {
 	//
 	return (
-		<div className="mt-4 p-3 bg-accent/50 border border-border rounded-lg">
+		<div className="mt-4 p-3 bg-accent border border-border rounded-lg">
 			<h5 className="font-semibold text-sm mb-2 text-accent-foreground">Active Effects:</h5>
 			{activeEffects.map((effect) => {
 				//

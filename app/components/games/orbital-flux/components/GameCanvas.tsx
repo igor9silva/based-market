@@ -11,6 +11,43 @@ interface GameCanvasProps {
 export function GameCanvas({ gameState, config, className }: GameCanvasProps) {
 	//
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	/**
+	 * calculates optimal canvas size based on available space
+	 */
+	const calculateCanvasSize = useCallback(() => {
+		//
+		const container = containerRef.current;
+		if (!container) return { width: 600, height: 600, scale: 1 };
+
+		const containerRect = container.getBoundingClientRect();
+		const availableWidth = containerRect.width - 32; // padding
+		const availableHeight = containerRect.height - 32; // padding
+
+		const { gridWidth, gridHeight } = config;
+		const aspectRatio = gridWidth / gridHeight;
+
+		let canvasWidth, canvasHeight;
+
+		if (availableWidth / availableHeight > aspectRatio) {
+			// height is the limiting factor
+			canvasHeight = availableHeight;
+			canvasWidth = canvasHeight * aspectRatio;
+		} else {
+			// width is the limiting factor
+			canvasWidth = availableWidth;
+			canvasHeight = canvasWidth / aspectRatio;
+		}
+
+		const scale = canvasWidth / (gridWidth * config.blockSize);
+
+		return {
+			width: Math.floor(canvasWidth),
+			height: Math.floor(canvasHeight),
+			scale,
+		};
+	}, [config]);
 
 	/**
 	 * renders the complete game state to the canvas
@@ -23,20 +60,40 @@ export function GameCanvas({ gameState, config, className }: GameCanvasProps) {
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
 
-		const { gridWidth, gridHeight, blockSize } = config;
+		const { scale } = calculateCanvasSize();
 
 		// clear canvas
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		// scale the context to fit the canvas
+		ctx.save();
+		ctx.scale(scale, scale);
 
 		// get theme-aware colors
 		const colors = getThemeColors();
 
 		// render grid blocks
-		renderGrid(ctx, gameState.grid, blockSize, colors);
+		renderGrid(ctx, gameState.grid, config.blockSize, colors);
 
 		// render orbs with effect indicators
 		renderOrbs(ctx, gameState.orbs, gameState.activeEffects, colors);
-	}, [config, gameState.grid, gameState.orbs, gameState.activeEffects]);
+
+		ctx.restore();
+	}, [config, gameState.grid, gameState.orbs, gameState.activeEffects, calculateCanvasSize]);
+
+	/**
+	 * updates canvas size when container resizes
+	 */
+	const updateCanvasSize = useCallback(() => {
+		//
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+
+		const { width, height } = calculateCanvasSize();
+		canvas.width = width;
+		canvas.height = height;
+		render();
+	}, [calculateCanvasSize, render]);
 
 	/**
 	 * re-render when game state changes
@@ -46,13 +103,24 @@ export function GameCanvas({ gameState, config, className }: GameCanvasProps) {
 		render();
 	}, [render]);
 
+	/**
+	 * handle window resize
+	 */
+	useEffect(() => {
+		//
+		const handleResize = () => updateCanvasSize();
+		window.addEventListener('resize', handleResize);
+
+		// initial size calculation
+		setTimeout(updateCanvasSize, 0);
+
+		return () => window.removeEventListener('resize', handleResize);
+	}, [updateCanvasSize]);
+
 	return (
-		<canvas
-			ref={canvasRef}
-			width={config.gridWidth * config.blockSize}
-			height={config.gridHeight * config.blockSize}
-			className={className}
-		/>
+		<div ref={containerRef} className="w-full h-full flex items-center justify-center">
+			<canvas ref={canvasRef} className={className} />
+		</div>
 	);
 }
 

@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { Play } from 'lucide-react';
+import { Button } from '~/components/ui/button';
 import { Label } from '~/components/ui/label';
 import { Slider } from '~/components/ui/slider';
 import { CONFIG_LIMITS } from '../constants';
@@ -8,9 +9,10 @@ interface ConfigPanelProps {
 	config: GameConfig;
 	isRunning: boolean;
 	onConfigChange: (newConfig: GameConfig) => void;
+	onStart: () => void;
 }
 
-export function ConfigPanel({ config, isRunning, onConfigChange }: ConfigPanelProps) {
+export function ConfigPanel({ config, isRunning, onConfigChange, onStart }: ConfigPanelProps) {
 	//
 	/**
 	 * updates a specific config value
@@ -36,11 +38,18 @@ export function ConfigPanel({ config, isRunning, onConfigChange }: ConfigPanelPr
 	};
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Configuration</CardTitle>
-			</CardHeader>
-			<CardContent className="space-y-4">
+		<div className="space-y-4">
+			{/* game controls */}
+			<div className="flex items-center justify-between">
+				<h3 className="text-lg font-semibold text-card-foreground">Configuration</h3>
+				<Button onClick={onStart} variant="default" size="sm">
+					<Play className="w-4 h-4" />
+					Start
+				</Button>
+			</div>
+
+			{/* configuration sliders */}
+			<div className="space-y-3">
 				{/* grid size control */}
 				<ConfigSlider
 					label={`Grid Size: ${config.gridWidth}×${config.gridHeight}`}
@@ -67,17 +76,8 @@ export function ConfigPanel({ config, isRunning, onConfigChange }: ConfigPanelPr
 					limits={CONFIG_LIMITS.winThreshold}
 					disabled={isRunning}
 				/>
-
-				{/* block size control */}
-				<ConfigSlider
-					label={`Block Size: ${config.blockSize}px`}
-					value={config.blockSize}
-					onChange={(value) => updateConfig('blockSize', value)}
-					limits={CONFIG_LIMITS.blockSize}
-					disabled={isRunning}
-				/>
-			</CardContent>
-		</Card>
+			</div>
+		</div>
 	);
 }
 

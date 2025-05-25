@@ -2,10 +2,10 @@ import type { GameConfig, PerkConfig } from './types';
 
 // default game configuration
 export const DEFAULT_GAME_CONFIG: GameConfig = {
-	gridWidth: 50,
-	gridHeight: 50,
+	gridWidth: 20,
+	gridHeight: 20,
 	orbSpeed: 20,
-	winThreshold: 90,
+	winThreshold: 75,
 	blockSize: 12,
 };
 
