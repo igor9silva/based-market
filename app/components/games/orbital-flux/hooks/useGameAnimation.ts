@@ -110,7 +110,7 @@ export function useGameAnimation({ gameState, config, updateGameState }: UseGame
  */
 function updateOrbPhysics(orbs: TempOrb[], grid: any[][], config: GameConfig, activeEffects: any[]): void {
 	//
-	orbs.forEach((orb) => {
+	orbs.forEach((orb, index) => {
 		//
 		// store previous position for collision detection
 		const prevX = orb.x;
@@ -118,6 +118,32 @@ function updateOrbPhysics(orbs: TempOrb[], grid: any[][], config: GameConfig, ac
 
 		// check if orb is frozen
 		if (isOrbFrozen(orb, activeEffects)) return;
+
+		// deadlock detection - if orb hasn't moved significantly in a while, give it a nudge
+		if (!orb.lastMoveTime) orb.lastMoveTime = Date.now();
+		if (!orb.lastPosition) orb.lastPosition = { x: orb.x, y: orb.y };
+
+		const timeSinceLastMove = Date.now() - orb.lastMoveTime;
+		const distanceMoved = Math.sqrt(
+			Math.pow(orb.x - orb.lastPosition.x, 2) + Math.pow(orb.y - orb.lastPosition.y, 2),
+		);
+
+		// if orb hasn't moved much in 2 seconds, it might be stuck
+		if (timeSinceLastMove > 2000 && distanceMoved < 5) {
+			//
+			// give it a random nudge to break deadlock
+			const nudgeAngle = Math.random() * 2 * Math.PI;
+			const nudgeForce = 2;
+			orb.vx += Math.cos(nudgeAngle) * nudgeForce;
+			orb.vy += Math.sin(nudgeAngle) * nudgeForce;
+			orb.lastMoveTime = Date.now();
+			orb.lastPosition = { x: orb.x, y: orb.y };
+		} else if (distanceMoved > 10) {
+			//
+			// orb is moving normally, update tracking
+			orb.lastMoveTime = Date.now();
+			orb.lastPosition = { x: orb.x, y: orb.y };
+		}
 
 		// apply speed modifications
 		const speedMultiplier = getSpeedMultiplier(orb, activeEffects);
@@ -131,5 +157,54 @@ function updateOrbPhysics(orbs: TempOrb[], grid: any[][], config: GameConfig, ac
 
 		// check block collisions with previous position
 		checkBlockCollision(orb, grid, prevX, prevY, config, activeEffects);
+
+		// check orb-to-orb collisions to prevent overlapping
+		checkOrbCollisions(orb, orbs, index);
 	});
+}
+
+/**
+ * checks and resolves collisions between orbs to prevent them from getting stuck together
+ */
+function checkOrbCollisions(currentOrb: TempOrb, allOrbs: TempOrb[], currentIndex: number): void {
+	//
+	for (let i = 0; i < allOrbs.length; i++) {
+		//
+		if (i === currentIndex) continue;
+
+		const otherOrb = allOrbs[i];
+		const dx = currentOrb.x - otherOrb.x;
+		const dy = currentOrb.y - otherOrb.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+		const minDistance = currentOrb.radius + otherOrb.radius;
+
+		// if orbs are overlapping or too close
+		if (distance < minDistance && distance > 0) {
+			//
+			// calculate separation vector
+			const separationX = (dx / distance) * (minDistance - distance) * 0.5;
+			const separationY = (dy / distance) * (minDistance - distance) * 0.5;
+
+			// separate the orbs
+			currentOrb.x += separationX;
+			currentOrb.y += separationY;
+			otherOrb.x -= separationX;
+			otherOrb.y -= separationY;
+
+			// calculate collision response (elastic collision)
+			const relativeVx = currentOrb.vx - otherOrb.vx;
+			const relativeVy = currentOrb.vy - otherOrb.vy;
+			const relativeSpeed = relativeVx * (dx / distance) + relativeVy * (dy / distance);
+
+			// only resolve if orbs are moving towards each other
+			if (relativeSpeed < 0) {
+				//
+				const impulse = (2 * relativeSpeed) / 2; // assuming equal mass
+				currentOrb.vx -= impulse * (dx / distance);
+				currentOrb.vy -= impulse * (dy / distance);
+				otherOrb.vx += impulse * (dx / distance);
+				otherOrb.vy += impulse * (dy / distance);
+			}
+		}
+	}
 }

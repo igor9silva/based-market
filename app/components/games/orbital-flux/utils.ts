@@ -52,7 +52,10 @@ export function checkBlockCollision(
 	const stepSize = Math.min(blockSize / 4, distance / 10);
 	const steps = Math.ceil(distance / stepSize);
 
-	for (let step = 0; step <= steps; step++) {
+	// safety limit to prevent infinite loops
+	const maxSteps = Math.min(steps, 50);
+
+	for (let step = 0; step <= maxSteps; step++) {
 		//
 		const checkX = prevX + dirX * stepSize * step;
 		const checkY = prevY + dirY * stepSize * step;
@@ -198,6 +201,16 @@ export function checkBoundaryCollision(orb: TempOrb, config: GameConfig): void {
 	if (orb.y - orb.radius <= 0 || orb.y + orb.radius >= canvasHeight) {
 		orb.vy = -orb.vy;
 		orb.y = Math.max(orb.radius, Math.min(canvasHeight - orb.radius, orb.y));
+	}
+
+	// velocity limiter to prevent orbs from getting too fast and causing issues
+	const maxSpeed = config.orbSpeed * 3; // allow up to 3x normal speed
+	const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
+	if (currentSpeed > maxSpeed) {
+		//
+		const scale = maxSpeed / currentSpeed;
+		orb.vx *= scale;
+		orb.vy *= scale;
 	}
 }
 

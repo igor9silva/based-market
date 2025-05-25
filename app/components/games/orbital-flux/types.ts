@@ -12,6 +12,8 @@ export interface Orb {
 export interface TempOrb extends Orb {
 	isTemporary?: boolean;
 	endTime?: number;
+	lastMoveTime?: number;
+	lastPosition?: { x: number; y: number };
 }
 
 export interface ActiveEffect {
