@@ -6,23 +6,18 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Meta, Scripts } from '@tanstack/start';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react';
 import * as React from 'react';
-import { CommandMenuDialog } from '~/components/CommandMenu';
 
-import { Loading } from '~/components/Loading';
-import { MainHeader } from '~/components/MainHeader';
-import { RotatingLoadingMessage } from '~/components/RotatingLoadingMessage';
 import { Button } from '~/components/ui/button';
 import { Toaster } from '~/components/ui/sonner';
-import { useCurrentUser } from '~/hooks/useCurrentUser';
+// import { useCurrentUser } from '~/hooks/useCurrentUser';
 
 import appCss from '~/styles/app.css?url';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
 	head: () => ({
 		meta: [
-			{ title: 'Meseeks' },
+			{ title: 'Based Market' },
 			{ charSet: 'utf-8' },
 			{
 				name: 'viewport',
@@ -38,16 +33,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 		],
 		links: [
 			{ rel: 'stylesheet', href: appCss },
-
-			// Favicon
-			{ rel: 'icon', href: '/static/favicon-dark.ico', media: '(prefers-color-scheme: dark)' },
-			{ rel: 'icon', href: '/static/favicon-light.ico', media: '(prefers-color-scheme: light)' },
-
-			{ name: 'application-name', content: 'Meseeks' },
-			{ name: 'apple-mobile-web-app-title', content: 'Meseeks' },
-
-			// PWA Manifest
-			{ rel: 'manifest', href: '/static/site.webmanifest' },
 
 			// Theme Color
 			{ name: 'theme-color', content: '#000000', media: '(prefers-color-scheme: dark)' },
@@ -94,38 +79,34 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	//
-	return (
-		<div>
-			<AuthLoading>
-				<Loading className="h-svh" />
-			</AuthLoading>
-			<Unauthenticated>
-				<AccessDenied />
-			</Unauthenticated>
-			<Authenticated>
-				<Main>{children}</Main>
-			</Authenticated>
-		</div>
-	);
+	return <Main>{children}</Main>;
+	// return (
+	// 	<div>
+	// 		<AuthLoading>
+	// 			<Loading className="h-svh" />
+	// 		</AuthLoading>
+	// 		<Unauthenticated>
+	// 			<AccessDenied />
+	// 		</Unauthenticated>
+	// 		<Authenticated>
+	// 			<Main>{children}</Main>
+	// 		</Authenticated>
+	// 	</div>
+	// );
 }
 
 function Main({ children }: { children: React.ReactNode }) {
 	//
-	const user = useCurrentUser();
+	// const user = useCurrentUser();
 
-	if (!user.isReady) return <RotatingLoadingMessage />;
+	// if (!user.isReady) return <RotatingLoadingMessage />;
 
 	return (
 		<div className="flex h-svh w-full">
-			{/* <div className="hidden md:block">
-				<MainSidebar />
-			</div> */}
 			<main className="flex-1 flex flex-col-reverse md:flex-col overflow-hidden p-1 pb-3 md:p-0">
-				<MainHeader className="mt-0" />
 				<div className="flex-1 overflow-auto">{children}</div>
 			</main>
 			<Toaster />
-			<CommandMenuDialog />
 		</div>
 	);
 }

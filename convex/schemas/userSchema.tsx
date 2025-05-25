@@ -21,13 +21,3 @@ export const userPreferencesSchema = z.object({
 	key: z.string(),
 	value: z.any(),
 });
-
-export const userRequestKeySchema = z.enum([
-	'share_skills', //
-]);
-
-export const userRequestSchema = z.object({
-	owner: zid('users'),
-	key: userRequestKeySchema,
-	message: z.string().min(1).max(1000),
-});

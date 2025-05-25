@@ -5,7 +5,7 @@ import './lib/bigint-serialization';
 import { createRouter } from './router';
 
 Sentry.init({
-	dsn: 'https://0c170522df4ac8c15f74d66ff6619146@o4508540750331904.ingest.us.sentry.io/4508540754591744',
+	dsn: 'https://d1e3e5a175d04d9a494032aa785969d7@o4508540750331904.ingest.us.sentry.io/4509384313077760',
 	integrations: [
 		Sentry.browserTracingIntegration(), //
 		Sentry.replayIntegration(),
@@ -14,9 +14,9 @@ Sentry.init({
 	// Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
 	tracePropagationTargets: [
 		'localhost',
-		/^https:\/\/meeseeks\.app/,
-		/^https:\/\/notable-penguin-391\.convex\.cloud/,
-		/^https:\/\/wary-dogfish-609\.convex\.cloud/,
+		/^https:\/\/based\.market/,
+		/^https:\/\/dazzling-hornet-128\.convex\.cloud/,
+		/^https:\/\/veracious-ferret-552\.convex\.cloud/,
 	],
 	// Session Replay
 	replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.

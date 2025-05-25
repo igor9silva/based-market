@@ -7,62 +7,62 @@ export const env = createEnv({
 
 	server: {
 		//
-		SITE_URL: z.string().min(1).describe('The app public URL.'),
+		// SITE_URL: z.string().min(1).describe('The app public URL.'),
 
-		POLAR_SERVER: z.enum(['sandbox', 'production']).default('sandbox').describe('Polar server.'),
-		POLAR_ACCESS_TOKEN: z.string().min(1).describe('Polar Access Token for payment processing.'),
-		POLAR_WEBHOOK_SECRET: z.string().min(1).describe('Polar webhook secret for payment verification.'),
-		POLAR_SUBSCRIPTION_ID: z.string().min(1).describe('Pro subscription product ID.'),
-		POLAR_TOP_UP_ID: z.string().min(1).describe('Top up product ID.'),
-		PAYMENT_ETH_ADDRESS_BASE_CHAIN: z.string().min(1).describe('The Base wallet address to receive payments.'),
+		// POLAR_SERVER: z.enum(['sandbox', 'production']).default('sandbox').describe('Polar server.'),
+		// POLAR_ACCESS_TOKEN: z.string().min(1).describe('Polar Access Token for payment processing.'),
+		// POLAR_WEBHOOK_SECRET: z.string().min(1).describe('Polar webhook secret for payment verification.'),
+		// POLAR_SUBSCRIPTION_ID: z.string().min(1).describe('Pro subscription product ID.'),
+		// POLAR_TOP_UP_ID: z.string().min(1).describe('Top up product ID.'),
+		// PAYMENT_ETH_ADDRESS_BASE_CHAIN: z.string().min(1).describe('The Base wallet address to receive payments.'),
 
-		ACTION_COST_USD: z
-			.string()
-			.min(1)
-			.transform((s) => BigInt(s))
-			.pipe(z.bigint())
-			.describe('The cost of one action in USD.'),
+		// ACTION_COST_USD: z
+		// 	.string()
+		// 	.min(1)
+		// 	.transform((s) => BigInt(s))
+		// 	.pipe(z.bigint())
+		// 	.describe('The cost of one action in USD.'),
 
-		CHAR_PER_TOKEN: z
-			.string()
-			.min(1)
-			.transform((s) => parseInt(s, 10))
-			.pipe(z.number())
-			.describe('The number of characters per token to account for in cost prediction.'),
+		// CHAR_PER_TOKEN: z
+		// 	.string()
+		// 	.min(1)
+		// 	.transform((s) => parseInt(s, 10))
+		// 	.pipe(z.number())
+		// 	.describe('The number of characters per token to account for in cost prediction.'),
 
-		COST_PREDICTION_MARGIN: z
-			.string()
-			.min(1)
-			.transform((s) => parseInt(s, 10))
-			.pipe(z.number())
-			.describe('The cost prediction margin, in percentage (e.g. "50" for 50%).'),
+		// COST_PREDICTION_MARGIN: z
+		// 	.string()
+		// 	.min(1)
+		// 	.transform((s) => parseInt(s, 10))
+		// 	.pipe(z.number())
+		// 	.describe('The cost prediction margin, in percentage (e.g. "50" for 50%).'),
 
-		AUTH_GOOGLE_ID: z.string().min(1).describe('Google OAuth client ID.'),
-		AUTH_GOOGLE_SECRET: z.string().min(1).describe('Google OAuth client secret.'),
+		// AUTH_GOOGLE_ID: z.string().min(1).describe('Google OAuth client ID.'),
+		// AUTH_GOOGLE_SECRET: z.string().min(1).describe('Google OAuth client secret.'),
 
-		REF_USER_ID: z
-			.string()
-			.min(1)
-			.optional()
-			.describe('Reference user ID. Will be used to seed new users (their components will be cloned).'),
+		// REF_USER_ID: z
+		// 	.string()
+		// 	.min(1)
+		// 	.optional()
+		// 	.describe('Reference user ID. Will be used to seed new users (their components will be cloned).'),
 
-		ALLOWED_DOMAINS: z
-			.string()
-			.min(1)
-			// transform to array
-			.transform((s) => s.split(','))
-			// make sure transform worked
-			.pipe(z.array(z.string()))
-			.describe('Comma-separated list of allowed domains to sign in with.'),
+		// ALLOWED_DOMAINS: z
+		// 	.string()
+		// 	.min(1)
+		// 	// transform to array
+		// 	.transform((s) => s.split(','))
+		// 	// make sure transform worked
+		// 	.pipe(z.array(z.string()))
+		// 	.describe('Comma-separated list of allowed domains to sign in with.'),
 
-		ALLOWED_EMAILS: z
-			.string()
-			.min(1)
-			// transform to array
-			.transform((s) => s.split(','))
-			// make sure transform worked
-			.pipe(z.array(z.string()))
-			.describe('Comma-separated list of allowed emails to sign in with.'),
+		// ALLOWED_EMAILS: z
+		// 	.string()
+		// 	.min(1)
+		// 	// transform to array
+		// 	.transform((s) => s.split(','))
+		// 	// make sure transform worked
+		// 	.pipe(z.array(z.string()))
+		// 	.describe('Comma-separated list of allowed emails to sign in with.'),
 
 		JWT_SESSION_DURATION_MS: z
 			.string()
@@ -73,21 +73,21 @@ export const env = createEnv({
 			.pipe(z.number())
 			.describe('JWT session duration in milliseconds.'),
 
-		OPENAI_API_KEY: z.string().min(1).describe('OpenAI API key.'),
+		// OPENAI_API_KEY: z.string().min(1).describe('OpenAI API key.'),
 
-		MAX_CONSECUTIVE_COMPANION_ACTIONS: z
-			.string()
-			.transform((s) => parseInt(s, 10))
-			.pipe(z.number())
-			.describe('The maximum number of consecutive companion actions.')
-			.default('20'),
+		// MAX_CONSECUTIVE_COMPANION_ACTIONS: z
+		// 	.string()
+		// 	.transform((s) => parseInt(s, 10))
+		// 	.pipe(z.number())
+		// 	.describe('The maximum number of consecutive companion actions.')
+		// 	.default('20'),
 
-		DEFAULT_CONTEXT_SIZE: z
-			.string()
-			.transform((s) => parseInt(s, 10))
-			.pipe(z.number())
-			.describe('The default context size.')
-			.default('40'),
+		// DEFAULT_CONTEXT_SIZE: z
+		// 	.string()
+		// 	.transform((s) => parseInt(s, 10))
+		// 	.pipe(z.number())
+		// 	.describe('The default context size.')
+		// 	.default('40'),
 
 		NODE_ENV: z.enum(['development', 'production']).default('development').describe('Automatically populated.'),
 	},

@@ -1,3 +1,2 @@
-# Meseeks
+# Based Market
 
-The first companion. Fully open-source.

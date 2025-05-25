@@ -1,14 +1,8 @@
 import { authTables } from '@convex-dev/auth/server';
 import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
-import { actionSchema } from './schemas/actionSchema';
-import { componentSchema } from './schemas/componentSchema';
-import { polarEventSchema } from './schemas/polarEventSchema';
-import { skillSchema } from './schemas/skillSchema';
-import { taskSchema } from './schemas/taskSchema';
-import { topUpSchema } from './schemas/topUpSchema';
-import { transactionSchema } from './schemas/transactionSchema';
-import { userPreferencesSchema, userRequestSchema, userSchema } from './schemas/userSchema';
+import { gameSchema } from './schemas/gameSchema';
+import { userPreferencesSchema, userSchema } from './schemas/userSchema';
 
 // prettier-ignore
 export default defineSchema({
@@ -31,72 +25,9 @@ export default defineSchema({
 		'by_owner_key', ['owner', 'key'],
 	),
 
-	user_requests: defineTable(
-		zodToConvex(userRequestSchema),
-	).index(
-		'by_owner_key', ['owner', 'key'],
-	),
-
-	tasks: defineTable(
-		zodToConvex(taskSchema),
-	).index(
-		'by_owner_parentId_isActive', ['owner', 'parentId', 'isActive'],
-	).index(
-		'by_parent_isActive', ['parentId', 'isActive'],
-	).index(
-		'by_owner_isActive', ['owner', 'isActive'],
-	).index(
-		'by_owner_status', ['owner', 'status'],
-	),
-	// .index(
-	// 	'by_embeddingId', ['embeddingId'],
-	// ),
-
-	// taskEmbeddings: defineTable(
-	// 	zodToConvex(taskEmbeddingsSchema),
-	// ).vectorIndex("by_embedding", {
-	// 	dimensions: 3072,
-	// 	vectorField: 'embedding',
-	// 	filterFields: ['isDone'],
-	// }),
-	
-	actions: defineTable(
-		zodToConvex(actionSchema),
-	).index(
-		'by_task', ['taskId'],
-	).index(
-		'by_task_status', ['taskId', 'status'],
-	),
-
-	skills: defineTable(
-		zodToConvex(skillSchema),
-	).index(
-		'by_owner_kind', ['owner', 'kind'],
-	).index(
-		'by_owner_key', ['owner', 'key'],
-	),
-
-	components: defineTable(
-		zodToConvex(componentSchema),
-	).index(
-		'by_owner_slug', ['owner', 'slug'],
-	),
-
-	transactions: defineTable(
-		zodToConvex(transactionSchema),
+	games: defineTable(
+		zodToConvex(gameSchema),
 	).index(
 		'by_owner', ['owner'],
-	),
-
-	topUps: defineTable(
-		zodToConvex(topUpSchema),
-	).index(
-		'by_status_owner', ['status', 'owner'],
-	).index(
-		'by_paymentId', ['paymentId'],
-	),
-
-	polarEvents: defineTable(
-		zodToConvex(polarEventSchema),
 	),
 });
