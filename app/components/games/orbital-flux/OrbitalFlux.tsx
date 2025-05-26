@@ -1,16 +1,19 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight, Square } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { api } from 'convex/_generated/api';
+import { useMutation } from 'convex/react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '~/components/ui/button';
 import { DEFAULT_GAME_CONFIG, DEFAULT_PERK_CONFIG } from './constants';
 import { useGameAnimation } from './hooks/useGameAnimation';
 import { useGameState } from './hooks/useGameState';
-import type { GameConfig, GameStats, OrbitalFluxProps, PerkConfig } from './types';
+import { usePaymentPerkActivation } from './hooks/usePaymentPerkActivation';
+import { usePerkHost } from './hooks/usePerkHost';
+import type { EffectType, GameConfig, GameStats, OrbitalFluxProps, PerkConfig } from './types';
 import { calculateTerritoryStats } from './utils';
 
 // components
 import { PaymentsPanel } from '~/components/games/orbital-flux/components/PaymentsPanel';
-import { ConfigPanel } from './components/ConfigPanel';
 import { GameCanvas } from './components/GameCanvas';
 import { PerkPanel } from './components/PerkPanel';
 import { TerritoryStatsBar } from './components/TerritoryStatsBar';
@@ -19,9 +22,10 @@ export default function OrbitalFlux({
 	// initial configuration
 	initialConfig = {},
 	initialPerkConfig = {},
+	// backend integration
+	gameId,
 	// customization options
 	enablePerks = true,
-	enableConfigControls = true,
 	showStats = true,
 	// event callbacks
 	onGameStart,
@@ -29,7 +33,7 @@ export default function OrbitalFlux({
 	onGameReset,
 	onWinner,
 	onTerritoryChange,
-}: OrbitalFluxProps = {}) {
+}: OrbitalFluxProps) {
 	//
 	// merge initial configs with defaults
 	const [config, setConfig] = useState<GameConfig>({
@@ -42,36 +46,74 @@ export default function OrbitalFlux({
 		...initialPerkConfig,
 	});
 
+	// backend mutations (only if gameId is provided)
+	const finishGameMutation = useMutation(api.games.public.finish);
+
+	// perk host - manages perks client-side as "host"
+	const perkHost = usePerkHost(gameId);
+
 	// sidebar visibility from URL params
 	const navigate = useNavigate();
-	const search = useSearch({ from: '/games/orbital-flux' });
+	const search = useSearch({ strict: false });
 	const isSidebarOpen = !search.isExpanded; // isExpanded means sidebar is closed
 
 	const toggleSidebar = () => {
 		//
 		navigate({
 			to: '.',
-			search: (prev) => ({ ...prev, isExpanded: !prev.isExpanded }),
+			search: (prev: any) => ({ ...prev, isExpanded: !prev.isExpanded }),
 		});
 	};
 
+	/**
+	 * handles winner with backend integration
+	 */
+	const handleWinner = async (winner: string) => {
+		//
+		// finish game in backend if gameId is provided
+		if (finishGameMutation && (winner === 'white' || winner === 'black')) {
+			try {
+				await finishGameMutation({ gameId, winner: winner as 'white' | 'black' });
+			} catch (error) {
+				console.error('Failed to finish game in backend:', error);
+			}
+		}
+
+		// call the original callback
+		onWinner?.(winner);
+	};
+
 	// game state management
-	const {
-		gameState,
-		initializeGame,
-		hasActiveEffect,
-		canActivateEffect,
-		countActiveEffects,
-		activateEffect,
-		updateGameState,
-		startGame,
-		stopGame,
-		resetGame,
-	} = useGameState({
-		config,
-		perkConfig,
-		onWinner,
-		onTerritoryChange,
+	const { gameState, initializeGame, updateGameState, startGame, stopGame, resetGame, activateEffect } = useGameState(
+		{
+			config,
+			perkConfig,
+			onWinner: handleWinner,
+			onTerritoryChange,
+		},
+	);
+
+	/**
+	 * activates a perk in both the game simulation and backend
+	 */
+	const handlePerkActivation = useCallback(
+		async (type: EffectType, side: 'white' | 'black' | 'neutral', duration: number) => {
+			//
+			// activate in game simulation immediately (only if game is running)
+			if (gameState.isRunning) {
+				activateEffect(type as any, side as any);
+			}
+
+			// also persist to backend via perk host
+			await perkHost.activatePerk(type, side, duration);
+		},
+		[activateEffect, perkHost.activatePerk, gameState.isRunning],
+	);
+
+	// payment monitoring - activates perks when payments are confirmed
+	usePaymentPerkActivation({
+		gameId,
+		onActivatePerk: handlePerkActivation,
 	});
 
 	// animation loop management
@@ -115,15 +157,11 @@ export default function OrbitalFlux({
 	};
 
 	/**
-	 * handles config changes and reinitializes game if needed
+	 * handles starting a new game (navigates back to config)
 	 */
-	const handleConfigChange = (newConfig: GameConfig) => {
+	const handleStartNewGame = () => {
 		//
-		setConfig(newConfig);
-		// reinitialize game with new config if not running
-		if (!gameState.isRunning) {
-			// the useEffect below will handle reinitialization
-		}
+		navigate({ to: '/games/orbital-flux' });
 	};
 
 	// reinitialize game when config changes
@@ -170,47 +208,45 @@ export default function OrbitalFlux({
 				{/* right sidebar - controls and config */}
 				{isSidebarOpen && (
 					<div className="w-80 bg-card border-l border-border flex flex-col">
-						{/* header with title and stop button */}
+						{/* header with title and controls */}
 						<div className="p-4 border-b border-border">
 							<div className="flex items-center justify-between">
 								<h1 className="text-xl font-bold text-foreground">Orbital Flux</h1>
-								{gameState.isRunning && (
-									<Button onClick={handleStop} variant="destructive" size="sm">
-										<Square className="w-4 h-4" />
-										Stop
+								{gameState.winner ? (
+									<Button onClick={handleStartNewGame} variant="default" size="sm">
+										Start New Game
+									</Button>
+								) : gameState.isRunning ? (
+									<Button onClick={handleStop} variant="outline" size="sm">
+										<Pause className="w-4 h-4" />
+										Pause
+									</Button>
+								) : (
+									<Button onClick={handleStart} variant="default" size="sm">
+										<Play className="w-4 h-4" />
+										Resume
 									</Button>
 								)}
 							</div>
 						</div>
 
-						{/* configuration section - only show when not running */}
-						{enableConfigControls && !gameState.isRunning && (
-							<div className="p-4 border-b border-border">
-								<ConfigPanel
-									config={config}
-									isRunning={gameState.isRunning}
-									onConfigChange={handleConfigChange}
-									onStart={handleStart}
-								/>
-							</div>
-						)}
-
 						{/* perks section */}
 						<div className="flex-1 overflow-y-auto">
 							{enablePerks && (
 								<PerkPanel
+									gameId={gameId}
 									isRunning={gameState.isRunning}
-									activeEffects={gameState.activeEffects}
-									hasActiveEffect={hasActiveEffect}
-									canActivateEffect={canActivateEffect}
-									countActiveEffects={countActiveEffects}
-									onActivateEffect={activateEffect}
+									activeEffects={perkHost.activePerks}
+									hasActiveEffect={perkHost.hasActiveEffect}
+									canActivateEffect={perkHost.canActivateEffect}
+									countActiveEffects={perkHost.countActiveEffects}
+									onActivateEffect={perkHost.onActivateEffect}
 								/>
 							)}
 						</div>
 
 						{/* payments panel */}
-						<PaymentsPanel />
+						<PaymentsPanel gameId={gameId} />
 					</div>
 				)}
 			</div>

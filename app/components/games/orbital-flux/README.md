@@ -178,9 +178,8 @@ export type EffectType =
   | 'extra-orb' 
   | 'unbreakable' 
   | 'speed-boost' 
-  | 'freeze-opponent' 
-  | 'chaos-mode'
-  | 'your-new-effect'; // Add here
+  | 'freeze-enemy' 
+  | 'chaos';
 ```
 
 2. Update the duration configuration in `constants.ts`

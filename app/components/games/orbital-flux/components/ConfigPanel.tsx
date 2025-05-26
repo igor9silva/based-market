@@ -1,5 +1,3 @@
-import { Play } from 'lucide-react';
-import { Button } from '~/components/ui/button';
 import { Label } from '~/components/ui/label';
 import { Slider } from '~/components/ui/slider';
 import { CONFIG_LIMITS } from '../constants';
@@ -9,10 +7,9 @@ interface ConfigPanelProps {
 	config: GameConfig;
 	isRunning: boolean;
 	onConfigChange: (newConfig: GameConfig) => void;
-	onStart: () => void;
 }
 
-export function ConfigPanel({ config, isRunning, onConfigChange, onStart }: ConfigPanelProps) {
+export function ConfigPanel({ config, isRunning, onConfigChange }: ConfigPanelProps) {
 	//
 	/**
 	 * updates a specific config value
@@ -39,15 +36,6 @@ export function ConfigPanel({ config, isRunning, onConfigChange, onStart }: Conf
 
 	return (
 		<div className="space-y-4">
-			{/* game controls */}
-			<div className="flex items-center justify-between">
-				<h3 className="text-lg font-semibold text-card-foreground">Configuration</h3>
-				<Button onClick={onStart} variant="default" size="sm">
-					<Play className="w-4 h-4" />
-					Start
-				</Button>
-			</div>
-
 			{/* configuration sliders */}
 			<div className="space-y-3">
 				{/* grid size control */}

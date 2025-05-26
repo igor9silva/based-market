@@ -240,7 +240,7 @@ export function isOrbFrozen(orb: TempOrb, activeEffects: ActiveEffect[]): boolea
 	const now = Date.now();
 	return activeEffects.some(
 		(effect) =>
-			effect.type === 'freeze-opponent' &&
+			effect.type === 'freeze-enemy' &&
 			((effect.side === 'white' && orb.color === 'black') ||
 				(effect.side === 'black' && orb.color === 'white')) &&
 			effect.endTime > now,
@@ -264,7 +264,7 @@ export function hasSpeedBoost(orb: TempOrb, activeEffects: ActiveEffect[]): bool
 export function hasChaosMode(activeEffects: ActiveEffect[]): boolean {
 	//
 	const now = Date.now();
-	return activeEffects.some((effect) => effect.type === 'chaos-mode' && effect.endTime > now);
+	return activeEffects.some((effect) => effect.type === 'chaos' && effect.endTime > now);
 }
 
 /**

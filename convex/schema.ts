@@ -36,6 +36,8 @@ export default defineSchema({
 	payments: defineTable(
 		zodToConvex(paymentSchema),
 	).index(
+		'by_gameId', ['gameId'],
+	).index(
 		'by_coinbaseId', ['coinbaseId'],
 	),
 });

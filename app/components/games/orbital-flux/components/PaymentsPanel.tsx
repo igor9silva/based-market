@@ -1,11 +1,12 @@
 import { convexQuery } from '@convex-dev/react-query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
+import { Id } from 'convex/_generated/dataModel';
 import { TimeAgo } from '~/components/TimeAgo';
 
-export function PaymentsPanel() {
+export function PaymentsPanel({ gameId }: { gameId: Id<'games'> }) {
 	//
-	const query = convexQuery(api.payments.public.all, {});
+	const query = convexQuery(api.payments.public.all, { gameId });
 	const { data: payments } = useSuspenseQuery(query);
 
 	return (
@@ -14,7 +15,6 @@ export function PaymentsPanel() {
 			<div className="space-y-1">
 				{payments.map((payment) => {
 					//
-					const formattedDate = new Date(payment._creationTime).toLocaleString();
 					const shortId = payment.coinbaseId.slice(0, 8);
 
 					const statusText = {

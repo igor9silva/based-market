@@ -56,3 +56,5 @@ when doing multiple react Components on the same file, make sure the main Compon
 smaller components should be AFTER the main component
 ------------------------------------
 prefer array.concat() over [...spread] for performance reasons
+------------------------------------
+There is absolutetly no need to run the dev server. `bun run dev` is ALWAYS running.

@@ -108,7 +108,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 	const canActivateEffect = useCallback(
 		(effectType: EffectType, side: Color) => {
 			//
-			if (effectType === 'chaos-mode') {
+			if (effectType === 'chaos') {
 				// chaos mode counts against both sides' limits and cannot stack
 				const whiteCount = countActiveEffects('white');
 				const blackCount = countActiveEffects('black');
@@ -169,7 +169,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 					if (tempOrb) {
 						newState.orbs = [...newState.orbs, tempOrb];
 					}
-				} else if (effectType === 'chaos-mode') {
+				} else if (effectType === 'chaos') {
 					//
 					// randomize all orb directions with non-right angles, keeping original speed
 					newState.orbs = newState.orbs.map((orb) => {
@@ -342,9 +342,9 @@ function getDurationForEffect(effectType: EffectType, perkConfig: PerkConfig): n
 			return perkConfig.unbreakableDuration;
 		case 'speed-boost':
 			return perkConfig.speedBoostDuration;
-		case 'freeze-opponent':
+		case 'freeze-enemy':
 			return perkConfig.freezeDuration;
-		case 'chaos-mode':
+		case 'chaos':
 			return perkConfig.chaosModeDuration;
 		default:
 			return 10000; // default 10 seconds

@@ -1,3 +1,7 @@
+import { Id } from 'convex/_generated/dataModel';
+import { perkTypeSchema } from 'convex/schemas/gameSchema';
+import { z } from 'zod';
+
 export type Color = 'black' | 'white' | 'neutral';
 
 export interface Orb {
@@ -60,9 +64,10 @@ export interface OrbitalFluxProps {
 	// initial configuration options
 	initialConfig?: Partial<GameConfig>;
 	initialPerkConfig?: Partial<PerkConfig>;
+	// backend integration
+	gameId: Id<'games'>;
 	// customization options
 	enablePerks?: boolean;
-	enableConfigControls?: boolean;
 	showStats?: boolean;
 	// event callbacks
 	onGameStart?: () => void;
@@ -72,4 +77,4 @@ export interface OrbitalFluxProps {
 	onTerritoryChange?: (stats: GameStats) => void;
 }
 
-export type EffectType = 'extra-orb' | 'unbreakable' | 'speed-boost' | 'freeze-enemy' | 'chaos';
+export type EffectType = z.infer<typeof perkTypeSchema>;

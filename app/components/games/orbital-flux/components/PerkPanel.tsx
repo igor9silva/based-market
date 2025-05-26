@@ -1,7 +1,10 @@
+import { Id } from 'convex/_generated/dataModel';
+import { productSchema } from 'convex/schemas/paymentSchema';
 import { usePaymentMutations } from '~/hooks/usePayment';
 import type { ActiveEffect, Color, EffectType } from '../types';
 
 interface PerkPanelProps {
+	gameId: Id<'games'>;
 	isRunning: boolean;
 	activeEffects: ActiveEffect[];
 	hasActiveEffect: (effectType: string, side: string) => boolean;
@@ -11,6 +14,7 @@ interface PerkPanelProps {
 }
 
 export function PerkPanel({
+	gameId,
 	isRunning,
 	activeEffects,
 	hasActiveEffect,
@@ -23,13 +27,15 @@ export function PerkPanel({
 
 	const handlePurchasePerk = async (effectType: EffectType, teamColor: Color) => {
 		//
-		const productKey = `orbital-flux ${teamColor} ${effectType}`;
-		await purchasePerk({ product: productKey as any });
+		await purchasePerk({
+			product: productSchema.parse(`orbital-flux ${teamColor} ${effectType}`),
+			gameId,
+		});
 	};
 
 	const handlePurchaseChaos = async () => {
 		//
-		await purchasePerk({ product: 'orbital-flux neutral chaos' });
+		await purchasePerk({ product: 'orbital-flux neutral chaos', gameId });
 	};
 
 	return (
