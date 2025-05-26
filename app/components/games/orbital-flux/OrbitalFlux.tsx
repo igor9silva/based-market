@@ -9,6 +9,7 @@ import type { GameConfig, GameStats, OrbitalFluxProps, PerkConfig } from './type
 import { calculateTerritoryStats } from './utils';
 
 // components
+import { PaymentsPanel } from '~/components/games/orbital-flux/components/PaymentsPanel';
 import { ConfigPanel } from './components/ConfigPanel';
 import { GameCanvas } from './components/GameCanvas';
 import { PerkPanel } from './components/PerkPanel';
@@ -207,6 +208,9 @@ export default function OrbitalFlux({
 								/>
 							)}
 						</div>
+
+						{/* payments panel */}
+						<PaymentsPanel />
 					</div>
 				)}
 			</div>

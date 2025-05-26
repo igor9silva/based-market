@@ -2,6 +2,7 @@ import { authTables } from '@convex-dev/auth/server';
 import { zodToConvex } from 'convex-helpers/server/zod';
 import { defineSchema, defineTable } from 'convex/server';
 import { gameSchema } from './schemas/gameSchema';
+import { paymentSchema } from './schemas/paymentSchema';
 import { userPreferencesSchema, userSchema } from './schemas/userSchema';
 
 // prettier-ignore
@@ -27,7 +28,14 @@ export default defineSchema({
 
 	games: defineTable(
 		zodToConvex(gameSchema),
+	),
+	// .index(
+	// 	'by_owner', ['owner'],
+	// ),
+
+	payments: defineTable(
+		zodToConvex(paymentSchema),
 	).index(
-		'by_owner', ['owner'],
+		'by_coinbaseId', ['coinbaseId'],
 	),
 });

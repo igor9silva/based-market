@@ -9,12 +9,14 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as games_private from "../games/private.js";
+import type * as games_public from "../games/public.js";
 import type * as http from "../http.js";
 import type * as lib from "../lib.js";
 import type * as migrations from "../migrations.js";
+import type * as payments_public from "../payments/public.js";
 import type * as schemas_envSchema from "../schemas/envSchema.js";
 import type * as schemas_gameSchema from "../schemas/gameSchema.js";
+import type * as schemas_paymentSchema from "../schemas/paymentSchema.js";
 import type * as schemas_userSchema from "../schemas/userSchema.js";
 import type * as users_preferences_private from "../users/preferences/private.js";
 import type * as users_preferences_public from "../users/preferences/public.js";
@@ -39,12 +41,14 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  "games/private": typeof games_private;
+  "games/public": typeof games_public;
   http: typeof http;
   lib: typeof lib;
   migrations: typeof migrations;
+  "payments/public": typeof payments_public;
   "schemas/envSchema": typeof schemas_envSchema;
   "schemas/gameSchema": typeof schemas_gameSchema;
+  "schemas/paymentSchema": typeof schemas_paymentSchema;
   "schemas/userSchema": typeof schemas_userSchema;
   "users/preferences/private": typeof users_preferences_private;
   "users/preferences/public": typeof users_preferences_public;
