@@ -1,11 +1,12 @@
-import { env } from '../schemas/envSchema';
-import { parseAndVerifyCoinbaseEvent, PayloadParseError, SignatureVerificationError } from './webhooks';
-
+import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { api } from '../_generated/api';
+import { Id } from '../_generated/dataModel';
 import { ActionCtx, httpAction } from '../_generated/server';
 import { action, mutation, query } from '../lib';
+import { env } from '../schemas/envSchema';
 import { productSchema } from '../schemas/paymentSchema';
+import { parseAndVerifyCoinbaseEvent, PayloadParseError, SignatureVerificationError } from './webhooks';
 
 export const byCoinbaseId = query({
 	args: {
@@ -20,19 +21,52 @@ export const byCoinbaseId = query({
 });
 
 export const all = query({
-	args: {},
-	handler: async (ctx) => {
-		return ctx.db.query('payments').order('desc').take(20);
+	args: {
+		gameId: zid('games'),
+	},
+	handler: async (ctx, { gameId }) => {
+		return ctx.db
+			.query('payments')
+			.withIndex('by_gameId', (q) => q.eq('gameId', gameId))
+			.order('desc')
+			.collect();
+	},
+});
+
+export const notUsed = query({
+	args: {
+		gameId: zid('games'),
+	},
+	handler: async (ctx, { gameId }) => {
+		return ctx.db
+			.query('payments')
+			.withIndex('by_gameId', (q) => q.eq('gameId', gameId))
+			.filter((q) =>
+				q.and(
+					q.eq(q.field('isUsed'), false),
+					q.or(q.eq(q.field('status'), 'pending'), q.eq(q.field('status'), 'confirmed')),
+				),
+			)
+			.order('desc')
+			.collect();
 	},
 });
 
 export const start = action({
 	args: {
-		// gameId: zid('games'),
+		gameId: zid('games'),
 		product: productSchema,
 	},
-	handler: async (ctx, { product }) => {
+	handler: async (ctx, { product, gameId }) => {
 		//
+		// const coinbaseId = crypto.randomUUID();
+		// await ctx.runMutation(api.payments.public.create, { product, coinbaseId, gameId });
+
+		// await ctx.scheduler.runAfter(3000, api.payments.public.finish, {
+		// 	coinbaseId,
+		// 	status: 'confirmed',
+		// });
+
 		const response = await fetch('https://api.commerce.coinbase.com/charges', {
 			method: 'POST',
 			headers: {
@@ -49,6 +83,7 @@ export const start = action({
 				},
 				metadata: {
 					product,
+					gameId,
 				},
 			}),
 		});
@@ -66,12 +101,15 @@ export const create = mutation({
 	args: {
 		product: productSchema,
 		coinbaseId: z.string(),
+		gameId: zid('games'),
 	},
-	handler: async (ctx, { product, coinbaseId }) => {
+	handler: async (ctx, { product, coinbaseId, gameId }) => {
 		await ctx.db.insert('payments', {
 			product,
 			coinbaseId,
+			gameId,
 			status: 'created',
+			isUsed: false,
 		});
 	},
 });
@@ -103,9 +141,24 @@ export const finish = mutation({
 	},
 });
 
-function createPayment(ctx: ActionCtx, product: z.infer<typeof productSchema>, coinbaseId: string) {
+export const markAsUsed = mutation({
+	args: {
+		paymentId: zid('payments'),
+	},
+	handler: async (ctx, { paymentId }) => {
+		//
+		await ctx.db.patch(paymentId, { isUsed: true });
+	},
+});
+
+function createPayment(
+	ctx: ActionCtx,
+	product: z.infer<typeof productSchema>,
+	coinbaseId: string,
+	gameId: Id<'games'>,
+) {
 	//
-	return ctx.runMutation(api.payments.public.create, { product, coinbaseId });
+	return ctx.runMutation(api.payments.public.create, { product, coinbaseId, gameId });
 }
 
 function setPendingPayment(ctx: ActionCtx, coinbaseId: string) {
@@ -120,14 +173,21 @@ function finishPayment(ctx: ActionCtx, coinbaseId: string, status: 'confirmed' |
 
 export const coinbaseWebhook = httpAction(async (ctx, request) => {
 	//
+	// return new Response(null, { status: 200 });
 	try {
 		const verifiedEvent = await parseAndVerifyCoinbaseEvent(request, env.COINBASE_WEBHOOK_SECRET);
 
 		const { event } = webhookPayloadSchema.parse(verifiedEvent);
 		const product = event.data.metadata.product;
+		const gameId = event.data.metadata.gameId;
 
 		if (!product) {
 			console.error('Coinbase webhook received without product', { event });
+			return new Response(null, { status: 200 });
+		}
+
+		if (!gameId) {
+			console.error('Coinbase webhook received without gameId', { event });
 			return new Response(null, { status: 200 });
 		}
 
@@ -135,7 +195,7 @@ export const coinbaseWebhook = httpAction(async (ctx, request) => {
 
 		// prettier-ignore
 		switch (event.type) {
-			case 'charge:created': await createPayment(ctx, product, event.data.id); break;
+			case 'charge:created': await createPayment(ctx, product, event.data.id, gameId as Id<'games'>); break;
 			case 'charge:pending': await setPendingPayment(ctx, event.data.id); break;
 			case 'charge:failed': await finishPayment(ctx, event.data.id, 'failed'); break;
 			case 'charge:confirmed': await finishPayment(ctx, event.data.id, 'confirmed'); break;
@@ -176,6 +236,7 @@ const webhookPayloadSchema = z.object({
 			id: z.string(),
 			metadata: z.object({
 				product: productSchema.optional(),
+				gameId: z.string().optional(),
 			}),
 		}),
 	}),

@@ -1,3 +1,4 @@
+import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 
 export const productSchema = z.enum([
@@ -20,8 +21,9 @@ export const paymentStatusSchema = z.enum([
 ]);
 
 export const paymentSchema = z.object({
-	// gameId: zid('games'),
+	gameId: zid('games'),
 	coinbaseId: z.string(),
 	product: productSchema,
 	status: paymentStatusSchema,
+	isUsed: z.boolean(),
 });
