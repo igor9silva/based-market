@@ -59,13 +59,17 @@ export const start = action({
 	},
 	handler: async (ctx, { product, gameId }) => {
 		//
-		// const coinbaseId = crypto.randomUUID();
-		// await ctx.runMutation(api.payments.public.create, { product, coinbaseId, gameId });
+		if (env.USE_FAKE_PAYMENTS === 'true') {
+			//
+			const coinbaseId = crypto.randomUUID();
+			await ctx.runMutation(api.payments.public.create, { product, coinbaseId, gameId });
 
-		// await ctx.scheduler.runAfter(3000, api.payments.public.finish, {
-		// 	coinbaseId,
-		// 	status: 'confirmed',
-		// });
+			// auto-confirm after 3 seconds
+			await ctx.scheduler.runAfter(3000, api.payments.public.finish, {
+				coinbaseId,
+				status: 'confirmed',
+			});
+		}
 
 		const response = await fetch('https://api.commerce.coinbase.com/charges', {
 			method: 'POST',
@@ -173,6 +177,11 @@ function finishPayment(ctx: ActionCtx, coinbaseId: string, status: 'confirmed' |
 
 export const coinbaseWebhook = httpAction(async (ctx, request) => {
 	//
+	if (env.USE_FAKE_PAYMENTS === 'true') {
+		console.debug('Using fake payments');
+		return new Response(null, { status: 200 });
+	}
+
 	// return new Response(null, { status: 200 });
 	try {
 		const verifiedEvent = await parseAndVerifyCoinbaseEvent(request, env.COINBASE_WEBHOOK_SECRET);

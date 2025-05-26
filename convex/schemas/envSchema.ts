@@ -12,6 +12,8 @@ export const env = createEnv({
 		COINBASE_API_KEY: z.string().min(1).describe('Coinbase API key for payment processing.'),
 		COINBASE_WEBHOOK_SECRET: z.string().min(1).describe('Coinbase webhook secret for payment verification.'),
 
+		USE_FAKE_PAYMENTS: z.string().optional().describe('Whether to use fake payments.'),
+
 		// POLAR_SERVER: z.enum(['sandbox', 'production']).default('sandbox').describe('Polar server.'),
 		// POLAR_ACCESS_TOKEN: z.string().min(1).describe('Polar Access Token for payment processing.'),
 		// POLAR_WEBHOOK_SECRET: z.string().min(1).describe('Polar webhook secret for payment verification.'),
