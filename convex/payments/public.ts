@@ -1,9 +1,10 @@
 import { env } from '../schemas/envSchema';
+import { parseAndVerifyCoinbaseEvent, PayloadParseError, SignatureVerificationError } from './webhooks';
 
 import { z } from 'zod';
 import { api } from '../_generated/api';
 import { ActionCtx, httpAction } from '../_generated/server';
-import { mutation, query } from '../lib';
+import { action, mutation, query } from '../lib';
 import { productSchema } from '../schemas/paymentSchema';
 
 export const byCoinbaseId = query({
@@ -21,11 +22,11 @@ export const byCoinbaseId = query({
 export const all = query({
 	args: {},
 	handler: async (ctx) => {
-		return ctx.db.query('payments').collect();
+		return ctx.db.query('payments').order('desc').take(20);
 	},
 });
 
-export const start = mutation({
+export const start = action({
 	args: {
 		// gameId: zid('games'),
 		product: productSchema,
@@ -55,9 +56,9 @@ export const start = mutation({
 		if (!response.ok) throw new Error('Failed to create charge');
 
 		const json = await response.json();
-		console.debug(`Coinbase charge created (${json.checkout.id}):`, json);
+		console.debug(`Coinbase charge created`, json);
 
-		return json.hosted_url;
+		return json.data.hosted_url;
 	},
 });
 
@@ -103,68 +104,62 @@ export const finish = mutation({
 });
 
 function createPayment(ctx: ActionCtx, product: z.infer<typeof productSchema>, coinbaseId: string) {
+	//
 	return ctx.runMutation(api.payments.public.create, { product, coinbaseId });
 }
 
 function setPendingPayment(ctx: ActionCtx, coinbaseId: string) {
+	//
 	return ctx.runMutation(api.payments.public.setPending, { coinbaseId });
 }
 
 function finishPayment(ctx: ActionCtx, coinbaseId: string, status: 'confirmed' | 'failed') {
+	//
 	return ctx.runMutation(api.payments.public.finish, { coinbaseId, status });
 }
 
 export const coinbaseWebhook = httpAction(async (ctx, request) => {
 	//
 	try {
-		const signature = request.headers.get('X-CC-Webhook-Signature');
-		if (!signature || signature !== env.COINBASE_WEBHOOK_SECRET) {
-			console.warn('Coinbase webhook signature mismatch', signature);
-			return new Response(null, { status: 403 });
-		}
+		const verifiedEvent = await parseAndVerifyCoinbaseEvent(request, env.COINBASE_WEBHOOK_SECRET);
 
-		const json = await request.json();
-		console.debug('Coinbase webhook received', json);
-
-		const { event } = webhookPayloadSchema.parse(json);
+		const { event } = webhookPayloadSchema.parse(verifiedEvent);
 		const product = event.data.metadata.product;
 
 		if (!product) {
-			console.error('Coinbase webhook received without product', json);
+			console.error('Coinbase webhook received without product', { event });
 			return new Response(null, { status: 200 });
 		}
 
+		console.debug(`Coinbase '${event.type}' event (${event.data.id}) received:`, verifiedEvent);
+
 		// prettier-ignore
 		switch (event.type) {
-			//
 			case 'charge:created': await createPayment(ctx, product, event.data.id); break;
 			case 'charge:pending': await setPendingPayment(ctx, event.data.id); break;
 			case 'charge:failed': await finishPayment(ctx, event.data.id, 'failed'); break;
 			case 'charge:confirmed': await finishPayment(ctx, event.data.id, 'confirmed'); break;
-
-			default: console.debug(`Unhandled Coinbase '${event.type}' event received.`, json);
+			default: console.debug(`Unhandled Coinbase '${event.type}' event received.`, { event });
 		}
 
 		return new Response(null, { status: 200 });
 		//
 	} catch (error) {
 		//
+		if (error instanceof SignatureVerificationError) {
+			console.warn('Coinbase webhook signature verification failed', error);
+			return new Response(null, { status: 403 });
+		}
+
 		if (error instanceof PayloadParseError) {
-			console.warn('Polar webhook payload parse error', error);
+			console.warn('Coinbase webhook payload parse error', error);
 			return new Response(null, { status: 400 });
 		}
 
-		console.error('Polar webhook error', error);
+		console.error('Coinbase webhook error', error);
 		return new Response(null, { status: 500 });
 	}
 });
-
-class PayloadParseError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.message = message;
-	}
-}
 
 const webhookPayloadSchema = z.object({
 	id: z.string(),

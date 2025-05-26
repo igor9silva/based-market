@@ -1,23 +1,25 @@
-import { useMutation } from '@tanstack/react-query';
-import { Doc } from 'convex/_generated/dataModel';
+import { api } from 'convex/_generated/api';
+import { useAction } from 'convex/react';
+import { productSchema } from 'convex/schemas/paymentSchema';
+import { z } from 'zod';
 
-export class PaymentError extends Error {
-	constructor(
-		message: string,
-		public code: string,
-	) {
-		super(message);
-	}
-}
-
-export const usePayment = (topUp: Doc<'topUps'>) => {
+export function usePaymentMutations() {
 	//
-	const { mutate, isPending, error } = useMutation({
-		mutationFn: async () => {
-			//
-			location.href = topUp.paymentUrl;
-		},
-	});
+	const startPayment = useAction(api.payments.public.start);
 
-	return { pay: mutate, isPending, error };
-};
+	const purchasePerk = async ({
+		product, //
+	}: {
+		product: z.infer<typeof productSchema>;
+	}) => {
+		//
+		const paymentUrl = await startPayment({ product });
+
+		// redirect to payment URL
+		window.location.href = paymentUrl;
+	};
+
+	return {
+		purchasePerk,
+	};
+}

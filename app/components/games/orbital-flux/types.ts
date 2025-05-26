@@ -72,4 +72,4 @@ export interface OrbitalFluxProps {
 	onTerritoryChange?: (stats: GameStats) => void;
 }
 
-export type EffectType = 'extra-orb' | 'unbreakable' | 'speed-boost' | 'freeze-opponent' | 'chaos-mode';
+export type EffectType = 'extra-orb' | 'unbreakable' | 'speed-boost' | 'freeze-enemy' | 'chaos';

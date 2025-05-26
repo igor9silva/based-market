@@ -54,8 +54,8 @@ function RootComponent() {
 	return (
 		<RootDocument>
 			<Outlet />
-			<TanStackRouterDevtools position="bottom-right" />
-			<ReactQueryDevtools />
+			<TanStackRouterDevtools position="bottom-left" />
+			<ReactQueryDevtools buttonPosition="bottom-left" />
 		</RootDocument>
 	);
 }

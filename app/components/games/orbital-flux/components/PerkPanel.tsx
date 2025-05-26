@@ -1,3 +1,4 @@
+import { usePaymentMutations } from '~/hooks/usePayment';
 import type { ActiveEffect, Color, EffectType } from '../types';
 
 interface PerkPanelProps {
@@ -18,6 +19,19 @@ export function PerkPanel({
 	onActivateEffect,
 }: PerkPanelProps) {
 	//
+	const { purchasePerk } = usePaymentMutations();
+
+	const handlePurchasePerk = async (effectType: EffectType, teamColor: Color) => {
+		//
+		const productKey = `orbital-flux ${teamColor} ${effectType}`;
+		await purchasePerk({ product: productKey as any });
+	};
+
+	const handlePurchaseChaos = async () => {
+		//
+		await purchasePerk({ product: 'orbital-flux neutral chaos' });
+	};
+
 	return (
 		<div className="bg-card border border-border rounded-lg">
 			<div className="p-4">
@@ -33,6 +47,7 @@ export function PerkPanel({
 					canActivateEffect={canActivateEffect}
 					countActiveEffects={countActiveEffects}
 					onActivateEffect={onActivateEffect}
+					onPurchasePerk={handlePurchasePerk}
 				/>
 
 				{/* black team perks */}
@@ -44,15 +59,15 @@ export function PerkPanel({
 					canActivateEffect={canActivateEffect}
 					countActiveEffects={countActiveEffects}
 					onActivateEffect={onActivateEffect}
+					onPurchasePerk={handlePurchasePerk}
 				/>
 
 				{/* chaos mode section */}
 				<div className="space-y-2">
 					<h4 className="font-semibold text-sm text-muted-foreground">Chaos</h4>
 					<button
-						onClick={() => onActivateEffect('chaos-mode', 'neutral')}
-						disabled={!isRunning || !canActivateEffect('chaos-mode', 'neutral')}
-						className="w-full px-3 py-2 text-sm bg-destructive hover:bg-destructive/80 disabled:bg-muted disabled:text-muted-foreground text-destructive-foreground border border-border rounded transition-colors"
+						onClick={handlePurchaseChaos}
+						className="w-full px-3 py-2 text-sm bg-destructive hover:bg-destructive/80 text-destructive-foreground border border-border rounded transition-colors"
 					>
 						🌪️ CHAOS 🌪️ (6s)
 					</button>
@@ -73,6 +88,7 @@ interface TeamPerksProps {
 	canActivateEffect: (effectType: EffectType, side: Color) => boolean;
 	countActiveEffects: (side: string) => number;
 	onActivateEffect: (effectType: EffectType, side: Color) => void;
+	onPurchasePerk: (effectType: EffectType, teamColor: Color) => Promise<void>;
 }
 
 function TeamPerks({
@@ -83,6 +99,7 @@ function TeamPerks({
 	canActivateEffect,
 	countActiveEffects,
 	onActivateEffect,
+	onPurchasePerk,
 }: TeamPerksProps) {
 	//
 	const perks = [
@@ -90,7 +107,7 @@ function TeamPerks({
 		{ type: 'unbreakable' as EffectType, label: 'Unbreakable (10s)' },
 		{ type: 'speed-boost' as EffectType, label: 'Speed Boost (8s)' },
 		{
-			type: 'freeze-opponent' as EffectType,
+			type: 'freeze-enemy' as EffectType,
 			label: `Freeze ${teamColor === 'white' ? 'Black' : 'White'} (5s)`,
 		},
 	];
@@ -108,9 +125,8 @@ function TeamPerks({
 				{perks.map((perk) => (
 					<button
 						key={perk.type}
-						onClick={() => onActivateEffect(perk.type, teamColor)}
-						disabled={!isRunning || !canActivateEffect(perk.type, teamColor)}
-						className="px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 disabled:bg-muted disabled:text-muted-foreground text-secondary-foreground border border-border rounded transition-colors"
+						onClick={() => onPurchasePerk(perk.type, teamColor)}
+						className="px-3 py-2 text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border rounded transition-colors"
 					>
 						{perk.label}
 					</button>
