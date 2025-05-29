@@ -13,8 +13,8 @@ export const teamsSchema = z.enum([
 export const orbitalFluxConfigSchema = z.object({
 	gridWidth: z.number().min(20).max(100),
 	gridHeight: z.number().min(20).max(100),
-	orbSpeed: z.number().min(5).max(50),
-	winThreshold: z.number().min(50).max(95),
+	orbSpeed: z.number().min(1).max(50),
+	winThreshold: z.number().min(51).max(100),
 	blockSize: z.number().min(8).max(20),
 });
 

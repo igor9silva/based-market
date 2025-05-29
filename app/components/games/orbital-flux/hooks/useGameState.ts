@@ -48,6 +48,8 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 			y: (gridHeight / 2) * blockSize + blockSize / 2,
 			vx: whiteDirection.vx,
 			vy: whiteDirection.vy,
+			baseSpeed: orbSpeed,
+			baseDirection: whiteDirection.baseDirection,
 			color: 'white',
 			radius: blockSize * 0.4,
 		};
@@ -58,6 +60,8 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 			y: (gridHeight / 2) * blockSize + blockSize / 2,
 			vx: blackDirection.vx,
 			vy: blackDirection.vy,
+			baseSpeed: orbSpeed,
+			baseDirection: blackDirection.baseDirection,
 			color: 'black',
 			radius: blockSize * 0.4,
 		};
@@ -171,15 +175,15 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 					}
 				} else if (effectType === 'chaos') {
 					//
-					// randomize all orb directions with non-right angles, keeping original speed
+					// randomize all orb directions with non-right angles, but preserve base properties
 					newState.orbs = newState.orbs.map((orb) => {
 						//
-						const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
-						const direction = generateNonRightAngleDirection(currentSpeed);
+						const direction = generateNonRightAngleDirection(orb.baseSpeed);
 						return {
 							...orb,
 							vx: direction.vx,
 							vy: direction.vy,
+							// keep original baseSpeed and baseDirection unchanged
 						};
 					});
 
@@ -268,6 +272,8 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 					y: (gridHeight / 2) * blockSize + blockSize / 2,
 					vx: whiteDirection.vx,
 					vy: whiteDirection.vy,
+					baseSpeed: orbSpeed,
+					baseDirection: whiteDirection.baseDirection,
 					color: 'white',
 					radius: blockSize * 0.4,
 				};
@@ -278,6 +284,8 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 					y: (gridHeight / 2) * blockSize + blockSize / 2,
 					vx: blackDirection.vx,
 					vy: blackDirection.vy,
+					baseSpeed: orbSpeed,
+					baseDirection: blackDirection.baseDirection,
 					color: 'black',
 					radius: blockSize * 0.4,
 				};
@@ -379,6 +387,8 @@ function createExtraOrb(side: Color, grid: Color[][], config: GameConfig, endTim
 		y: randomBlock.y * blockSize + blockSize / 2,
 		vx: direction.vx,
 		vy: direction.vy,
+		baseSpeed: orbSpeed,
+		baseDirection: direction.baseDirection,
 		color: side,
 		radius: blockSize * 0.35,
 		isTemporary: true,

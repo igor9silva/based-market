@@ -16,9 +16,17 @@ export function generateNonRightAngleDirection(speed: number) {
 		Math.abs(angle % (Math.PI / 2)) > Math.PI / 2 - RIGHT_ANGLE_TOLERANCE
 	);
 
+	const vx = Math.cos(angle) * speed;
+	const vy = Math.sin(angle) * speed;
+
 	return {
-		vx: Math.cos(angle) * speed,
-		vy: Math.sin(angle) * speed,
+		vx,
+		vy,
+		// normalized direction (for preserving original direction)
+		baseDirection: {
+			vx: Math.cos(angle),
+			vy: Math.sin(angle),
+		},
 	};
 }
 
@@ -203,8 +211,8 @@ export function checkBoundaryCollision(orb: TempOrb, config: GameConfig): void {
 		orb.y = Math.max(orb.radius, Math.min(canvasHeight - orb.radius, orb.y));
 	}
 
-	// velocity limiter to prevent orbs from getting too fast and causing issues
-	const maxSpeed = config.orbSpeed * 3; // allow up to 3x normal speed
+	// velocity limiter to prevent orbs from getting too fast, but preserve base speed
+	const maxSpeed = orb.baseSpeed * 3; // allow up to 3x base speed
 	const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
 	if (currentSpeed > maxSpeed) {
 		//
@@ -305,4 +313,31 @@ export function checkWinConditions(
 	}
 
 	return null;
+}
+
+/**
+ * normalizes an orb's velocity to maintain its base speed
+ * this preserves the original intended speed while allowing direction changes
+ */
+export function normalizeOrbVelocity(orb: TempOrb): void {
+	//
+	const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
+
+	// if speed is too different from base speed, normalize it
+	if (currentSpeed > 0 && Math.abs(currentSpeed - orb.baseSpeed) > 0.1) {
+		//
+		const scale = orb.baseSpeed / currentSpeed;
+		orb.vx *= scale;
+		orb.vy *= scale;
+	}
+}
+
+/**
+ * resets an orb's velocity to its original base direction and speed
+ * used to restore original movement after temporary effects
+ */
+export function resetOrbToBaseVelocity(orb: TempOrb): void {
+	//
+	orb.vx = orb.baseDirection.vx * orb.baseSpeed;
+	orb.vy = orb.baseDirection.vy * orb.baseSpeed;
 }

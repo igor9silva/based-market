@@ -34,6 +34,20 @@ export function useGameAnimation({ gameState, config, updateGameState }: UseGame
 			const activeEffects = prevState.activeEffects.filter((effect) => effect.endTime > now);
 			const orbs = prevState.orbs.filter((orb) => !orb.isTemporary || (orb.endTime && orb.endTime > now));
 
+			// check if chaos mode just ended
+			const hadChaosMode = prevState.activeEffects.some((effect) => effect.type === 'chaos');
+			const hasChaosMode = activeEffects.some((effect) => effect.type === 'chaos');
+
+			// if chaos mode just ended, restore orbs to their base directions
+			if (hadChaosMode && !hasChaosMode) {
+				//
+				orbs.forEach((orb) => {
+					// restore original direction at base speed
+					orb.vx = orb.baseDirection.vx * orb.baseSpeed;
+					orb.vy = orb.baseDirection.vy * orb.baseSpeed;
+				});
+			}
+
 			const newGrid = prevState.grid.map((row) => [...row]);
 			const newOrbs = orbs.map((orb) => ({ ...orb }));
 
@@ -131,11 +145,16 @@ function updateOrbPhysics(orbs: TempOrb[], grid: any[][], config: GameConfig, ac
 		// if orb hasn't moved much in 2 seconds, it might be stuck
 		if (timeSinceLastMove > 2000 && distanceMoved < 5) {
 			//
-			// give it a random nudge to break deadlock
+			// give it a temporary directional nudge to break deadlock (don't modify base speed)
 			const nudgeAngle = Math.random() * 2 * Math.PI;
-			const nudgeForce = 2;
-			orb.vx += Math.cos(nudgeAngle) * nudgeForce;
-			orb.vy += Math.sin(nudgeAngle) * nudgeForce;
+			const nudgeDirection = {
+				vx: Math.cos(nudgeAngle),
+				vy: Math.sin(nudgeAngle),
+			};
+
+			// set velocity to nudge direction at base speed
+			orb.vx = nudgeDirection.vx * orb.baseSpeed;
+			orb.vy = nudgeDirection.vy * orb.baseSpeed;
 			orb.lastMoveTime = Date.now();
 			orb.lastPosition = { x: orb.x, y: orb.y };
 		} else if (distanceMoved > 10) {
@@ -160,6 +179,15 @@ function updateOrbPhysics(orbs: TempOrb[], grid: any[][], config: GameConfig, ac
 
 		// check orb-to-orb collisions to prevent overlapping
 		checkOrbCollisions(orb, orbs, index);
+
+		// ensure velocity magnitude stays close to base speed after collisions
+		const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
+		if (currentSpeed > 0 && Math.abs(currentSpeed - orb.baseSpeed) > 0.1) {
+			//
+			const scale = orb.baseSpeed / currentSpeed;
+			orb.vx *= scale;
+			orb.vy *= scale;
+		}
 	});
 }
 
@@ -191,20 +219,16 @@ function checkOrbCollisions(currentOrb: TempOrb, allOrbs: TempOrb[], currentInde
 			otherOrb.x -= separationX;
 			otherOrb.y -= separationY;
 
-			// calculate collision response (elastic collision)
-			const relativeVx = currentOrb.vx - otherOrb.vx;
-			const relativeVy = currentOrb.vy - otherOrb.vy;
-			const relativeSpeed = relativeVx * (dx / distance) + relativeVy * (dy / distance);
+			// instead of modifying velocities permanently, apply a temporary deflection
+			// that maintains base speeds
+			const deflectionAngle1 = Math.atan2(dy, dx);
+			const deflectionAngle2 = deflectionAngle1 + Math.PI;
 
-			// only resolve if orbs are moving towards each other
-			if (relativeSpeed < 0) {
-				//
-				const impulse = (2 * relativeSpeed) / 2; // assuming equal mass
-				currentOrb.vx -= impulse * (dx / distance);
-				currentOrb.vy -= impulse * (dy / distance);
-				otherOrb.vx += impulse * (dx / distance);
-				otherOrb.vy += impulse * (dy / distance);
-			}
+			// set velocities to deflection directions at base speeds
+			currentOrb.vx = Math.cos(deflectionAngle1) * currentOrb.baseSpeed;
+			currentOrb.vy = Math.sin(deflectionAngle1) * currentOrb.baseSpeed;
+			otherOrb.vx = Math.cos(deflectionAngle2) * otherOrb.baseSpeed;
+			otherOrb.vy = Math.sin(deflectionAngle2) * otherOrb.baseSpeed;
 		}
 	}
 }

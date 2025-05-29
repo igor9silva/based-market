@@ -13,7 +13,15 @@ export interface Orb {
 	radius: number;
 }
 
-export interface TempOrb extends Orb {
+export interface TempOrb {
+	x: number;
+	y: number;
+	vx: number;
+	vy: number;
+	baseSpeed: number;
+	baseDirection: { vx: number; vy: number };
+	color: Color;
+	radius: number;
 	isTemporary?: boolean;
 	endTime?: number;
 	lastMoveTime?: number;
