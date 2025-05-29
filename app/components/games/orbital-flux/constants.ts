@@ -5,7 +5,7 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
 	gridWidth: 20,
 	gridHeight: 20,
 	orbSpeed: 5,
-	winThreshold: 55,
+	winThreshold: 70,
 	blockSize: 12,
 };
 

@@ -82,6 +82,18 @@ function RouteComponent() {
 	}, [startLiveGame, password, promptPassword]);
 
 	/**
+	 * handles when a game finishes and a winner is declared
+	 */
+	const handleWinner = useCallback(
+		async (winner: string) => {
+			setLastWinner(winner);
+			setState('countdown');
+			setCountdown(LIVE_COUNTDOWN_DURATION);
+		},
+		[password, promptPassword],
+	);
+
+	/**
 	 * stops the current live game
 	 */
 	const handleStopGame = useCallback(async () => {
@@ -234,6 +246,7 @@ function RouteComponent() {
 					customStatsBar={customStatsBar}
 					showSidebarToggle={false}
 					hideGameControls={true}
+					onWinner={handleWinner}
 					onGameStart={handleGameStart}
 					initialConfig={{ ...DEFAULT_GAME_CONFIG }}
 				/>
