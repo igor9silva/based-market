@@ -1,7 +1,7 @@
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { EffectType } from '../types';
 
 interface PaymentPerkActivationProps {
@@ -17,6 +17,9 @@ export function usePaymentPerkActivation({ gameId, onActivatePerk }: PaymentPerk
 	// mutation to mark payments as used
 	const markAsUsed = useMutation(api.payments.public.markAsUsed);
 
+	// track processed payment IDs to prevent duplicate activation
+	const processedPaymentIds = useRef(new Set<string>());
+
 	/**
 	 * process ready payments when they arrive
 	 */
@@ -26,9 +29,28 @@ export function usePaymentPerkActivation({ gameId, onActivatePerk }: PaymentPerk
 
 		console.log(`Processing ${readyPayments.length} ready payments`);
 
-		// process all ready payments in parallel
-		const processPayments = readyPayments.map(async (payment) => {
+		// filter out payments we've already processed
+		const newPayments = readyPayments.filter((payment) => {
 			//
+			const paymentKey = `${payment._id}-${payment.status}`;
+			return !processedPaymentIds.current.has(paymentKey);
+		});
+
+		if (newPayments.length === 0) {
+			console.log('No new payments to process');
+			return;
+		}
+
+		console.log(`Processing ${newPayments.length} new payments`);
+
+		// process only new payments in parallel
+		const processPayments = newPayments.map(async (payment) => {
+			//
+			const paymentKey = `${payment._id}-${payment.status}`;
+
+			// mark as processed immediately to prevent reprocessing
+			processedPaymentIds.current.add(paymentKey);
+
 			console.log('Processing payment:', payment._id, 'status:', payment.status);
 
 			// parse the product to extract perk info
@@ -82,5 +104,11 @@ export function usePaymentPerkActivation({ gameId, onActivatePerk }: PaymentPerk
 			console.error('Error processing payments:', error);
 		});
 		//
-	}, [readyPayments, markAsUsed]);
+	}, [readyPayments, markAsUsed, onActivatePerk]);
+
+	// cleanup processed payment IDs when gameId changes
+	useEffect(() => {
+		//
+		processedPaymentIds.current.clear();
+	}, [gameId]);
 }
