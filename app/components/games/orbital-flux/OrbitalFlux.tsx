@@ -1,5 +1,6 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
+import { Id } from 'convex/_generated/dataModel';
 import { useMutation } from 'convex/react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -30,6 +31,7 @@ export default function OrbitalFlux({
 	autoStart = false,
 	customStatsBar,
 	showSidebarToggle = true,
+	hideGameControls = false,
 	// event callbacks
 	onGameStart,
 	onGameStop,
@@ -53,7 +55,7 @@ export default function OrbitalFlux({
 	const finishGameMutation = useMutation(api.games.public.finish);
 
 	// perk host - manages perks client-side as "host"
-	const perkHost = usePerkHost(gameId);
+	const perkHost = usePerkHost(gameId || ('' as Id<'games'>));
 
 	// sidebar visibility from URL params
 	const navigate = useNavigate();
@@ -73,8 +75,8 @@ export default function OrbitalFlux({
 	 */
 	const handleWinner = async (winner: string) => {
 		//
-		// finish game in backend if gameId is provided
-		if (finishGameMutation && (winner === 'white' || winner === 'black')) {
+		// only update backend if gameId is provided
+		if (gameId) {
 			try {
 				await finishGameMutation({ gameId, winner: winner as 'white' | 'black' });
 			} catch (error) {
@@ -107,15 +109,15 @@ export default function OrbitalFlux({
 				activateEffect(type as any, side as any);
 			}
 
-			// also persist to backend via perk host
+			// also persist to backend via perk host (only if gameId is provided)
 			await perkHost.activatePerk(type, side, duration);
 		},
-		[activateEffect, perkHost.activatePerk, gameState.isRunning],
+		[activateEffect, perkHost.activatePerk, gameState.isRunning, gameId],
 	);
 
-	// payment monitoring - activates perks when payments are confirmed
+	// payment monitoring - activates perks when payments are confirmed (only if gameId is provided)
 	usePaymentPerkActivation({
-		gameId,
+		gameId: gameId || ('' as Id<'games'>),
 		onActivatePerk: handlePerkActivation,
 	});
 
@@ -232,27 +234,31 @@ export default function OrbitalFlux({
 						<div className="p-4 border-b border-border">
 							<div className="flex items-center justify-between">
 								<h1 className="text-xl font-bold text-foreground">Orbital Flux</h1>
-								{gameState.winner ? (
-									<Button onClick={handleStartNewGame} variant="default" size="sm">
-										Start New Game
-									</Button>
-								) : gameState.isRunning ? (
-									<Button onClick={handleStop} variant="outline" size="sm">
-										<Pause className="w-4 h-4" />
-										Pause
-									</Button>
-								) : (
-									<Button onClick={handleStart} variant="default" size="sm">
-										<Play className="w-4 h-4" />
-										Resume
-									</Button>
+								{!hideGameControls && (
+									<>
+										{gameState.winner ? (
+											<Button onClick={handleStartNewGame} variant="default" size="sm">
+												Start New Game
+											</Button>
+										) : gameState.isRunning ? (
+											<Button onClick={handleStop} variant="outline" size="sm">
+												<Pause className="w-4 h-4" />
+												Pause
+											</Button>
+										) : (
+											<Button onClick={handleStart} variant="default" size="sm">
+												<Play className="w-4 h-4" />
+												Resume
+											</Button>
+										)}
+									</>
 								)}
 							</div>
 						</div>
 
 						{/* perks section */}
 						<div className="flex-1 overflow-y-auto">
-							{enablePerks && (
+							{enablePerks && gameId && (
 								<PerkPanel
 									gameId={gameId}
 									isRunning={gameState.isRunning}
@@ -267,7 +273,7 @@ export default function OrbitalFlux({
 						</div>
 
 						{/* payments panel */}
-						<PaymentsPanel gameId={gameId} />
+						{gameId && <PaymentsPanel gameId={gameId} />}
 					</div>
 				)}
 			</div>

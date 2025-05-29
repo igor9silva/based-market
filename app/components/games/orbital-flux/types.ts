@@ -81,6 +81,7 @@ export interface OrbitalFluxProps {
 	autoStart?: boolean;
 	customStatsBar?: ReactNode;
 	showSidebarToggle?: boolean;
+	hideGameControls?: boolean;
 	// event callbacks
 	onGameStart?: () => void;
 	onGameStop?: () => void;

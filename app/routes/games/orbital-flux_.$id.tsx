@@ -30,7 +30,7 @@ function RouteComponent() {
 	// show loading state while data is loading
 	if (game === undefined) {
 		return (
-			<div className="h-screen bg-background flex items-center justify-center">
+			<div className="h-screen bg-background flex items-center justify-center overflow-hidden">
 				<div className="text-center">
 					<TextShimmer text="Loading game" className="text-lg" />
 				</div>
@@ -41,7 +41,7 @@ function RouteComponent() {
 	// handle game not found
 	if (game === null) {
 		return (
-			<div className="h-screen bg-background flex items-center justify-center">
+			<div className="h-screen bg-background flex items-center justify-center overflow-hidden">
 				<div className="text-center">
 					<p className="text-muted-foreground">Game not found</p>
 				</div>
@@ -50,5 +50,9 @@ function RouteComponent() {
 	}
 
 	// render the game with backend integration
-	return <OrbitalFlux gameId={gameId} enablePerks={true} showStats={true} />;
+	return (
+		<div className="h-screen overflow-hidden">
+			<OrbitalFlux gameId={gameId} enablePerks={true} showStats={true} />
+		</div>
+	);
 }

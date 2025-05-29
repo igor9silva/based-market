@@ -69,6 +69,8 @@ export const start = action({
 				coinbaseId,
 				status: 'confirmed',
 			});
+
+			return 'https://igorsilva.pro';
 		}
 
 		const response = await fetch('https://api.commerce.coinbase.com/charges', {

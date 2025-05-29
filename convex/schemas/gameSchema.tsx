@@ -1,3 +1,4 @@
+import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 
 export const gameKindsSchema = z.enum([
@@ -54,3 +55,8 @@ export const gameSchema = z.discriminatedUnion('status', [
 	runningGameSchema, //
 	finishedGameSchema,
 ]);
+
+export const liveGameSchema = z.object({
+	gameId: zid('games'),
+	kind: gameKindsSchema,
+});
