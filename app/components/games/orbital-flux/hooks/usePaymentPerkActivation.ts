@@ -52,8 +52,8 @@ export function usePaymentPerkActivation({ gameId, onActivatePerk }: PaymentPerk
 			// determine duration based on perk type
 			const durations: Record<EffectType, number> = {
 				'extra-orb': 10000, // 10 seconds
-				'unbreakable': 10000, // 10 seconds
-				'speed-boost': 8000, // 8 seconds
+				'unbreakable': 15000, // 15 seconds
+				'speed-boost': 15000, // 15 seconds
 				'freeze-enemy': 5000, // 5 seconds
 				'chaos': 6000, // 6 seconds
 			};

@@ -241,6 +241,7 @@ export default function OrbitalFlux({
 									canActivateEffect={perkHost.canActivateEffect}
 									countActiveEffects={perkHost.countActiveEffects}
 									onActivateEffect={perkHost.onActivateEffect}
+									perkConfig={perkConfig}
 								/>
 							)}
 						</div>

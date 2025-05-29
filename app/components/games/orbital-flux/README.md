@@ -15,8 +15,8 @@ Orbital Flux is a real-time strategy simulation where two teams (black and white
 
 ##### Perks
 - **Extra Orb**: Spawn temporary additional orbs (10s)
-- **Unbreakable**: Make territory blocks immune to conversion (10s)
-- **Speed Boost**: Double orb movement speed (8s)
+- **Unbreakable**: Make territory blocks immune to conversion (15s)
+- **Speed Boost**: Double orb movement speed (15s)
 - **Freeze Opponent**: Freeze enemy orbs (5s)
 - **Chaos Mode**: Randomize all orb directions (6s)
 
@@ -124,8 +124,8 @@ export default function MinimalGamePage() {
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `extraOrbDuration` | `number` | `10000` | Extra orb duration (ms) |
-| `unbreakableDuration` | `number` | `10000` | Unbreakable effect duration (ms) |
-| `speedBoostDuration` | `number` | `8000` | Speed boost duration (ms) |
+| `unbreakableDuration` | `number` | `15000` | Unbreakable effect duration (ms) |
+| `speedBoostDuration` | `number` | `15000` | Speed boost duration (ms) |
 | `freezeDuration` | `number` | `5000` | Freeze effect duration (ms) |
 | `chaosModeDuration` | `number` | `6000` | Chaos mode duration (ms) |
 

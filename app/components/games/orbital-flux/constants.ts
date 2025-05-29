@@ -12,8 +12,8 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
 // default perk durations (in milliseconds)
 export const DEFAULT_PERK_CONFIG: PerkConfig = {
 	extraOrbDuration: 10000, // 10 seconds
-	unbreakableDuration: 10000, // 10 seconds
-	speedBoostDuration: 8000, // 8 seconds
+	unbreakableDuration: 15000, // 15 seconds
+	speedBoostDuration: 15000, // 15 seconds
 	freezeDuration: 5000, // 5 seconds
 	chaosModeDuration: 6000, // 6 seconds
 };

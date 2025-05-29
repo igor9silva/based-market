@@ -1,7 +1,7 @@
 import { Id } from 'convex/_generated/dataModel';
 import { productSchema } from 'convex/schemas/paymentSchema';
 import { usePaymentMutations } from '~/hooks/usePayment';
-import type { ActiveEffect, Color, EffectType } from '../types';
+import type { ActiveEffect, Color, EffectType, PerkConfig } from '../types';
 
 interface PerkPanelProps {
 	gameId: Id<'games'>;
@@ -11,6 +11,57 @@ interface PerkPanelProps {
 	canActivateEffect: (effectType: EffectType, side: Color) => boolean;
 	countActiveEffects: (side: string) => number;
 	onActivateEffect: (effectType: EffectType, side: Color) => void;
+	perkConfig: PerkConfig;
+}
+
+interface PerkDefinition {
+	type: EffectType;
+	label: string;
+}
+
+/**
+ * converts milliseconds to seconds for display
+ */
+function formatDuration(milliseconds: number): number {
+	//
+	return Math.round(milliseconds / 1000);
+}
+
+/**
+ * generates perk definitions with dynamic durations
+ */
+function createPerkDefinitions(perkConfig: PerkConfig, teamColor: Color): PerkDefinition[] {
+	//
+	const enemyTeam = teamColor === 'white' ? 'Black' : 'White';
+
+	return [
+		{
+			type: 'extra-orb',
+			label: `Extra Orb (${formatDuration(perkConfig.extraOrbDuration)}s)`,
+		},
+		{
+			type: 'unbreakable',
+			label: `Unbreakable (${formatDuration(perkConfig.unbreakableDuration)}s)`,
+		},
+		{
+			type: 'speed-boost',
+			label: `Speed Boost (${formatDuration(perkConfig.speedBoostDuration)}s)`,
+		},
+		{
+			type: 'freeze-enemy',
+			label: `Freeze ${enemyTeam} (${formatDuration(perkConfig.freezeDuration)}s)`,
+		},
+	];
+}
+
+/**
+ * calculates total active effects for a team including chaos effects
+ */
+function calculateTotalEffects(teamColor: Color, countActiveEffects: (side: string) => number): number {
+	//
+	const teamEffects = countActiveEffects(teamColor);
+	const chaosEffects = countActiveEffects('neutral');
+	return teamEffects + chaosEffects;
 }
 
 export function PerkPanel({
@@ -21,6 +72,7 @@ export function PerkPanel({
 	canActivateEffect,
 	countActiveEffects,
 	onActivateEffect,
+	perkConfig,
 }: PerkPanelProps) {
 	//
 	const { purchasePerk } = usePaymentMutations();
@@ -48,11 +100,8 @@ export function PerkPanel({
 				<TeamPerks
 					teamName="White"
 					teamColor="white"
-					isRunning={isRunning}
-					hasActiveEffect={hasActiveEffect}
-					canActivateEffect={canActivateEffect}
+					perkConfig={perkConfig}
 					countActiveEffects={countActiveEffects}
-					onActivateEffect={onActivateEffect}
 					onPurchasePerk={handlePurchasePerk}
 				/>
 
@@ -60,24 +109,13 @@ export function PerkPanel({
 				<TeamPerks
 					teamName="Black"
 					teamColor="black"
-					isRunning={isRunning}
-					hasActiveEffect={hasActiveEffect}
-					canActivateEffect={canActivateEffect}
+					perkConfig={perkConfig}
 					countActiveEffects={countActiveEffects}
-					onActivateEffect={onActivateEffect}
 					onPurchasePerk={handlePurchasePerk}
 				/>
 
 				{/* chaos mode section */}
-				<div className="space-y-2">
-					<h4 className="font-semibold text-sm text-muted-foreground">Chaos</h4>
-					<button
-						onClick={handlePurchaseChaos}
-						className="w-full px-3 py-2 text-sm bg-destructive hover:bg-destructive/80 text-destructive-foreground border border-border rounded transition-colors"
-					>
-						🌪️ CHAOS 🌪️ (6s)
-					</button>
-				</div>
+				<ChaosSection perkConfig={perkConfig} onPurchaseChaos={handlePurchaseChaos} />
 
 				{/* active effects display */}
 				{activeEffects.length > 0 && <ActiveEffectsDisplay activeEffects={activeEffects} />}
@@ -89,38 +127,15 @@ export function PerkPanel({
 interface TeamPerksProps {
 	teamName: string;
 	teamColor: Color;
-	isRunning: boolean;
-	hasActiveEffect: (effectType: string, side: string) => boolean;
-	canActivateEffect: (effectType: EffectType, side: Color) => boolean;
+	perkConfig: PerkConfig;
 	countActiveEffects: (side: string) => number;
-	onActivateEffect: (effectType: EffectType, side: Color) => void;
 	onPurchasePerk: (effectType: EffectType, teamColor: Color) => Promise<void>;
 }
 
-function TeamPerks({
-	teamName,
-	teamColor,
-	isRunning,
-	hasActiveEffect,
-	canActivateEffect,
-	countActiveEffects,
-	onActivateEffect,
-	onPurchasePerk,
-}: TeamPerksProps) {
+function TeamPerks({ teamName, teamColor, perkConfig, countActiveEffects, onPurchasePerk }: TeamPerksProps) {
 	//
-	const perks = [
-		{ type: 'extra-orb' as EffectType, label: 'Extra Orb (10s)' },
-		{ type: 'unbreakable' as EffectType, label: 'Unbreakable (10s)' },
-		{ type: 'speed-boost' as EffectType, label: 'Speed Boost (8s)' },
-		{
-			type: 'freeze-enemy' as EffectType,
-			label: `Freeze ${teamColor === 'white' ? 'Black' : 'White'} (5s)`,
-		},
-	];
-
-	const effectCount = countActiveEffects(teamColor);
-	const chaosCount = countActiveEffects('neutral');
-	const totalEffects = effectCount + chaosCount;
+	const perks = createPerkDefinitions(perkConfig, teamColor);
+	const totalEffects = calculateTotalEffects(teamColor, countActiveEffects);
 
 	return (
 		<div className="space-y-2">
@@ -142,20 +157,57 @@ function TeamPerks({
 	);
 }
 
+interface ChaosSectionProps {
+	perkConfig: PerkConfig;
+	onPurchaseChaos: () => Promise<void>;
+}
+
+function ChaosSection({ perkConfig, onPurchaseChaos }: ChaosSectionProps) {
+	//
+	const chaosDuration = formatDuration(perkConfig.chaosModeDuration);
+
+	return (
+		<div className="space-y-2">
+			<h4 className="font-semibold text-sm text-muted-foreground">Chaos</h4>
+			<button
+				onClick={onPurchaseChaos}
+				className="w-full px-3 py-2 text-sm bg-destructive hover:bg-destructive/80 text-destructive-foreground border border-border rounded transition-colors"
+			>
+				🌪️ CHAOS 🌪️ ({chaosDuration}s)
+			</button>
+		</div>
+	);
+}
+
 interface ActiveEffectsDisplayProps {
 	activeEffects: ActiveEffect[];
 }
 
 function ActiveEffectsDisplay({ activeEffects }: ActiveEffectsDisplayProps) {
 	//
+	const formatEffectName = (type: string): string => {
+		//
+		return type.replace('-', ' ').toUpperCase();
+	};
+
+	const formatTimeLeft = (endTime: number): number => {
+		//
+		return Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+	};
+
+	const formatTeamPrefix = (side: string): string => {
+		//
+		return side !== 'neutral' ? `${side.toUpperCase()}: ` : '';
+	};
+
 	return (
 		<div className="mt-4 p-3 bg-accent border border-border rounded-lg">
 			<h5 className="font-semibold text-sm mb-2 text-accent-foreground">Active Effects:</h5>
 			{activeEffects.map((effect) => {
 				//
-				const timeLeft = Math.max(0, Math.ceil((effect.endTime - Date.now()) / 1000));
-				const displayName = effect.type.replace('-', ' ').toUpperCase();
-				const teamPrefix = effect.side !== 'neutral' ? `${effect.side.toUpperCase()}: ` : '';
+				const timeLeft = formatTimeLeft(effect.endTime);
+				const displayName = formatEffectName(effect.type);
+				const teamPrefix = formatTeamPrefix(effect.side);
 
 				return (
 					<div key={effect.id} className="text-xs text-muted-foreground">
