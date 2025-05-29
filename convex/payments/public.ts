@@ -29,7 +29,7 @@ export const all = query({
 			.query('payments')
 			.withIndex('by_gameId', (q) => q.eq('gameId', gameId))
 			.order('desc')
-			.collect();
+			.take(10);
 	},
 });
 

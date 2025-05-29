@@ -30,6 +30,7 @@ export default function OrbitalFlux({
 	showStats = true,
 	autoStart = false,
 	customStatsBar,
+	customRightPanel,
 	showSidebarToggle = true,
 	hideGameControls = false,
 	// event callbacks
@@ -205,13 +206,19 @@ export default function OrbitalFlux({
 						)}
 					</div>
 
-					{/* game canvas - uses all remaining space */}
-					<div className="flex-1 min-h-0">
-						<GameCanvas
-							gameState={gameState}
-							config={config}
-							className="border-2 border-border bg-card rounded-lg shadow-2xl"
-						/>
+					{/* game content area - canvas and optional right panel */}
+					<div className="flex-1 min-h-0 flex gap-4">
+						{/* game canvas */}
+						<div className="flex-1">
+							<GameCanvas
+								gameState={gameState}
+								config={config}
+								className="border-2 border-border bg-card rounded-lg shadow-2xl h-full"
+							/>
+						</div>
+
+						{/* custom right panel */}
+						{customRightPanel && <div className="flex-shrink-0">{customRightPanel}</div>}
 					</div>
 
 					{/* toggle button - bottom right corner */}

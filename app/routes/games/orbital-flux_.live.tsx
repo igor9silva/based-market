@@ -7,6 +7,7 @@ import { Loading } from '~/components/Loading';
 import OrbitalFlux from '~/components/games/orbital-flux/OrbitalFlux';
 import { ConfigPanel } from '~/components/games/orbital-flux/components/ConfigPanel';
 import { LiveCountdownBar } from '~/components/games/orbital-flux/components/LiveCountdownBar';
+import { LivePerksPanel } from '~/components/games/orbital-flux/components/LivePerksPanel';
 import { DEFAULT_GAME_CONFIG, LIVE_COUNTDOWN_DURATION } from '~/components/games/orbital-flux/constants';
 import type { GameConfig } from '~/components/games/orbital-flux/types';
 import { Button } from '~/components/ui/button';
@@ -252,6 +253,7 @@ function RouteComponent() {
 					showStats={true}
 					autoStart={true}
 					customStatsBar={customStatsBar}
+					customRightPanel={<LivePerksPanel gameId={currentGameId} />}
 					showSidebarToggle={false}
 					hideGameControls={true}
 					onWinner={handleWinner}
