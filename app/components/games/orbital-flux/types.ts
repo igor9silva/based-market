@@ -50,7 +50,7 @@ export interface GameState {
 	blackCount: number;
 	whiteCount: number;
 	isRunning: boolean;
-	winner: string | null;
+	winner?: 'white' | 'black';
 	animationId: number | null;
 	activeEffects: ActiveEffect[];
 }

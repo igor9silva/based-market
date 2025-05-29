@@ -34,7 +34,6 @@ function RouteComponent() {
 	const gameRef = useRef<{ startGame: () => void } | null>(null);
 
 	const startLiveGame = useMutation(api.games.public.startLive);
-	const finishLiveGame = useMutation(api.games.public.finishLive);
 	const stopLiveGame = useMutation(api.games.public.stopLive);
 	const cleanupAllGames = useMutation(api.games.public.cleanupAll);
 
@@ -81,34 +80,6 @@ function RouteComponent() {
 			setIsLoading(false);
 		}
 	}, [startLiveGame, password, promptPassword]);
-
-	/**
-	 * handles when a game finishes and a winner is declared
-	 */
-	const handleWinner = useCallback(
-		async (winner: string) => {
-			//
-			setIsLoading(true);
-			try {
-				const pwd = password || promptPassword();
-				if (!pwd) return;
-
-				await finishLiveGame({
-					password: pwd,
-					winner: winner as 'white' | 'black',
-				});
-			} catch (error) {
-				console.error('Failed to finish live game:', error);
-			} finally {
-				setIsLoading(false);
-			}
-
-			setLastWinner(winner);
-			setState('countdown');
-			setCountdown(LIVE_COUNTDOWN_DURATION);
-		},
-		[finishLiveGame, password, promptPassword],
-	);
 
 	/**
 	 * stops the current live game
@@ -263,7 +234,6 @@ function RouteComponent() {
 					customStatsBar={customStatsBar}
 					showSidebarToggle={false}
 					hideGameControls={true}
-					onWinner={handleWinner}
 					onGameStart={handleGameStart}
 					initialConfig={{ ...DEFAULT_GAME_CONFIG }}
 				/>
