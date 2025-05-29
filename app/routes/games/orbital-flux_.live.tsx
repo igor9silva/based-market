@@ -5,8 +5,10 @@ import { useMutation, useQuery } from 'convex/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Loading } from '~/components/Loading';
 import OrbitalFlux from '~/components/games/orbital-flux/OrbitalFlux';
+import { ConfigPanel } from '~/components/games/orbital-flux/components/ConfigPanel';
 import { LiveCountdownBar } from '~/components/games/orbital-flux/components/LiveCountdownBar';
 import { DEFAULT_GAME_CONFIG, LIVE_COUNTDOWN_DURATION } from '~/components/games/orbital-flux/constants';
+import type { GameConfig } from '~/components/games/orbital-flux/types';
 import { Button } from '~/components/ui/button';
 
 // NOTE: Add LIVE_GAME_PASSWORD to your .env.local file for live game control
@@ -26,6 +28,7 @@ function RouteComponent() {
 	const currentLiveGame = useQuery(api.games.public.getCurrentLiveGame);
 
 	const [state, setState] = useState<LiveState>('idle');
+	const [config, setConfig] = useState<GameConfig>(DEFAULT_GAME_CONFIG);
 	const [currentGameId, setCurrentGameId] = useState<Id<'games'> | null>(null);
 	const [countdown, setCountdown] = useState(LIVE_COUNTDOWN_DURATION);
 	const [lastWinner, setLastWinner] = useState<string | null>(null);
@@ -68,7 +71,7 @@ function RouteComponent() {
 			const gameId = await startLiveGame({
 				password: pwd,
 				kind: 'orbital-flux',
-				config: DEFAULT_GAME_CONFIG,
+				config,
 			});
 			setCurrentGameId(gameId);
 			setState('playing');
@@ -79,19 +82,16 @@ function RouteComponent() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [startLiveGame, password, promptPassword]);
+	}, [startLiveGame, password, promptPassword, config]);
 
 	/**
 	 * handles when a game finishes and a winner is declared
 	 */
-	const handleWinner = useCallback(
-		async (winner: string) => {
-			setLastWinner(winner);
-			setState('countdown');
-			setCountdown(LIVE_COUNTDOWN_DURATION);
-		},
-		[password, promptPassword],
-	);
+	const handleWinner = useCallback(async (winner: string) => {
+		setLastWinner(winner);
+		setState('countdown');
+		setCountdown(LIVE_COUNTDOWN_DURATION);
+	}, []);
 
 	/**
 	 * stops the current live game
@@ -208,22 +208,30 @@ function RouteComponent() {
 		);
 	}
 
-	// NO ACTIVE GAME - SHOW START CONTROLS
+	// NO ACTIVE GAME - SHOW START CONTROLS WITH CONFIG
 	if (state === 'idle' && !currentLiveGame) {
 		return (
-			<div className="h-screen bg-background flex items-center justify-center overflow-hidden">
-				<div className="text-center space-y-6 max-w-md">
-					<div className="space-y-4">
-						<Button onClick={createNewGame} size="lg" className="w-full">
-							🎮 Start Live Game
-						</Button>
+			<div className="h-screen bg-background text-foreground overflow-hidden">
+				<div className="h-full flex items-center justify-center">
+					<div className="w-96 bg-card border border-border rounded-lg p-6">
+						<h1 className="text-2xl font-bold text-center mb-6">Orbital Flux Live</h1>
 
-						<Button onClick={handleCleanup} variant="destructive" size="lg" className="w-full">
-							🧹 Emergency Cleanup
-						</Button>
+						<div className="space-y-6">
+							<ConfigPanel config={config} isRunning={false} onConfigChange={setConfig} />
+
+							<div className="space-y-3">
+								<Button onClick={createNewGame} disabled={isLoading} className="w-full" size="lg">
+									{isLoading ? 'Starting Live Game...' : '🎮 START LIVE GAME'}
+								</Button>
+
+								<Button onClick={handleCleanup} variant="destructive" className="w-full">
+									🧹 Emergency Cleanup
+								</Button>
+							</div>
+						</div>
+
+						{password && <p className="text-xs text-muted-foreground text-center mt-4">Password set ✓</p>}
 					</div>
-
-					{password && <p className="text-xs text-muted-foreground">Password set ✓</p>}
 				</div>
 			</div>
 		);
@@ -248,7 +256,7 @@ function RouteComponent() {
 					hideGameControls={true}
 					onWinner={handleWinner}
 					onGameStart={handleGameStart}
-					initialConfig={{ ...DEFAULT_GAME_CONFIG }}
+					initialConfig={config}
 				/>
 
 				{/* game ID footer */}
