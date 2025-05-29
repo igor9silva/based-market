@@ -297,19 +297,34 @@ export function checkWinConditions(
 	whiteCount: number,
 	totalBlocks: number,
 	winThreshold: number,
-): string | null {
+): {
+	winner: 'white' | 'black';
+	percentage: number;
+} | null {
 	//
 	const blackPercentage = (blackCount / totalBlocks) * 100;
 	const whitePercentage = (whiteCount / totalBlocks) * 100;
 
 	if (blackPercentage >= winThreshold) {
-		return `Black wins with ${blackPercentage.toFixed(1)}%!`;
+		return {
+			winner: 'black',
+			percentage: blackPercentage,
+		};
 	} else if (whitePercentage >= winThreshold) {
-		return `White wins with ${whitePercentage.toFixed(1)}%!`;
+		return {
+			winner: 'white',
+			percentage: whitePercentage,
+		};
 	} else if (blackCount === 0) {
-		return 'White wins with total domination!';
+		return {
+			winner: 'white',
+			percentage: 100,
+		};
 	} else if (whiteCount === 0) {
-		return 'Black wins with total domination!';
+		return {
+			winner: 'black',
+			percentage: 100,
+		};
 	}
 
 	return null;

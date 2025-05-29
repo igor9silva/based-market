@@ -58,12 +58,14 @@ export function useGameAnimation({ gameState, config, updateGameState }: UseGame
 			const stats = calculateTerritoryStats(newGrid);
 
 			// check win conditions
-			const winner = checkWinConditions(
+			const winResult = checkWinConditions(
 				stats.blackCount,
 				stats.whiteCount,
 				stats.totalBlocks,
 				config.winThreshold,
 			);
+
+			const { winner, percentage } = winResult || {};
 
 			return {
 				...prevState,
@@ -72,7 +74,8 @@ export function useGameAnimation({ gameState, config, updateGameState }: UseGame
 				blackCount: stats.blackCount,
 				whiteCount: stats.whiteCount,
 				winner,
-				isRunning: !winner,
+				winPercent: percentage,
+				isRunning: !winResult,
 				activeEffects,
 			};
 		});

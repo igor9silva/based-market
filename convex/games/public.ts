@@ -72,39 +72,15 @@ export const finish = mutation({
 			endedAt: Date.now(),
 		});
 
+		// if this game is in liveGames table, remove it
+		const liveGameEntry = await ctx.db
+			.query('liveGames')
+			.filter((q) => q.eq(q.field('gameId'), gameId))
+			.first();
+
+		if (liveGameEntry) await ctx.db.delete(liveGameEntry._id);
+
 		return gameId;
-	},
-});
-
-/**
- * finishes a live game (password protected)
- */
-export const finishLive = mutation({
-	args: {
-		password: z.string(),
-		winner: teamsSchema,
-	},
-	handler: async (ctx, { password, winner }) => {
-		//
-		// verify password
-		if (password !== env.LIVE_GAME_PASSWORD) {
-			throw new Error('Invalid password for live game management');
-		}
-
-		// get current live game
-		const liveGameEntry = await ctx.db.query('liveGames').first();
-		if (!liveGameEntry) throw new Error('No live game is currently running');
-
-		// finish the game using existing finish method
-		const game = await ctx.db.get(liveGameEntry.gameId);
-		if (!game) throw new Error('Live game not found');
-
-		await finish(ctx, { gameId: liveGameEntry.gameId, winner });
-
-		// remove from liveGames table
-		await ctx.db.delete(liveGameEntry._id);
-
-		return liveGameEntry.gameId;
 	},
 });
 

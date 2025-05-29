@@ -5,7 +5,7 @@ import { calculateTerritoryStats, generateNonRightAngleDirection } from '../util
 interface UseGameStateProps {
 	config: GameConfig;
 	perkConfig: PerkConfig;
-	onWinner?: (winner: string) => void;
+	onWinner?: (winner: 'white' | 'black') => void;
 	onTerritoryChange?: (stats: any) => void;
 }
 
@@ -17,7 +17,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 		blackCount: 0,
 		whiteCount: 0,
 		isRunning: false,
-		winner: null,
+		winner: undefined,
 		animationId: null,
 		activeEffects: [],
 	});
@@ -74,7 +74,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 			blackCount: stats.blackCount,
 			whiteCount: stats.whiteCount,
 			isRunning: false,
-			winner: null,
+			winner: undefined,
 			animationId: null,
 			activeEffects: [],
 		});
@@ -298,13 +298,13 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 					blackCount: stats.blackCount,
 					whiteCount: stats.whiteCount,
 					isRunning: true,
-					winner: null,
+					winner: undefined,
 					animationId: null,
 					activeEffects: [],
 				};
 			}
 			// otherwise just start the current game
-			return { ...prev, isRunning: true, winner: null };
+			return { ...prev, isRunning: true, winner: undefined };
 		});
 	}, [config]);
 

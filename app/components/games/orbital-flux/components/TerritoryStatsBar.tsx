@@ -2,7 +2,7 @@ import type { GameStats } from '../types';
 
 interface TerritoryStatsBarProps {
 	stats: GameStats;
-	winner?: string | null;
+	winner?: 'white' | 'black';
 	showStats?: boolean;
 	winThreshold?: number;
 }

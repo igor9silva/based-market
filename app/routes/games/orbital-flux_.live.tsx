@@ -123,7 +123,6 @@ function RouteComponent() {
 			await stopLiveGame({ password: pwd });
 			setState('idle');
 			setCurrentGameId(null);
-			alert('✅ Live game stopped successfully');
 		} catch (error) {
 			console.error('Failed to stop live game:', error);
 			alert(`❌ Failed to stop live game: ${error}`);
