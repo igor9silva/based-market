@@ -27,6 +27,9 @@ export default function OrbitalFlux({
 	// customization options
 	enablePerks = true,
 	showStats = true,
+	autoStart = false,
+	customStatsBar,
+	showSidebarToggle = true,
 	// event callbacks
 	onGameStart,
 	onGameStop,
@@ -170,6 +173,19 @@ export default function OrbitalFlux({
 		initializeGame();
 	}, [initializeGame]);
 
+	// auto-start game if autoStart is enabled
+	useEffect(() => {
+		//
+		if (autoStart && !gameState.isRunning && !gameState.winner) {
+			const timer = setTimeout(() => {
+				//
+				handleStart();
+			}, 100); // small delay to ensure game is initialized
+
+			return () => clearTimeout(timer);
+		}
+	}, [autoStart, gameState.isRunning, gameState.winner, handleStart]);
+
 	return (
 		<div className="h-screen bg-background text-foreground overflow-hidden">
 			<div className="h-full flex">
@@ -177,12 +193,14 @@ export default function OrbitalFlux({
 				<div className="flex-1 flex flex-col p-4 relative">
 					{/* territory stats bar - above canvas */}
 					<div className="mb-4">
-						<TerritoryStatsBar
-							stats={currentStats}
-							winner={gameState.winner}
-							showStats={showStats}
-							winThreshold={config.winThreshold}
-						/>
+						{customStatsBar || (
+							<TerritoryStatsBar
+								stats={currentStats}
+								winner={gameState.winner}
+								showStats={showStats}
+								winThreshold={config.winThreshold}
+							/>
+						)}
 					</div>
 
 					{/* game canvas - uses all remaining space */}
@@ -195,14 +213,16 @@ export default function OrbitalFlux({
 					</div>
 
 					{/* toggle button - bottom right corner */}
-					<Button
-						onClick={toggleSidebar}
-						variant="outline"
-						size="sm"
-						className="absolute bottom-6 right-6 z-10 bg-card border-border shadow-lg"
-					>
-						{isSidebarOpen ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-					</Button>
+					{showSidebarToggle && (
+						<Button
+							onClick={toggleSidebar}
+							variant="outline"
+							size="sm"
+							className="absolute bottom-6 right-6 z-10 bg-card border-border shadow-lg"
+						>
+							{isSidebarOpen ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+						</Button>
+					)}
 				</div>
 
 				{/* right sidebar - controls and config */}

@@ -4,8 +4,8 @@ import type { GameConfig, PerkConfig } from './types';
 export const DEFAULT_GAME_CONFIG: GameConfig = {
 	gridWidth: 20,
 	gridHeight: 20,
-	orbSpeed: 10,
-	winThreshold: 75,
+	orbSpeed: 5,
+	winThreshold: 55,
 	blockSize: 12,
 };
 
@@ -17,6 +17,9 @@ export const DEFAULT_PERK_CONFIG: PerkConfig = {
 	freezeDuration: 5000, // 5 seconds
 	chaosModeDuration: 6000, // 6 seconds
 };
+
+// live mode configuration
+export const LIVE_COUNTDOWN_DURATION = 10; // seconds between games in live mode
 
 // configuration limits for sliders
 export const CONFIG_LIMITS = {

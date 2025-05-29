@@ -1,5 +1,6 @@
 import { Id } from 'convex/_generated/dataModel';
 import { perkTypeSchema } from 'convex/schemas/gameSchema';
+import { ReactNode } from 'react';
 import { z } from 'zod';
 
 export type Color = 'black' | 'white' | 'neutral';
@@ -77,6 +78,9 @@ export interface OrbitalFluxProps {
 	// customization options
 	enablePerks?: boolean;
 	showStats?: boolean;
+	autoStart?: boolean;
+	customStatsBar?: ReactNode;
+	showSidebarToggle?: boolean;
 	// event callbacks
 	onGameStart?: () => void;
 	onGameStop?: () => void;
