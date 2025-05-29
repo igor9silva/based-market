@@ -12,8 +12,8 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
-import { Route as LivePerksImport } from './routes/live_.perks'
 import { Route as GamesOrbitalFluxIndexImport } from './routes/games/orbital-flux_.index'
+import { Route as GamesOrbitalFluxPerksImport } from './routes/games/orbital-flux_.perks'
 import { Route as GamesOrbitalFluxLiveImport } from './routes/games/orbital-flux_.live'
 import { Route as GamesOrbitalFluxIdImport } from './routes/games/orbital-flux_.$id'
 
@@ -25,15 +25,15 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LivePerksRoute = LivePerksImport.update({
-  id: '/live_/perks',
-  path: '/live/perks',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const GamesOrbitalFluxIndexRoute = GamesOrbitalFluxIndexImport.update({
   id: '/games/orbital-flux_/',
   path: '/games/orbital-flux/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const GamesOrbitalFluxPerksRoute = GamesOrbitalFluxPerksImport.update({
+  id: '/games/orbital-flux_/perks',
+  path: '/games/orbital-flux/perks',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,13 +60,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/live_/perks': {
-      id: '/live_/perks'
-      path: '/live/perks'
-      fullPath: '/live/perks'
-      preLoaderRoute: typeof LivePerksImport
-      parentRoute: typeof rootRoute
-    }
     '/games/orbital-flux_/$id': {
       id: '/games/orbital-flux_/$id'
       path: '/games/orbital-flux/$id'
@@ -79,6 +72,13 @@ declare module '@tanstack/react-router' {
       path: '/games/orbital-flux/live'
       fullPath: '/games/orbital-flux/live'
       preLoaderRoute: typeof GamesOrbitalFluxLiveImport
+      parentRoute: typeof rootRoute
+    }
+    '/games/orbital-flux_/perks': {
+      id: '/games/orbital-flux_/perks'
+      path: '/games/orbital-flux/perks'
+      fullPath: '/games/orbital-flux/perks'
+      preLoaderRoute: typeof GamesOrbitalFluxPerksImport
       parentRoute: typeof rootRoute
     }
     '/games/orbital-flux_/': {
@@ -95,26 +95,26 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/live/perks': typeof LivePerksRoute
   '/games/orbital-flux/$id': typeof GamesOrbitalFluxIdRoute
   '/games/orbital-flux/live': typeof GamesOrbitalFluxLiveRoute
+  '/games/orbital-flux/perks': typeof GamesOrbitalFluxPerksRoute
   '/games/orbital-flux': typeof GamesOrbitalFluxIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/live/perks': typeof LivePerksRoute
   '/games/orbital-flux/$id': typeof GamesOrbitalFluxIdRoute
   '/games/orbital-flux/live': typeof GamesOrbitalFluxLiveRoute
+  '/games/orbital-flux/perks': typeof GamesOrbitalFluxPerksRoute
   '/games/orbital-flux': typeof GamesOrbitalFluxIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/live_/perks': typeof LivePerksRoute
   '/games/orbital-flux_/$id': typeof GamesOrbitalFluxIdRoute
   '/games/orbital-flux_/live': typeof GamesOrbitalFluxLiveRoute
+  '/games/orbital-flux_/perks': typeof GamesOrbitalFluxPerksRoute
   '/games/orbital-flux_/': typeof GamesOrbitalFluxIndexRoute
 }
 
@@ -122,40 +122,40 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/live/perks'
     | '/games/orbital-flux/$id'
     | '/games/orbital-flux/live'
+    | '/games/orbital-flux/perks'
     | '/games/orbital-flux'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/live/perks'
     | '/games/orbital-flux/$id'
     | '/games/orbital-flux/live'
+    | '/games/orbital-flux/perks'
     | '/games/orbital-flux'
   id:
     | '__root__'
     | '/'
-    | '/live_/perks'
     | '/games/orbital-flux_/$id'
     | '/games/orbital-flux_/live'
+    | '/games/orbital-flux_/perks'
     | '/games/orbital-flux_/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LivePerksRoute: typeof LivePerksRoute
   GamesOrbitalFluxIdRoute: typeof GamesOrbitalFluxIdRoute
   GamesOrbitalFluxLiveRoute: typeof GamesOrbitalFluxLiveRoute
+  GamesOrbitalFluxPerksRoute: typeof GamesOrbitalFluxPerksRoute
   GamesOrbitalFluxIndexRoute: typeof GamesOrbitalFluxIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LivePerksRoute: LivePerksRoute,
   GamesOrbitalFluxIdRoute: GamesOrbitalFluxIdRoute,
   GamesOrbitalFluxLiveRoute: GamesOrbitalFluxLiveRoute,
+  GamesOrbitalFluxPerksRoute: GamesOrbitalFluxPerksRoute,
   GamesOrbitalFluxIndexRoute: GamesOrbitalFluxIndexRoute,
 }
 
@@ -170,23 +170,23 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/live_/perks",
         "/games/orbital-flux_/$id",
         "/games/orbital-flux_/live",
+        "/games/orbital-flux_/perks",
         "/games/orbital-flux_/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/live_/perks": {
-      "filePath": "live_.perks.tsx"
-    },
     "/games/orbital-flux_/$id": {
       "filePath": "games/orbital-flux_.$id.tsx"
     },
     "/games/orbital-flux_/live": {
       "filePath": "games/orbital-flux_.live.tsx"
+    },
+    "/games/orbital-flux_/perks": {
+      "filePath": "games/orbital-flux_.perks.tsx"
     },
     "/games/orbital-flux_/": {
       "filePath": "games/orbital-flux_.index.tsx"
