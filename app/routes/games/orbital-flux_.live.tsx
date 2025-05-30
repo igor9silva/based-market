@@ -246,7 +246,8 @@ function RouteComponent() {
 				//
 				if (prev <= 1) {
 					// countdown finished, start new game
-					createNewGame();
+					// createNewGame();
+					window.location.reload();
 					return LIVE_COUNTDOWN_DURATION;
 				}
 				return prev - 1;
