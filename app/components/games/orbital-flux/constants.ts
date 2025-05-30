@@ -19,7 +19,7 @@ export const DEFAULT_PERK_CONFIG: PerkConfig = {
 };
 
 // live mode configuration
-export const LIVE_COUNTDOWN_DURATION = 10; // seconds between games in live mode
+export const LIVE_COUNTDOWN_DURATION = 30; // seconds between games in live mode
 
 // configuration limits for sliders
 export const CONFIG_LIMITS = {
