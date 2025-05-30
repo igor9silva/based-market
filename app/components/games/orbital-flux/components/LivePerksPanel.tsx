@@ -12,7 +12,13 @@ export function LivePerksPanel({ gameId }: { gameId: Id<'games'> }) {
 	return (
 		<div className="w-80 bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg">
 			<div className="p-4 border-b border-border">
-				<h3 className="text-lg font-bold text-card-foreground">Perks</h3>
+				<div className="text-center">
+					<p className="text-lg font-semibold text-card-foreground">
+						<span className="text-blue-500 underline">based.market/perks</span>
+						<br />
+						to support a team!
+					</p>
+				</div>
 			</div>
 
 			<div className="p-4 space-y-2">
