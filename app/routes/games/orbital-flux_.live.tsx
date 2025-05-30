@@ -1,8 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { z } from 'zod';
 import { Loading } from '~/components/Loading';
 import OrbitalFlux from '~/components/games/orbital-flux/OrbitalFlux';
 import { ConfigPanel } from '~/components/games/orbital-flux/components/ConfigPanel';
@@ -16,8 +17,20 @@ import { Button } from '~/components/ui/button';
 
 export const Route = createFileRoute('/games/orbital-flux_/live')({
 	component: RouteComponent,
-	validateSearch: () => ({
-		isExpanded: true, // start in expanded mode (sidebar closed)
+	validateSearch: z.object({
+		// UI configuration
+		isExpanded: z.boolean().optional().default(true), // start in expanded mode (sidebar closed)
+
+		// auto-play and authentication
+		autoPlay: z.boolean().optional().default(false),
+		password: z.string().optional(),
+
+		// game configuration parameters
+		gridWidth: z.coerce.number().optional(),
+		gridHeight: z.coerce.number().optional(),
+		orbSpeed: z.coerce.number().optional(),
+		winThreshold: z.coerce.number().optional(),
+		blockSize: z.coerce.number().optional(),
 	}),
 });
 
@@ -25,35 +38,66 @@ type LiveState = 'idle' | 'starting' | 'playing' | 'countdown';
 
 function RouteComponent() {
 	//
-	// check if there's already a live game running
+	const searchParams = useSearch({ from: '/games/orbital-flux_/live' });
 	const currentLiveGame = useQuery(api.games.public.getCurrentLiveGame);
 
+	// === STATE MANAGEMENT ===
 	const [state, setState] = useState<LiveState>('idle');
-	const [config, setConfig] = useState<GameConfig>(DEFAULT_GAME_CONFIG);
 	const [currentGameId, setCurrentGameId] = useState<Id<'games'> | null>(null);
 	const [countdown, setCountdown] = useState(LIVE_COUNTDOWN_DURATION);
 	const [lastWinner, setLastWinner] = useState<string | null>(null);
-	const [password, setPassword] = useState<string | null>(null);
+	const [password, setPassword] = useState<string | null>(searchParams.password || null);
 	const [isLoading, setIsLoading] = useState(false);
 	const gameRef = useRef<{ startGame: () => void } | null>(null);
 
+	// === CONFIGURATION ===
+	// merge URL config parameters with defaults
+	const urlConfig = useMemo((): Partial<GameConfig> => {
+		//
+		const config: Partial<GameConfig> = {};
+
+		if (searchParams.gridWidth) config.gridWidth = searchParams.gridWidth;
+		if (searchParams.gridHeight) config.gridHeight = searchParams.gridHeight;
+		if (searchParams.orbSpeed) config.orbSpeed = searchParams.orbSpeed;
+		if (searchParams.winThreshold) config.winThreshold = searchParams.winThreshold;
+		if (searchParams.blockSize) config.blockSize = searchParams.blockSize;
+
+		return config;
+	}, [
+		searchParams.gridWidth,
+		searchParams.gridHeight,
+		searchParams.orbSpeed,
+		searchParams.winThreshold,
+		searchParams.blockSize,
+	]);
+
+	const [config, setConfig] = useState<GameConfig>({ ...DEFAULT_GAME_CONFIG, ...urlConfig });
+
+	// === MUTATIONS ===
 	const startLiveGame = useMutation(api.games.public.startLive);
 	const stopLiveGame = useMutation(api.games.public.stopLive);
 	const cleanupAllGames = useMutation(api.games.public.cleanupAll);
 
-	// DON'T auto-sync with existing live game - always start with control options
+	// === HANDLERS ===
 
 	/**
-	 * prompts for password
+	 * prompts for password (or uses URL password if available)
 	 */
 	const promptPassword = useCallback(() => {
 		//
+		// use URL password if available
+		if (searchParams.password) {
+			setPassword(searchParams.password);
+			return searchParams.password;
+		}
+
+		// otherwise prompt user
 		const pwd = window.prompt('Enter live game password:');
 		if (pwd) {
 			setPassword(pwd);
 		}
 		return pwd;
-	}, []);
+	}, [searchParams.password]);
 
 	/**
 	 * creates and starts a new live game
@@ -144,10 +188,10 @@ function RouteComponent() {
 	 * handles when game component mounts - auto-start the game
 	 */
 	const handleGameStart = useCallback(() => {
-		//
-		// game automatically starts when mounted
 		console.log('Game auto-started');
 	}, []);
+
+	// === EFFECTS ===
 
 	/**
 	 * countdown timer effect - runs when in countdown state
@@ -172,12 +216,42 @@ function RouteComponent() {
 		return () => clearInterval(timer);
 	}, [state, createNewGame]);
 
-	// USE LOADING COMPONENT FOR ALL LOADING STATES
+	/**
+	 * autoPlay effect - automatically starts a game when autoPlay is enabled
+	 */
+	useEffect(() => {
+		//
+		// exit early if autoPlay is disabled
+		if (!searchParams.autoPlay) return;
+
+		// wait for currentLiveGame to be determined
+		if (currentLiveGame === undefined) return;
+
+		// don't start if there's already a game running or we're not idle
+		if (currentLiveGame || state !== 'idle') return;
+
+		// automatically start the game
+		console.log('🎮 AutoPlay: Starting live game automatically...');
+		createNewGame();
+	}, [searchParams.autoPlay, currentLiveGame, state, createNewGame]);
+
+	/**
+	 * config sync effect - updates config when URL parameters change
+	 */
+	useEffect(() => {
+		//
+		const newConfig = { ...DEFAULT_GAME_CONFIG, ...urlConfig };
+		setConfig(newConfig);
+	}, [urlConfig]);
+
+	// === RENDER LOGIC ===
+
+	// loading state
 	if (currentLiveGame === undefined || isLoading) {
 		return <Loading />;
 	}
 
-	// IF THERE'S AN ACTIVE LIVE GAME - SHOW CONTROL OPTIONS (join or stop)
+	// existing live game detected - show control options
 	if (currentLiveGame && state === 'idle') {
 		return (
 			<div className="h-screen bg-background flex items-center justify-center overflow-hidden">
@@ -209,7 +283,7 @@ function RouteComponent() {
 		);
 	}
 
-	// NO ACTIVE GAME - SHOW START CONTROLS WITH CONFIG
+	// no active game - show configuration and start controls
 	if (state === 'idle' && !currentLiveGame) {
 		return (
 			<div className="h-screen bg-background text-foreground overflow-hidden">
