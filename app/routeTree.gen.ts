@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as PerksImport } from './routes/perks'
 import { Route as IndexImport } from './routes/index'
 import { Route as GamesOrbitalFluxIndexImport } from './routes/games/orbital-flux_.index'
 import { Route as GamesOrbitalFluxPerksImport } from './routes/games/orbital-flux_.perks'
@@ -18,6 +19,12 @@ import { Route as GamesOrbitalFluxLiveImport } from './routes/games/orbital-flux
 import { Route as GamesOrbitalFluxIdImport } from './routes/games/orbital-flux_.$id'
 
 // Create/Update Routes
+
+const PerksRoute = PerksImport.update({
+  id: '/perks',
+  path: '/perks',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -60,6 +67,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/perks': {
+      id: '/perks'
+      path: '/perks'
+      fullPath: '/perks'
+      preLoaderRoute: typeof PerksImport
+      parentRoute: typeof rootRoute
+    }
     '/games/orbital-flux_/$id': {
       id: '/games/orbital-flux_/$id'
       path: '/games/orbital-flux/$id'
@@ -95,6 +109,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/perks': typeof PerksRoute
   '/games/orbital-flux/$id': typeof GamesOrbitalFluxIdRoute
   '/games/orbital-flux/live': typeof GamesOrbitalFluxLiveRoute
   '/games/orbital-flux/perks': typeof GamesOrbitalFluxPerksRoute
@@ -103,6 +118,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/perks': typeof PerksRoute
   '/games/orbital-flux/$id': typeof GamesOrbitalFluxIdRoute
   '/games/orbital-flux/live': typeof GamesOrbitalFluxLiveRoute
   '/games/orbital-flux/perks': typeof GamesOrbitalFluxPerksRoute
@@ -112,6 +128,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/perks': typeof PerksRoute
   '/games/orbital-flux_/$id': typeof GamesOrbitalFluxIdRoute
   '/games/orbital-flux_/live': typeof GamesOrbitalFluxLiveRoute
   '/games/orbital-flux_/perks': typeof GamesOrbitalFluxPerksRoute
@@ -122,6 +139,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/perks'
     | '/games/orbital-flux/$id'
     | '/games/orbital-flux/live'
     | '/games/orbital-flux/perks'
@@ -129,6 +147,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/perks'
     | '/games/orbital-flux/$id'
     | '/games/orbital-flux/live'
     | '/games/orbital-flux/perks'
@@ -136,6 +155,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/perks'
     | '/games/orbital-flux_/$id'
     | '/games/orbital-flux_/live'
     | '/games/orbital-flux_/perks'
@@ -145,6 +165,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PerksRoute: typeof PerksRoute
   GamesOrbitalFluxIdRoute: typeof GamesOrbitalFluxIdRoute
   GamesOrbitalFluxLiveRoute: typeof GamesOrbitalFluxLiveRoute
   GamesOrbitalFluxPerksRoute: typeof GamesOrbitalFluxPerksRoute
@@ -153,6 +174,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PerksRoute: PerksRoute,
   GamesOrbitalFluxIdRoute: GamesOrbitalFluxIdRoute,
   GamesOrbitalFluxLiveRoute: GamesOrbitalFluxLiveRoute,
   GamesOrbitalFluxPerksRoute: GamesOrbitalFluxPerksRoute,
@@ -170,6 +192,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/perks",
         "/games/orbital-flux_/$id",
         "/games/orbital-flux_/live",
         "/games/orbital-flux_/perks",
@@ -178,6 +201,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/perks": {
+      "filePath": "perks.tsx"
     },
     "/games/orbital-flux_/$id": {
       "filePath": "games/orbital-flux_.$id.tsx"
