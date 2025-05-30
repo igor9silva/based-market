@@ -142,7 +142,7 @@ function formatPerkName(perkType: string): string {
 		'unbreakable': 'Unbreakable',
 		'speed-boost': 'Speed Boost',
 		'freeze-enemy': 'Freeze Enemy',
-		'chaos': 'Chaos Mode',
+		'chaos': 'Chaos',
 	};
 
 	return perkNames[perkType] || perkType;

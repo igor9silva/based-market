@@ -18,7 +18,7 @@ Orbital Flux is a real-time strategy simulation where two teams (black and white
 - **Unbreakable**: Make territory blocks immune to conversion (15s)
 - **Speed Boost**: Double orb movement speed (15s)
 - **Freeze Opponent**: Freeze enemy orbs (5s)
-- **Chaos Mode**: Randomize all orb directions (6s)
+- **Chaos**: Randomize all orb directions (6s)
 
 ##### Customization
 - **Grid Size**: 20×20 to 60×60 blocks
