@@ -15,6 +15,36 @@ import { Button } from '~/components/ui/button';
 
 // NOTE: Add LIVE_GAME_PASSWORD to your .env.local file for live game control
 
+/**
+ * formats elapsed time from milliseconds to MM:SS format
+ */
+function formatElapsedTime(startTime: number | undefined, currentTime: number): string {
+	//
+	if (!startTime) return '00:00';
+
+	const elapsed = Math.max(0, currentTime - startTime);
+	const minutes = Math.floor(elapsed / 60000);
+	const seconds = Math.floor((elapsed % 60000) / 1000);
+
+	return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+/**
+ * hook to get current time that updates every second
+ */
+function useCurrentTime() {
+	//
+	const [currentTime, setCurrentTime] = useState(Date.now());
+
+	useEffect(() => {
+		//
+		const interval = setInterval(() => setCurrentTime(Date.now()), 1000);
+		return () => clearInterval(interval);
+	}, []);
+
+	return currentTime;
+}
+
 export const Route = createFileRoute('/games/orbital-flux_/live')({
 	component: RouteComponent,
 	validateSearch: z.object({
@@ -40,6 +70,7 @@ function RouteComponent() {
 	//
 	const searchParams = useSearch({ from: '/games/orbital-flux_/live' });
 	const currentLiveGame = useQuery(api.games.public.getCurrentLiveGame);
+	const currentTime = useCurrentTime();
 
 	// === STATE MANAGEMENT ===
 	const [state, setState] = useState<LiveState>('idle');
@@ -48,6 +79,7 @@ function RouteComponent() {
 	const [lastWinner, setLastWinner] = useState<string | null>(null);
 	const [password, setPassword] = useState<string | null>(searchParams.password || null);
 	const [isLoading, setIsLoading] = useState(false);
+	const [gameStartTime, setGameStartTime] = useState<number | undefined>(undefined);
 	const gameRef = useRef<{ startGame: () => void } | null>(null);
 
 	// === CONFIGURATION ===
@@ -191,6 +223,14 @@ function RouteComponent() {
 		console.log('Game auto-started');
 	}, []);
 
+	/**
+	 * handles game state changes to track start time
+	 */
+	const handleGameStateChange = useCallback((gameState: any) => {
+		//
+		setGameStartTime(gameState.startTime);
+	}, []);
+
 	// === EFFECTS ===
 
 	/**
@@ -319,25 +359,33 @@ function RouteComponent() {
 				<LiveCountdownBar winner={lastWinner} countdown={countdown} />
 			) : undefined;
 
-		return (
-			<div className="h-screen bg-background relative overflow-hidden">
-				<OrbitalFlux
-					gameId={currentGameId}
-					enablePerks={true}
-					showStats={true}
-					autoStart={true}
-					customStatsBar={customStatsBar}
-					customRightPanel={<LivePerksPanel gameId={currentGameId} />}
-					showSidebarToggle={false}
-					hideGameControls={true}
-					onWinner={handleWinner}
-					onGameStart={handleGameStart}
-					initialConfig={config}
-				/>
+		const elapsedTime = formatElapsedTime(gameStartTime, currentTime);
 
-				{/* game ID footer */}
-				<div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm">
-					<p className="text-xs text-muted-foreground text-center font-mono py-1">{currentGameId}</p>
+		return (
+			<div className="h-screen bg-background flex flex-col overflow-hidden">
+				{/* game area */}
+				<div className="flex-1">
+					<OrbitalFlux
+						gameId={currentGameId}
+						enablePerks={true}
+						showStats={true}
+						autoStart={true}
+						customStatsBar={customStatsBar}
+						customRightPanel={<LivePerksPanel gameId={currentGameId} />}
+						showSidebarToggle={false}
+						hideGameControls={true}
+						onWinner={handleWinner}
+						onGameStart={handleGameStart}
+						onGameStateChange={handleGameStateChange}
+						initialConfig={config}
+					/>
+				</div>
+
+				{/* game ID and elapsed time footer */}
+				<div className="bg-background/80 backdrop-blur-sm border-t border-border">
+					<p className="text-xs text-muted-foreground text-center font-mono py-2">
+						{currentGameId} • Elapsed: {elapsedTime}
+					</p>
 				</div>
 			</div>
 		);

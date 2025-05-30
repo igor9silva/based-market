@@ -39,6 +39,7 @@ export default function OrbitalFlux({
 	onGameReset,
 	onWinner,
 	onTerritoryChange,
+	onGameStateChange,
 }: OrbitalFluxProps) {
 	//
 	// merge initial configs with defaults
@@ -189,8 +190,14 @@ export default function OrbitalFlux({
 		}
 	}, [autoStart, gameState.isRunning, gameState.winner, handleStart]);
 
+	// notify parent of game state changes
+	useEffect(() => {
+		//
+		onGameStateChange?.(gameState);
+	}, [gameState, onGameStateChange]);
+
 	return (
-		<div className="h-screen bg-background text-foreground overflow-hidden">
+		<div className="h-full bg-background text-foreground overflow-hidden">
 			<div className="h-full flex">
 				{/* main arena - takes most of the screen */}
 				<div className="flex-1 flex flex-col p-4 relative">

@@ -20,6 +20,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 		winner: undefined,
 		animationId: null,
 		activeEffects: [],
+		startTime: undefined,
 	});
 
 	/**
@@ -77,6 +78,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 			winner: undefined,
 			animationId: null,
 			activeEffects: [],
+			startTime: undefined,
 		});
 
 		// notify parent of initial territory state
@@ -248,6 +250,8 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 	const startGame = useCallback(() => {
 		//
 		setGameState((prev) => {
+			const now = Date.now();
+
 			// if there was a winner, reset the game completely
 			if (prev.winner) {
 				// reset to fresh game state and start immediately
@@ -301,10 +305,11 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 					winner: undefined,
 					animationId: null,
 					activeEffects: [],
+					startTime: now,
 				};
 			}
 			// otherwise just start the current game
-			return { ...prev, isRunning: true, winner: undefined };
+			return { ...prev, isRunning: true, winner: undefined, startTime: prev.startTime || now };
 		});
 	}, [config]);
 

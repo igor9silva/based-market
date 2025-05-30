@@ -53,6 +53,7 @@ export interface GameState {
 	winner?: 'white' | 'black';
 	animationId: number | null;
 	activeEffects: ActiveEffect[];
+	startTime?: number;
 }
 
 export interface GameStats {
@@ -89,6 +90,7 @@ export interface OrbitalFluxProps {
 	onGameReset?: () => void;
 	onWinner?: (winner: string) => void;
 	onTerritoryChange?: (stats: GameStats) => void;
+	onGameStateChange?: (gameState: GameState) => void;
 }
 
 export type EffectType = z.infer<typeof perkTypeSchema>;
