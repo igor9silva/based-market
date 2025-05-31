@@ -25,10 +25,10 @@ function formatElapsedTime(startTime: number | undefined, currentTime: number): 
 	let elapsed = Math.max(0, currentTime - startTime) / 1000; // work in seconds
 
 	const days = Math.floor(elapsed / (24 * 60 * 60));
-	elapsed %= (24 * 60 * 60);
+	elapsed %= 24 * 60 * 60;
 
 	const hours = Math.floor(elapsed / (60 * 60));
-	elapsed %= (60 * 60);
+	elapsed %= 60 * 60;
 
 	const minutes = Math.floor(elapsed / 60);
 	const seconds = Math.floor(elapsed % 60);
