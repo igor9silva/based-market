@@ -404,7 +404,7 @@ function RouteComponent() {
 
 				{/* Right Section (Info Panel) */}
 				<div className="flex-1 bg-card border-l border-border p-4 overflow-y-auto">
-					<LiveInfoPanel gameId={currentGameId} elapsedTime={elapsedTime} config={config} />
+					<LiveInfoPanel gameId={currentGameId} elapsedTime={elapsedTime} />
 				</div>
 			</div>
 		);
