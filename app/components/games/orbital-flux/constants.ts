@@ -25,7 +25,7 @@ export const LIVE_COUNTDOWN_DURATION = 30; // seconds between games in live mode
 export const CONFIG_LIMITS = {
 	gridSize: { min: 20, max: 60, step: 5 },
 	orbSpeed: { min: 1, max: 50, step: 1 },
-	winThreshold: { min: 60, max: 99, step: 5 },
+	winThreshold: { min: 51, max: 100, step: 1 },
 	blockSize: { min: 8, max: 20, step: 2 },
 } as const;
 

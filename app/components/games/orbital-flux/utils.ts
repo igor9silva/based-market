@@ -41,6 +41,8 @@ export function checkBlockCollision(
 	prevY: number,
 	config: GameConfig,
 	activeEffects: ActiveEffect[],
+	onTerritoryCapture?: (color: 'white' | 'black') => void,
+	onOrbBounce?: (intensity?: number) => void,
 ): boolean {
 	//
 	const { gridWidth, gridHeight, blockSize } = config;
@@ -114,9 +116,17 @@ export function checkBlockCollision(
 						orb.vy = -orb.vy;
 					}
 
+					// play bounce sound
+					const intensity = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy) / orb.baseSpeed;
+					onOrbBounce?.(intensity);
+
 					// convert block if not unbreakable
 					if (!hasUnbreakable) {
 						grid[gridY][gridX] = orb.color;
+						// play territory capture sound
+						if (orb.color === 'white' || orb.color === 'black') {
+							onTerritoryCapture?.(orb.color);
+						}
 					}
 
 					return true;
@@ -195,7 +205,11 @@ function calculateBlockIntersections(
 /**
  * checks and handles collision with canvas boundaries
  */
-export function checkBoundaryCollision(orb: TempOrb, config: GameConfig): void {
+export function checkBoundaryCollision(
+	orb: TempOrb,
+	config: GameConfig,
+	onOrbBounce?: (intensity?: number) => void,
+): void {
 	//
 	const { gridWidth, gridHeight, blockSize } = config;
 	const canvasWidth = gridWidth * blockSize;
@@ -204,11 +218,17 @@ export function checkBoundaryCollision(orb: TempOrb, config: GameConfig): void {
 	if (orb.x - orb.radius <= 0 || orb.x + orb.radius >= canvasWidth) {
 		orb.vx = -orb.vx;
 		orb.x = Math.max(orb.radius, Math.min(canvasWidth - orb.radius, orb.x));
+		// play boundary bounce sound
+		const intensity = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy) / orb.baseSpeed;
+		onOrbBounce?.(intensity);
 	}
 
 	if (orb.y - orb.radius <= 0 || orb.y + orb.radius >= canvasHeight) {
 		orb.vy = -orb.vy;
 		orb.y = Math.max(orb.radius, Math.min(canvasHeight - orb.radius, orb.y));
+		// play boundary bounce sound
+		const intensity = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy) / orb.baseSpeed;
+		onOrbBounce?.(intensity);
 	}
 
 	// velocity limiter to prevent orbs from getting too fast, but preserve base speed

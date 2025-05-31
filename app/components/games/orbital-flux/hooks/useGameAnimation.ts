@@ -13,9 +13,19 @@ interface UseGameAnimationProps {
 	gameState: GameState;
 	config: GameConfig;
 	updateGameState: (updater: (prevState: GameState) => GameState) => void;
+	onTerritoryCapture?: (color: 'white' | 'black') => void;
+	onOrbBounce?: (intensity?: number) => void;
+	onOrbCollision?: () => void;
 }
 
-export function useGameAnimation({ gameState, config, updateGameState }: UseGameAnimationProps) {
+export function useGameAnimation({
+	gameState,
+	config,
+	updateGameState,
+	onTerritoryCapture,
+	onOrbBounce,
+	onOrbCollision,
+}: UseGameAnimationProps) {
 	//
 	const animationRef = useRef<number>();
 
@@ -52,7 +62,7 @@ export function useGameAnimation({ gameState, config, updateGameState }: UseGame
 			const newOrbs = orbs.map((orb) => ({ ...orb }));
 
 			// update orb physics
-			updateOrbPhysics(newOrbs, newGrid, config, activeEffects);
+			updateOrbPhysics(newOrbs, newGrid, config, activeEffects, onTerritoryCapture, onOrbBounce, onOrbCollision);
 
 			// calculate territory statistics
 			const stats = calculateTerritoryStats(newGrid);
@@ -125,7 +135,15 @@ export function useGameAnimation({ gameState, config, updateGameState }: UseGame
 /**
  * updates physics for all orbs including movement, collisions, and effects
  */
-function updateOrbPhysics(orbs: TempOrb[], grid: any[][], config: GameConfig, activeEffects: any[]): void {
+function updateOrbPhysics(
+	orbs: TempOrb[],
+	grid: any[][],
+	config: GameConfig,
+	activeEffects: any[],
+	onTerritoryCapture?: (color: 'white' | 'black') => void,
+	onOrbBounce?: (intensity?: number) => void,
+	onOrbCollision?: () => void,
+): void {
 	//
 	orbs.forEach((orb, index) => {
 		//
@@ -175,13 +193,13 @@ function updateOrbPhysics(orbs: TempOrb[], grid: any[][], config: GameConfig, ac
 		orb.y += orb.vy * speedMultiplier;
 
 		// check boundary collisions first
-		checkBoundaryCollision(orb, config);
+		checkBoundaryCollision(orb, config, onOrbBounce);
 
 		// check block collisions with previous position
-		checkBlockCollision(orb, grid, prevX, prevY, config, activeEffects);
+		checkBlockCollision(orb, grid, prevX, prevY, config, activeEffects, onTerritoryCapture, onOrbBounce);
 
 		// check orb-to-orb collisions to prevent overlapping
-		checkOrbCollisions(orb, orbs, index);
+		checkOrbCollisions(orb, orbs, index, onOrbCollision);
 
 		// ensure velocity magnitude stays close to base speed after collisions
 		const currentSpeed = Math.sqrt(orb.vx * orb.vx + orb.vy * orb.vy);
@@ -197,7 +215,12 @@ function updateOrbPhysics(orbs: TempOrb[], grid: any[][], config: GameConfig, ac
 /**
  * checks and resolves collisions between orbs to prevent them from getting stuck together
  */
-function checkOrbCollisions(currentOrb: TempOrb, allOrbs: TempOrb[], currentIndex: number): void {
+function checkOrbCollisions(
+	currentOrb: TempOrb,
+	allOrbs: TempOrb[],
+	currentIndex: number,
+	onOrbCollision?: () => void,
+): void {
 	//
 	for (let i = 0; i < allOrbs.length; i++) {
 		//
@@ -232,6 +255,9 @@ function checkOrbCollisions(currentOrb: TempOrb, allOrbs: TempOrb[], currentInde
 			currentOrb.vy = Math.sin(deflectionAngle1) * currentOrb.baseSpeed;
 			otherOrb.vx = Math.cos(deflectionAngle2) * otherOrb.baseSpeed;
 			otherOrb.vy = Math.sin(deflectionAngle2) * otherOrb.baseSpeed;
+
+			// play collision sound
+			onOrbCollision?.();
 		}
 	}
 }

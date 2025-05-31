@@ -10,11 +10,13 @@ import { useGameAnimation } from './hooks/useGameAnimation';
 import { useGameState } from './hooks/useGameState';
 import { usePaymentPerkActivation } from './hooks/usePaymentPerkActivation';
 import { usePerkHost } from './hooks/usePerkHost';
+import { useSoundManager } from './hooks/useSoundManager';
 import type { EffectType, GameConfig, GameStats, OrbitalFluxProps, PerkConfig } from './types';
 import { calculateTerritoryStats } from './utils';
 
 // components
 import { PaymentsPanel } from '~/components/games/orbital-flux/components/PaymentsPanel';
+import { SoundSettings } from '~/components/games/orbital-flux/components/SoundSettings';
 import { GameCanvas } from './components/GameCanvas';
 import { PerkPanel } from './components/PerkPanel';
 import { TerritoryStatsBar } from './components/TerritoryStatsBar';
@@ -59,6 +61,9 @@ export default function OrbitalFlux({
 	// perk host - manages perks client-side as "host"
 	const perkHost = usePerkHost(gameId || ('' as Id<'games'>));
 
+	// sound manager - handles all game audio
+	const soundManager = useSoundManager();
+
 	// sidebar visibility from URL params
 	const navigate = useNavigate();
 	const search = useSearch({ strict: false });
@@ -77,6 +82,11 @@ export default function OrbitalFlux({
 	 */
 	const handleWinner = async (winner: string) => {
 		//
+		// play game end sound
+		if (winner === 'white' || winner === 'black') {
+			soundManager.playGameEnd(winner);
+		}
+
 		// only update backend if gameId is provided
 		if (gameId) {
 			try {
@@ -106,6 +116,12 @@ export default function OrbitalFlux({
 	const handlePerkActivation = useCallback(
 		async (type: EffectType, side: 'white' | 'black' | 'neutral', duration: number) => {
 			//
+			// ensure audio context is resumed
+			await soundManager.resumeAudioContext();
+
+			// play perk activation sound
+			soundManager.playPerkActivation(type);
+
 			// activate in game simulation immediately (only if game is running)
 			if (gameState.isRunning) {
 				activateEffect(type as any, side as any);
@@ -114,7 +130,14 @@ export default function OrbitalFlux({
 			// also persist to backend via perk host (only if gameId is provided)
 			await perkHost.activatePerk(type, side, duration);
 		},
-		[activateEffect, perkHost.activatePerk, gameState.isRunning, gameId],
+		[
+			activateEffect,
+			perkHost.activatePerk,
+			gameState.isRunning,
+			gameId,
+			soundManager.playPerkActivation,
+			soundManager.resumeAudioContext,
+		],
 	);
 
 	// payment monitoring - activates perks when payments are confirmed (only if gameId is provided)
@@ -128,6 +151,9 @@ export default function OrbitalFlux({
 		gameState,
 		config,
 		updateGameState,
+		onTerritoryCapture: soundManager.playTerritoryCapture,
+		onOrbBounce: soundManager.playOrbBounce,
+		onOrbCollision: soundManager.playOrbCollision,
 	});
 
 	// calculate current stats for display
@@ -139,9 +165,13 @@ export default function OrbitalFlux({
 	/**
 	 * handles game start with callback
 	 */
-	const handleStart = () => {
+	const handleStart = async () => {
 		//
+		// ensure audio context is resumed
+		await soundManager.resumeAudioContext();
+
 		startGame();
+		soundManager.playGameStart();
 		onGameStart?.();
 	};
 
@@ -271,7 +301,10 @@ export default function OrbitalFlux({
 						</div>
 
 						{/* perks section */}
-						<div className="flex-1 overflow-y-auto">
+						<div className="flex-1 overflow-y-auto space-y-4 p-4">
+							{/* sound settings */}
+							<SoundSettings config={soundManager.config} onConfigChange={soundManager.updateConfig} />
+
 							{enablePerks && gameId && (
 								<PerkPanel
 									gameId={gameId}

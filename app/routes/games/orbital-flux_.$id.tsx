@@ -49,10 +49,10 @@ function RouteComponent() {
 		);
 	}
 
-	// render the game with backend integration
+	// render the game with backend integration and saved config
 	return (
 		<div className="h-screen overflow-hidden">
-			<OrbitalFlux gameId={gameId} enablePerks={true} showStats={true} />
+			<OrbitalFlux gameId={gameId} enablePerks={true} showStats={true} initialConfig={game.config} />
 		</div>
 	);
 }

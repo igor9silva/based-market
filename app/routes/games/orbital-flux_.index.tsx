@@ -42,7 +42,6 @@ function RouteComponent() {
 			navigate({
 				to: '/games/orbital-flux/$id',
 				params: { id: gameId },
-				replace: true,
 			});
 			console.log('Navigation called');
 		} catch (error) {
