@@ -11,14 +11,22 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as IndexImport } from './routes/index' // New Index Route
 import { Route as PerksImport } from './features/perks/routes/index'
-import { Route as IndexImport } from './features/games/routes/index'
+import { Route as GamesIndexImport } from './features/games/routes/index' // Old Index, now Games Index
 import { Route as GamesGameSlugIndexImport } from './features/games/routes/$gameSlug.index'
 import { Route as GamesGameSlugPerksImport } from './features/perks/routes/$gameSlug.perks'
 import { Route as GamesGameSlugLiveImport } from './features/livestream/routes/$gameSlug.live'
 import { Route as GamesGameSlugIdImport } from './features/games/routes/$gameSlug.$id'
 
+
 // Create/Update Routes
+
+const IndexRoute = IndexImport.update({ // New Index Route for path '/'
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const PerksRoute = PerksImport.update({
   id: '/perks',
@@ -26,9 +34,11 @@ const PerksRoute = PerksImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexRoute = IndexImport.update({
-  id: '/',
-  path: '/',
+// This is the route for '/games/', which lists all games.
+// It was previously the IndexRoute before we added the redirecting root IndexRoute.
+const GamesRoute = GamesIndexImport.update({
+  id: '/games', // Changed id to /games to match path
+  path: '/games', // Changed path to /games
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -64,7 +74,14 @@ declare module '@tanstack/react-router' {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+      preLoaderRoute: typeof IndexImport // New Index for '/'
+      parentRoute: typeof rootRoute
+    }
+    '/games': { // Path for listing games
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesIndexImport // Route from features/games/routes/index.tsx
       parentRoute: typeof rootRoute
     }
     '/perks': {
@@ -109,6 +126,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/games': typeof GamesRoute // Corrected variable name
   '/perks': typeof PerksRoute
   '/games/$gameSlug/$id': typeof GamesGameSlugIdRoute
   '/games/$gameSlug/live': typeof GamesGameSlugLiveRoute
@@ -118,6 +136,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/games': typeof GamesRoute // Corrected variable name
   '/perks': typeof PerksRoute
   '/games/$gameSlug/$id': typeof GamesGameSlugIdRoute
   '/games/$gameSlug/live': typeof GamesGameSlugLiveRoute
@@ -128,6 +147,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/games': typeof GamesRoute // Corrected variable name
   '/perks': typeof PerksRoute
   '/games/$gameSlug/$id': typeof GamesGameSlugIdRoute
   '/games/$gameSlug/live': typeof GamesGameSlugLiveRoute
@@ -139,6 +159,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/games' // Corrected path
     | '/perks'
     | '/games/$gameSlug/$id'
     | '/games/$gameSlug/live'
@@ -147,6 +168,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/games' // Corrected path
     | '/perks'
     | '/games/$gameSlug/$id'
     | '/games/$gameSlug/live'
@@ -155,6 +177,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/games' // Corrected path
     | '/perks'
     | '/games/$gameSlug/$id'
     | '/games/$gameSlug/live'
@@ -165,6 +188,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GamesRoute: typeof GamesRoute // Corrected variable name
   PerksRoute: typeof PerksRoute
   GamesGameSlugIdRoute: typeof GamesGameSlugIdRoute
   GamesGameSlugLiveRoute: typeof GamesGameSlugLiveRoute
@@ -174,6 +198,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GamesRoute: GamesRoute, // Corrected variable name
   PerksRoute: PerksRoute,
   GamesGameSlugIdRoute: GamesGameSlugIdRoute,
   GamesGameSlugLiveRoute: GamesGameSlugLiveRoute,
@@ -191,19 +216,23 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/",
+        "/", // New Index for '/'
         "/perks",
+        "/games", // Path for listing games from features/games/routes/index.tsx
         "/games/$gameSlug/$id",
         "/games/$gameSlug/live",
         "/games/$gameSlug/perks",
         "/games/$gameSlug/"
       ]
     },
-    "/": {
-      "filePath": "features/games/routes/index.tsx"
+    "/": { // New Index for '/'
+      "filePath": "routes/index.tsx"
     },
     "/perks": {
       "filePath": "features/perks/routes/index.tsx"
+    },
+    "/games": { // Path for listing games
+      "filePath": "features/games/routes/index.tsx"
     },
     "/games/$gameSlug/$id": {
       "filePath": "features/games/routes/$gameSlug.$id.tsx"
