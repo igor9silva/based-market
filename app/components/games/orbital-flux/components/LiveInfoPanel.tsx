@@ -3,25 +3,46 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { TimeAgo } from '~/components/TimeAgo';
+import type { GameConfig } from '~/components/games/orbital-flux/types'; // Add import
 
 interface LiveInfoPanelProps {
     gameId: Id<'games'>;
     elapsedTime: string;
+    config: GameConfig; // Add config prop
 }
 
-export function LiveInfoPanel({ gameId, elapsedTime }: LiveInfoPanelProps) {
+export function LiveInfoPanel({ gameId, elapsedTime, config }: LiveInfoPanelProps) {
 	//
 	const query = convexQuery(api.payments.public.all, { gameId });
 	const { data: payments } = useSuspenseQuery(query);
 
 	return (
 		<div className="h-full flex flex-col bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg">
-			{/* Game ID and Elapsed Time Section */}
-			<div className="p-4 border-b border-border">
-				<h2 className="text-lg font-semibold text-center text-foreground">Live Game Info</h2>
-				<div className="mt-2 space-y-1 text-sm font-mono text-muted-foreground">
-					<p>Game ID: {gameId}</p>
-					<p>Elapsed Time: {elapsedTime}</p>
+			{/* New Section for Game Info (ID, Time, Config) */}
+			<div className="p-3 border-b border-border space-y-1 text-xs"> {/* Reduced space-y-2 to space-y-1 */}
+				{/* Row 1: Elapsed Time */}
+				<div className="flex items-center justify-between">
+					<span className="text-muted-foreground">Elapsed:</span>
+					<span className="font-mono text-foreground">{elapsedTime}</span>
+				</div>
+
+				{/* Row 2: Game ID (no label) & Grid Size */}
+				<div className="flex items-center justify-between">
+					<span className="font-mono text-foreground truncate" title={gameId.toString()}>{gameId.toString().substring(gameId.toString().length - 8)}</span> {/* Show last 8 chars of ID, full ID on hover */}
+					<div className="flex items-center space-x-1">
+						{/* Consider adding a small grid icon here later if possible */}
+						<span className="text-muted-foreground">Grid:</span>
+						<span className="font-mono text-foreground">{config.gridWidth}x{config.gridHeight}</span>
+					</div>
+				</div>
+
+				{/* Row 3: Orb Speed (potentially other compact info here too) */}
+				<div className="flex items-center justify-end"> {/* Align to right if it's a single item */}
+					<div className="flex items-center space-x-1">
+						{/* Consider adding a small speed icon here later */}
+						<span className="text-muted-foreground">Speed:</span>
+						<span className="font-mono text-foreground">{config.orbSpeed}</span>
+					</div>
 				</div>
 			</div>
 

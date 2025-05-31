@@ -22,8 +22,8 @@ export function GameCanvas({ gameState, config, className }: GameCanvasProps) {
 		if (!container) return { width: 600, height: 600, scale: 1 };
 
 		const containerRect = container.getBoundingClientRect();
-		const availableWidth = containerRect.width - 32; // padding
-		const availableHeight = containerRect.height - 32; // padding
+		const availableWidth = containerRect.width - 0; // No internal horizontal padding
+		const availableHeight = containerRect.height - 0; // No internal vertical padding
 
 		const { gridWidth, gridHeight } = config;
 		const aspectRatio = gridWidth / gridHeight;
