@@ -4,13 +4,28 @@ import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { TimeAgo } from '~/components/TimeAgo';
 
-export function LivePerksPanel({ gameId }: { gameId: Id<'games'> }) {
+interface LiveInfoPanelProps {
+    gameId: Id<'games'>;
+    elapsedTime: string;
+}
+
+export function LiveInfoPanel({ gameId, elapsedTime }: LiveInfoPanelProps) {
 	//
 	const query = convexQuery(api.payments.public.all, { gameId });
 	const { data: payments } = useSuspenseQuery(query);
 
 	return (
-		<div className="w-80 bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg">
+		<div className="h-full flex flex-col bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg">
+			{/* Game ID and Elapsed Time Section */}
+			<div className="p-4 border-b border-border">
+				<h2 className="text-lg font-semibold text-center text-foreground">Live Game Info</h2>
+				<div className="mt-2 space-y-1 text-sm font-mono text-muted-foreground">
+					<p>Game ID: {gameId}</p>
+					<p>Elapsed Time: {elapsedTime}</p>
+				</div>
+			</div>
+
+			{/* Perks Call to Action (based.market/perks) */}
 			<div className="p-4 border-b border-border">
 				<div className="text-center">
 					<p className="text-lg font-semibold text-card-foreground">
@@ -21,7 +36,8 @@ export function LivePerksPanel({ gameId }: { gameId: Id<'games'> }) {
 				</div>
 			</div>
 
-			<div className="p-4 space-y-2">
+			{/* Perks List */}
+			<div className="p-4 space-y-2 overflow-y-auto flex-1">
 				{payments.length < 1 ? (
 					<div className="text-center text-muted-foreground text-sm">No perks purchased yet</div>
 				) : (

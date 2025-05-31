@@ -8,7 +8,8 @@ import { Loading } from '~/components/Loading';
 import OrbitalFlux from '~/components/games/orbital-flux/OrbitalFlux';
 import { ConfigPanel } from '~/components/games/orbital-flux/components/ConfigPanel';
 import { LiveCountdownBar } from '~/components/games/orbital-flux/components/LiveCountdownBar';
-import { LivePerksPanel } from '~/components/games/orbital-flux/components/LivePerksPanel';
+// import { LivePerksPanel } from '~/components/games/orbital-flux/components/LivePerksPanel'; // No longer used directly
+import { LiveInfoPanel } from '~/components/games/orbital-flux/components/LiveInfoPanel'; // Add import
 import { DEFAULT_GAME_CONFIG, LIVE_COUNTDOWN_DURATION } from '~/components/games/orbital-flux/constants';
 import type { GameConfig } from '~/components/games/orbital-flux/types';
 import { Button } from '~/components/ui/button';
@@ -363,16 +364,16 @@ function RouteComponent() {
 		const elapsedTime = formatElapsedTime(gameStartTime, currentTime);
 
 		return (
-			<div className="h-screen bg-background flex flex-col overflow-hidden">
-				{/* game area */}
-				<div className="flex-1">
+			<div className="h-screen bg-background flex flex-row overflow-hidden">
+				{/* Left Section (Game Area) */}
+				<div className="flex-shrink-0 flex justify-center items-center p-4 relative w-auto">
 					<OrbitalFlux
 						gameId={currentGameId}
 						enablePerks={true}
 						showStats={true}
 						autoStart={true}
 						customStatsBar={customStatsBar}
-						customRightPanel={<LivePerksPanel gameId={currentGameId} />}
+						// customRightPanel is removed
 						showSidebarToggle={false}
 						hideGameControls={true}
 						onWinner={handleWinner}
@@ -382,11 +383,9 @@ function RouteComponent() {
 					/>
 				</div>
 
-				{/* game ID and elapsed time footer */}
-				<div className="bg-background/80 backdrop-blur-sm border-t border-border">
-					<p className="text-xs text-muted-foreground text-center font-mono py-2">
-						{currentGameId} • Elapsed: {elapsedTime}
-					</p>
+				{/* Right Section (Info Panel) */}
+				<div className="flex-1 bg-card border-l border-border p-4 overflow-y-auto">
+					<LiveInfoPanel gameId={currentGameId} elapsedTime={elapsedTime} />
 				</div>
 			</div>
 		);
