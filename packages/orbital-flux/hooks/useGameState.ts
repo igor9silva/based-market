@@ -1,19 +1,34 @@
 import { useCallback, useState } from 'react';
-import type { ActiveEffect, Color, EffectType, GameConfig, GameState, PerkConfig, TempOrb } from '../types';
+// Types are mostly Orbital Flux specific.
+import type { ActiveEffect, Color, EffectType, GameState, PerkConfig, TempOrb } from '../types';
+// Utilities are Orbital Flux specific.
 import { calculateTerritoryStats, generateNonRightAngleDirection } from '../utils';
 
 interface UseGameStateProps {
-	config: GameConfig;
-	perkConfig: PerkConfig;
+	config: Record<string, any>; // Generic game configuration
+	perkConfig: PerkConfig; // Orbital Flux specific perk configuration
 	onWinner?: (winner: 'white' | 'black') => void;
-	onTerritoryChange?: (stats: any) => void;
+	onTerritoryChange?: (stats: any) => void; // Stats object structure might be game-specific
 }
 
+/**
+ * Custom hook for managing the core game state and logic of Orbital Flux.
+ * It handles game initialization, state updates, perk activation effects, and win conditions.
+ *
+ * @param config - Generic game configuration. Consumed as `any` here, expecting Orbital Flux properties.
+ * @param perkConfig - Orbital Flux specific perk durations and settings.
+ * @param onWinner - Callback when a winner is determined.
+ * @param onTerritoryChange - Callback when territory stats change.
+ */
 export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }: UseGameStateProps) {
-	//
+	// Cast config to `any` to access Orbital Flux specific properties.
+	// This hook is tightly coupled with Orbital Flux logic.
+	// For other games, a different game state hook would be needed.
+	const gameConfig = config as any;
+
 	const [gameState, setGameState] = useState<GameState>({
-		grid: [],
-		orbs: [],
+		grid: [], // Represents the game board
+		orbs: [], // List of active orbs
 		blackCount: 0,
 		whiteCount: 0,
 		isRunning: false,
@@ -28,7 +43,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 	 */
 	const initializeGame = useCallback(() => {
 		//
-		const { gridWidth, gridHeight, orbSpeed, blockSize } = config;
+		const { gridWidth, gridHeight, orbSpeed, blockSize } = gameConfig;
 
 		// create initial grid with 50/50 split (left white, right black)
 		const grid: Color[][] = [];
@@ -170,50 +185,35 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 
 				// apply immediate effect
 				if (effectType === 'extra-orb') {
-					//
-					const tempOrb = createExtraOrb(side, newState.grid, config, now + duration);
+					const tempOrb = createExtraOrb(side, newState.grid, gameConfig, now + duration);
 					if (tempOrb) {
 						newState.orbs = [...newState.orbs, tempOrb];
 					}
 				} else if (effectType === 'chaos') {
-					//
-					// randomize all orb directions with non-right angles, but preserve base properties
+					// Randomize all orb directions
 					newState.orbs = newState.orbs.map((orb) => {
-						//
 						const direction = generateNonRightAngleDirection(orb.baseSpeed);
 						return {
 							...orb,
 							vx: direction.vx,
 							vy: direction.vy,
-							// keep original baseSpeed and baseDirection unchanged
 						};
 					});
-
-					// add 3 extra temporary orbs for each side
+					// Add extra orbs for chaos mode
 					const chaosOrbs: TempOrb[] = [];
-
-					// create 3 white chaos orbs
 					for (let i = 0; i < 3; i++) {
-						//
-						const whiteOrb = createExtraOrb('white', newState.grid, config, now + duration);
+						const whiteOrb = createExtraOrb('white', newState.grid, gameConfig, now + duration);
 						if (whiteOrb) chaosOrbs.push(whiteOrb);
-					}
-
-					// create 3 black chaos orbs
-					for (let i = 0; i < 3; i++) {
-						//
-						const blackOrb = createExtraOrb('black', newState.grid, config, now + duration);
+						const blackOrb = createExtraOrb('black', newState.grid, gameConfig, now + duration);
 						if (blackOrb) chaosOrbs.push(blackOrb);
 					}
-
-					// add all chaos orbs to the game
 					newState.orbs = [...newState.orbs, ...chaosOrbs];
 				}
 
 				return newState;
 			});
 		},
-		[gameState.isRunning, config, perkConfig, canActivateEffect],
+		[gameState.isRunning, gameConfig, perkConfig, canActivateEffect],
 	);
 
 	/**
@@ -255,7 +255,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 			// if there was a winner, reset the game completely
 			if (prev.winner) {
 				// reset to fresh game state and start immediately
-				const { gridWidth, gridHeight, orbSpeed, blockSize } = config;
+				const { gridWidth, gridHeight, orbSpeed, blockSize } = gameConfig;
 
 				// create initial grid with 50/50 split (left white, right black)
 				const grid: Color[][] = [];
@@ -311,7 +311,7 @@ export function useGameState({ config, perkConfig, onWinner, onTerritoryChange }
 			// otherwise just start the current game
 			return { ...prev, isRunning: true, winner: undefined, startTime: prev.startTime || now };
 		});
-	}, [config]);
+	}, [gameConfig]);
 
 	/**
 	 * stops the game simulation
@@ -365,11 +365,11 @@ function getDurationForEffect(effectType: EffectType, perkConfig: PerkConfig): n
 }
 
 /**
- * creates a temporary extra orb for a team
+ * Creates a temporary extra orb for a team.
+ * Specific to Orbital Flux mechanics.
  */
-function createExtraOrb(side: Color, grid: Color[][], config: GameConfig, endTime: number): TempOrb | null {
-	//
-	const { gridWidth, gridHeight, blockSize, orbSpeed } = config;
+function createExtraOrb(side: Color, grid: Color[][], gameConfig: Record<string, any>, endTime: number): TempOrb | null {
+	const { gridWidth, gridHeight, blockSize, orbSpeed } = gameConfig as any;
 
 	// find a random position in the team's territory
 	const teamBlocks = [];

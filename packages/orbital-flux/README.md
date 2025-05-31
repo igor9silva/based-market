@@ -32,7 +32,7 @@ Orbital Flux is a real-time strategy simulation where two teams (black and white
 ##### Basic Usage
 
 ```tsx
-import { OrbitalFlux } from '~/components/games/orbital-flux';
+import { OrbitalFlux } from '~/../packages/orbital-flux';
 
 export default function GamePage() {
   return <OrbitalFlux />;
@@ -42,8 +42,8 @@ export default function GamePage() {
 ##### Advanced Configuration
 
 ```tsx
-import { OrbitalFlux } from '~/components/games/orbital-flux';
-import type { GameConfig, PowerUpConfig } from '~/components/games/orbital-flux';
+import { OrbitalFlux } from '~/../packages/orbital-flux';
+import type { GameConfig, PowerUpConfig } from '~/../packages/orbital-flux';
 
 const customConfig: Partial<GameConfig> = {
   gridWidth: 40,
@@ -78,7 +78,7 @@ export default function CustomGamePage() {
 ##### Minimal Configuration
 
 ```tsx
-import { OrbitalFlux } from '~/components/games/orbital-flux';
+import { OrbitalFlux } from '~/../packages/orbital-flux';
 
 export default function MinimalGamePage() {
   return (

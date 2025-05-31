@@ -1,91 +1,110 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { api } from 'convex/_generated/api'
-import { useQuery } from 'convex/react'
-import { productSchema } from 'convex/schemas/paymentSchema'
-import { DEFAULT_PERK_CONFIG } from '~/components/games/orbital-flux/constants'
+import { createFileRoute, useParams } from '@tanstack/react-router';
+import { api } from 'convex/_generated/api';
+import { useQuery } from 'convex/react';
+// productSchema is now z.string(), expecting "{gameSlug}:{side}:{perkType}"
+import { productSchema } from 'convex/schemas/paymentSchema';
+// Constants and types from Orbital Flux are used here.
+// For other games, these would need to be made generic or loaded dynamically.
+import { DEFAULT_PERK_CONFIG } from '~/../../packages/orbital-flux/constants';
 import type {
-  Color,
-  EffectType,
-  PerkConfig,
-} from '~/components/games/orbital-flux/types'
-import { Loading } from '~/components/Loading'
-import { usePaymentMutations } from '~/hooks/usePayment'
+	Color,
+	EffectType,
+	PerkConfig,
+} from '~/../../packages/orbital-flux/types';
+import { Loading } from '~/../../components/Loading';
+import { usePaymentMutations } from '~/../../hooks/usePayment';
 
-export const Route = createFileRoute('/games/orbital-flux_/perks')({
-  component: RouteComponent,
-})
+/**
+ * Route for displaying and purchasing perks for a specific live game.
+ * The `gameSlug` parameter in the URL determines for which game the perks are shown.
+ */
+export const Route = createFileRoute('/games/$gameSlug/perks')({
+	component: RouteComponent,
+});
 
+// Defines the structure for perk display information.
+// Currently specific to Orbital Flux perk types.
 interface PerkDefinition {
-  type: EffectType
-  label: string
+	type: EffectType;
+	label: string;
 }
 
 /**
- * converts milliseconds to seconds for display
+ * Converts milliseconds to seconds for display.
  */
 function formatDuration(milliseconds: number): number {
-  //
-  return Math.round(milliseconds / 1000)
+	return Math.round(milliseconds / 1000);
 }
 
 /**
- * generates perk definitions with dynamic durations
+ * Generates perk definitions with dynamic durations.
+ * This function is currently specific to Orbital Flux perks.
+ * For other games, this would need to be adapted or made more generic.
  */
 function createPerkDefinitions(
-  perkConfig: PerkConfig,
-  teamColor: Color,
+	perkConfig: PerkConfig, // PerkConfig is Orbital Flux specific
+	teamColor: Color,
 ): PerkDefinition[] {
-  //
-  const enemyTeam = teamColor === 'white' ? 'Black' : 'White'
+	const enemyTeam = teamColor === 'white' ? 'Black' : 'White';
 
-  return [
-    {
-      type: 'extra-orb',
-      label: `Extra Orb (${formatDuration(perkConfig.extraOrbDuration)}s)`,
-    },
-    {
-      type: 'unbreakable',
-      label: `Unbreakable (${formatDuration(perkConfig.unbreakableDuration)}s)`,
-    },
-    {
-      type: 'speed-boost',
-      label: `Speed Boost (${formatDuration(perkConfig.speedBoostDuration)}s)`,
-    },
-    {
-      type: 'freeze-enemy',
-      label: `Freeze ${enemyTeam} (${formatDuration(perkConfig.freezeDuration)}s)`,
-    },
-  ]
+	return [
+		{
+			type: 'extra-orb',
+			label: `Extra Orb (${formatDuration(perkConfig.extraOrbDuration)}s)`,
+		},
+		{
+			type: 'unbreakable',
+			label: `Unbreakable (${formatDuration(perkConfig.unbreakableDuration)}s)`,
+		},
+		{
+			type: 'speed-boost',
+			label: `Speed Boost (${formatDuration(perkConfig.speedBoostDuration)}s)`,
+		},
+		{
+			type: 'freeze-enemy',
+			label: `Freeze ${enemyTeam} (${formatDuration(perkConfig.freezeDuration)}s)`,
+		},
+	];
 }
 
 function RouteComponent() {
-  //
-  // get the current live game
-  const currentGame = useQuery(api.games.public.getCurrentLiveGame)
-  const { purchasePerk } = usePaymentMutations()
+	// Get the gameSlug from the URL (e.g., "orbital-flux")
+	const { gameSlug } = useParams({ from: '/games/$gameSlug/perks' });
+	// Get the current live game (could be any game kind)
+	const currentGame = useQuery(api.games.public.getCurrentLiveGame);
+	const { purchasePerk } = usePaymentMutations(); // Hook for initiating perk purchases
 
-  const handlePurchasePerk = async (
-    effectType: EffectType,
-    teamColor: Color,
-  ) => {
-    //
-    if (!currentGame) return
+	/**
+	 * Handles purchasing a team-specific perk.
+	 * The product string is constructed using the gameSlug, teamColor, and effectType.
+	 */
+	const handlePurchasePerk = async (
+		effectType: EffectType, // EffectType is Orbital Flux specific
+		teamColor: Color,
+	) => {
+		if (!currentGame) return;
 
-    await purchasePerk({
-      product: productSchema.parse(`orbital-flux ${teamColor} ${effectType}`),
-      gameId: currentGame._id,
-    })
-  }
+		// Construct the product string, e.g., "orbital-flux:white:extra-orb"
+		// This structured string is sent to the backend.
+		await purchasePerk({
+			product: `${gameSlug}:${teamColor}:${effectType}`,
+			gameId: currentGame._id,
+		});
+	};
 
-  const handlePurchaseChaos = async () => {
-    //
-    if (!currentGame) return
+	/**
+	 * Handles purchasing a neutral perk (chaos mode for Orbital Flux).
+	 * The product string includes "neutral" as the side.
+	 */
+	const handlePurchaseChaos = async () => {
+		if (!currentGame) return;
 
-    await purchasePerk({
-      product: 'orbital-flux neutral chaos',
-      gameId: currentGame._id,
-    })
-  }
+		// Construct the product string for chaos, e.g., "orbital-flux:neutral:chaos"
+		await purchasePerk({
+			product: `${gameSlug}:neutral:chaos`,
+			gameId: currentGame._id,
+		});
+	};
 
   // show loading state
   if (currentGame === undefined) {

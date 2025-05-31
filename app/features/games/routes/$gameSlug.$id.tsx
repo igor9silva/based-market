@@ -4,10 +4,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { z } from 'zod';
-import OrbitalFlux from '~/../packages/orbital-flux/OrbitalFlux';
-import { TextShimmer } from '~/components/ui/text-shimmer';
+import OrbitalFlux from '~/../../packages/orbital-flux/OrbitalFlux';
+import { TextShimmer } from '~/../../components/ui/text-shimmer';
 
-export const Route = createFileRoute('/games/orbital-flux_/$id')({
+export const Route = createFileRoute('/games/$gameSlug/$id')({
 	component: RouteComponent,
 	validateSearch: z.object({
 		isExpanded: z.boolean().optional(),
@@ -16,10 +16,10 @@ export const Route = createFileRoute('/games/orbital-flux_/$id')({
 
 function RouteComponent() {
 	//
-	const { id } = Route.useParams();
+	const { gameSlug, id } = Route.useParams();
 	const gameId = id as Id<'games'>;
 
-	console.log('Specific game route loaded with ID:', id);
+	console.log(`Specific game route loaded for ${gameSlug} with ID:`, id);
 
 	// fetch game data from backend
 	const query = convexQuery(api.games.public.get, { gameId });

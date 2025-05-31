@@ -72,7 +72,7 @@ export interface PerkConfig {
 
 export interface OrbitalFluxProps {
 	// initial configuration options
-	initialConfig?: Partial<GameConfig>;
+	initialConfig?: Record<string, any>;
 	initialPerkConfig?: Partial<PerkConfig>;
 	// backend integration
 	gameId: Id<'games'>;

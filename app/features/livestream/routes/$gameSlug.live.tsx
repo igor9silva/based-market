@@ -1,19 +1,21 @@
-import { createFileRoute, useSearch } from '@tanstack/react-router';
+import { createFileRoute, useParams, useSearch } from '@tanstack/react-router';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { useMutation, useQuery } from 'convex/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { z } from 'zod';
-import { Loading } from '~/components/Loading';
-import OrbitalFlux from '~/components/games/orbital-flux/OrbitalFlux';
-import { ConfigPanel } from '~/components/games/orbital-flux/components/ConfigPanel';
-import { LiveCountdownBar } from '~/components/games/orbital-flux/components/LiveCountdownBar';
-import { LivePerksPanel } from '~/components/games/orbital-flux/components/LivePerksPanel';
-import { DEFAULT_GAME_CONFIG, LIVE_COUNTDOWN_DURATION } from '~/components/games/orbital-flux/constants';
-import type { GameConfig } from '~/components/games/orbital-flux/types';
-import { Button } from '~/components/ui/button';
+import { Loading } from '~/../../components/Loading';
+import OrbitalFlux from '~/../../packages/orbital-flux/OrbitalFlux'; // Assuming OrbitalFlux can handle generic config
+import { ConfigPanel } from '~/../../packages/orbital-flux/components/ConfigPanel'; // ConfigPanel might need to be more generic or replaced for other games
+import { LiveCountdownBar } from '~/../../packages/orbital-flux/components/LiveCountdownBar';
+import { LivePerksPanel } from '~/../../packages/orbital-flux/components/LivePerksPanel'; // PerksPanel might also need to be game-specific
+import { DEFAULT_GAME_CONFIG, LIVE_COUNTDOWN_DURATION } from '~/../../packages/orbital-flux/constants';
+// GameConfig from orbital-flux, used for default values. Actual config can be generic.
+import type { GameConfig } from '~/../../packages/orbital-flux/types';
+import { Button } from '~/../../components/ui/button';
 
 // NOTE: Add LIVE_GAME_PASSWORD to your .env.local file for live game control
+// This password is used for administrative actions on live games.
 
 /**
  * formats elapsed time from milliseconds to MM:SS format
@@ -45,17 +47,18 @@ function useCurrentTime() {
 	return currentTime;
 }
 
-export const Route = createFileRoute('/games/orbital-flux_/live')({
+export const Route = createFileRoute('/games/$gameSlug/live')({
 	component: RouteComponent,
 	validateSearch: z.object({
-		// UI configuration
-		isExpanded: z.boolean().optional().default(true), // start in expanded mode (sidebar closed)
+		// UI configuration for sidebar
+		isExpanded: z.boolean().optional().default(true),
 
-		// auto-play and authentication
+		// Auto-play and authentication for live game control
 		autoPlay: z.boolean().optional().default(false),
-		password: z.string().optional(),
+		password: z.string().optional(), // Password can be passed via URL for convenience
 
-		// game configuration parameters
+		// Game configuration parameters (example for Orbital Flux, could be different for other games)
+		// These are parsed from the URL search parameters.
 		gridWidth: z.coerce.number().optional(),
 		gridHeight: z.coerce.number().optional(),
 		orbSpeed: z.coerce.number().optional(),
@@ -68,33 +71,34 @@ type LiveState = 'idle' | 'starting' | 'playing' | 'countdown';
 
 function RouteComponent() {
 	//
-	const searchParams = useSearch({ from: '/games/orbital-flux_/live' });
-	const currentLiveGame = useQuery(api.games.public.getCurrentLiveGame);
-	const currentTime = useCurrentTime();
+	const searchParams = useSearch({ from: '/games/$gameSlug/live' });
+	// gameSlug (e.g., "orbital-flux") determines the game kind.
+	const { gameSlug } = useParams({ from: '/games/$gameSlug/live' });
+	const currentLiveGame = useQuery(api.games.public.getCurrentLiveGame); // Fetches any currently live game
+	const currentTime = useCurrentTime(); // For displaying elapsed time
 
 	// === STATE MANAGEMENT ===
-	const [state, setState] = useState<LiveState>('idle');
-	const [currentGameId, setCurrentGameId] = useState<Id<'games'> | null>(null);
-	const [countdown, setCountdown] = useState(LIVE_COUNTDOWN_DURATION);
-	const [lastWinner, setLastWinner] = useState<string | null>(null);
-	const [password, setPassword] = useState<string | null>(searchParams.password || null);
-	const [isLoading, setIsLoading] = useState(false);
-	const [gameStartTime, setGameStartTime] = useState<number | undefined>(undefined);
-	const gameRef = useRef<{ startGame: () => void } | null>(null);
+	const [state, setState] = useState<LiveState>('idle'); // Manages the overall state of the live page
+	const [currentGameId, setCurrentGameId] = useState<Id<'games'> | null>(null); // ID of the active game
+	const [countdown, setCountdown] = useState(LIVE_COUNTDOWN_DURATION); // Countdown timer between games
+	const [lastWinner, setLastWinner] = useState<string | null>(null); // Stores the winner of the last game
+	const [password, setPassword] = useState<string | null>(searchParams.password || null); // Admin password
+	const [isLoading, setIsLoading] = useState(false); // For loading states during API calls
+	const [gameStartTime, setGameStartTime] = useState<number | undefined>(undefined); // Start time of the current game
+	const gameRef = useRef<{ startGame: () => void } | null>(null); // Ref to the game component instance (currently not used for OrbitalFlux)
 
 	// === CONFIGURATION ===
-	// merge URL config parameters with defaults
-	const urlConfig = useMemo((): Partial<GameConfig> => {
-		//
-		const config: Partial<GameConfig> = {};
-
-		if (searchParams.gridWidth) config.gridWidth = searchParams.gridWidth;
-		if (searchParams.gridHeight) config.gridHeight = searchParams.gridHeight;
-		if (searchParams.orbSpeed) config.orbSpeed = searchParams.orbSpeed;
-		if (searchParams.winThreshold) config.winThreshold = searchParams.winThreshold;
-		if (searchParams.blockSize) config.blockSize = searchParams.blockSize;
-
-		return config;
+	// Game configuration is primarily taken from URL search parameters.
+	// This allows for dynamic configuration of live games.
+	const urlConfig = useMemo((): Record<string, any> => {
+		const newConfig: Record<string, any> = {};
+		// Example for Orbital Flux specific params. Other games might have different URL params.
+		if (searchParams.gridWidth) newConfig.gridWidth = searchParams.gridWidth;
+		if (searchParams.gridHeight) newConfig.gridHeight = searchParams.gridHeight;
+		if (searchParams.orbSpeed) newConfig.orbSpeed = searchParams.orbSpeed;
+		if (searchParams.winThreshold) newConfig.winThreshold = searchParams.winThreshold;
+		if (searchParams.blockSize) newConfig.blockSize = searchParams.blockSize;
+		return newConfig;
 	}, [
 		searchParams.gridWidth,
 		searchParams.gridHeight,
@@ -103,21 +107,25 @@ function RouteComponent() {
 		searchParams.blockSize,
 	]);
 
-	const [config, setConfig] = useState<GameConfig>({ ...DEFAULT_GAME_CONFIG, ...urlConfig });
+	// The final configuration merges URL parameters with default game config (e.g., DEFAULT_GAME_CONFIG for orbital-flux).
+	// This ensures that if some params are not provided in the URL, defaults are used.
+	const [config, setConfig] = useState<Record<string, any>>({ ...DEFAULT_GAME_CONFIG, ...urlConfig });
 
 	// === MUTATIONS ===
-	const startLiveGame = useMutation(api.games.public.startLive);
-	const stopLiveGame = useMutation(api.games.public.stopLive);
-	const cleanupAllGames = useMutation(api.games.public.cleanupAll);
+	// Mutation to start a new live game. The `gameSlug` is passed as `kind`.
+	const startLiveGameMutation = useMutation(api.games.public.startLive);
+	const stopLiveGameMutation = useMutation(api.games.public.stopLive);
+	const cleanupAllGamesMutation = useMutation(api.games.public.cleanupAll);
 
 	// === HANDLERS ===
 
 	/**
-	 * prompts for password (or uses URL password if available)
+	 * Prompts for the live game password if not already set or provided in the URL.
+	 * This password is required for administrative actions like starting or stopping live games.
 	 */
 	const promptPassword = useCallback(() => {
 		//
-		// use URL password if available
+		// Use URL password if available
 		if (searchParams.password) {
 			setPassword(searchParams.password);
 			return searchParams.password;
@@ -145,10 +153,12 @@ function RouteComponent() {
 				return;
 			}
 
-			const gameId = await startLiveGame({
+			// The `gameSlug` from the URL (e.g., "orbital-flux") determines the `kind` of game to start.
+			// The `config` is passed as a generic object, allowing different games to have different settings.
+			const gameId = await startLiveGameMutation({
 				password: pwd,
-				kind: 'orbital-flux',
-				config,
+				kind: gameSlug, // gameSlug from URL is used as the game kind
+				config, // Generic config object
 			});
 			setCurrentGameId(gameId);
 			setState('playing');
@@ -180,7 +190,7 @@ function RouteComponent() {
 
 		setIsLoading(true);
 		try {
-			await stopLiveGame({ password: pwd });
+			await stopLiveGameMutation({ password: pwd });
 			setState('idle');
 			setCurrentGameId(null);
 		} catch (error) {
@@ -189,7 +199,7 @@ function RouteComponent() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [stopLiveGame, password, promptPassword]);
+	}, [stopLiveGameMutation, password, promptPassword]);
 
 	/**
 	 * cleanup all games
@@ -204,7 +214,7 @@ function RouteComponent() {
 
 		setIsLoading(true);
 		try {
-			const result = await cleanupAllGames({ password: pwd });
+			const result = await cleanupAllGamesMutation({ password: pwd });
 			alert(`✅ Cleanup complete: ${result.stoppedGames} games stopped`);
 			setState('idle');
 			setCurrentGameId(null);
@@ -214,7 +224,7 @@ function RouteComponent() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [cleanupAllGames, password, promptPassword]);
+	}, [cleanupAllGamesMutation, password, promptPassword]);
 
 	/**
 	 * handles when game component mounts - auto-start the game
@@ -324,20 +334,25 @@ function RouteComponent() {
 		);
 	}
 
-	// no active game - show configuration and start controls
+// No active game - show configuration and start controls.
+// This UI allows an admin to start a new live game with specific configurations.
 	if (state === 'idle' && !currentLiveGame) {
 		return (
 			<div className="h-screen bg-background text-foreground overflow-hidden">
 				<div className="h-full flex items-center justify-center">
 					<div className="w-96 bg-card border border-border rounded-lg p-6">
-						<h1 className="text-2xl font-bold text-center mb-6">Orbital Flux Live</h1>
+					{/* Title dynamically shows the gameSlug */}
+					<h1 className="text-2xl font-bold text-center mb-6">{gameSlug} Live</h1>
 
 						<div className="space-y-6">
+						{/* ConfigPanel is currently Orbital Flux specific.
+                For other games, this would need to be a dynamic component
+                or a more generic configuration UI. */}
 							<ConfigPanel config={config} isRunning={false} onConfigChange={setConfig} />
 
 							<div className="space-y-3">
 								<Button onClick={createNewGame} disabled={isLoading} className="w-full" size="lg">
-									{isLoading ? 'Starting Live Game...' : '🎮 START LIVE GAME'}
+								{isLoading ? `Starting ${gameSlug} Live...` : `🎮 START ${gameSlug.toUpperCase()} LIVE`}
 								</Button>
 
 								<Button onClick={handleCleanup} variant="destructive" className="w-full">
@@ -353,7 +368,8 @@ function RouteComponent() {
 		);
 	}
 
-	// GAME IS RUNNING - SHOW ONLY THE GAME (no control buttons for livestream)
+// GAME IS RUNNING - Show the game interface.
+// For live streams, controls are usually hidden, and perks/stats might be displayed differently.
 	if (currentGameId) {
 		const customStatsBar =
 			state === 'countdown' && lastWinner ? (
@@ -362,23 +378,26 @@ function RouteComponent() {
 
 		const elapsedTime = formatElapsedTime(gameStartTime, currentTime);
 
+	// The OrbitalFlux component is used here. If other games are added,
+	// a dynamic component loader would be needed to render the correct game UI
+	// based on `gameSlug` or `currentLiveGame.kind`.
 		return (
 			<div className="h-screen bg-background flex flex-col overflow-hidden">
 				{/* game area */}
 				<div className="flex-1">
-					<OrbitalFlux
+				<OrbitalFlux // This would need to be dynamic for other games
 						gameId={currentGameId}
-						enablePerks={true}
-						showStats={true}
-						autoStart={true}
-						customStatsBar={customStatsBar}
-						customRightPanel={<LivePerksPanel gameId={currentGameId} />}
-						showSidebarToggle={false}
-						hideGameControls={true}
-						onWinner={handleWinner}
-						onGameStart={handleGameStart}
-						onGameStateChange={handleGameStateChange}
-						initialConfig={config}
+					enablePerks={true} // Perks can be enabled/disabled
+					showStats={true} // Stats display can be toggled
+					autoStart={true} // Game starts automatically when component mounts
+					customStatsBar={customStatsBar} // Custom bar for countdowns, etc.
+					customRightPanel={<LivePerksPanel gameId={currentGameId} />} // Panel for live perks, could be game-specific
+					showSidebarToggle={false} // Sidebar toggle usually hidden for live view
+					hideGameControls={true} // Game controls (start/stop) hidden for live view
+					onWinner={handleWinner} // Callback when a winner is determined
+					onGameStart={handleGameStart} // Callback when the game starts
+					onGameStateChange={handleGameStateChange} // Callback for game state updates
+					initialConfig={config} // The game is initialized with the current config state
 					/>
 				</div>
 
@@ -392,11 +411,11 @@ function RouteComponent() {
 		);
 	}
 
-	// fallback - should not reach here normally
+// Fallback - should not reach here normally if logic is correct.
 	return (
 		<div className="h-screen bg-background flex items-center justify-center overflow-hidden">
 			<div className="text-center">
-				<p className="text-muted-foreground">No game running</p>
+			<p className="text-muted-foreground">No game running or invalid state.</p>
 			</div>
 		</div>
 	);

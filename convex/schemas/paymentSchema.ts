@@ -1,17 +1,15 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 
-export const productSchema = z.enum([
-	'orbital-flux white extra-orb',
-	'orbital-flux white unbreakable',
-	'orbital-flux white speed-boost',
-	'orbital-flux white freeze-enemy',
-	'orbital-flux black extra-orb',
-	'orbital-flux black unbreakable',
-	'orbital-flux black speed-boost',
-	'orbital-flux black freeze-enemy',
-	'orbital-flux neutral chaos',
-]);
+/**
+ * Defines the schema for a product identifier.
+ * This is a string that is expected to be structured to encode information
+ * about the game, side, and perk type.
+ * Example structure: "{gameSlug}:{side}:{perkType}"
+ *   - orbital-flux:white:extra-orb
+ *   - orbital-flux:neutral:chaos
+ */
+export const productSchema = z.string();
 
 export const paymentStatusSchema = z.enum([
 	'created', //

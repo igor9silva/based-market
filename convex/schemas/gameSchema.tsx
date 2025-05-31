@@ -1,9 +1,12 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 
-export const gameKindsSchema = z.enum([
-	'orbital-flux', //
-]);
+/**
+ * Defines the available kinds of games.
+ * This schema can be extended to support new game types in the future.
+ * Example: z.enum(['orbital-flux', 'chess', 'tic-tac-toe']);
+ */
+export const gameKindsSchema = z.enum(['orbital-flux']);
 
 export const teamsSchema = z.enum([
 	'white', //
@@ -33,10 +36,16 @@ export const activePerkSchema = z.object({
 });
 
 const coreGameSchema = z.object({
-	// owner: zid('users'),
-	kind: gameKindsSchema,
-	config: orbitalFluxConfigSchema,
-	activePerks: z.array(activePerkSchema),
+	// owner: zid('users'), // TODO: Consider adding owner to games
+	kind: gameKindsSchema, // The kind of game this schema represents
+	/**
+	 * Game-specific configuration.
+	 * Stored as `z.any()` to allow flexibility for different game kinds.
+	 * Each game kind will have its own specific config schema (e.g., orbitalFluxConfigSchema).
+	 * Validation of this config should be handled by the game-specific logic.
+	 */
+	config: z.any(),
+	activePerks: z.array(activePerkSchema), // List of perks currently active in the game
 });
 
 const runningGameSchema = coreGameSchema.extend({
@@ -52,11 +61,16 @@ const finishedGameSchema = coreGameSchema.extend({
 });
 
 export const gameSchema = z.discriminatedUnion('status', [
-	runningGameSchema, //
+	runningGameSchema,
 	finishedGameSchema,
 ]);
 
+/**
+ * Represents a game that is currently marked as "live".
+ * This is a separate document to quickly query for the current live game of a specific kind.
+ */
+
 export const liveGameSchema = z.object({
-	gameId: zid('games'),
-	kind: gameKindsSchema,
+	gameId: zid('games'), // Reference to the actual game document in the 'games' table
+	kind: gameKindsSchema, // The kind of game that is live (e.g., 'orbital-flux')
 });

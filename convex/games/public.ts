@@ -2,18 +2,24 @@ import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
 import { mutation, query } from '../lib';
 import { env } from '../schemas/envSchema';
-import { gameKindsSchema, orbitalFluxConfigSchema, perkTypeSchema, teamsSchema } from '../schemas/gameSchema';
+import { gameKindsSchema, perkTypeSchema, teamsSchema } from '../schemas/gameSchema';
 
+/**
+ * Starts a new game instance.
+ * This function is generic and can start any game specified by `kind`.
+ * The `config` parameter is of type `z.any()` to accommodate different
+ * configuration structures for various game kinds.
+ */
 export const start = mutation({
 	args: {
-		kind: gameKindsSchema,
-		config: orbitalFluxConfigSchema,
+		kind: gameKindsSchema, // The kind of game to start (e.g., 'orbital-flux')
+		config: z.any(), // Game-specific configuration object
 	},
 	handler: async (ctx, { kind, config }) => {
 		//
 		return await ctx.db.insert('games', {
 			kind,
-			config,
+			config, // The configuration is stored as provided
 			activePerks: [],
 			status: 'running',
 			startedAt: Date.now(),
@@ -22,13 +28,16 @@ export const start = mutation({
 });
 
 /**
- * starts a new live game (password protected)
+ * Starts a new live game (password protected).
+ * Similar to `start`, this function is generic for `kind` and `config`.
+ * It performs additional checks for live games, such as password verification
+ * and ensuring only one live game of a specific kind runs at a time.
  */
 export const startLive = mutation({
 	args: {
-		password: z.string(),
-		kind: gameKindsSchema,
-		config: orbitalFluxConfigSchema,
+		password: z.string(), // Password to authorize live game creation
+		kind: gameKindsSchema, // The kind of game to start
+		config: z.any(), // Game-specific configuration object
 	},
 	handler: async (ctx, { password, kind, config }) => {
 		//
@@ -58,14 +67,17 @@ export const startLive = mutation({
 
 export const finish = mutation({
 	args: {
-		gameId: zid('games'),
-		winner: teamsSchema,
+		gameId: zid('games'), // The ID of the game to finish
+		winner: teamsSchema, // The winning team/player
 	},
 	handler: async (ctx, { gameId, winner }) => {
 		//
 		const game = await ctx.db.get(gameId);
 		if (!game) throw new Error('Game not found');
 
+		// Update the game's status to 'finished' and record the winner and end time.
+		// This function is generic as it only relies on the gameId and winner,
+		// not on game-specific config or state.
 		await ctx.db.patch(gameId, {
 			status: 'finished',
 			winner,
