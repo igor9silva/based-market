@@ -8,7 +8,8 @@ import { Loading } from '~/components/Loading';
 import OrbitalFlux from '~/components/games/orbital-flux/OrbitalFlux';
 import { ConfigPanel } from '~/components/games/orbital-flux/components/ConfigPanel';
 import { LiveCountdownBar } from '~/components/games/orbital-flux/components/LiveCountdownBar';
-import { LivePerksPanel } from '~/components/games/orbital-flux/components/LivePerksPanel';
+// import { LivePerksPanel } from '~/components/games/orbital-flux/components/LivePerksPanel'; // No longer used directly
+import { LiveInfoPanel } from '~/components/games/orbital-flux/components/LiveInfoPanel'; // Add import
 import { DEFAULT_GAME_CONFIG, LIVE_COUNTDOWN_DURATION } from '~/components/games/orbital-flux/constants';
 import type { GameConfig } from '~/components/games/orbital-flux/types';
 import { Button } from '~/components/ui/button';
@@ -16,17 +17,36 @@ import { Button } from '~/components/ui/button';
 // NOTE: Add LIVE_GAME_PASSWORD to your .env.local file for live game control
 
 /**
- * formats elapsed time from milliseconds to MM:SS format
+ * formats elapsed time from milliseconds to DD:HH:MM:SS, HH:MM:SS or MM:SS format
  */
 function formatElapsedTime(startTime: number | undefined, currentTime: number): string {
-	//
 	if (!startTime) return '00:00';
 
-	const elapsed = Math.max(0, currentTime - startTime);
-	const minutes = Math.floor(elapsed / 60000);
-	const seconds = Math.floor((elapsed % 60000) / 1000);
+	let elapsed = Math.max(0, currentTime - startTime) / 1000; // work in seconds
 
-	return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+	const days = Math.floor(elapsed / (24 * 60 * 60));
+	elapsed %= 24 * 60 * 60;
+
+	const hours = Math.floor(elapsed / (60 * 60));
+	elapsed %= 60 * 60;
+
+	const minutes = Math.floor(elapsed / 60);
+	const seconds = Math.floor(elapsed % 60);
+
+	let parts: string[] = [];
+	if (days > 0) {
+		parts.push(days.toString().padStart(2, '0'));
+		parts.push(hours.toString().padStart(2, '0'));
+	} else if (hours > 0) {
+		parts.push(hours.toString().padStart(2, '0'));
+	}
+	parts.push(minutes.toString().padStart(2, '0'));
+	parts.push(seconds.toString().padStart(2, '0'));
+
+	// This logic simplifies: if days > 0, parts is [DD, HH, MM, SS]
+	// if hours > 0 (and days = 0), parts is [HH, MM, SS]
+	// otherwise, parts is [MM, SS] (or [00, SS] if minutes < 1)
+	return parts.join(':');
 }
 
 /**
@@ -363,16 +383,16 @@ function RouteComponent() {
 		const elapsedTime = formatElapsedTime(gameStartTime, currentTime);
 
 		return (
-			<div className="h-screen bg-background flex flex-col overflow-hidden">
-				{/* game area */}
-				<div className="flex-1">
+			<div className="h-screen bg-background flex flex-row overflow-hidden">
+				{/* Left Section (Game Area) */}
+				<div className="flex-shrink-0 flex justify-center items-center relative w-auto">
 					<OrbitalFlux
 						gameId={currentGameId}
 						enablePerks={true}
 						showStats={true}
 						autoStart={true}
 						customStatsBar={customStatsBar}
-						customRightPanel={<LivePerksPanel gameId={currentGameId} />}
+						// customRightPanel is removed
 						showSidebarToggle={false}
 						hideGameControls={true}
 						onWinner={handleWinner}
@@ -382,11 +402,9 @@ function RouteComponent() {
 					/>
 				</div>
 
-				{/* game ID and elapsed time footer */}
-				<div className="bg-background/80 backdrop-blur-sm border-t border-border">
-					<p className="text-xs text-muted-foreground text-center font-mono py-2">
-						{currentGameId} • Elapsed: {elapsedTime}
-					</p>
+				{/* Right Section (Info Panel) */}
+				<div className="flex-1 bg-card border-l border-border p-4 overflow-y-auto">
+					<LiveInfoPanel gameId={currentGameId} elapsedTime={elapsedTime} />
 				</div>
 			</div>
 		);

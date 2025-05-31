@@ -3,30 +3,55 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { api } from 'convex/_generated/api';
 import { Id } from 'convex/_generated/dataModel';
 import { TimeAgo } from '~/components/TimeAgo';
+// import type { GameConfig } from '~/components/games/orbital-flux/types'; // GameConfig not needed
 
-export function LivePerksPanel({ gameId }: { gameId: Id<'games'> }) {
+interface LiveInfoPanelProps {
+	gameId: Id<'games'>;
+	elapsedTime: string; // elapsedTime is not used anymore but kept for now as per instructions
+	// config: GameConfig; // config prop removed
+}
+
+export function LiveInfoPanel({ gameId, elapsedTime }: LiveInfoPanelProps) {
+	// config removed from destructuring
 	//
 	const query = convexQuery(api.payments.public.all, { gameId });
 	const { data: payments } = useSuspenseQuery(query);
 
 	return (
-		<div className="w-80 bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg">
+		<div className="h-full flex flex-col bg-card/95 backdrop-blur-sm border border-border rounded-lg shadow-lg">
+			{/* Info Section Removed */}
+
+			{/* Perks Call to Action (based.market/perks) - this will now be the first child */}
 			<div className="p-4 border-b border-border">
 				<div className="text-center">
 					<p className="text-lg font-semibold text-card-foreground">
-						<span className="text-blue-500 underline">based.market/perks</span>
-						<br />
-						to support a team!
+						Visit <span className="text-blue-500 underline">based.market/perks</span> to support a team!
 					</p>
 				</div>
 			</div>
 
-			<div className="p-4 space-y-2">
+			{/* Perks List */}
+			<div className="p-4 space-y-2 overflow-y-auto flex-1">
 				{payments.length < 1 ? (
-					<div className="text-center text-muted-foreground text-sm">No perks purchased yet</div>
+					<div className="text-center text-muted-foreground text-sm h-full w-full flex items-center justify-center">
+						No perks used yet
+					</div>
 				) : (
 					payments.map((payment) => <PerkItem key={payment._id} payment={payment} />)
 				)}
+			</div>
+
+			{/* New Footer Section */}
+			<div className="p-2 border-t border-border text-xs text-muted-foreground">
+				<div className="flex items-center justify-between gap-3">
+					{/* Game ID (Full) */}
+					<span className="font-mono truncate" title={gameId.toString()}>
+						{gameId}
+					</span>
+
+					{/* Elapsed Time */}
+					<span className="font-mono">{elapsedTime}</span>
+				</div>
 			</div>
 		</div>
 	);
