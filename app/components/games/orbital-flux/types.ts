@@ -2,6 +2,7 @@ import { Id } from 'convex/_generated/dataModel';
 import { perkTypeSchema } from 'convex/schemas/gameSchema';
 import { ReactNode } from 'react';
 import { z } from 'zod';
+import type { GameConfig as BaseGameConfig, GameComponentProps } from '~/lib/games/GameRegistry';
 
 export type Color = 'black' | 'white' | 'neutral';
 
@@ -36,7 +37,7 @@ export interface ActiveEffect {
 	id: string;
 }
 
-export interface GameConfig {
+export interface GameConfig extends BaseGameConfig {
 	gridWidth: number;
 	gridHeight: number;
 	orbSpeed: number;
@@ -70,27 +71,10 @@ export interface PerkConfig {
 	chaosModeDuration: number;
 }
 
-export interface OrbitalFluxProps {
-	// initial configuration options
-	initialConfig?: Partial<GameConfig>;
+// extend the base game component props with orbital flux specific props
+export interface OrbitalFluxProps extends GameComponentProps<GameConfig> {
 	initialPerkConfig?: Partial<PerkConfig>;
-	// backend integration
-	gameId: Id<'games'>;
-	// customization options
-	enablePerks?: boolean;
-	showStats?: boolean;
-	autoStart?: boolean;
-	customStatsBar?: ReactNode;
-	customRightPanel?: ReactNode;
-	showSidebarToggle?: boolean;
-	hideGameControls?: boolean;
-	// event callbacks
-	onGameStart?: () => void;
-	onGameStop?: () => void;
-	onGameReset?: () => void;
-	onWinner?: (winner: string) => void;
 	onTerritoryChange?: (stats: GameStats) => void;
-	onGameStateChange?: (gameState: GameState) => void;
 }
 
 export type EffectType = z.infer<typeof perkTypeSchema>;

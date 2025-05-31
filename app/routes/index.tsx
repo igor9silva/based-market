@@ -1,10 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router';
-import GamesList from '~/components/GamesList';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/')({
-	component: RouteComponent,
+	beforeLoad: () => {
+		// redirect to games listing
+		throw redirect({ to: '/games' });
+	},
 });
-
-function RouteComponent() {
-	return <GamesList />;
-}
