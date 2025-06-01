@@ -25,5 +25,8 @@ export const paymentSchema = z.object({
 	coinbaseId: z.string(),
 	product: productSchema,
 	status: paymentStatusSchema,
+	sender: z.string().optional().describe('The ETH address of the sender'),
+	chainId: z.number().optional().describe('The chain ID of the sender (Coinbase Commerce IDs)'),
+	contractAddress: z.string().optional().describe('The payment contract address'),
 	isUsed: z.boolean(),
 });

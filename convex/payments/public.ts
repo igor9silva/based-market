@@ -108,12 +108,18 @@ export const create = mutation({
 		product: productSchema,
 		coinbaseId: z.string(),
 		gameId: zid('games'),
+		sender: z.string().optional(),
+		chainId: z.number().optional(),
+		contractAddress: z.string().optional(),
 	},
-	handler: async (ctx, { product, coinbaseId, gameId }) => {
+	handler: async (ctx, { product, coinbaseId, gameId, sender, chainId, contractAddress }) => {
 		await ctx.db.insert('payments', {
 			product,
 			coinbaseId,
 			gameId,
+			sender,
+			chainId,
+			contractAddress,
 			status: 'created',
 			isUsed: false,
 		});
@@ -162,9 +168,19 @@ function createPayment(
 	product: z.infer<typeof productSchema>,
 	coinbaseId: string,
 	gameId: Id<'games'>,
+	sender?: string,
+	chainId?: number,
+	contractAddress?: string,
 ) {
 	//
-	return ctx.runMutation(api.payments.public.create, { product, coinbaseId, gameId });
+	return ctx.runMutation(api.payments.public.create, {
+		product,
+		coinbaseId,
+		gameId,
+		sender,
+		chainId,
+		contractAddress,
+	});
 }
 
 function setPendingPayment(ctx: ActionCtx, coinbaseId: string) {
@@ -191,6 +207,7 @@ export const coinbaseWebhook = httpAction(async (ctx, request) => {
 		const { event } = webhookPayloadSchema.parse(verifiedEvent);
 		const product = event.data.metadata.product;
 		const gameId = event.data.metadata.gameId;
+		const transferIntent = event.data.web3_data.transfer_intent;
 
 		if (!product) {
 			console.error('Coinbase webhook received without product', { event });
@@ -206,7 +223,15 @@ export const coinbaseWebhook = httpAction(async (ctx, request) => {
 
 		// prettier-ignore
 		switch (event.type) {
-			case 'charge:created': await createPayment(ctx, product, event.data.id, gameId as Id<'games'>); break;
+			case 'charge:created': await createPayment(
+				ctx,
+				product,
+				event.data.id,
+				gameId as Id<'games'>,
+				transferIntent.metadata.sender,
+				transferIntent.metadata.chain_id,
+				transferIntent.metadata.contract_address,
+			); break;
 			case 'charge:pending': await setPendingPayment(ctx, event.data.id); break;
 			case 'charge:failed': await finishPayment(ctx, event.data.id, 'failed'); break;
 			case 'charge:confirmed': await finishPayment(ctx, event.data.id, 'confirmed'); break;
@@ -248,6 +273,15 @@ const webhookPayloadSchema = z.object({
 			metadata: z.object({
 				product: productSchema.optional(),
 				gameId: z.string().optional(),
+			}),
+			web3_data: z.object({
+				transfer_intent: z.object({
+					metadata: z.object({
+						sender: z.string().optional(),
+						chain_id: z.number().optional(),
+						contract_address: z.string().optional(),
+					}),
+				}),
 			}),
 		}),
 	}),
