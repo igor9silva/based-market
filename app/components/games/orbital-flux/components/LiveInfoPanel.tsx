@@ -103,7 +103,7 @@ function PerkItem({ payment }: PerkItemProps) {
 		switch (payment.status) {
 			case 'created':
 				return {
-					text: 'pending',
+					text: 'pending payment',
 					color: 'text-yellow-500',
 					bgColor: 'bg-yellow-500/10',
 					strikethrough: false,
@@ -111,7 +111,7 @@ function PerkItem({ payment }: PerkItemProps) {
 			case 'pending':
 			case 'confirmed':
 				return {
-					text: 'active',
+					text: 'confirmed',
 					color: 'text-green-500',
 					bgColor: 'bg-green-500/10',
 					strikethrough: false,
