@@ -76,6 +76,7 @@ export interface OrbitalFluxProps {
 	initialPerkConfig?: Partial<PerkConfig>;
 	// backend integration
 	gameId: Id<'games'>;
+	password?: string;
 	// customization options
 	enablePerks?: boolean;
 	showStats?: boolean;

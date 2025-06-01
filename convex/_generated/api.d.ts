@@ -13,6 +13,7 @@ import type * as games_public from "../games/public.js";
 import type * as http from "../http.js";
 import type * as lib from "../lib.js";
 import type * as migrations from "../migrations.js";
+import type * as payments_private from "../payments/private.js";
 import type * as payments_public from "../payments/public.js";
 import type * as payments_webhooks from "../payments/webhooks.js";
 import type * as schemas_envSchema from "../schemas/envSchema.js";
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   lib: typeof lib;
   migrations: typeof migrations;
+  "payments/private": typeof payments_private;
   "payments/public": typeof payments_public;
   "payments/webhooks": typeof payments_webhooks;
   "schemas/envSchema": typeof schemas_envSchema;

@@ -27,6 +27,7 @@ export default function OrbitalFlux({
 	initialPerkConfig = {},
 	// backend integration
 	gameId,
+	password,
 	// customization options
 	enablePerks = true,
 	showStats = true,
@@ -143,6 +144,7 @@ export default function OrbitalFlux({
 	// payment monitoring - activates perks when payments are confirmed (only if gameId is provided)
 	usePaymentPerkActivation({
 		gameId: gameId || ('' as Id<'games'>),
+		password,
 		onActivatePerk: handlePerkActivation,
 	});
 

@@ -10,11 +10,40 @@ import { ConfigPanel } from '~/components/games/orbital-flux/components/ConfigPa
 import { LiveCountdownBar } from '~/components/games/orbital-flux/components/LiveCountdownBar';
 // import { LivePerksPanel } from '~/components/games/orbital-flux/components/LivePerksPanel'; // No longer used directly
 import { LiveInfoPanel } from '~/components/games/orbital-flux/components/LiveInfoPanel'; // Add import
-import { DEFAULT_GAME_CONFIG, LIVE_COUNTDOWN_DURATION } from '~/components/games/orbital-flux/constants';
+import {
+	DEFAULT_GAME_CONFIG,
+	LIVE_COUNTDOWN_DURATION,
+	RANDOM_PERK_CONFIG,
+} from '~/components/games/orbital-flux/constants';
 import type { GameConfig } from '~/components/games/orbital-flux/types';
 import { Button } from '~/components/ui/button';
 
 // NOTE: Add LIVE_GAME_PASSWORD to your .env.local file for live game control
+
+/**
+ * generates a random interval between min-max minutes in milliseconds
+ */
+function getRandomPerkInterval(): number {
+	//
+	const { minMinutes, maxMinutes } = RANDOM_PERK_CONFIG;
+	const randomMinutes = Math.floor(Math.random() * (maxMinutes - minMinutes + 1)) + minMinutes;
+
+	return randomMinutes * 60 * 1000; // convert to milliseconds
+}
+
+/**
+ * formats time remaining until next event in MM:SS format
+ */
+function formatTimeRemaining(milliseconds: number): string {
+	//
+	if (milliseconds <= 0) return '00:00';
+
+	const totalSeconds = Math.ceil(milliseconds / 1000);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = totalSeconds % 60;
+
+	return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
 
 /**
  * formats elapsed time from milliseconds to DD:HH:MM:SS, HH:MM:SS or MM:SS format
@@ -100,7 +129,22 @@ function RouteComponent() {
 	const [password, setPassword] = useState<string | null>(searchParams.password || null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [gameStartTime, setGameStartTime] = useState<number | undefined>(undefined);
-	const gameRef = useRef<{ startGame: () => void } | null>(null);
+	const [nextPerkTime, setNextPerkTime] = useState<number | null>(null);
+	const perkTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+	/**
+	 * clears the random perk timer and resets next perk time
+	 */
+	const clearPerkTimer = useCallback(() => {
+		//
+		if (perkTimerRef.current) {
+			clearTimeout(perkTimerRef.current);
+			perkTimerRef.current = null;
+		}
+
+		setNextPerkTime(null);
+		//
+	}, []);
 
 	// === CONFIGURATION ===
 	// merge URL config parameters with defaults
@@ -129,6 +173,69 @@ function RouteComponent() {
 	const startLiveGame = useMutation(api.games.public.startLive);
 	const stopLiveGame = useMutation(api.games.public.stopLive);
 	const cleanupAllGames = useMutation(api.games.public.cleanupAll);
+	const createAutoPayment = useMutation(api.payments.public.createAutoPayment);
+
+	// === RANDOM PERK SYSTEM ===
+
+	/**
+	 * activates a random perk to prevent orbs from getting stuck
+	 */
+	const activateRandomPerk = useCallback(async () => {
+		//
+		if (!currentGameId || state !== 'playing') return;
+		if (!password) return;
+
+		try {
+			await createAutoPayment({ gameId: currentGameId, password });
+			//
+		} catch (error) {
+			//
+			console.error('❌ Failed to create auto payment for random perk:', error);
+
+			// if password is invalid, stop the random perk system
+			if (error instanceof Error && error.message.includes('Invalid password')) {
+				clearPerkTimer();
+			}
+		}
+	}, [currentGameId, state, password, createAutoPayment]);
+
+	/**
+	 * schedules the next random perk activation
+	 */
+	const scheduleNextRandomPerk = useCallback(() => {
+		//
+		// clear existing timer
+		if (perkTimerRef.current) {
+			clearTimeout(perkTimerRef.current);
+			console.log('🧹 Cleared existing perk timer');
+		}
+
+		// only schedule if game is playing
+		if (state !== 'playing' || !currentGameId) {
+			setNextPerkTime(null);
+			return;
+		}
+
+		const interval = getRandomPerkInterval();
+		const nextTime = Date.now() + interval;
+		setNextPerkTime(nextTime);
+
+		perkTimerRef.current = setTimeout(() => {
+			//
+			activateRandomPerk();
+			scheduleNextRandomPerk(); // schedule the next one
+			//
+		}, interval);
+		//
+	}, [state, currentGameId, activateRandomPerk]);
+
+	// calculate time remaining until next perk
+	const timeUntilNextPerk = useMemo(() => {
+		//
+		if (!nextPerkTime || state !== 'playing') return null;
+		return Math.max(0, nextPerkTime - currentTime);
+		//
+	}, [nextPerkTime, currentTime, state]);
 
 	// === HANDLERS ===
 
@@ -185,9 +292,14 @@ function RouteComponent() {
 	 * handles when a game finishes and a winner is declared
 	 */
 	const handleWinner = useCallback(async (winner: string) => {
+		//
 		setLastWinner(winner);
 		setState('countdown');
 		setCountdown(LIVE_COUNTDOWN_DURATION);
+
+		// clear random perk timer when game ends
+		clearPerkTimer();
+		//
 	}, []);
 
 	/**
@@ -203,9 +315,15 @@ function RouteComponent() {
 			await stopLiveGame({ password: pwd });
 			setState('idle');
 			setCurrentGameId(null);
+
+			// clear random perk timer
+			clearPerkTimer();
+			//
 		} catch (error) {
+			//
 			console.error('Failed to stop live game:', error);
 			alert(`❌ Failed to stop live game: ${error}`);
+			//
 		} finally {
 			setIsLoading(false);
 		}
@@ -228,6 +346,10 @@ function RouteComponent() {
 			alert(`✅ Cleanup complete: ${result.stoppedGames} games stopped`);
 			setState('idle');
 			setCurrentGameId(null);
+
+			// clear random perk timer
+			clearPerkTimer();
+			//
 		} catch (error) {
 			console.error('Failed to cleanup games:', error);
 			alert(`❌ Failed to cleanup games: ${error}`);
@@ -240,8 +362,11 @@ function RouteComponent() {
 	 * handles when game component mounts - auto-start the game
 	 */
 	const handleGameStart = useCallback(() => {
-		console.log('Game auto-started');
-	}, []);
+		console.log('🎮 Game auto-started, starting random perk system...');
+		// start the random perk system when game starts
+		scheduleNextRandomPerk();
+		//
+	}, [scheduleNextRandomPerk]);
 
 	/**
 	 * handles game state changes to track start time
@@ -304,6 +429,19 @@ function RouteComponent() {
 		const newConfig = { ...DEFAULT_GAME_CONFIG, ...urlConfig };
 		setConfig(newConfig);
 	}, [urlConfig]);
+
+	/**
+	 * cleanup effect - clear timers on unmount
+	 */
+	useEffect(() => {
+		//
+		return () => {
+			if (perkTimerRef.current) {
+				clearTimeout(perkTimerRef.current);
+			}
+		};
+		//
+	}, []);
 
 	// === RENDER LOGIC ===
 
@@ -384,10 +522,11 @@ function RouteComponent() {
 
 		return (
 			<div className="h-screen bg-background flex flex-row overflow-hidden">
-				{/* Left Section (Game Area) */}
-				<div className="flex-shrink-0 flex justify-center items-center relative w-auto">
+				{/* Left Section (Game Area) - 70% width */}
+				<div className="w-[70%] flex-shrink-0 flex justify-center items-center relative">
 					<OrbitalFlux
 						gameId={currentGameId}
+						password={password ?? undefined}
 						enablePerks={true}
 						showStats={true}
 						autoStart={true}
@@ -402,9 +541,13 @@ function RouteComponent() {
 					/>
 				</div>
 
-				{/* Right Section (Info Panel) */}
-				<div className="flex-1 bg-card border-l border-border p-4 overflow-y-auto">
-					<LiveInfoPanel gameId={currentGameId} elapsedTime={elapsedTime} />
+				{/* Right Section (Info Panel) - 30% width */}
+				<div className="w-[30%] flex-shrink-0 bg-card border-l border-border p-4 overflow-y-auto">
+					<LiveInfoPanel
+						gameId={currentGameId}
+						elapsedTime={elapsedTime}
+						nextEventTime={timeUntilNextPerk !== null ? formatTimeRemaining(timeUntilNextPerk) : null}
+					/>
 				</div>
 			</div>
 		);

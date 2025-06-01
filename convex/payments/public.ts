@@ -1,11 +1,12 @@
 import { zid } from 'convex-helpers/server/zod';
 import { z } from 'zod';
-import { api } from '../_generated/api';
+import { internal } from '../_generated/api';
 import { Id } from '../_generated/dataModel';
-import { ActionCtx, httpAction } from '../_generated/server';
+import { httpAction } from '../_generated/server';
 import { action, mutation, query } from '../lib';
 import { env } from '../schemas/envSchema';
 import { productSchema } from '../schemas/paymentSchema';
+import { createConfirmed, createPayment, finishPayment, setPendingPayment } from './private';
 import { parseAndVerifyCoinbaseEvent, PayloadParseError, SignatureVerificationError } from './webhooks';
 
 export const byCoinbaseId = query({
@@ -61,13 +62,10 @@ export const start = action({
 		//
 		if (env.USE_FAKE_PAYMENTS === 'true') {
 			//
-			const coinbaseId = crypto.randomUUID();
-			await ctx.runMutation(api.payments.public.create, { product, coinbaseId, gameId });
-
-			// auto-confirm after 3 seconds
-			await ctx.scheduler.runAfter(3000, api.payments.public.finish, {
-				coinbaseId,
-				status: 'confirmed',
+			await ctx.runMutation(internal.payments.private.createConfirmed, {
+				product,
+				coinbaseId: crypto.randomUUID(),
+				gameId,
 			});
 
 			return 'https://igorsilva.pro';
@@ -103,95 +101,48 @@ export const start = action({
 	},
 });
 
-export const create = mutation({
-	args: {
-		product: productSchema,
-		coinbaseId: z.string(),
-		gameId: zid('games'),
-		sender: z.string().optional(),
-		chainId: z.number().optional(),
-		contractAddress: z.string().optional(),
-	},
-	handler: async (ctx, { product, coinbaseId, gameId, sender, chainId, contractAddress }) => {
-		await ctx.db.insert('payments', {
-			product,
-			coinbaseId,
-			gameId,
-			sender,
-			chainId,
-			contractAddress,
-			status: 'created',
-			isUsed: false,
-		});
-	},
-});
-
-export const setPending = mutation({
-	args: {
-		coinbaseId: z.string(),
-	},
-	handler: async (ctx, { coinbaseId }) => {
-		//
-		const payment = await byCoinbaseId(ctx, { coinbaseId });
-		if (!payment) throw new Error('Payment not found');
-
-		await ctx.db.patch(payment._id, { status: 'pending' });
-	},
-});
-
-export const finish = mutation({
-	args: {
-		coinbaseId: z.string(),
-		status: z.enum(['confirmed', 'failed']),
-	},
-	handler: async (ctx, { coinbaseId, status }) => {
-		//
-		const payment = await byCoinbaseId(ctx, { coinbaseId });
-		if (!payment) throw new Error('Payment not found');
-
-		await ctx.db.patch(payment._id, { status });
-	},
-});
-
 export const markAsUsed = mutation({
 	args: {
 		paymentId: zid('payments'),
+		password: z.string(),
 	},
-	handler: async (ctx, { paymentId }) => {
+	handler: async (ctx, { paymentId, password }) => {
 		//
+		// verify password
+		if (password !== env.LIVE_GAME_PASSWORD) {
+			throw new Error('Invalid password');
+		}
+
 		await ctx.db.patch(paymentId, { isUsed: true });
 	},
 });
 
-function createPayment(
-	ctx: ActionCtx,
-	product: z.infer<typeof productSchema>,
-	coinbaseId: string,
-	gameId: Id<'games'>,
-	sender?: string,
-	chainId?: number,
-	contractAddress?: string,
-) {
-	//
-	return ctx.runMutation(api.payments.public.create, {
-		product,
-		coinbaseId,
-		gameId,
-		sender,
-		chainId,
-		contractAddress,
-	});
-}
+export const createAutoPayment = mutation({
+	args: {
+		gameId: zid('games'),
+		password: z.string(),
+	},
+	handler: async (ctx, { gameId, password }) => {
+		//
+		// verify password
+		if (password !== env.LIVE_GAME_PASSWORD) {
+			throw new Error('Invalid password');
+		}
 
-function setPendingPayment(ctx: ActionCtx, coinbaseId: string) {
-	//
-	return ctx.runMutation(api.payments.public.setPending, { coinbaseId });
-}
+		// get all valid products and select one randomly
+		const validProducts = productSchema.options;
+		const orbitalFluxProducts = validProducts.filter((p) => p.startsWith('orbital-flux '));
+		const randomIndex = Math.floor(Math.random() * orbitalFluxProducts.length);
+		const product = orbitalFluxProducts[randomIndex];
 
-function finishPayment(ctx: ActionCtx, coinbaseId: string, status: 'confirmed' | 'failed') {
-	//
-	return ctx.runMutation(api.payments.public.finish, { coinbaseId, status });
-}
+		// use the reusable createConfirmed function
+		return await createConfirmed(ctx, {
+			product,
+			coinbaseId: `auto-${crypto.randomUUID()}`,
+			gameId,
+		});
+	},
+});
 
 export const coinbaseWebhook = httpAction(async (ctx, request) => {
 	//

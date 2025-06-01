@@ -8,10 +8,11 @@ import { TimeAgo } from '~/components/TimeAgo';
 interface LiveInfoPanelProps {
 	gameId: Id<'games'>;
 	elapsedTime: string; // elapsedTime is not used anymore but kept for now as per instructions
+	nextEventTime?: string | null; // optional countdown for next random event
 	// config: GameConfig; // config prop removed
 }
 
-export function LiveInfoPanel({ gameId, elapsedTime }: LiveInfoPanelProps) {
+export function LiveInfoPanel({ gameId, elapsedTime, nextEventTime }: LiveInfoPanelProps) {
 	// config removed from destructuring
 	//
 	const query = convexQuery(api.payments.public.all, { gameId });
@@ -46,12 +47,20 @@ export function LiveInfoPanel({ gameId, elapsedTime }: LiveInfoPanelProps) {
 				<div className="flex items-center justify-between gap-3">
 					{/* Game ID (Full) */}
 					<span className="font-mono truncate" title={gameId.toString()}>
-						{gameId}
+						game {gameId}
 					</span>
 
 					{/* Elapsed Time */}
-					<span className="font-mono">{elapsedTime}</span>
+					<span className="font-mono">elapsed {elapsedTime}</span>
 				</div>
+
+				{/* Random Event Countdown - only show if nextEventTime is provided */}
+				{nextEventTime && (
+					<div className="flex justify-start gap-3 mt-1 pt-1 border-t border-border/50">
+						<span className="font-mono text-muted-foreground">next random event in {nextEventTime}</span>
+						{/* <span className="font-"></span> */}
+					</div>
+				)}
 			</div>
 		</div>
 	);

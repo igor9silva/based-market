@@ -21,6 +21,12 @@ export const DEFAULT_PERK_CONFIG: PerkConfig = {
 // live mode configuration
 export const LIVE_COUNTDOWN_DURATION = 30; // seconds between games in live mode
 
+// random perk event system configuration
+export const RANDOM_PERK_CONFIG = {
+	minMinutes: 1, // minimum minutes between random perk events
+	maxMinutes: 30, // maximum minutes between random perk events
+} as const;
+
 // configuration limits for sliders
 export const CONFIG_LIMITS = {
 	gridSize: { min: 20, max: 60, step: 5 },

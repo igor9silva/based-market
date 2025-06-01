@@ -6,10 +6,11 @@ import type { EffectType } from '../types';
 
 interface PaymentPerkActivationProps {
 	gameId: Id<'games'>;
+	password?: string;
 	onActivatePerk: (type: EffectType, side: 'white' | 'black' | 'neutral', duration: number) => void;
 }
 
-export function usePaymentPerkActivation({ gameId, onActivatePerk }: PaymentPerkActivationProps) {
+export function usePaymentPerkActivation({ gameId, password, onActivatePerk }: PaymentPerkActivationProps) {
 	//
 	// query ready-to-use payments for this game
 	const readyPayments = useQuery(api.payments.public.notUsed, { gameId });
@@ -90,12 +91,14 @@ export function usePaymentPerkActivation({ gameId, onActivatePerk }: PaymentPerk
 			console.log(`Activating perk: ${type} for ${side} (${duration}ms)`);
 			onActivatePerk(type, side, duration);
 
-			// mark payment as used in backend
-			try {
-				await markAsUsed({ paymentId: payment._id });
-				console.log(`Payment marked as used: ${payment._id}`);
-			} catch (error) {
-				console.error('Failed to mark payment as used:', error);
+			// mark payment as used in backend (only if password is provided)
+			if (password) {
+				try {
+					await markAsUsed({ paymentId: payment._id, password });
+					console.log(`Payment marked as used: ${payment._id}`);
+				} catch (error) {
+					console.error('Failed to mark payment as used:', error);
+				}
 			}
 		});
 
