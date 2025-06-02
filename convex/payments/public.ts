@@ -179,9 +179,9 @@ export const coinbaseWebhook = httpAction(async (ctx, request) => {
 				product,
 				event.data.id,
 				gameId as Id<'games'>,
-				transferIntent.metadata.sender,
-				transferIntent.metadata.chain_id,
-				transferIntent.metadata.contract_address,
+				transferIntent?.metadata.sender,
+				transferIntent?.metadata.chain_id,
+				transferIntent?.metadata.contract_address,
 			); break;
 			case 'charge:pending': await setPendingPayment(ctx, event.data.id); break;
 			case 'charge:failed': await finishPayment(ctx, event.data.id, 'failed'); break;
@@ -226,13 +226,15 @@ const webhookPayloadSchema = z.object({
 				gameId: z.string().optional(),
 			}),
 			web3_data: z.object({
-				transfer_intent: z.object({
-					metadata: z.object({
-						sender: z.string().optional(),
-						chain_id: z.number().optional(),
-						contract_address: z.string().optional(),
-					}),
-				}),
+				transfer_intent: z
+					.object({
+						metadata: z.object({
+							sender: z.string().optional(),
+							chain_id: z.number().optional(),
+							contract_address: z.string().optional(),
+						}),
+					})
+					.optional(),
 			}),
 		}),
 	}),
