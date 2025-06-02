@@ -234,7 +234,8 @@ const webhookPayloadSchema = z.object({
 							contract_address: z.string().optional(),
 						}),
 					})
-					.optional(),
+					.optional()
+					.nullable(),
 			}),
 		}),
 	}),
