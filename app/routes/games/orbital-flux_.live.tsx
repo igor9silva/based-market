@@ -130,7 +130,7 @@ function RouteComponent() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [gameStartTime, setGameStartTime] = useState<number | undefined>(undefined);
 	const [nextPerkTime, setNextPerkTime] = useState<number | null>(null);
-	const perkTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const perkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	/**
 	 * clears the random perk timer and resets next perk time

@@ -16,7 +16,7 @@ interface PerkFromBackend {
 export function usePerkHost(gameId: Id<'games'>) {
 	//
 	const [localActivePerks, setLocalActivePerks] = useState<ActiveEffect[]>([]);
-	const [perkTimers, setPerkTimers] = useState<Map<string, NodeJS.Timeout>>(new Map());
+	const [perkTimers, setPerkTimers] = useState<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
 	// backend queries and mutations
 	const backendPerks = useQuery(api.games.public.getActivePerks, { gameId });
@@ -129,7 +129,7 @@ export function usePerkHost(gameId: Id<'games'>) {
 
 		const now = Date.now();
 		const activePerks: ActiveEffect[] = [];
-		const newTimers = new Map<string, NodeJS.Timeout>();
+		const newTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 		backendPerks.forEach((backendPerk) => {
 			const perk = convertBackendPerk(backendPerk);
