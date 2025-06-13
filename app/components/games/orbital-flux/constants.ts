@@ -24,7 +24,7 @@ export const LIVE_COUNTDOWN_DURATION = 30; // seconds between games in live mode
 // random perk event system configuration
 export const RANDOM_PERK_CONFIG = {
 	minMinutes: 1, // minimum minutes between random perk events
-	maxMinutes: 30, // maximum minutes between random perk events
+	maxMinutes: 5, // maximum minutes between random perk events
 } as const;
 
 // configuration limits for sliders
